@@ -9,7 +9,7 @@ import qualified Text.Parsec
 import SouC_Types
 
 reserved_words :: Parser String
-reserved_words = (foldr (<|>) (try (string "if")) $ map (try . (\p -> p <* space) . string) [ "if", "unless", "else", "while", "until", "for", "in", "do", "end", "where", "return", "break", "continue", "case", "and", "or", "atomic", "module", "import", "unary", "infix", "postfix", "typedef", "newtype", "datatype", "deriving", "typeclass", "define", "attribute", "assert", "trace", "undefined",
+reserved_words = (foldr (<|>) (try (string "if")) $ map (try . (\s -> string s <* notFollowedBy identifier_char)) [ "if", "unless", "else", "while", "until", "for", "in", "do", "end", "where", "return", "break", "continue", "case", "and", "or", "atomic", "module", "import", "unary", "infix", "postfix", "typedef", "newtype", "datatype", "deriving", "typeclass", "define", "attribute", "assert", "trace", "undefined",
     "abort", "abstract", "alias", "alignof", "allocate", "as", "associate", "asynchronous", "begin", "bind", "block", "breakpoint", "call", "close", "common", "const", "contains", "contiguous", "critical", "cycle", "data", "deallocate", "default", "defer", "deferred", "delegate", "dynamic", "elem", "element", "elif", "entry", "enum", "errno", "error", "eval", "exhibiting", "exhibits", "exists", "exit", "export", "explicit", "extend", "extends", "extern", "external", "fail", "final", "flush", "forall", "foreach", "format", "from", "function", "generic", "given", "global", "goto", "halt", "has", "implement", "implements", "implicit", "inquire", "instance", "intent", "interface", "internal", "is", "it", "kindof", "l", "label", "lambda", "let", "lock", "loop", "macro", "make", "match", "mem", "memory", "method", "mod", "namespace", "native", "new", "noop", "not", "null", "object", "only", "open", "operator", "override", "package", "parameter", "partial", "pass", "pause", "persist", "persistent", "pointer", "private", "procedure", "program", "public", "read", "recurse", "recursive", "ref", "require", "result", "rewind", "routine", "satisfies", "save", "select", "sequence", "sizeof", "static", "static_assert", "stop", "store", "struct", "sub", "subclass", "submodule", "subroutine", "suchthat", "super", "superclass", "switch", "sync", "synchronous", "table", "take", "target", "test", "then", "this", "to", "typeof", "unlock", "undef", "use", "virtual", "void", "volatile", "wait", "when", "with", "write", "yield"]) <?> "reserved word"
 
 space :: Parser ()
@@ -30,17 +30,20 @@ double_newline :: Parser ()
 double_newline = lookAhead (newline *> newline) *> newline *> return () -- something like this?
 
 
+identifier_char :: Parser Char
+identifier_char = (alphaNum <|> char '_')
+
 upper_name :: Parser String
 upper_name = do
     first <- upper
-    rest <- many (alphaNum <|> char '_')
+    rest <- many identifier_char
     return $ first:rest
 
 identifier :: Parser Identifier
 identifier = do
     notFollowedBy (reserved_words)
     first <- lower <|> char '_'
-    rest <- many (alphaNum <|> char '_')
+    rest <- many identifier_char
     return (Identifier(first:rest)) <?> "identifier"
 
 -- for pattern matching

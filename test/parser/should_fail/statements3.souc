@@ -1,0 +1,3 @@
+main() = do
+    x <- 4
+    print x++
