@@ -1,0 +1,9 @@
+import ModuleName
+
+main() = do
+    if 85 do
+        print "hello"
+    else
+        print "sup"
+    end if
+end main

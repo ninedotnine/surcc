@@ -1,0 +1,7 @@
+output(param) = do
+    print param
+end
+
+main() = do
+    output "hello world"
+end

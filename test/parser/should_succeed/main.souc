@@ -1,0 +1,5 @@
+import Module
+
+main() = do
+    var = 4
+end main

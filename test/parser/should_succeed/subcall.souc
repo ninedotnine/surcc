@@ -1,0 +1,5 @@
+import Module
+
+main() = do
+    print 42
+end main

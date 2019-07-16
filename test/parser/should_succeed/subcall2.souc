@@ -1,0 +1,7 @@
+ougput(param) = do
+    print param
+end
+
+main() = do
+    output 42
+end

@@ -1,0 +1,9 @@
+import ModuleName
+
+main() = do
+    if 85
+        print "sub call"
+        if "nested"
+            print "hello"
+            print "another sub call"
+end main

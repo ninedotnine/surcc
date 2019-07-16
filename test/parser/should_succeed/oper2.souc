@@ -1,0 +1,4 @@
+main() = do
+    x <- 4
+    x_p <- @x
+    print !x_p

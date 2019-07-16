@@ -1,0 +1,4 @@
+import Module
+
+main() = do
+    print "hello world"

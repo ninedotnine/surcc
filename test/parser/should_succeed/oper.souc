@@ -1,0 +1,5 @@
+main() = do
+    x <- 42
+    print x
+    x++ 
+    print x

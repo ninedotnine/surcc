@@ -1,0 +1,43 @@
+#!/usr/bin/dash
+
+parse_succeed_dir="test/parser/should_succeed"
+parse_fail_dir="test/parser/should_fail"
+
+echo "testing... "
+
+for fi in $(ls -t -r "$parse_succeed_dir")
+do
+    fullname="$parse_succeed_dir/$fi"
+#     echo "test/parse/$fi"
+# done
+
+# while false ; do
+    if 
+        bin/soucc "$fullname"  >> /dev/null 2>&1
+#         bin/soucc "test/parse/$fi" 
+    then
+        echo "passed test $fi"
+        continue
+    else
+        echo "FAILED TEST:"
+        bin/soucc "$fullname"
+        exit 1
+    fi
+done
+
+echo "all tests passed. testing bad parses..."
+
+for fi in $(ls -t -r "$parse_fail_dir")
+do
+    fullname="$parse_fail_dir/$fi"
+    if 
+        bin/soucc "$fullname"  >> /dev/null 2>&1
+    then
+        echo "ILLEGAL PARSE (this test should have failed):"
+        bin/soucc "$fullname"
+        exit 1
+    else
+        echo "passed test $fi"
+        continue
+    fi
+done
