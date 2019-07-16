@@ -9,7 +9,8 @@ import qualified Text.Parsec
 import SouC_Types
 
 reserved_words :: Parser String
-reserved_words = (foldr (<|>) (try (string "if")) $ map (try . string) [ "if", "unless", "else", "while", "until", "for", "in", "do", "end", "where", "return", "break", "continue", "case", "and", "or", "atomic", "module", "import", "unary", "infix", "postfix", "typedef", "newtype", "datatype", "deriving", "typeclass", "define", "attribute", "assert", "trace", "undefined", "abort", "abstract", "alias", "alignof", "allocate", "as", "associate", "asynchronous", "begin", "bind", "block", "breakpoint", "call", "close", "common", "const", "contains", "contiguous", "critical", "cycle", "data", "deallocate", "default", "defer", "deferred", "delegate", "dynamic", "elem", "element", "elif", "entry", "enum", "errno", "error", "eval", "exhibiting", "exhibits", "exists", "exit", "export", "explicit", "extend", "extends", "extern", "external", "fail", "final", "flush", "forall", "foreach", "format", "from", "function", "generic", "given", "global", "goto", "halt", "has", "implement", "implements", "implicit", "inquire", "instance", "intent", "interface", "internal", "is", "it", "kindof", "l", "label", "lambda", "let", "lock", "loop", "macro", "make", "match", "mem", "memory", "method", "mod", "namespace", "native", "new", "noop", "not", "null", "object", "only", "open", "operator", "override", "package", "parameter", "partial", "pass", "pause", "persist", "persistent", "pointer", "private", "procedure", "program", "public", "read", "recurse", "recursive", "ref", "require", "result", "rewind", "routine", "satisfies", "save", "select", "sequence", "sizeof", "static", "static_assert", "stop", "store", "struct", "sub", "subclass", "submodule", "subroutine", "suchthat", "super", "superclass", "switch", "sync", "synchronous", "table", "take", "target", "test", "then", "this", "to", "typeof", "unlock", "undef", "use", "virtual", "void", "volatile", "wait", "when", "with", "write", "yield"]) <?> "reserved word"
+reserved_words = (foldr (<|>) (try (string "if")) $ map (try . (\p -> p <* space) . string) [ "if", "unless", "else", "while", "until", "for", "in", "do", "end", "where", "return", "break", "continue", "case", "and", "or", "atomic", "module", "import", "unary", "infix", "postfix", "typedef", "newtype", "datatype", "deriving", "typeclass", "define", "attribute", "assert", "trace", "undefined",
+    "abort", "abstract", "alias", "alignof", "allocate", "as", "associate", "asynchronous", "begin", "bind", "block", "breakpoint", "call", "close", "common", "const", "contains", "contiguous", "critical", "cycle", "data", "deallocate", "default", "defer", "deferred", "delegate", "dynamic", "elem", "element", "elif", "entry", "enum", "errno", "error", "eval", "exhibiting", "exhibits", "exists", "exit", "export", "explicit", "extend", "extends", "extern", "external", "fail", "final", "flush", "forall", "foreach", "format", "from", "function", "generic", "given", "global", "goto", "halt", "has", "implement", "implements", "implicit", "inquire", "instance", "intent", "interface", "internal", "is", "it", "kindof", "l", "label", "lambda", "let", "lock", "loop", "macro", "make", "match", "mem", "memory", "method", "mod", "namespace", "native", "new", "noop", "not", "null", "object", "only", "open", "operator", "override", "package", "parameter", "partial", "pass", "pause", "persist", "persistent", "pointer", "private", "procedure", "program", "public", "read", "recurse", "recursive", "ref", "require", "result", "rewind", "routine", "satisfies", "save", "select", "sequence", "sizeof", "static", "static_assert", "stop", "store", "struct", "sub", "subclass", "submodule", "subroutine", "suchthat", "super", "superclass", "switch", "sync", "synchronous", "table", "take", "target", "test", "then", "this", "to", "typeof", "unlock", "undef", "use", "virtual", "void", "volatile", "wait", "when", "with", "write", "yield"]) <?> "reserved word"
 
 space :: Parser ()
 space = char ' ' *> return ()
@@ -37,13 +38,10 @@ upper_name = do
 
 identifier :: Parser Identifier
 identifier = do
---     notFollowedBy (fmap string reserved_words)
---     notFollowedBy (reserved_words)
+    notFollowedBy (reserved_words)
     first <- lower <|> char '_'
     rest <- many (alphaNum <|> char '_')
---     when $ (first:rest) `elem` reserved_words
---         fail
-    return $ Identifier(first:rest)
+    return (Identifier(first:rest)) <?> "identifier"
 
 -- for pattern matching
 pattern :: Parser [Identifier]
@@ -59,7 +57,7 @@ decrease_indent_level = modifyState (\x -> x-1)
 indent_depth :: Parser ()
 indent_depth = do
     level <- getState
-    count (4 * level) space *> return () -- FIXME indent shouldn't have to be exactly 4 spaces
+    count (4 * level) space *> return () <?> "indent" -- FIXME indent shouldn't have to be exactly 4 spaces
 
 parens :: Parser a -> Parser a
 parens = between (char '(') (char ')')

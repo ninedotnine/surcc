@@ -1,0 +1,4 @@
+Import BadCapital
+
+main() = do
+    print "bad capital Import"

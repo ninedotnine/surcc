@@ -22,24 +22,21 @@ stmt_block = do
     return (first_stmt:more_stmts)
 
 stmt_const_assign :: Parser Stmt
-stmt_const_assign = do 
+stmt_const_assign = do
     iden <- try (identifier <* spaces <* char '=')
     val <- spaces *> expr
     return $ Stmt_Const_Assign iden val
 
 stmt_var_assign :: Parser Stmt
-stmt_var_assign = do 
+stmt_var_assign = do
     iden <- try (identifier <* spaces <* string "<-")
     val <- spaces *> expr
     return $ Stmt_Var_Assign iden val
 
 stmt_sub_call :: Parser Stmt
 stmt_sub_call = do
-    traceM "sub clal"
     name <- try (identifier <* spaces)
-    traceM "sub clal2"
     arg <- optionMaybe expr
-    traceM "sub clal3"
     return $ Stmt_Sub_Call name arg
 
 stmt_postfix_oper :: Parser Stmt

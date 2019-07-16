@@ -1,0 +1,5 @@
+main() = do
+    if "ok"
+        print("bad parens")
+    end if
+end main

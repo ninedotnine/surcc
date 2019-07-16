@@ -44,7 +44,9 @@ outputResult filename (Program name imps body) = do
 print_file_contents :: FilePath -> IO ()
 print_file_contents filename = do
     putStrLn "-------------------- file contents: --------------------"
-    putStr =<< readFile filename
+    contents <- map ("   "++) . lines <$> readFile filename
+    mapM_ putStrLn $ zipWith (++) (map show [1..]) contents
+
 
 prettyPrint :: Top_Level_Defn -> IO ()
 prettyPrint (SubDefn name param stmts) = do
