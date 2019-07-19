@@ -1,4 +1,3 @@
-{-# OPTIONS_GHC -Wall #-}
 module SouC_Expr where
 
 import Debug.Trace
