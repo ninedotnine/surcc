@@ -1,0 +1,5 @@
+import Import
+
+main() = do
+    print @uhcruelue@
+end main
