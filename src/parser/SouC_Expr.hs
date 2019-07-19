@@ -2,22 +2,10 @@ module SouC_Expr where
 
 import Debug.Trace
 
--- import Text.Parsec
-import Control.Monad (forever)
-import System.IO (hFlush, stdout)
 import Text.Parsec hiding (space, spaces, string)
 
 import SouC_Types
 import Basics
-
-
-main :: IO ()
-main = forever $ do
-    input <- putStr "> " >> hFlush stdout >> getLine
-    case runParser (raw_expr <* eof) 0 "raw_expr" input of
-        Left err -> putStrLn $ "error: " ++ (show err)
-        Right r -> print r
-
 
 raw_expr :: Parser Raw_Expr
 raw_expr = Raw_Expr <$> expr_internal

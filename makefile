@@ -1,20 +1,26 @@
 FLAGS = -Wall -dynamic -no-keep-o-files -no-keep-hi-files -Wno-unused-imports
-FILES = src/Main.hs
 SOURCEDIR = src/
 INCLUDE_DIRS = src/parser
-OUT_EXE = bin/soucc
+OUT_DIR = bin
 
 default: build test
 
-build:
-	mkdir -p bin
-	ghc $(FLAGS) -o $(OUT_EXE) -i$(SOURCEDIR):$(INCLUDE_DIRS) $(FILES)
-# 	echo helo
+all: build expr
+
+makedir:
+	mkdir -p $(OUT_DIR)
+
+build: makedir
+	ghc $(FLAGS) -o $(OUT_DIR)/soucc -i$(SOURCEDIR):$(INCLUDE_DIRS) src/Main.hs
 
 .PHONY: clean
 clean:
-	rm -f $(OUT_EXE)
+	rm -fr $(OUT_DIR)
 
 .PHONY: test
 test: 
 	@test/test_parser
+
+expr: makedir
+	ghc $(FLAGS) -o $(OUT_DIR)/expr -i$(SOURCEDIR):$(INCLUDE_DIRS) src/expr/Main.hs 
+

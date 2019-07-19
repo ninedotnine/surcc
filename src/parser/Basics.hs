@@ -30,6 +30,8 @@ endline = skipMany space *> (line_comment <|> newline) <?> "end-of-line"
 line_comment :: Parser ()
 line_comment = try (char ';') *> manyTill anyChar newline *> return ()
 
+block_comment :: Parser ()
+block_comment = string "{;" *> manyTill anyChar (try (string ";}")) *> return () -- FIXME these need to nest
 
 string :: String -> Parser String
 string = try . Text.Parsec.string
