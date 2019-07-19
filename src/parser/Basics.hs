@@ -18,6 +18,9 @@ space = char ' ' *> return ()
 spaces :: Parser ()
 spaces = many1 space *> return ()
 
+keep_spaces :: Parser String
+keep_spaces = many (char ' ')
+
 endline :: Parser ()
 -- endline = try (skipMany space *> newline) *> return () <?> "end-of-line"
 endline = try (skipMany space *> newline) *> return () <?> "end-of-line"

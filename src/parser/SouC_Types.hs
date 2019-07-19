@@ -33,13 +33,15 @@ type Stmts = [Stmt]
 type Param = [Identifier]
 
 
-data Top_Level_Defn = Top_Level_Const_Defn Identifier Expr
+data Top_Level_Defn = Top_Level_Const_Defn Identifier Raw_Expr
                     | FuncDefn Identifier Param [Stmt]
                     | SubDefn Identifier (Maybe Param) [Stmt]
                     deriving (Show)
 
 -- FIXME right now the map maps strings to nothing
 type MyState = (Indentation, Map.Map String ())
+
+data Raw_Expr = Raw_Expr String deriving (Show)
 
 data Expr = Expr_Number Integer
           | Expr_CharLit Char
@@ -51,12 +53,12 @@ data Expr = Expr_Number Integer
           | Expr_Infix_Oper Expr String Expr -- FIXME get rid of this?
           deriving (Show)
 
-data Stmt = Stmt_While Expr Stmts
-          | Stmt_If Expr Stmts (Maybe Stmts)
-          | Stmt_Sub_Call Identifier (Maybe Expr)
+data Stmt = Stmt_While Raw_Expr Stmts
+          | Stmt_If Raw_Expr Stmts (Maybe Stmts)
+          | Stmt_Sub_Call Identifier (Maybe Raw_Expr)
           | Stmt_Postfix_Oper Identifier String
-          | Stmt_Const_Assign Identifier Expr
-          | Stmt_Var_Assign Identifier Expr
+          | Stmt_Const_Assign Identifier Raw_Expr
+          | Stmt_Var_Assign Identifier Raw_Expr
           deriving (Show)
 
 data Endable_Stmts = Stmt_If_End | Stmt_While_End
