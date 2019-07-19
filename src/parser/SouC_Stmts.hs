@@ -24,19 +24,19 @@ stmt_block = do
 stmt_const_assign :: Parser Stmt
 stmt_const_assign = do
     iden <- try (identifier <* spaces <* char '=')
-    val <- spaces *> expr
+    val <- spaces *> raw_expr
     return $ Stmt_Const_Assign iden val
 
 stmt_var_assign :: Parser Stmt
 stmt_var_assign = do
     iden <- try (identifier <* spaces <* string "<-")
-    val <- spaces *> expr
+    val <- spaces *> raw_expr
     return $ Stmt_Var_Assign iden val
 
 stmt_sub_call :: Parser Stmt
 stmt_sub_call = do
     name <- try (identifier <* spaces)
-    arg <- optionMaybe expr
+    arg <- optionMaybe raw_expr
     return $ Stmt_Sub_Call name arg
 
 stmt_postfix_oper :: Parser Stmt
@@ -48,7 +48,7 @@ stmt_postfix_oper = do
 
 stmt_if :: Parser Stmt
 stmt_if = do
-    condition <- try (reserved "if") *> spaces *> expr <* optional_do <* endline
+    condition <- try (reserved "if") *> spaces *> raw_expr <* optional_do <* endline
 --     thenDo <- many1 (statement <* many1 endline)
     thenDo <- stmt_block
 --     elseDo <- optionMaybe (reserved "else" *> endline *> increase_indent_level *> many1 (statement <* many1 endline) <* decrease_indent_level)

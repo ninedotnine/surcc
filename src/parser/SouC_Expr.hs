@@ -15,7 +15,7 @@ import Basics
 main :: IO ()
 main = forever $ do
     input <- putStr "> " >> hFlush stdout >> getLine
-    case runParser (expr <* eof) 0 "expr" input of
+    case runParser (raw_expr <* eof) 0 "raw_expr" input of
         Left err -> putStrLn $ "error: " ++ (show err)
         Right r -> print r
 
@@ -29,7 +29,7 @@ raw_expr = Raw_Expr <$> expr_internal
 expr_internal :: Parser String
 expr_internal = (prefix_oper <> keep_spaces <> expr_internal)
     <|> (string "(" <> expr_inside_parens <> string ")")
-    <|> (try (term <> keep_spaces <> infix_oper <> keep_spaces <> expr_internal)) -- FIXME whitespace must be equal
+    <|> (try (term <> keep_spaces <> infix_oper) <> keep_spaces <> expr_internal) -- FIXME whitespace must be equal
     <|> term
     <|> (fn_call)
 
