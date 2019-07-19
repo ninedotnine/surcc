@@ -3,7 +3,7 @@ module Basics where
 import Debug.Trace
 
 import Control.Monad (when)
-import Text.Parsec hiding (space, spaces, string)
+import Text.Parsec hiding (space, spaces, string, newline)
 import qualified Text.Parsec
 
 import SouC_Types
@@ -15,6 +15,9 @@ reserved_words = (foldr (<|>) (try (string "if")) $ map (try . (\s -> string s <
 space :: Parser ()
 space = char ' ' *> return ()
 
+newline :: Parser ()
+newline = char '\n' *> return ()
+
 spaces :: Parser ()
 spaces = many1 space *> return ()
 
@@ -22,15 +25,17 @@ keep_spaces :: Parser String
 keep_spaces = many (char ' ')
 
 endline :: Parser ()
--- endline = try (skipMany space *> newline) *> return () <?> "end-of-line"
-endline = try (skipMany space *> newline) *> return () <?> "end-of-line"
+endline = skipMany space *> (line_comment <|> newline) <?> "end-of-line"
+
+line_comment :: Parser ()
+line_comment = try (char ';') *> manyTill anyChar newline *> return ()
 
 
 string :: String -> Parser String
 string = try . Text.Parsec.string
 
 double_newline :: Parser ()
-double_newline = lookAhead (newline *> newline) *> newline *> return () -- something like this?
+double_newline = lookAhead (newline *> newline) *> newline -- something like this?
 
 
 identifier_char :: Parser Char
