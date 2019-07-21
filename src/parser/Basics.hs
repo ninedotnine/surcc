@@ -9,7 +9,7 @@ import qualified Text.Parsec
 import SouC_Types
 
 reserved_words :: Parser String
-reserved_words = (foldr (<|>) (try (string "if")) $ map (try . (\s -> string s <* notFollowedBy identifier_char)) [ "if", "unless", "else", "while", "until", "for", "in", "do", "end", "where", "return", "break", "continue", "case", "and", "or", "atomic", "module", "import", "unary", "infix", "postfix", "typedef", "newtype", "datatype", "deriving", "typeclass", "define", "attribute", "assert", "trace", "undefined",
+reserved_words = (foldr (<|>) (string "if") $ map (\s -> string s <* notFollowedBy identifier_char) [ "if", "unless", "else", "while", "until", "for", "in", "do", "end", "where", "return", "break", "continue", "case", "and", "or", "atomic", "module", "import", "unary", "infix", "postfix", "typedef", "newtype", "datatype", "deriving", "typeclass", "define", "attribute", "assert", "trace", "undefined",
     "abort", "abstract", "alias", "alignof", "allocate", "as", "associate", "asynchronous", "begin", "bind", "block", "breakpoint", "call", "close", "common", "const", "contains", "contiguous", "critical", "cycle", "data", "deallocate", "default", "defer", "deferred", "delegate", "dynamic", "elem", "element", "elif", "entry", "enum", "errno", "error", "eval", "exhibiting", "exhibits", "exists", "exit", "export", "explicit", "extend", "extends", "extern", "external", "fail", "final", "flush", "forall", "foreach", "format", "from", "function", "generic", "given", "global", "goto", "halt", "has", "implement", "implements", "implicit", "inquire", "instance", "intent", "interface", "internal", "is", "it", "kindof", "l", "label", "lambda", "let", "lock", "loop", "macro", "make", "match", "mem", "memory", "method", "mod", "namespace", "native", "new", "noop", "not", "null", "object", "only", "open", "operator", "override", "package", "parameter", "partial", "pass", "pause", "persist", "persistent", "pointer", "private", "procedure", "program", "public", "read", "recurse", "recursive", "ref", "require", "result", "rewind", "routine", "satisfies", "save", "select", "sequence", "sizeof", "static", "static_assert", "stop", "store", "struct", "sub", "subclass", "submodule", "subroutine", "suchthat", "super", "superclass", "switch", "sync", "synchronous", "table", "take", "target", "test", "then", "this", "to", "typeof", "unlock", "undef", "use", "virtual", "void", "volatile", "wait", "when", "with", "write", "yield"]) <?> "reserved word"
 
 space :: Parser ()
@@ -28,7 +28,7 @@ endline :: Parser ()
 endline = skipMany space *> (line_comment <|> newline) <?> "end-of-line"
 
 line_comment :: Parser ()
-line_comment = try (char ';') *> manyTill anyChar newline *> return ()
+line_comment = char ';' *> manyTill anyChar newline *> return ()
 
 block_comment :: Parser ()
 block_comment = string "{;" *> manyTill anyChar (try (string ";}")) *> return () -- FIXME these need to nest
