@@ -25,20 +25,29 @@ keep_spaces :: Parser String
 keep_spaces = many (char ' ')
 
 endline :: Parser ()
-endline = skipMany space *> (line_comment <|> newline) <?> "end-of-line"
+endline = skipMany space *> (line_comment <|> (string "{;" *> block_comment) <|> newline) <?> "end-of-line"
 
 line_comment :: Parser ()
 line_comment = char ';' *> manyTill anyChar newline *> return ()
 
 block_comment :: Parser ()
-block_comment = string "{;" *> manyTill anyChar (try (string ";}")) *> return () -- FIXME these need to nest
+block_comment = block_comment_depth 1 *> endline
+    where
+        nest n = string "{;" *> block_comment_depth n
+        end = string ";}" *> return ()
+        block_comment_depth :: Integer -> Parser ()
+        block_comment_depth 1 = skipManyTill anyChar ((nest 2) <|> end)
+        block_comment_depth n = skipManyTill anyChar ((nest (n+1)) <|> end *> block_comment_depth (n-1))
 
+skipManyTill :: Parser a -> Parser b -> Parser ()
+skipManyTill p1 p2 = manyTill p1 p2 *> return ()
+
+-- Text.Parsec.string does this silly thing where it might fail while advancing the stream.
 string :: String -> Parser String
 string = try . Text.Parsec.string
 
 double_newline :: Parser ()
 double_newline = lookAhead (newline *> newline) *> newline -- something like this?
-
 
 identifier_char :: Parser Char
 identifier_char = (alphaNum <|> char '_')

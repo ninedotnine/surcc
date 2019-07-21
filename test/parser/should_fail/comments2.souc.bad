@@ -1,0 +1,6 @@
+import Commens
+
+{; comment begins here, but doesn't end.
+main() = do
+    x <- 42 ; a comment
+    print x

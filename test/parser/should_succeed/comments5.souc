@@ -1,0 +1,12 @@
+import Commens
+
+{; comment {; nested {; wow such comments comment ;} ;}
+main() = do
+    x <- 42 ; a comment
+    print x
+
+    ;}
+
+main() = do ; finally some actual code
+    x <- 42
+    print x

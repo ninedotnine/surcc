@@ -1,0 +1,6 @@
+import Commens
+
+{; comment ;} ;} ;} ;} technically OK, because it begins with ';'
+main() = do
+    x <- 42 ; a comment
+    print x ;}

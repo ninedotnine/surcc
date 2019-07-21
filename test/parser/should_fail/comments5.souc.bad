@@ -1,0 +1,6 @@
+import Commens
+
+{; comment {; nested {; comment ;} ;}
+main() = do
+    x <- 42 ; a comment
+    print x
