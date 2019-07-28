@@ -1,0 +1,6 @@
+import Directovis
+
+{^; this is unclosed
+main() = do
+    x <- 42 ; a comment
+    print x ;}

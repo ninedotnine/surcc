@@ -1,0 +1,8 @@
+{^; make main fast ;^}
+
+import Pragmatic
+import SoPragma
+
+main() = do
+    x <- 42 ; a comment
+    print x ;}

@@ -24,6 +24,7 @@ runSouCParser name input = runParser souCParser initState name input
 souCParser :: Parser Program
 souCParser = do
     name <- module_name <|> return Nothing
+    _ <- many (pragma) *> skipMany endline -- FIXME do something with pragmas
     imps <- imports
     code <- parseDefs
     eof
@@ -31,7 +32,7 @@ souCParser = do
 
 module_name :: Parser (Maybe ModuleName)
 module_name = do
-    name <- string "module" *> space *> upper_name <* endline <* endline
+    name <- string "module" *> space *> upper_name <* endline <* (many pragma) <* endline
     return $ Just (ModuleName(name))
 
 imports :: Parser Imports
@@ -42,23 +43,23 @@ imports = do
 
 souc_import :: Parser Import
 souc_import = do
-    name <- string "import" *> space *> upper_name <* endline <* skipMany endline
+    name <- string "import" *> spaces *> upper_name <* skipMany1 endline
     return $ Import(name)
 
 parseDefs :: Parser [Top_Level_Defn]
 parseDefs = do
-    defns <- many (parse_def <* (many1 endline))
+    defns <- many (parse_def <* many1 endline)
     return defns
 
 parse_def :: Parser Top_Level_Defn
 parse_def = do
-    defn <- top_level_const <|> top_level_proc
+    defn <- top_level_const <|> top_level_proc <|> (pragma *> skipMany endline *> parse_def) <?> "top-level definition"
     return defn
 
 top_level_const :: Parser Top_Level_Defn
-top_level_const = do 
+top_level_const = do
     const_defn <- try stmt_const_assign
-    case const_defn of 
+    case const_defn of
         Stmt_Const_Assign iden val -> return $ Top_Level_Const_Defn iden val
         _ -> return undefined
 
