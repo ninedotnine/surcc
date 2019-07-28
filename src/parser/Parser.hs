@@ -72,7 +72,7 @@ top_level_sub :: Identifier -> Parser Top_Level_Defn
 top_level_sub sub_name = do
     param <- optionMaybe pattern <* char ')' <* spaces <* char '=' <* spaces <* string "do" <* endline
     stmts <- stmt_block
-    optional_end_name sub_name 
+    optional_end_name sub_name
     return $ SubDefn sub_name param stmts
 
 top_level_func :: Identifier -> Parser Top_Level_Defn

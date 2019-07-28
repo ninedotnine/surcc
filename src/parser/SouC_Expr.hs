@@ -58,7 +58,7 @@ raw_number_lit = ((try octInt <|> try hexInt <|> int) <?> "lit")
         int = (many1 digit)
 
 souc_string :: Parser Expr
-souc_string = Expr_StringLit <$> between (char '"') (char '"') (many string_char)
+souc_string = Expr_StringLit <$> between (char '"') (char '"') (many (noneOf "\""))
 
 string_char :: Parser Char
 string_char = alphaNum <|> char ' ' -- FIXME many other chars are allowed in strings, just not '"'
