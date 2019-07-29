@@ -39,11 +39,9 @@ block_comment = block_comment_depth 1 *> endline
         block_comment_depth 1 = skipManyTill anyChar ((nest 2) <|> end)
         block_comment_depth n = skipManyTill anyChar ((nest (n+1)) <|> end *> block_comment_depth (n-1))
 
--- pragma :: Parser Pragma
--- pragma = Pragma <$> manyTill anyChar (string ";^}") -- FIXME
+-- pragma :: Parser Pragma -- FIXME
 pragma :: Parser ()
-pragma = string "{^;" *> skipManyTill (satisfy (/= '\n')) (string ";^}") *> endline <?> "pragma"
-
+pragma = string "{^;" *> space *> endBy1 (many1 alphaNum) space *> (string ";^}") *> endline <?> "pragma"
 
 skipManyTill :: Parser a -> Parser b -> Parser ()
 skipManyTill p1 p2 = manyTill p1 p2 *> return ()

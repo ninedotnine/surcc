@@ -1,0 +1,6 @@
+import Directovis
+
+{^; ;^} ; cannot be empty
+main() = do
+    x <- 42 ; a comment
+    print x ;}
