@@ -1,0 +1,20 @@
+#!/usr/bin/dash
+
+tests_dir="test/code_gen/unit_tests_txt"
+
+echo "testing code gen..."
+
+for fi in $(ls -t -r "${tests_dir}"); do
+    fullname="$tests_dir/$fi"
+
+    if bin/code_gen "$fullname"; then
+        echo "passed test $fi"
+        continue
+    else
+        echo "--------------------FAILED TEST:--------------------"
+        bin/code_gen "$fullname"
+        exit 1
+    fi
+done
+
+echo "all code gen tests passed"

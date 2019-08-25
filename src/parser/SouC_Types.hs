@@ -14,19 +14,26 @@ type Indentation = Int
 
 type Parser a = Parsec String Indentation a
 
-newtype Identifier = Identifier String
---                    deriving (Show)
+class Valueable a where
+    value :: a -> String
 
-instance Show Identifier where
-    show (Identifier x) = show x
+newtype Identifier = Identifier String
+                   deriving (Eq, Read, Show)
+
+instance Valueable Identifier where
+    value (Identifier v) = v
+
+-- instance Show Identifier where
+--     show (Identifier x) = show x
 
 data Program = Program (Maybe ModuleName) Imports Body
+    deriving (Read, Show)
 
-newtype ModuleName = ModuleName String deriving Show
+newtype ModuleName = ModuleName String deriving (Read, Show)
 type Imports = [Import]
 type Body = [Top_Level_Defn]
 
-newtype Import = Import String deriving Show
+newtype Import = Import String deriving (Read, Show)
 
 type Stmts = [Stmt]
 
@@ -37,12 +44,15 @@ data Top_Level_Defn = Top_Level_Const_Defn Identifier Raw_Expr
                     | FuncDefn Identifier Param [Stmt]
                     | ShortFuncDefn Identifier Param Raw_Expr
                     | SubDefn Identifier (Maybe Param) [Stmt]
-                    deriving (Show)
+                    deriving (Read, Show)
 
 -- FIXME right now the map maps strings to nothing
 type MyState = (Indentation, Map.Map String ())
 
-data Raw_Expr = Raw_Expr String deriving (Show)
+data Raw_Expr = Raw_Expr String deriving (Read, Show)
+
+instance Valueable Raw_Expr where
+    value (Raw_Expr v) = v
 
 data Expr = Expr_Number Integer
           | Expr_CharLit Char
@@ -61,6 +71,6 @@ data Stmt = Stmt_While Raw_Expr Stmts
           | Stmt_Const_Assign Identifier Raw_Expr
           | Stmt_Var_Assign Identifier Raw_Expr
           | Stmt_Return (Maybe Raw_Expr)
-          deriving (Show)
+          deriving (Read, Show)
 
 data Endable_Stmts = Stmt_If_End | Stmt_While_End

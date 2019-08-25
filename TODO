@@ -1,3 +1,5 @@
 [ ] implement pragmas, don't just skip them
 [ ] in a line-character comment, '}' should not be allowed immediately after ';'
 [ ] right now, doc comments are only supported before procedures. is that good?
+[ ] code gen should use types other than int ?
+[ ] why is Param a list of identifiers? there should be only one param.

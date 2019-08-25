@@ -2,3 +2,5 @@ BUGS
 bin/
 old/
 future_tests/
+hi_files/
+obj_files/
