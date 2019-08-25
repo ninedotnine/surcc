@@ -9,18 +9,15 @@ for fi in $(ls -t -r "$parse_succeed_dir")
 do
     fullname="$parse_succeed_dir/$fi"
 #     echo "test/parse/$fi"
-# done
 
-# while false ; do
     if 
-        bin/soucc "$fullname"  >> /dev/null 2>&1
-#         bin/soucc "test/parse/$fi" 
+        bin/parser "$fullname"  >> /dev/null 2>&1
     then
         echo "passed test $fi"
         continue
     else
         echo "FAILED TEST:"
-        bin/soucc "$fullname"
+        bin/parser "$fullname"
         exit 1
     fi
 done
@@ -31,10 +28,10 @@ for fi in $(ls -t -r "$parse_fail_dir")
 do
     fullname="$parse_fail_dir/$fi"
     if 
-        bin/soucc "$fullname"  >> /dev/null 2>&1
+        bin/parser "$fullname"  >> /dev/null 2>&1
     then
         echo "ILLEGAL PARSE (this test should have failed):"
-        bin/soucc "$fullname"
+        bin/parser "$fullname"
         exit 1
     else
         echo "passed test $fi"

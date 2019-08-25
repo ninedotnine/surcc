@@ -1,26 +1,33 @@
-FLAGS = -Wall -dynamic -no-keep-o-files -no-keep-hi-files -Wno-unused-imports
+# FLAGS = -dynamic -Wall -Wno-unused-imports -no-keep-o-files -no-keep-hi-files
 SOURCEDIR = src/
 INCLUDE_DIRS = src/parser
 OUT_DIR = bin
+HI_DIR = hi_files
+OBJ_DIR = obj_files
+FLAGS = -Wall -dynamic -hidir $(HI_DIR) -odir $(OBJ_DIR) -Wno-unused-imports
 
-default: build test
+default: all test
 
-all: build expr
+all: build expr parser
 
-makedir:
+makedirs:
 	mkdir -p $(OUT_DIR)
+	mkdir -p $(HI_DIR)
+	mkdir -p $(OBJ_DIR)
 
-build: makedir
+build: makedirs
 	ghc $(FLAGS) -o $(OUT_DIR)/soucc -i$(SOURCEDIR):$(INCLUDE_DIRS) src/Main.hs
 
 .PHONY: clean
 clean:
-	rm -fr $(OUT_DIR)
+	rm -fr $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
 
 .PHONY: test
 test: 
 	@test/test_parser
 
-expr: makedir
+expr: makedirs
 	ghc $(FLAGS) -o $(OUT_DIR)/expr -i$(SOURCEDIR):$(INCLUDE_DIRS) src/expr/Main.hs 
 
+parser: makedirs
+	ghc $(FLAGS) -o $(OUT_DIR)/parser -i$(SOURCEDIR):$(INCLUDE_DIRS) src/parser/Main.hs
