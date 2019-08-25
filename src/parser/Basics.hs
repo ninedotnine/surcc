@@ -25,19 +25,22 @@ keep_spaces :: Parser String
 keep_spaces = many (char ' ')
 
 endline :: Parser ()
-endline = skipMany space *> (line_comment <|> (string "{;" *> block_comment) <|> newline) <?> "end-of-line"
+endline = skipMany space *> (line_comment <|> block_comment <|> newline) <?> "end-of-line"
 
 line_comment :: Parser ()
 line_comment = char ';' *> manyTill anyChar newline *> return ()
 
 block_comment :: Parser ()
-block_comment = block_comment_depth 1 *> endline
+block_comment = try (string "{;" *> notFollowedBy (char '>')) *> block_comment_depth 1 *> endline
     where
         nest n = string "{;" *> block_comment_depth n
         end = string ";}" *> return ()
         block_comment_depth :: Integer -> Parser ()
         block_comment_depth 1 = skipManyTill anyChar ((nest 2) <|> end)
         block_comment_depth n = skipManyTill anyChar ((nest (n+1)) <|> end *> block_comment_depth (n-1))
+
+doc_comment :: Parser ()
+doc_comment = string "{;>" *> skipManyTill anyChar (string "<;}") *> endline *> optional endline
 
 -- pragma :: Parser Pragma -- FIXME
 pragma :: Parser ()

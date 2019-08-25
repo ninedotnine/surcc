@@ -1,1 +1,3 @@
 [ ] implement pragmas, don't just skip them
+[ ] in a line-character comment, '}' should not be allowed immediately after ';'
+[ ] right now, doc comments are only supported before procedures. is that good?

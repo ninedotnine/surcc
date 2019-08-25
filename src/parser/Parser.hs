@@ -53,6 +53,7 @@ parseDefs = do
 
 parse_def :: Parser Top_Level_Defn
 parse_def = do
+    optional doc_comment
     defn <- top_level_const <|> top_level_proc <|> (pragma *> skipMany endline *> parse_def) <?> "top-level definition"
     return defn
 

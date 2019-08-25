@@ -1,0 +1,10 @@
+import DoCommens
+
+{;> this is the main routine. it returns no value. <;}
+main() = do
+    x <- f $ 42 ; a comment
+    print x ;}
+
+{;> this is the f subroutine. it prints x. <;}
+f(x) = do
+    print x

@@ -1,0 +1,10 @@
+import DoCommens
+
+{;> doc comments {;> cannot nest. <;} <;}
+
+main() = do
+    x <- f $ 42 ; a comment
+    print x
+
+f(x) = do
+    print x
