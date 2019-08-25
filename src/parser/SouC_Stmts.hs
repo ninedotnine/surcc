@@ -11,7 +11,7 @@ import Basics
 statement :: Parser Stmt
 statement = do
     try indent_depth
-    stmt_if <|> stmt_const_assign <|> stmt_var_assign <|> stmt_sub_call <|> stmt_postfix_oper
+    stmt_if <|> stmt_const_assign <|> stmt_var_assign <|> stmt_sub_call <|> stmt_postfix_oper <|> stmt_return
 
 stmt_block :: Parser Stmts
 stmt_block = do
@@ -56,3 +56,7 @@ stmt_if = do
     _ <- optional_end Stmt_If_End -- FIXME use this for type-checking
     return $ Stmt_If condition thenDo elseDo
 
+stmt_return :: Parser Stmt
+stmt_return = do
+    result <- reserved "return" *> spaces *> optionMaybe raw_expr
+    return (Stmt_Return result)

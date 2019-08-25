@@ -15,19 +15,22 @@ raw_expr = Raw_Expr <$> expr_internal
 
 expr_internal :: Parser String
 expr_internal = (prefix_oper <> keep_spaces <> expr_internal)
-    <|> (string "(" <> expr_inside_parens <> string ")")
+    <|> ((string "(" <* skipMany space) <> expr_inside_parens <> (skipMany space *> string ")"))
     <|> (try (term <> keep_spaces <> infix_oper) <> keep_spaces <> expr_internal) -- FIXME whitespace must be equal
     <|> term
-    <|> (fn_call)
 
 expr_inside_parens :: Parser String
 expr_inside_parens = expr_internal  -- FIXME eventually this must skip newlines
 
 fn_call :: Parser String
-fn_call = string "IMPOSSIBLE" -- FIXME
+fn_call = try (raw_identifier <> string "(") <> expr_internal <> string ")"
 
 term :: Parser String
-term = many1 identifier_char <|> raw_souc_char <|> raw_souc_string <|> raw_number_lit
+term = fn_call
+    <|> raw_identifier
+    <|> raw_souc_char
+    <|> raw_souc_string
+    <|> raw_number_lit
 
 oper_char :: Parser Char
 oper_char = oneOf "#$%&*+-/<=>?\\^|~"

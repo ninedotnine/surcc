@@ -53,8 +53,10 @@ prettyPrint (SubDefn name param stmts) = do
     putStr $ "sub " ++ show name ++ " takes "
     putStrLn $ show param
     putStrLn (unlines (map prettifyStmt stmts))
-prettyPrint (FuncDefn name arg stmts) = do
-    putStrLn $ "fn " ++ show name ++ " takn? " ++ show arg ++ (unlines (map prettifyStmt stmts))
+prettyPrint (FuncDefn name param stmts) = do
+    putStrLn $ "fn " ++ show name ++ " takn " ++ show param ++ " " ++ (unlines (map prettifyStmt stmts))
+prettyPrint (ShortFuncDefn name param expr) = do
+    putStrLn $ "fn" ++ show name ++ " takn " ++ show param ++ " = " ++ show expr
 prettyPrint (Top_Level_Const_Defn name val) = do
     putStrLn $ "const " ++ show name ++ " = " ++ show val
 

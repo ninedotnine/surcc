@@ -1,0 +1,21 @@
+{;> this is the main routine. it returns no value. <;}
+main() = do
+    x <- f $ 42 ; a comment
+    print x ;}
+
+{;> this is the f function. it returns 3. <;}
+f(x) = do 
+    return 3
+
+{;> this is the id function. it returns f(x). <;}
+id(x) = do
+    return f(x)
+
+{;> this function returns double its arg. <;}
+double(x) = do
+    return 2 * x
+
+{;> this function combines its arg with double(itself). 
+    x must be a member of a semigroup <;}
+combine(x) = do
+    return double(x) <> double(x)

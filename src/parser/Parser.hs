@@ -12,7 +12,7 @@ import Text.Parsec hiding (space, spaces, string)
 -- import Souc_Expr
 import Basics
 import SouC_Types
--- import SouC_Expr
+import SouC_Expr
 import SouC_Stmts
 
 
@@ -67,7 +67,23 @@ top_level_const = do
 top_level_proc :: Parser Top_Level_Defn
 top_level_proc = do
     proc_name <- try (identifier <* char '(')
-    return =<< (top_level_sub proc_name <|> top_level_func proc_name)
+    return =<< (try (top_level_func proc_name) <|> top_level_sub proc_name)
+
+top_level_func :: Identifier -> Parser Top_Level_Defn
+top_level_func func_name = do
+    param <- pattern <* char ')' <* spaces <* char '=' <* spaces
+    short_top_level_func func_name param <|> long_top_level_func func_name param
+
+short_top_level_func :: Identifier -> Param -> Parser Top_Level_Defn
+short_top_level_func func_name param = do
+    body <- raw_expr
+    return $ ShortFuncDefn func_name param body
+
+long_top_level_func :: Identifier -> Param -> Parser Top_Level_Defn
+long_top_level_func func_name param = do
+    stmts <- string "do" *> endline *> stmt_block
+    optional_end_name func_name
+    return $ FuncDefn func_name param stmts
 
 top_level_sub :: Identifier -> Parser Top_Level_Defn
 top_level_sub sub_name = do
@@ -75,10 +91,3 @@ top_level_sub sub_name = do
     stmts <- stmt_block
     optional_end_name sub_name
     return $ SubDefn sub_name param stmts
-
-top_level_func :: Identifier -> Parser Top_Level_Defn
-top_level_func func_name = do
-    param <- pattern <* char ')' <* spaces <* char '=' <* spaces <* string "do" <* endline
-    stmts <- stmt_block
-    optional_end_name func_name
-    return $ FuncDefn func_name param stmts

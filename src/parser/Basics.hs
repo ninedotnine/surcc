@@ -66,11 +66,14 @@ upper_name = do
     return $ first:rest
 
 identifier :: Parser Identifier
-identifier = do
+identifier = Identifier <$> raw_identifier
+
+raw_identifier :: Parser String
+raw_identifier = do
     notFollowedBy (reserved_words)
     first <- lower <|> char '_'
     rest <- many identifier_char
-    return (Identifier(first:rest)) <?> "identifier"
+    return (first:rest)
 
 -- for pattern matching
 pattern :: Parser [Identifier]
