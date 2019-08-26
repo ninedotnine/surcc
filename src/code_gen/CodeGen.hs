@@ -20,10 +20,17 @@ generate_top_level (SubDefn name m_param stmts) = "void " ++ value name ++ "(" +
 generate_stmts :: Stmts -> String
 generate_stmts stmts = concat $ map generate_stmt stmts
 
+generate_stmt :: Stmt -> String
 generate_stmt (Stmt_Return m_raw_expr) = "return " ++ raw_expr ++ "; " where
     raw_expr = case m_raw_expr of
         Nothing -> ""
         Just e -> value e
+generate_stmt (Stmt_Sub_Call name m_raw_expr) = value name ++ "(" ++ raw_expr ++ "); " where
+    raw_expr = case m_raw_expr of
+        Nothing -> ""
+        Just e -> value e
+generate_stmt (Stmt_Var_Assign name raw_expr) = value name ++ " = " ++ value raw_expr ++ "; "
+generate_stmt (Stmt_Postfix_Oper name oper) = value name ++ oper ++ "; "
 generate_stmt stmt = undefined -- FIXME
 {-
 Stmt_While Raw_Expr Stmts

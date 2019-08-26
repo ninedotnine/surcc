@@ -23,14 +23,13 @@ clean:
 	rm -fr $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
 
 .PHONY: test
-test:
-	@test/test_parser
+test: test_parser test_codegen
 
 test_parser:
 	@test/test_parser
 
 test_codegen:
-	@test/test_codegen
+	@runghc -Wall -isrc/:src/code_gen/:src/parser/ test/test_codegen.hs
 
 expr: makedirs
 	ghc $(FLAGS) -o $(OUT_DIR)/expr -i$(SOURCEDIR):$(INCLUDE_DIRS) src/expr/Main.hs 
