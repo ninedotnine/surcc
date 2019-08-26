@@ -1,1 +1,0 @@
-Program Nothing [] [ShortFuncDefn (Identifier "f") [Identifier "x"] (Raw_Expr "42")]

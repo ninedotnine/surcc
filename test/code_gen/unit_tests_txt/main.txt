@@ -1,1 +1,0 @@
-Program Nothing [] [SubDefn (Identifier "main") Nothing []]
