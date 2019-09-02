@@ -21,7 +21,7 @@ clean:
 	rm -fr $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
 
 .PHONY: test
-test: test_parser test_codegen
+test: test_parser test_codegen test_integration
 
 .PHONY: test_parser
 test_parser:
@@ -31,6 +31,11 @@ test_parser:
 test_codegen:
 	@echo "testing code gen..."
 	@runghc -Wall -isrc/:src/code_gen/:src/parser/ test/test_codegen.hs
+
+.PHONY: test_integration
+test_integration:
+	@echo "running integration test..."
+	@test/integration/integration_test
 
 expr: makedirs
 	ghc $(FLAGS) -o $(OUT_DIR)/expr -i$(SOURCEDIR):$(INCLUDE_DIRS) src/expr/Main.hs 

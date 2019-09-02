@@ -6,3 +6,4 @@
 [ ] postfix operators need to handle opers other than ++ and --
 [ ] expressions should be transformed a lot before being converted to C
         example: `x + y` in souc is *not* the same as x + y in C
+[ ] subroutines should also be converted (mapped?) to do the right thing.
