@@ -4,7 +4,8 @@ import SouC_Types
 
 generate :: Program -> String
 -- generate (Program name imports body) =
-generate (Program _ _ body) = concat $ map generate_top_level body
+generate (Program _ _ body) = includes ++ concat (map generate_top_level body)
+    where includes = "#include <stdio.h>\n#include <stdbool.h>\n#include <stdlib.h>\n"
 
 generate_top_level :: Top_Level_Defn -> String
 generate_top_level (Top_Level_Const_Defn name raw_expr) = "const int " ++ value name ++ " = " ++ value raw_expr ++ ";"
