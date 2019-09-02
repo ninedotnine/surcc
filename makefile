@@ -11,9 +11,7 @@ default: all test
 all: build expr parser codegen
 
 makedirs:
-	mkdir -p $(OUT_DIR)
-	mkdir -p $(HI_DIR)
-	mkdir -p $(OBJ_DIR)
+	@mkdir -p $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
 
 build: makedirs
 	ghc $(FLAGS) -o $(OUT_DIR)/soucc -i$(SOURCEDIR):$(INCLUDE_DIRS) src/Main.hs
@@ -25,10 +23,13 @@ clean:
 .PHONY: test
 test: test_parser test_codegen
 
+.PHONY: test_parser
 test_parser:
 	@test/test_parser
 
+.PHONY: test_codegen
 test_codegen:
+	@echo "testing code gen..."
 	@runghc -Wall -isrc/:src/code_gen/:src/parser/ test/test_codegen.hs
 
 expr: makedirs
