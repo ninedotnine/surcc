@@ -44,6 +44,7 @@ data Top_Level_Defn = Top_Level_Const_Defn Identifier Raw_Expr
                     | FuncDefn Identifier Param [Stmt]
                     | ShortFuncDefn Identifier Param Raw_Expr
                     | SubDefn Identifier (Maybe Param) [Stmt]
+                    | MainDefn (Maybe Param) [Stmt]
                     deriving (Read, Show)
 
 -- FIXME right now the map maps strings to nothing

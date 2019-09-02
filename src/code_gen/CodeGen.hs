@@ -15,7 +15,10 @@ generate_top_level (SubDefn name m_param stmts) = "void " ++ value name ++ "(" +
     where
         param = if m_param == Nothing then "void" else show m_param
         body = generate_stmts stmts
-
+generate_top_level (MainDefn m_param stmts) = "int main (" ++ param ++ ") { " ++ body ++ "}"
+    where
+        param = if m_param == Nothing then "void" else show m_param
+        body = generate_stmts stmts
 
 generate_stmts :: Stmts -> String
 generate_stmts stmts = concat $ map generate_stmt stmts

@@ -54,8 +54,20 @@ parseDefs = do
 parse_def :: Parser Top_Level_Defn
 parse_def = do
     optional doc_comment
-    defn <- top_level_const <|> top_level_proc <|> (pragma *> skipMany endline *> parse_def) <?> "top-level definition"
+    defn <- main_defn
+            <|> top_level_const
+            <|> top_level_proc
+            <|> (pragma *> skipMany endline *> parse_def)
+            <?> "top-level definition"
     return defn
+
+main_defn :: Parser Top_Level_Defn
+main_defn = do
+    _ <- string "main("
+    param <- optionMaybe pattern <* char ')' <* spaces <* char '=' <* spaces <* string "do" <* endline
+    stmts <- stmt_block
+    optional_end_name (Identifier "main")
+    return $ MainDefn param stmts
 
 top_level_const :: Parser Top_Level_Defn
 top_level_const = do

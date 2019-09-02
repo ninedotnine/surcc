@@ -59,6 +59,9 @@ prettyPrint (ShortFuncDefn name param expr) = do
     putStrLn $ "fn" ++ show name ++ " takn " ++ show param ++ " = " ++ show expr
 prettyPrint (Top_Level_Const_Defn name val) = do
     putStrLn $ "const " ++ show name ++ " = " ++ show val
+prettyPrint (MainDefn param stmts) = do
+    putStrLn $ "fn main with args? " ++ show param ++ " = "
+    putStrLn $ unlines (map prettifyStmt stmts)
 
 prettifyStmt :: Stmt -> String
 prettifyStmt stmt = show stmt -- FIXME could be much prettier
