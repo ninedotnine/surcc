@@ -20,7 +20,11 @@ main = do
     test mainer2
     test subber
     test subber_ass
+    test subber_const_ass
     test subber_postfix_oper
+    test subber_while
+    test subber_if
+    test subber_if_else
 
 empty_parse_tree :: Program
 empty_parse_tree = Program Nothing [] []
@@ -46,5 +50,20 @@ subber = Program Nothing [] [SubDefn (Identifier "subby") Nothing [Stmt_Sub_Call
 subber_ass :: Program
 subber_ass = Program Nothing [] [SubDefn (Identifier "subby") Nothing [Stmt_Var_Assign (Identifier "x") (Raw_Expr "42")]]
 
+subber_const_ass :: Program
+subber_const_ass = Program Nothing [] [SubDefn (Identifier "subby") Nothing [Stmt_Const_Assign (Identifier "x") (Raw_Expr "42")]]
+
 subber_postfix_oper :: Program
 subber_postfix_oper = Program Nothing [] [SubDefn (Identifier "subby") Nothing [Stmt_Var_Assign (Identifier "x") (Raw_Expr "41"), Stmt_Postfix_Oper (Identifier "x") "++"]]
+
+subber_while :: Program
+subber_while = Program Nothing [] [SubDefn (Identifier "subby") Nothing [Stmt_While (Raw_Expr "false") [Stmt_Var_Assign (Identifier "x") (Raw_Expr "41"), Stmt_Postfix_Oper (Identifier "x") "++"]]]
+
+subber_if :: Program
+subber_if = Program Nothing [] [SubDefn (Identifier "subby") Nothing [Stmt_If (Raw_Expr "false") [Stmt_Var_Assign (Identifier "x") (Raw_Expr "41"), Stmt_Postfix_Oper (Identifier "x") "++"] Nothing]]
+
+subber_if_else :: Program
+subber_if_else = Program Nothing [] [SubDefn (Identifier "subby") Nothing
+    [Stmt_If (Raw_Expr "false")
+        [Stmt_Var_Assign (Identifier "x") (Raw_Expr "41"), Stmt_Postfix_Oper (Identifier "x") "++"]
+            (Just [(Stmt_Postfix_Oper (Identifier "x") "--")])]]

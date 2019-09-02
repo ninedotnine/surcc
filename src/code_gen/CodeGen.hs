@@ -30,16 +30,10 @@ generate_stmt (Stmt_Sub_Call name m_raw_expr) = value name ++ "(" ++ raw_expr ++
         Nothing -> ""
         Just e -> value e
 generate_stmt (Stmt_Var_Assign name raw_expr) = value name ++ " = " ++ value raw_expr ++ "; "
+generate_stmt (Stmt_Const_Assign name raw_expr) = "const " ++ value name ++ " = " ++ value raw_expr ++ "; "
 generate_stmt (Stmt_Postfix_Oper name oper) = value name ++ oper ++ "; "
-generate_stmt stmt = undefined -- FIXME
-{-
-Stmt_While Raw_Expr Stmts
-          | Stmt_If Raw_Expr Stmts (Maybe Stmts)
-          | Stmt_Sub_Call Identifier (Maybe Raw_Expr)
-          | Stmt_Postfix_Oper Identifier String
-          | Stmt_Const_Assign Identifier Raw_Expr
-          | Stmt_Var_Assign Identifier Raw_Expr
-          | Stmt_Return (Maybe Raw_Expr)
-          deriving (Read, Show)
-
--}
+generate_stmt (Stmt_While raw_expr stmts) = "while ( " ++ value raw_expr ++ " ) { " ++ generate_stmts stmts ++ "}"
+generate_stmt (Stmt_If raw_expr stmts m_else_stmts) = if_branch ++ else_branch m_else_stmts where
+    if_branch = "if ( " ++ value raw_expr ++ " ) { " ++ generate_stmts stmts ++ "}"
+    else_branch Nothing = ""
+    else_branch (Just else_stmts) = " else {" ++ generate_stmts else_stmts ++ "}"

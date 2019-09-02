@@ -3,3 +3,6 @@
 [ ] right now, doc comments are only supported before procedures. is that good?
 [ ] code gen should use types other than int ?
 [ ] why is Param a list of identifiers? there should be only one param.
+[ ] postfix operators need to handle opers other than ++ and --
+[ ] expressions should be transformed a lot before being converted to C
+        example: `x + y` in souc is *not* the same as x + y in C
