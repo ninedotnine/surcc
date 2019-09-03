@@ -11,7 +11,13 @@ import Basics
 statement :: Parser Stmt
 statement = do
     try indent_depth
-    stmt_if <|> stmt_const_assign <|> stmt_var_assign <|> stmt_sub_call <|> stmt_postfix_oper <|> stmt_return
+    stmt_if <|> stmt_const_assign <|> stmt_var_assign <|> stmt_return <|> stmt_beginning_with_identifier
+
+stmt_beginning_with_identifier :: Parser Stmt
+stmt_beginning_with_identifier = do
+    iden <- identifier
+    res <- (stmt_postfix_oper iden <|> stmt_sub_call iden)
+    return res
 
 stmt_block :: Parser Stmts
 stmt_block = do
@@ -33,17 +39,15 @@ stmt_var_assign = do
     val <- spaces *> raw_expr
     return $ Stmt_Var_Assign iden val
 
-stmt_sub_call :: Parser Stmt
-stmt_sub_call = do
-    name <- try (identifier <* spaces)
-    arg <- optionMaybe raw_expr
-    return $ Stmt_Sub_Call name arg
+stmt_sub_call :: Identifier -> Parser Stmt
+stmt_sub_call name = do
+    m_arg <- optionMaybe (try (spaces *> raw_expr))
+    return $ Stmt_Sub_Call name m_arg
 
-stmt_postfix_oper :: Parser Stmt
-stmt_postfix_oper = do
-    iden <- identifier
+stmt_postfix_oper :: Identifier -> Parser Stmt
+stmt_postfix_oper name = do
     postfix_op <- postfix_oper
-    return $ Stmt_Postfix_Oper iden postfix_op
+    return $ Stmt_Postfix_Oper name postfix_op
 
 
 stmt_if :: Parser Stmt
