@@ -1,0 +1,4 @@
+main() = do
+    while true do
+        print "sub call"
+    end while

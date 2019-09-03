@@ -43,6 +43,7 @@ run_tests = do
     test subber_while "subber_while"
     test subber_if "subber_if"
     test subber_if_else "subber_if_else"
+    test sub_while "sub_while"
 
 conster :: Program
 conster = Program Nothing [] [
@@ -116,5 +117,14 @@ subber_if_else = Program Nothing [] [
             Stmt_Postfix_Oper (Identifier "x") "++"]
         (Just [
             (Stmt_Postfix_Oper (Identifier "x") "--")])],
+    MainDefn Nothing [
+        Stmt_Sub_Call (Identifier "subby") Nothing]]
+
+sub_while :: Program
+sub_while = Program Nothing [] [
+    SubDefn (Identifier "subby") Nothing [
+        Stmt_Var_Assign (Identifier "x") (Raw_Expr "41"),
+        Stmt_While (Raw_Expr "false") [
+            Stmt_Postfix_Oper (Identifier "x") "++"]],
     MainDefn Nothing [
         Stmt_Sub_Call (Identifier "subby") Nothing]]

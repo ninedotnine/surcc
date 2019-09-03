@@ -11,7 +11,7 @@ import Basics
 statement :: Parser Stmt
 statement = do
     try indent_depth
-    stmt_if <|> stmt_return <|> stmt_beginning_with_identifier
+    stmt_if <|> stmt_while <|> stmt_return <|> stmt_beginning_with_identifier
 
 
 stmt_beginning_with_identifier :: Parser Stmt
@@ -52,6 +52,12 @@ stmt_postfix_oper name = do
     postfix_op <- postfix_oper
     return $ Stmt_Postfix_Oper name postfix_op
 
+stmt_while :: Parser Stmt
+stmt_while = do
+    condition <- try (reserved "while") *> spaces *> raw_expr <* optional_do <* endline
+    stmts <- stmt_block
+    _ <- optional_end Stmt_While_End -- FIXME use this for type-checking
+    return $ Stmt_While condition stmts
 
 stmt_if :: Parser Stmt
 stmt_if = do

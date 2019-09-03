@@ -1,0 +1,9 @@
+main() = do
+    while true do
+        print "sub call"
+        if "nested"
+            print "hello"
+            print "another sub call"
+        else
+            explode
+    end while
