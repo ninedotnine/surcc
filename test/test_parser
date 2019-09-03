@@ -3,17 +3,18 @@
 parse_succeed_dir="test/parser/should_succeed"
 parse_fail_dir="test/parser/should_fail"
 
-echo "testing... "
+echo "=== testing parser... "
 
 for fi in $(ls -t -r "$parse_succeed_dir")
 do
     fullname="$parse_succeed_dir/$fi"
 #     echo "test/parse/$fi"
+    echo -n "testing ${fi}... "
 
     if 
         bin/parser "$fullname"  >> /dev/null 2>&1
     then
-        echo "passed test $fi"
+        echo "OK."
         continue
     else
         echo "FAILED TEST:"
@@ -22,11 +23,13 @@ do
     fi
 done
 
-echo "all tests passed. testing bad parses..."
+echo "=== all tests passed. testing bad parses..."
 
 for fi in $(ls -t -r "$parse_fail_dir")
 do
     fullname="$parse_fail_dir/$fi"
+    echo -n "testing ${fi}... "
+
     if 
         bin/parser "$fullname"  >> /dev/null 2>&1
     then
@@ -34,7 +37,7 @@ do
         bin/parser "$fullname"
         exit 1
     else
-        echo "passed test $fi"
+        echo "OK."
         continue
     fi
 done

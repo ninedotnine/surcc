@@ -25,6 +25,7 @@ test prog name = do
 main :: IO ()
 main = do
     System.Directory.createDirectoryIfMissing True tmpdir
+    putStrLn "=== testing codegen"
     run_tests
     putStrLn "all code gen tests passed :^)"
 

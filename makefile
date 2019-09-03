@@ -31,6 +31,7 @@ clean:
 
 .PHONY: test
 test: test_parser test_codegen test_integration
+	@echo "all tests successful! :^D"
 
 .PHONY: test_parser
 test_parser: parser
@@ -38,10 +39,8 @@ test_parser: parser
 
 .PHONY: test_codegen
 test_codegen: codegen
-	@echo "testing code gen..."
 	@runghc -Wall -isrc/:src/code_gen/:src/parser/ test/test_codegen.hs
 
 .PHONY: test_integration
 test_integration:
-	@echo "running integration test..."
-	@test/integration/integration_test
+	@test/integration_test
