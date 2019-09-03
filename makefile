@@ -4,7 +4,7 @@ INCLUDE_DIRS = src/parser:src/code_gen
 OUT_DIR = bin
 HI_DIR = hi_files
 OBJ_DIR = obj_files
-FLAGS = -Wall -dynamic -hidir $(HI_DIR) -odir $(OBJ_DIR) -Wno-unused-imports
+FLAGS = -Wall -dynamic -hidir $(HI_DIR) -odir $(OBJ_DIR) -i$(SOURCEDIR):$(INCLUDE_DIRS)  -Wno-unused-imports
 
 default: all test
 
@@ -14,16 +14,16 @@ makedirs:
 	@mkdir -p $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
 
 build: makedirs
-	ghc $(FLAGS) -o $(OUT_DIR)/soucc -i$(SOURCEDIR):$(INCLUDE_DIRS) src/Main.hs
+	ghc $(FLAGS) -o $(OUT_DIR)/soucc src/Main.hs
 
 expr: makedirs
-	ghc $(FLAGS) -o $(OUT_DIR)/expr -i$(SOURCEDIR):$(INCLUDE_DIRS) -main-is Main_Expr src/expr/Main_Expr.hs
+	ghc $(FLAGS) -o $(OUT_DIR)/expr -main-is Main_Expr src/expr/Main_Expr.hs
 
 parser: makedirs
-	ghc $(FLAGS) -o $(OUT_DIR)/parser -i$(SOURCEDIR):$(INCLUDE_DIRS) -main-is Main_Parser src/parser/Main_Parser.hs
+	ghc $(FLAGS) -o $(OUT_DIR)/parser -main-is Main_Parser src/parser/Main_Parser.hs
 
 codegen: makedirs
-	ghc $(FLAGS) -o $(OUT_DIR)/code_gen -i$(SOURCEDIR):$(INCLUDE_DIRS) -main-is Main_Codegen src/code_gen/Main_Codegen.hs
+	ghc $(FLAGS) -o $(OUT_DIR)/code_gen -main-is Main_Codegen src/code_gen/Main_Codegen.hs
 
 .PHONY: clean
 clean:
