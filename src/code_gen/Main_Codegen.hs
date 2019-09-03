@@ -1,4 +1,4 @@
-module Main where
+module Main_Codegen where
 
 import SouC_Types
 import Text.Parsec.Error (ParseError)

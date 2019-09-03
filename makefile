@@ -16,6 +16,15 @@ makedirs:
 build: makedirs
 	ghc $(FLAGS) -o $(OUT_DIR)/soucc -i$(SOURCEDIR):$(INCLUDE_DIRS) src/Main.hs
 
+expr: makedirs
+	ghc $(FLAGS) -o $(OUT_DIR)/expr -i$(SOURCEDIR):$(INCLUDE_DIRS) -main-is Main_Expr src/expr/Main_Expr.hs
+
+parser: makedirs
+	ghc $(FLAGS) -o $(OUT_DIR)/parser -i$(SOURCEDIR):$(INCLUDE_DIRS) -main-is Main_Parser src/parser/Main_Parser.hs
+
+codegen: makedirs
+	ghc $(FLAGS) -o $(OUT_DIR)/code_gen -i$(SOURCEDIR):$(INCLUDE_DIRS) -main-is Main_Codegen src/code_gen/Main_Codegen.hs
+
 .PHONY: clean
 clean:
 	rm -fr $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
@@ -36,12 +45,3 @@ test_codegen:
 test_integration:
 	@echo "running integration test..."
 	@test/integration/integration_test
-
-expr: makedirs
-	ghc $(FLAGS) -o $(OUT_DIR)/expr -i$(SOURCEDIR):$(INCLUDE_DIRS) src/expr/Main.hs 
-
-parser: makedirs
-	ghc $(FLAGS) -o $(OUT_DIR)/parser -i$(SOURCEDIR):$(INCLUDE_DIRS) src/parser/Main.hs
-
-codegen: makedirs
-	ghc $(FLAGS) -o $(OUT_DIR)/code_gen -i$(SOURCEDIR):$(INCLUDE_DIRS) src/code_gen/Main.hs

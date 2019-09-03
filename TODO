@@ -7,3 +7,4 @@
 [ ] expressions should be transformed a lot before being converted to C
         example: `x + y` in souc is *not* the same as x + y in C
 [ ] subroutines should also be converted (mapped?) to do the right thing.
+[ ] maybe don't use haskell's `String` and `++` for code gen, that seems slow
