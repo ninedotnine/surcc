@@ -7,19 +7,28 @@ generate :: Program -> String
 generate (Program _ _ body) = includes ++ concat (map generate_top_level body)
     where includes = "#include <stdio.h>\n#include <stdbool.h>\n#include <stdlib.h>\n"
 
+generate_param :: Param -> String
+generate_param [] = ""
+generate_param [param] = "int " ++ value param -- FIXME
+generate_param _ = "FIXME LOL"
+
 generate_top_level :: Top_Level_Defn -> String
 generate_top_level (Top_Level_Const_Defn name raw_expr) = "const int " ++ value name ++ " = " ++ value raw_expr ++ ";"
-generate_top_level (FuncDefn name param stmts) = "int " ++ value name ++ "(" ++ show param ++ ") {" ++ body ++ "}"
+generate_top_level (FuncDefn name param stmts) = "int " ++ value name ++ "(" ++ generate_param param ++ ") {" ++ body ++ "}"
     where body = generate_stmts stmts
-generate_top_level (ShortFuncDefn name param raw_expr) = "int " ++ value name ++ "(" ++ show param  ++ ") { return " ++ value raw_expr ++ "; }"
+generate_top_level (ShortFuncDefn name param raw_expr) = "int " ++ value name ++ "(" ++ generate_param param  ++ ") { return " ++ value raw_expr ++ "; }"
 generate_top_level (SubDefn name m_param stmts) = "void " ++ value name ++ "(" ++ param ++ ") { " ++ body ++ "}"
     where
-        param = if m_param == Nothing then "void" else show m_param
         body = generate_stmts stmts
-generate_top_level (MainDefn m_param stmts) = "int main (" ++ param ++ ") { " ++ body ++ "}"
+        param = case m_param of
+            Nothing -> "void"
+            Just p -> generate_param p
+generate_top_level (MainDefn m_param stmts) = "int main (" ++ param ++ ") { " ++ body ++ "} "
     where
-        param = if m_param == Nothing then "void" else show m_param
         body = generate_stmts stmts
+        param = case m_param of
+            Nothing -> "void"
+            Just p -> generate_param p
 
 generate_stmts :: Stmts -> String
 generate_stmts stmts = concat $ map generate_stmt stmts
@@ -33,8 +42,8 @@ generate_stmt (Stmt_Sub_Call name m_raw_expr) = value name ++ "(" ++ raw_expr ++
     raw_expr = case m_raw_expr of
         Nothing -> ""
         Just e -> value e
-generate_stmt (Stmt_Var_Assign name raw_expr) = value name ++ " = " ++ value raw_expr ++ "; "
-generate_stmt (Stmt_Const_Assign name raw_expr) = "const " ++ value name ++ " = " ++ value raw_expr ++ "; "
+generate_stmt (Stmt_Var_Assign name raw_expr) = "int " ++ value name ++ " = " ++ value raw_expr ++ "; "
+generate_stmt (Stmt_Const_Assign name raw_expr) = "const int " ++ value name ++ " = " ++ value raw_expr ++ "; "
 generate_stmt (Stmt_Postfix_Oper name oper) = value name ++ oper ++ "; "
 generate_stmt (Stmt_While raw_expr stmts) = "while ( " ++ value raw_expr ++ " ) { " ++ generate_stmts stmts ++ "}"
 generate_stmt (Stmt_If raw_expr stmts m_else_stmts) = if_branch ++ else_branch m_else_stmts where

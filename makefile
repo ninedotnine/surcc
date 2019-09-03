@@ -33,11 +33,11 @@ clean:
 test: test_parser test_codegen test_integration
 
 .PHONY: test_parser
-test_parser:
+test_parser: parser
 	@test/test_parser
 
 .PHONY: test_codegen
-test_codegen:
+test_codegen: codegen
 	@echo "testing code gen..."
 	@runghc -Wall -isrc/:src/code_gen/:src/parser/ test/test_codegen.hs
 

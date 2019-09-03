@@ -8,3 +8,5 @@
         example: `x + y` in souc is *not* the same as x + y in C
 [ ] subroutines should also be converted (mapped?) to do the right thing.
 [ ] maybe don't use haskell's `String` and `++` for code gen, that seems slow
+[ ] generating params is really not implemented at all
+[ ] don't always assume `int`, that was super lazy hacking
