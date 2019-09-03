@@ -20,4 +20,4 @@ for fi in $(ls -1 "${DIR}/outputs/") ; do
     diff --brief "${TEMPDIR}/output" "${DIR}/outputs/${fi}" || fail "$fi" "diff"
 done
 
-echo "integration tests passed."
+echo "integration tests passed :^D"

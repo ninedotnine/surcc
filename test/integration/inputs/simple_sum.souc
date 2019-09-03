@@ -1,0 +1,7 @@
+; note that "puts" is not the name for this souc subroutine (probably)
+main() = do
+    if 3 + 3 == 6 do
+        puts "6"
+    else
+        puts "not 6"
+    end if
