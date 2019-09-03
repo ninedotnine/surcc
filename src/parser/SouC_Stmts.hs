@@ -11,13 +11,16 @@ import Basics
 statement :: Parser Stmt
 statement = do
     try indent_depth
-    stmt_if <|> stmt_const_assign <|> stmt_var_assign <|> stmt_return <|> stmt_beginning_with_identifier
+    stmt_if <|> stmt_return <|> stmt_beginning_with_identifier
+
 
 stmt_beginning_with_identifier :: Parser Stmt
 stmt_beginning_with_identifier = do
     iden <- identifier
-    res <- (stmt_postfix_oper iden <|> stmt_sub_call iden)
-    return res
+    return =<< (stmt_const_assign iden <|>
+                stmt_var_assign iden <|>
+                stmt_postfix_oper iden <|>
+                stmt_sub_call iden)
 
 stmt_block :: Parser Stmts
 stmt_block = do
@@ -27,17 +30,17 @@ stmt_block = do
     decrease_indent_level
     return (first_stmt:more_stmts)
 
-stmt_const_assign :: Parser Stmt
-stmt_const_assign = do
-    iden <- try (identifier <* spaces <* char '=')
+stmt_const_assign :: Identifier -> Parser Stmt
+stmt_const_assign name = do
+    _ <- try (spaces <* char '=')
     val <- spaces *> raw_expr
-    return $ Stmt_Const_Assign iden val
+    return $ Stmt_Const_Assign name val
 
-stmt_var_assign :: Parser Stmt
-stmt_var_assign = do
-    iden <- try (identifier <* spaces <* string "<-")
+stmt_var_assign :: Identifier -> Parser Stmt
+stmt_var_assign name = do
+    _ <- try (spaces <* string "<-")
     val <- spaces *> raw_expr
-    return $ Stmt_Var_Assign iden val
+    return $ Stmt_Var_Assign name val
 
 stmt_sub_call :: Identifier -> Parser Stmt
 stmt_sub_call name = do
