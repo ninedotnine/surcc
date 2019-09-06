@@ -8,6 +8,4 @@ import SouC_Expr
 main :: IO ()
 main = forever $ do
     input <- putStr "> " >> hFlush stdout >> getLine
-    case runParser (raw_expr <* eof) 0 "raw_expr" input of
-        Left err -> putStrLn $ "error: " ++ (show err)
-        Right r -> print r
+    putStrLn (run_raw_expr_parser input)

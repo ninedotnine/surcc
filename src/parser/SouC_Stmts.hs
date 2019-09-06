@@ -34,6 +34,7 @@ stmt_const_assign :: Identifier -> Parser Stmt
 stmt_const_assign name = do
     _ <- try (spaces <* char '=')
     val <- spaces *> raw_expr
+    add_to_bindings name val
     return $ Stmt_Const_Assign name val
 
 stmt_var_assign :: Identifier -> Parser Stmt

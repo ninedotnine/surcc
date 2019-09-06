@@ -3,9 +3,16 @@ module SouC_Expr where
 import Debug.Trace
 
 import Text.Parsec hiding (space, spaces, string)
+import qualified Data.Map.Strict as Map (Map)
 
 import SouC_Types
 import Basics
+
+run_raw_expr_parser :: String -> String
+run_raw_expr_parser input = do
+    case runParser (raw_expr <* eof) empty_state "raw_expr" input of
+        Left err -> "error: " ++ (show err)
+        Right r -> show r
 
 raw_expr :: Parser Raw_Expr
 raw_expr = Raw_Expr <$> expr_internal

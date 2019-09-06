@@ -5,6 +5,7 @@ import Debug.Trace
 import Control.Monad (when)
 import Text.Parsec hiding (space, spaces, string, newline)
 import qualified Text.Parsec
+import Data.Map.Strict (singleton)
 
 import SouC_Types
 
@@ -81,15 +82,22 @@ pattern = identifier `sepBy1` oneOf ","
 
 
 increase_indent_level :: Parser ()
-increase_indent_level = modifyState (+1)
+increase_indent_level = modifyState (\(x,m) -> (x+1,m))
 
 decrease_indent_level :: Parser ()
-decrease_indent_level = modifyState (\x -> x-1)
+decrease_indent_level = modifyState (\(x,m) -> (x-1,m))
 
 indent_depth :: Parser ()
 indent_depth = do
-    level <- getState
+    (level, _) <- getState
     count (4 * level) space *> return () <?> "indent" -- FIXME indent shouldn't have to be exactly 4 spaces
+
+add_to_bindings :: Identifier -> Raw_Expr -> Parser ()
+add_to_bindings key val = do
+    (i, binds) <- getState
+    let new_binds = singleton key val
+    putState (i, binds <> new_binds)
+
 
 parens :: Parser a -> Parser a
 parens = between (char '(') (char ')')

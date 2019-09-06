@@ -9,8 +9,6 @@ import Text.Parsec.Error (ParseError)
 import System.Environment (getArgs)
 import System.Exit (exitFailure, exitSuccess)
 
-import Parser
-
 main :: IO ()
 main = do
     file_name <- getArgs >>= sanitize_args

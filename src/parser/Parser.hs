@@ -17,9 +17,7 @@ import SouC_Stmts
 
 
 runSouCParser :: SourceName -> String -> Either ParseError Program
-runSouCParser name input = runParser souCParser initState name input
---     where initState = (0, [])
-    where initState = 0
+runSouCParser name input = runParser souCParser empty_state name input
 
 souCParser :: Parser Program
 souCParser = do
@@ -28,6 +26,8 @@ souCParser = do
     imps <- imports
     code <- parseDefs
     eof
+    traceM "BINDINGS:"
+    traceM . show =<< getState
     return $ Program name imps code -- FIXME return something useful
 
 module_name :: Parser (Maybe ModuleName)

@@ -3,22 +3,31 @@ module SouC_Types where
 import Text.Parsec (Parsec)
 
 -- import qualified Data.Map.Strict as Map (Map, singleton, member, insert)
-import qualified Data.Map.Strict as Map (Map)
+import qualified Data.Map.Strict as Map (Map, empty)
 
 {-
 -- the depth and the number of spaces at each level
 -- type Indentation = (Int, [Int])
 -}
--- for now, indentation must be exactly 4 spaces
-type Indentation = Int
 
-type Parser a = Parsec String Indentation a
+type Mapping = Map.Map Identifier Raw_Expr -- FIXME: is raw_expr correct here?
+
+type Indentation = Int -- for now, indentation must be exactly 4 spaces
+
+-- FIXME: should this be a list of maps (for levels of scope)?
+type ParserState = (Indentation, Mapping)
+
+empty_state :: ParserState
+empty_state = (0, Map.empty)
+
+-- type Parser a = Parsec String Indentation a
+type Parser a = Parsec String ParserState a
 
 class Valueable a where
     value :: a -> String
 
 newtype Identifier = Identifier String
-                   deriving (Eq, Read, Show)
+                   deriving (Eq, Read, Show, Ord)
 
 instance Valueable Identifier where
     value (Identifier v) = v
@@ -46,9 +55,6 @@ data Top_Level_Defn = Top_Level_Const_Defn Identifier Raw_Expr
                     | SubDefn Identifier (Maybe Param) [Stmt]
                     | MainDefn (Maybe Param) [Stmt]
                     deriving (Read, Show)
-
--- FIXME right now the map maps strings to nothing
-type MyState = (Indentation, Map.Map String ())
 
 data Raw_Expr = Raw_Expr String deriving (Read, Show)
 
