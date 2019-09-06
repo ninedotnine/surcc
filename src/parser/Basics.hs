@@ -5,7 +5,8 @@ import Debug.Trace
 import Control.Monad (when)
 import Text.Parsec hiding (space, spaces, string, newline)
 import qualified Text.Parsec
-import Data.Map.Strict (singleton)
+import qualified Data.Map.Strict  as Map (singleton, member)
+import Data.List.NonEmpty ( NonEmpty(..) )
 
 import SouC_Types
 
@@ -94,10 +95,20 @@ indent_depth = do
 
 add_to_bindings :: Identifier -> Raw_Expr -> Parser ()
 add_to_bindings key val = do
-    (i, binds) <- getState
-    let new_binds = singleton key val
-    putState (i, binds <> new_binds)
+    (i, (binds :| deeper_binds)) <- getState
+    when (Map.member key binds)
+        (parserFail ("constant `" ++ value key ++ "` already defined"))
+    putState (i, ((binds <> Map.singleton key val) :| deeper_binds))
 
+{-
+add_to_bindings :: Identifier -> Raw_Expr -> Parser ()
+add_to_bindings key val = modifyState insert_at_smallest_scope where
+    insert_at_smallest_scope (i, (binds :| deep_binds)) =
+        if Map.notMember key binds then
+            (i, ((Map.singleton key val <> binds) :| deep_binds))
+        else
+            error $ "these binds already contain this key: " ++ show key
+-}
 
 parens :: Parser a -> Parser a
 parens = between (char '(') (char ')')

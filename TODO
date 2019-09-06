@@ -10,3 +10,4 @@
 [ ] maybe don't use haskell's `String` and `++` for code gen, that seems slow
 [ ] generating params is really not implemented at all
 [ ] don't always assume `int`, that was super lazy hacking
+[ ] keep bindings of variables (not only constants)

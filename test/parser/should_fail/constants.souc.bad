@@ -1,0 +1,6 @@
+import BadImport
+import OopsFailure
+
+con = 4
+con2 = 5
+con = 6

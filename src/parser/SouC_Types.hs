@@ -4,21 +4,22 @@ import Text.Parsec (Parsec)
 
 -- import qualified Data.Map.Strict as Map (Map, singleton, member, insert)
 import qualified Data.Map.Strict as Map (Map, empty)
+import Data.List.NonEmpty ( NonEmpty(..) )
 
 {-
 -- the depth and the number of spaces at each level
 -- type Indentation = (Int, [Int])
 -}
 
-type Mapping = Map.Map Identifier Raw_Expr -- FIXME: is raw_expr correct here?
+type Bindings = Map.Map Identifier Raw_Expr -- FIXME: is raw_expr correct here?
 
 type Indentation = Int -- for now, indentation must be exactly 4 spaces
 
 -- FIXME: should this be a list of maps (for levels of scope)?
-type ParserState = (Indentation, Mapping)
+type ParserState = (Indentation, NonEmpty Bindings)
 
 empty_state :: ParserState
-empty_state = (0, Map.empty)
+empty_state = (0, Map.empty :| [])
 
 -- type Parser a = Parsec String Indentation a
 type Parser a = Parsec String ParserState a
