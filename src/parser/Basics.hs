@@ -100,16 +100,6 @@ add_to_bindings key val = do
         (parserFail ("constant `" ++ value key ++ "` already defined"))
     putState (i, ((binds <> Map.singleton key val) :| deeper_binds))
 
-{-
-add_to_bindings :: Identifier -> Raw_Expr -> Parser ()
-add_to_bindings key val = modifyState insert_at_smallest_scope where
-    insert_at_smallest_scope (i, (binds :| deep_binds)) =
-        if Map.notMember key binds then
-            (i, ((Map.singleton key val <> binds) :| deep_binds))
-        else
-            error $ "these binds already contain this key: " ++ show key
--}
-
 parens :: Parser a -> Parser a
 parens = between (char '(') (char ')')
 
