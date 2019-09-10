@@ -1,0 +1,27 @@
+#!/usr/bin/dash
+
+expr_parser_dir="test/expr_parser"
+
+echo "=== testing expression parser... "
+
+for fi in $(ls -t -r "$expr_parser_dir"); do
+    fullname="$expr_parser_dir/$fi"
+    echo -n "testing ${fi}... "
+
+    input=$(head -n 1 "$fullname")
+    result=$(echo "$input" | bin/expr | scheme - )
+    correct_result=$(tail -n 1 "$fullname")
+
+    if [ "$result" = "$correct_result" ]; then
+        echo "OK."
+        continue
+    else
+        echo "FAILED TEST:"
+        echo "\tinput: $input"
+        echo "\tresult: \t$result"
+        echo "\tcorrect result: $correct_result"
+        exit 1
+    fi
+done
+
+echo "all expression parser tests passed :^)"

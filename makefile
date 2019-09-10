@@ -1,6 +1,6 @@
 # FLAGS = -dynamic -Wall -Wno-unused-imports -no-keep-o-files -no-keep-hi-files
 SOURCEDIR = src/
-INCLUDE_DIRS = src/parser:src/code_gen
+INCLUDE_DIRS = src/parser:src/expr:src/code_gen
 OUT_DIR = bin
 HI_DIR = hi_files
 OBJ_DIR = obj_files
@@ -30,7 +30,7 @@ clean:
 	rm -fr $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
 
 .PHONY: test
-test: test_parser test_codegen test_integration
+test: test_parser test_codegen test_expr_parser test_integration 
 	@echo "all tests successful! :^D"
 
 .PHONY: test_parser
@@ -44,3 +44,8 @@ test_codegen: codegen
 .PHONY: test_integration
 test_integration:
 	@test/integration_test
+
+.PHONY: test_expr_parser
+test_expr_parser: parser expr
+	@test/test_expr_parser
+
