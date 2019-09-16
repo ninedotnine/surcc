@@ -1,0 +1,3 @@
+main() = do
+    until true do
+        print "sub call"

@@ -1,0 +1,6 @@
+main() = do
+    cause_explosion
+end main
+
+    cause_explosion
+

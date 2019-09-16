@@ -127,7 +127,11 @@ optional_end :: Endable_Stmts -> Parser String
 optional_end stmt_type = do
     keyword <- optionMaybe (try (endline *> indent_depth *> reserved "end"))
     name <- optionMaybe (try (spaces *> string word))
-    return (show keyword ++ show name)
+    -- FIXME also allow type annotation here
+    lookAhead endline
+    return (show keyword ++ " " ++ word ++ " " ++ show name)
         where word = case stmt_type of
                 Stmt_While_End -> "while"
                 Stmt_If_End -> "if"
+                Stmt_Until_End -> "until"
+                Stmt_Unless_End -> "unless"

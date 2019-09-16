@@ -11,7 +11,7 @@ import Basics
 statement :: Parser Stmt
 statement = do
     try indent_depth
-    stmt_if <|> stmt_while <|> stmt_return <|> stmt_beginning_with_identifier
+    stmt_cond <|> stmt_loop <|> stmt_return <|> stmt_beginning_with_identifier
 
 
 stmt_beginning_with_identifier :: Parser Stmt
@@ -53,12 +53,25 @@ stmt_postfix_oper name = do
     postfix_op <- postfix_oper
     return $ Stmt_Postfix_Oper name postfix_op
 
+stmt_loop :: Parser Stmt
+stmt_loop = stmt_while <|> stmt_until
+
 stmt_while :: Parser Stmt
 stmt_while = do
     condition <- try (reserved "while") *> spaces *> raw_expr <* optional_do <* endline
     stmts <- stmt_block
     _ <- optional_end Stmt_While_End -- FIXME use this for type-checking
     return $ Stmt_While condition stmts
+
+stmt_until :: Parser Stmt
+stmt_until = do
+    condition <- try (reserved "until") *> spaces *> raw_expr <* optional_do <* endline
+    stmts <- stmt_block
+    _ <- optional_end Stmt_Until_End -- FIXME use this for type-checking
+    return $ Stmt_Until condition stmts
+
+stmt_cond :: Parser Stmt
+stmt_cond = stmt_if <|> stmt_unless
 
 stmt_if :: Parser Stmt
 stmt_if = do
@@ -69,6 +82,14 @@ stmt_if = do
     elseDo <- optionMaybe (try (endline *> indent_depth *> reserved "else") *> endline *> stmt_block)
     _ <- optional_end Stmt_If_End -- FIXME use this for type-checking
     return $ Stmt_If condition thenDo elseDo
+
+stmt_unless :: Parser Stmt
+stmt_unless = do
+    condition <- try (reserved "unless") *> spaces *> raw_expr <* optional_do <* endline
+    thenDo <- stmt_block
+    elseDo <- optionMaybe (try (endline *> indent_depth *> reserved "else") *> endline *> stmt_block)
+    _ <- optional_end Stmt_Unless_End -- FIXME use this for type-checking
+    return $ Stmt_Unless condition thenDo elseDo
 
 stmt_return :: Parser Stmt
 stmt_return = do

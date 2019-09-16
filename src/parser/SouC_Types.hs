@@ -73,7 +73,9 @@ data Expr = Expr_Number Integer
           deriving (Show)
 
 data Stmt = Stmt_While Raw_Expr Stmts
+          | Stmt_Until Raw_Expr Stmts
           | Stmt_If Raw_Expr Stmts (Maybe Stmts)
+          | Stmt_Unless Raw_Expr Stmts (Maybe Stmts)
           | Stmt_Sub_Call Identifier (Maybe Raw_Expr)
           | Stmt_Postfix_Oper Identifier String
           | Stmt_Const_Assign Identifier Raw_Expr
@@ -81,4 +83,4 @@ data Stmt = Stmt_While Raw_Expr Stmts
           | Stmt_Return (Maybe Raw_Expr)
           deriving (Read, Show)
 
-data Endable_Stmts = Stmt_If_End | Stmt_While_End
+data Endable_Stmts = Stmt_If_End | Stmt_While_End | Stmt_Unless_End | Stmt_Until_End

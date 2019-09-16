@@ -1,0 +1,5 @@
+main() = do
+    if true
+        unless true do
+            print "sub call"
+            explode

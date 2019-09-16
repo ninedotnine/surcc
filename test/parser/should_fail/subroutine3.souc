@@ -1,0 +1,7 @@
+main() = do
+    cause_explosion
+end main
+
+cause_explosion() = do
+    explode "this is so bad"
+        end cause_explosion

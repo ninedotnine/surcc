@@ -1,0 +1,3 @@
+main() = do
+    explode "this is very bad"
+    end main
