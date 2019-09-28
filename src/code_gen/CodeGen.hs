@@ -55,10 +55,19 @@ generate_stmt (Stmt_Const_Assign name raw_expr) =
 generate_stmt (Stmt_Postfix_Oper name oper) = value name ++ oper ++ "; "
 generate_stmt (Stmt_While raw_expr stmts) =
     "while ( " ++ value raw_expr ++ " ) { " ++ generate_stmts stmts ++ "} "
+generate_stmt (Stmt_Until raw_expr stmts) =
+    "while (!( " ++ value raw_expr ++ " )) { " ++ generate_stmts stmts ++ "} "
 generate_stmt (Stmt_If raw_expr stmts m_else_stmts) =
     if_branch ++ else_branch m_else_stmts where
         if_branch =
             "if ( " ++ value raw_expr ++ " ) { " ++ generate_stmts stmts ++ "} "
+        else_branch Nothing = ""
+        else_branch (Just else_stmts) =
+            "else {" ++ generate_stmts else_stmts ++ "} "
+generate_stmt (Stmt_Unless raw_expr stmts m_else_stmts) =
+    if_branch ++ else_branch m_else_stmts where
+        if_branch =
+            "if (!( " ++ value raw_expr ++ " )) { " ++ generate_stmts stmts ++ "} "
         else_branch Nothing = ""
         else_branch (Just else_stmts) =
             "else {" ++ generate_stmts else_stmts ++ "} "

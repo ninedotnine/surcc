@@ -43,7 +43,10 @@ run_tests = do
     test subber_while "subber_while"
     test subber_if "subber_if"
     test subber_if_else "subber_if_else"
+    test subber_unless "subber_unless"
+    test subber_unless_else "subber_unless_else"
     test sub_while "sub_while"
+    test sub_until "sub_until"
 
 conster :: Program
 conster = Program Nothing [] [
@@ -107,7 +110,7 @@ subber_if = Program Nothing [] [
         Stmt_If (Raw_Expr "false") [
             Stmt_Var_Assign (Identifier "x") (Raw_Expr "41"),
             Stmt_Postfix_Oper (Identifier "x") "++"]
-        Nothing]]
+            Nothing]]
 
 subber_if_else :: Program
 subber_if_else = Program Nothing [] [
@@ -115,8 +118,28 @@ subber_if_else = Program Nothing [] [
         Stmt_Var_Assign (Identifier "x") (Raw_Expr "41"),
         Stmt_If (Raw_Expr "false") [
             Stmt_Postfix_Oper (Identifier "x") "++"]
-        (Just [
-            (Stmt_Postfix_Oper (Identifier "x") "--")])],
+            (Just [
+                (Stmt_Postfix_Oper (Identifier "x") "--")])],
+    MainDefn Nothing [
+        Stmt_Sub_Call (Identifier "subby") Nothing]]
+
+subber_unless :: Program
+subber_unless = Program Nothing [] [
+    MainDefn Nothing [],
+    SubDefn (Identifier "subby") Nothing [
+        Stmt_Unless (Raw_Expr "false") [
+            Stmt_Var_Assign (Identifier "x") (Raw_Expr "41"),
+            Stmt_Postfix_Oper (Identifier "x") "++"]
+            Nothing]]
+
+subber_unless_else :: Program
+subber_unless_else = Program Nothing [] [
+    SubDefn (Identifier "subby") Nothing [
+        Stmt_Var_Assign (Identifier "x") (Raw_Expr "41"),
+        Stmt_Unless (Raw_Expr "false") [
+            Stmt_Postfix_Oper (Identifier "x") "++"]
+            (Just [
+                (Stmt_Postfix_Oper (Identifier "x") "--")])],
     MainDefn Nothing [
         Stmt_Sub_Call (Identifier "subby") Nothing]]
 
@@ -125,6 +148,15 @@ sub_while = Program Nothing [] [
     SubDefn (Identifier "subby") Nothing [
         Stmt_Var_Assign (Identifier "x") (Raw_Expr "41"),
         Stmt_While (Raw_Expr "false") [
+            Stmt_Postfix_Oper (Identifier "x") "++"]],
+    MainDefn Nothing [
+        Stmt_Sub_Call (Identifier "subby") Nothing]]
+
+sub_until :: Program
+sub_until = Program Nothing [] [
+    SubDefn (Identifier "subby") Nothing [
+        Stmt_Var_Assign (Identifier "x") (Raw_Expr "41"),
+        Stmt_Until (Raw_Expr "false") [
             Stmt_Postfix_Oper (Identifier "x") "++"]],
     MainDefn Nothing [
         Stmt_Sub_Call (Identifier "subby") Nothing]]
