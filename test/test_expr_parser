@@ -9,7 +9,7 @@ for fi in $(ls -t -r "$expr_parser_dir"); do
     echo -n "testing ${fi}... "
 
     input=$(head -n 1 "$fullname")
-    result=$(echo "$input" | bin/expr | scheme - )
+    result=$(echo "$input" | bin/expr - | scheme - )
     correct_result=$(tail -n 1 "$fullname")
 
     if [ "$result" = "$correct_result" ]; then

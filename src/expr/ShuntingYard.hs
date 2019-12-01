@@ -3,13 +3,17 @@
 -- it does not make any attempt at associativity, although this is possible.
 -- it gives higher precedence to operators which are not separated by spaces.
 
-module ShuntingYard where
-
-import qualified Text.Parsec as Parsec
-import Text.Parsec (Parsec, (<|>), (<?>))
-import System.Environment (getArgs)
+module ShuntingYard (run_shunting_yard, print_shunting_yard, pretty_show) where
 
 import Control.Monad (when)
+import qualified Text.Parsec as Parsec
+import Text.Parsec (Parsec, (<|>), (<?>))
+
+-- for trim_spaces
+import Data.Char (isSpace)
+import Data.Functor ((<&>))
+import Data.List (dropWhile, dropWhileEnd)
+
 
 -- the oper stack is a temporary storage place for opers
 -- the tree stack holds the result, the output, as well as being used for
@@ -312,20 +316,17 @@ parse_expression = do
 
 
 
-start_state :: Stack_State
-start_state = (Oper_Stack [],Tree_Stack [],Tight False)
-
 run_shunting_yard :: String -> Either Parsec.ParseError ASTree
-run_shunting_yard input = Parsec.runParser (ignore_spaces *> parse_expression) start_state "input" input
+run_shunting_yard input = Parsec.runParser parse_expression start_state "input" (trim_spaces input)
+    where
+        start_state = (Oper_Stack [], Tree_Stack [], Tight False)
+        trim_spaces = dropWhile isSpace <&> dropWhileEnd isSpace
 
 print_shunting_yard :: String -> IO ()
-print_shunting_yard input = case Parsec.runParser (ignore_spaces *> parse_expression) start_state "input" input of
+print_shunting_yard input = case run_shunting_yard input of
         Left err -> putStrLn (show err)
         Right tree -> putStrLn (pretty_show tree)
 
 pretty_show :: ASTree -> String
 pretty_show (Branch oper left right) = "(" ++ show oper ++ " "  ++ pretty_show left ++ " " ++ pretty_show right ++ ")"
 pretty_show (Leaf val) = show val
-
-main :: IO ()
-main = interact (show . run_shunting_yard) >> putChar '\n'

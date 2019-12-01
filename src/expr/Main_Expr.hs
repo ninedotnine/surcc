@@ -1,21 +1,28 @@
 module Main_Expr where
-import Data.Char (isSpace)
-import Data.List (dropWhile, dropWhileEnd)
-import Data.Functor ((<&>))
 import Control.Monad (forever)
+import System.Environment (getArgs)
 import System.IO (hFlush, stdout)
 
 import ShuntingYard (print_shunting_yard)
 
 main :: IO ()
 main = do
-    print_shunting_yard =<< getContents
-    putChar '\n'
-{-
+    args <- getArgs
+    if length args == 0
+        then repl
+        else if elem "-" args
+            then print_shunting_yard =<< getContents
+            else parse_all args
 
-main = forever $ do
+parse_once :: String -> IO ()
+parse_once input = print_shunting_yard input
+
+repl :: IO ()
+repl = forever $ do
     putStr "> "
     hFlush stdout
     input <- getLine
     print_shunting_yard input
--}
+
+parse_all :: [String] -> IO ()
+parse_all args = mapM_ print_shunting_yard args
