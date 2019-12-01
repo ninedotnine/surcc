@@ -6,7 +6,7 @@
 module ShuntingYard where
 
 import qualified Text.Parsec as Parsec
-import Text.Parsec (Parsec, (<|>))
+import Text.Parsec (Parsec, (<|>), (<?>))
 import System.Environment (getArgs)
 
 import Control.Monad (when)
@@ -135,7 +135,7 @@ parse_oper = do
         Just _  -> do
             if_tightly_spaced find_left_space
     oper <- parse_oper_symbol
-    if_loosely_spaced (read_spaces *> return ()) <|> Parsec.parserFail ("invalid whitespace around `" ++ show oper ++ "`")
+    if_loosely_spaced ((read_spaces <?> ("space after `" ++ show oper ++ "`")) *> return ())
     if_tightly_spaced $ no_spaces ("whitespace after `" ++ show oper ++ "`")
     return (Oper oper)
 
