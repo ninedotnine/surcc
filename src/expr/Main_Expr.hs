@@ -1,4 +1,7 @@
 module Main_Expr where
+import Data.Char (isSpace)
+import Data.List (dropWhile, dropWhileEnd)
+import Data.Functor ((<&>))
 import Control.Monad (forever)
 import System.IO (hFlush, stdout)
 
