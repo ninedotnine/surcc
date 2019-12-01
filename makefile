@@ -2,8 +2,8 @@
 SOURCEDIR = src/
 INCLUDE_DIRS = src/parser:src/expr:src/code_gen
 OUT_DIR = bin
-HI_DIR = hi_files
-OBJ_DIR = obj_files
+HI_DIR = cache/hi_files
+OBJ_DIR = cache/obj_files
 FLAGS = -Wall -dynamic -hidir $(HI_DIR) -odir $(OBJ_DIR) -i$(SOURCEDIR):$(INCLUDE_DIRS)  -Wno-unused-imports
 
 default: all test
