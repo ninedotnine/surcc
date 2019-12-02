@@ -1,7 +1,5 @@
 module Parser where
 
-import Debug.Trace (traceM)
-
 -- import System
 -- import System.FilePath
 import Text.Parsec hiding (space, spaces, string)
@@ -26,8 +24,6 @@ souCParser = do
     imps <- imports
     code <- parseDefs
     eof
-    traceM "BINDINGS:"
-    traceM . show =<< getState
     return $ Program name imps code -- FIXME return something useful
 
 module_name :: Parser (Maybe ModuleName)
