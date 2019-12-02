@@ -1,28 +1,34 @@
 module Main_Expr where
-import Control.Monad (forever)
+
+import Control.Monad (forever, unless)
+import Data.Char (isSpace)
 import System.Environment (getArgs)
+import System.Exit (exitFailure, exitSuccess)
 import System.IO (hFlush, stdout)
 
-import ShuntingYard (print_shunting_yard)
+import ShuntingYard
 
 main :: IO ()
 main = do
     args <- getArgs
-    if length args == 0
-        then repl
-        else if elem "-" args
-            then print_shunting_yard =<< getContents
-            else parse_all args
-
-parse_once :: String -> IO ()
-parse_once input = print_shunting_yard input
+    case args of
+        []    -> repl
+        ["-"] -> parse_stdin
+        _     -> parse_all args
 
 repl :: IO ()
 repl = forever $ do
     putStr "> "
     hFlush stdout
     input <- getLine
-    print_shunting_yard input
+    unless (all isSpace input) (parse_eval_print input)
+
+parse_stdin :: IO ()
+parse_stdin = do
+    input <- getContents
+    case run_shunting_yard input of
+        Left err -> putStrLn (show err) >> exitFailure
+        Right tree -> putStrLn (eval_show tree) >> exitSuccess
 
 parse_all :: [String] -> IO ()
-parse_all args = mapM_ print_shunting_yard args
+parse_all exprs = mapM_ parse_eval_print exprs

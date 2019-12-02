@@ -3,7 +3,16 @@
 -- it does not make any attempt at associativity, although this is possible.
 -- it gives higher precedence to operators which are not separated by spaces.
 
-module ShuntingYard (run_shunting_yard, print_shunting_yard, pretty_show) where
+-- module ShuntingYard (run_shunting_yard, print_shunting_yard, pretty_show) where
+module ShuntingYard (
+    pretty_show,
+    run_shunting_yard,
+    print_shunting_yard,
+    evaluate,
+    eval_show,
+    parse_eval_print
+) where
+
 
 import Control.Monad (when)
 import qualified Text.Parsec as Parsec
@@ -316,6 +325,10 @@ parse_expression = do
 
 
 
+pretty_show :: ASTree -> String
+pretty_show (Branch oper left right) = "(" ++ show oper ++ " "  ++ pretty_show left ++ " " ++ pretty_show right ++ ")"
+pretty_show (Leaf val) = show val
+
 run_shunting_yard :: String -> Either Parsec.ParseError ASTree
 run_shunting_yard input = Parsec.runParser parse_expression start_state "input" (trim_spaces input)
     where
@@ -327,6 +340,21 @@ print_shunting_yard input = case run_shunting_yard input of
         Left err -> putStrLn (show err)
         Right tree -> putStrLn (pretty_show tree)
 
-pretty_show :: ASTree -> String
-pretty_show (Branch oper left right) = "(" ++ show oper ++ " "  ++ pretty_show left ++ " " ++ pretty_show right ++ ")"
-pretty_show (Leaf val) = show val
+evaluate :: ASTree -> Integer
+evaluate (Leaf x) = x
+evaluate (Branch op left right) = evaluate left `operate` evaluate right
+    where operate = case op of
+            Plus   -> (+)
+            Minus  -> (-)
+            Splat  -> (*)
+            Divide -> div
+            Modulo -> mod
+            Hihat  -> (^)
+
+eval_show :: ASTree -> String
+eval_show = evaluate <&> show
+
+parse_eval_print :: String -> IO ()
+parse_eval_print input = case run_shunting_yard input of
+    Left err -> putStrLn (show err)
+    Right tree -> putStrLn (eval_show tree)
