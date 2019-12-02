@@ -9,7 +9,7 @@ for fi in $(ls -t -r "$parse_succeed_dir")
 do
     fullname="$parse_succeed_dir/$fi"
 #     echo "test/parse/$fi"
-    echo -n "testing ${fi}... "
+    echo -n "${fi}... "
 
     if 
         bin/parser "$fullname"  >> /dev/null 2>&1
@@ -28,7 +28,7 @@ echo "=== all tests passed. testing bad parses..."
 for fi in $(ls -t -r "$parse_fail_dir")
 do
     fullname="$parse_fail_dir/$fi"
-    echo -n "testing ${fi}... "
+    echo -n "${fi}... "
 
     if 
         bin/parser "$fullname"  >> /dev/null 2>&1

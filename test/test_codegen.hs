@@ -13,7 +13,7 @@ tmpdir = "/tmp/souc_code_gen_test/"
 
 test :: Program -> String -> IO ()
 test prog name = do
-    putStr "running test " >> putStr name >> putStr "... "
+    putStr name >> putStr "... "
 --     print prog
 --     print (generate prog)
     let bin_filename = tmpdir ++ name
