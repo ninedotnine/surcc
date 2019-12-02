@@ -1,27 +1,52 @@
 #!/usr/bin/dash
 
 expr_parser_dir="test/expr_parser"
+should_succeed_dir="${expr_parser_dir}/should_succeed"
+should_fail_dir="${expr_parser_dir}/should_fail"
 
-echo "=== testing expression parser... "
+passing_tests() {
+    local subdir="$1"
 
-for fi in $(ls -t -r "$expr_parser_dir"); do
-    fullname="$expr_parser_dir/$fi"
-    echo -n "testing ${fi}... "
+    for fi in $(ls -t -r "$subdir"); do
+        fullname="$subdir/$fi"
+        echo -n "$fi..."
 
-    input=$(head -n 1 "$fullname")
-    result=$(echo "$input" | bin/expr - | scheme - )
-    correct_result=$(tail -n 1 "$fullname")
+        input=$(head -n 1 "$fullname")
+        result=$("bin/expr" "$input")
+        correct_result=$(tail -n 1 "$fullname")
 
-    if [ "$result" = "$correct_result" ]; then
-        echo "OK."
-        continue
-    else
-        echo "FAILED TEST:"
-        echo "\tinput: $input"
-        echo "\tresult: \t$result"
-        echo "\tcorrect result: $correct_result"
-        exit 1
-    fi
-done
+        if [ "$result" = "$correct_result" ]; then
+            echo "OK."
+            continue
+        else
+            echo "FAILED TEST:"
+            echo "\tinput: $input"
+            echo "\tresult: \t$result"
+            echo "\tcorrect result: $correct_result"
+            exit 1
+        fi
+    done
+}
 
-echo "all expression parser tests passed :^)"
+failing_tests() {
+    local subdir="$1"
+
+    for fi in $(ls -t -r "$subdir"); do
+        fullname="$subdir/$fi"
+        echo -n "$fi..."
+        "bin/expr" '-' < "$fullname" > /dev/null && exit 1
+        echo " OK."
+    done
+}
+
+main() {
+    echo "=== testing expression parser... "
+    passing_tests "$should_succeed_dir"
+    echo "=== all expression parser tests passed :^)"
+
+    echo "=== now checking invalid inputs..."
+    failing_tests "$should_fail_dir"
+    echo "=== all bad tests failed :^)"
+}
+
+main
