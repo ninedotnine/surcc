@@ -10,7 +10,10 @@ module ShuntingYard (
     print_shunting_yard,
     evaluate,
     eval_show,
-    parse_eval_print
+    parse_eval_print,
+    ASTree(..),
+    Term(..),
+    Operator(..)
 ) where
 
 
@@ -32,7 +35,11 @@ import Data.List (dropWhile, dropWhileEnd)
 
 newtype Precedence = Precedence Integer deriving (Eq, Ord)
 
-data Token = Term Integer
+data Term = Lit Integer
+          | Var String
+    deriving Show
+
+data Token = TermTok Term
            | Oper Operator
            | LParen
            | RParen
@@ -40,7 +47,7 @@ data Token = Term Integer
     deriving Show
 
 data ASTree = Branch Operator ASTree ASTree
-            | Leaf Integer
+            | Leaf Term
          deriving Show
 
 newtype Oper_Stack = Oper_Stack [StackOp] deriving Show
@@ -137,8 +144,15 @@ read_spaces = Parsec.many1 (Parsec.char ' ') *> return ()
 ignore_spaces :: Parsec String Stack_State ()
 ignore_spaces = Parsec.many (Parsec.char ' ') *> return ()
 
+parse_term :: Parsec String Stack_State Token
+parse_term = parse_num <|> parse_var
+
 parse_num :: Parsec String Stack_State Token
-parse_num = Term <$> read <$> Parsec.many1 Parsec.digit
+parse_num = TermTok <$> Lit <$> read <$> Parsec.many1 Parsec.digit
+
+parse_var :: Parsec String Stack_State Token
+parse_var = TermTok <$> Var <$> Parsec.many1 (Parsec.lower <|> Parsec.char '_')
+
 
 parse_oper :: Parsec String Stack_State Token
 parse_oper = do
@@ -182,7 +196,7 @@ check_for_oper = Parsec.lookAhead (Parsec.try (ignore_spaces *> Parsec.oneOf val
 
 parse_token :: Parsec String Stack_State Token
 parse_token = do
-    parse_num <|> (check_for_oper *> parse_oper) <|> parse_left_paren <|> parse_right_paren
+    parse_term <|> (check_for_oper *> parse_oper) <|> parse_left_paren <|> parse_right_paren
 
 
 make_branch :: Operator -> [StackOp] -> Parsec String Stack_State ()
@@ -316,7 +330,7 @@ parse_expression = do
                 (StackSpace:ops) -> Parsec.modifyState (\(_,s2,_) -> (Oper_Stack ops, s2, Tight True))
                 _ -> return ()
             parse_expression <|> finish_expr
-        Term t -> tree_stack_push (Leaf t) *> (parse_expression <|> finish_expr)
+        TermTok t -> tree_stack_push (Leaf t) *> (parse_expression <|> finish_expr)
         Oper op -> do
             apply_higher_prec_ops (get_prec op)
             oper_stack_push (StackOp op)
@@ -341,7 +355,9 @@ print_shunting_yard input = case run_shunting_yard input of
         Right tree -> putStrLn (pretty_show tree)
 
 evaluate :: ASTree -> Integer
-evaluate (Leaf x) = x
+evaluate (Leaf t) = case t of
+    Lit x -> x
+    Var _ -> undefined -- no way to evaluate these
 evaluate (Branch op left right) = evaluate left `operate` evaluate right
     where operate = case op of
             Plus   -> (+)
