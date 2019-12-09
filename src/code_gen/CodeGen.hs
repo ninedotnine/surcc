@@ -19,8 +19,8 @@ generate (Program _ _ body) = includes ++ concat (map generate_top_level body)
             "#include <stdio.h>\n#include <stdbool.h>\n#include <stdlib.h>\n"
 
 generate_param :: Param -> String
-generate_param [] = ""
-generate_param [param] = "int " ++ gen param -- FIXME
+generate_param (Param []) = ""
+generate_param (Param [param]) = "int " ++ gen param -- FIXME
 generate_param _ = "FIXME LOL"
 
 generate_top_level :: Top_Level_Defn -> String

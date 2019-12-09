@@ -41,7 +41,7 @@ newtype Import = Import String deriving (Read, Show)
 
 newtype Stmts = Stmts [Stmt] deriving Show
 
-type Param = [Identifier]
+newtype Param = Param [Identifier] deriving (Show)
 
 
 data Top_Level_Defn = Top_Level_Const_Defn Identifier Raw_Expr

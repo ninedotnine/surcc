@@ -57,12 +57,12 @@ conster = Program Nothing [] [
 func :: Program
 func = Program Nothing [] [
     MainDefn Nothing (Stmts []),
-    ShortFuncDefn (Identifier "f") [Identifier "x"] (Raw_Expr "42")]
+    ShortFuncDefn (Identifier "f") (Param [Identifier "x"]) (Raw_Expr "42")]
 
 func2 :: Program
 func2 = Program Nothing [] [
     MainDefn Nothing (Stmts []),
-    FuncDefn (Identifier "f") [ Identifier "x"] (Stmts [
+    FuncDefn (Identifier "f") (Param  [Identifier "x"]) (Stmts [
         Stmt_Return (Just (Raw_Expr "42"))])]
 
 mainer :: Program

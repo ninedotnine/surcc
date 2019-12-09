@@ -78,8 +78,8 @@ raw_identifier = do
     return (first:rest)
 
 -- for pattern matching
-pattern :: Parser [Identifier]
-pattern = identifier `sepBy1` oneOf ","
+pattern :: Parser Param
+pattern = Param <$> identifier `sepBy1` oneOf ","
 
 
 increase_indent_level :: Parser ()
