@@ -12,7 +12,7 @@ import Basics
 import SouC_Types
 import SouC_Expr
 import SouC_Stmts
-
+import ShuntingYard
 
 runSouCParser :: SourceName -> String -> Either ParseError Program
 runSouCParser name input = runParser souCParser empty_state name input
@@ -84,8 +84,11 @@ top_level_func func_name = do
 
 short_top_level_func :: Identifier -> Param -> Parser Top_Level_Defn
 short_top_level_func func_name param = do
-    body <- raw_expr
-    return $ ShortFuncDefn func_name param body
+    (Raw_Expr body) <- raw_expr
+    case run_shunting_yard body of
+        Right result -> return $ ShortFuncDefn func_name param result
+--         Left parse_err -> mergeError (fail "invalid expression") parse_err
+        Left _ -> fail "invalid expression"
 
 long_top_level_func :: Identifier -> Param -> Parser Top_Level_Defn
 long_top_level_func func_name param = do

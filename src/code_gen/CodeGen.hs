@@ -1,6 +1,8 @@
 module CodeGen (generate) where
 
+import ExprGen (generate_expr)
 import SouC_Types
+import ShuntingYard
 
 generate :: Program -> String
 -- generate (Program name imports body) =
@@ -10,6 +12,9 @@ generate (Program _ _ body) = includes ++ concat (map gen body)
 
 class Generatable a where
     gen :: a -> String
+
+instance Generatable ASTree where
+    gen = generate_expr
 
 instance Generatable Identifier where
     gen (Identifier v) = v

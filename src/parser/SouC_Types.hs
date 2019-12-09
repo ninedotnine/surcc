@@ -6,6 +6,9 @@ import Text.Parsec (Parsec)
 import qualified Data.Map.Strict as Map (Map, empty)
 import Data.List.NonEmpty ( NonEmpty(..) )
 
+import ShuntingYard
+
+
 {-
 -- the depth and the number of spaces at each level
 -- type Indentation = (Int, [Int])
@@ -46,7 +49,7 @@ newtype Param = Param [Identifier] deriving (Show)
 
 data Top_Level_Defn = Top_Level_Const_Defn Identifier Raw_Expr
                     | FuncDefn Identifier Param Stmts
-                    | ShortFuncDefn Identifier Param Raw_Expr
+                    | ShortFuncDefn Identifier Param ASTree
                     | SubDefn Identifier (Maybe Param) Stmts
                     | MainDefn (Maybe Param) Stmts
                     deriving Show

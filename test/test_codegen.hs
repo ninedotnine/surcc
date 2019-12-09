@@ -3,6 +3,7 @@
 
 import CodeGen
 import SouC_Types
+import ShuntingYard (ASTree(..), Term(..))
 
 import System.Directory (createDirectoryIfMissing)
 import System.Process (callProcess)
@@ -57,7 +58,7 @@ conster = Program Nothing [] [
 func :: Program
 func = Program Nothing [] [
     MainDefn Nothing (Stmts []),
-    ShortFuncDefn (Identifier "f") (Param [Identifier "x"]) (Raw_Expr "42")]
+    ShortFuncDefn (Identifier "f") (Param [Identifier "x"]) (Leaf (Lit 42))]
 
 func2 :: Program
 func2 = Program Nothing [] [
