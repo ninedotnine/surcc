@@ -1,4 +1,4 @@
-module CodeGen where
+module CodeGen (generate) where
 
 import SouC_Types
 
