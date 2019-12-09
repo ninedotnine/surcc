@@ -8,7 +8,7 @@ FLAGS = -Wall -dynamic -j -hidir $(HI_DIR) -odir $(OBJ_DIR) -i$(SOURCEDIR):$(INC
 
 default: all test
 
-all: build expr parser codegen
+all: build expr parser
 
 makedirs:
 	@mkdir -p $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
@@ -21,9 +21,6 @@ expr: makedirs
 
 parser: makedirs
 	ghc $(FLAGS) -o $(OUT_DIR)/parser -main-is Main_Parser src/parser/Main_Parser.hs
-
-codegen: makedirs
-	ghc $(FLAGS) -o $(OUT_DIR)/code_gen -main-is Main_Codegen src/code_gen/Main_Codegen.hs
 
 .PHONY: clean
 clean:
@@ -38,8 +35,8 @@ test_parser: parser
 	@test/test_parser
 
 .PHONY: test_codegen
-test_codegen: codegen
-	@runghc -Wall -isrc/:src/code_gen/:src/parser/ test/test_codegen.hs
+test_codegen:
+	@runghc -Wall -i$(SOURCEDIR):$(INCLUDE_DIRS) test/test_codegen.hs
 
 .PHONY: test_integration
 test_integration:

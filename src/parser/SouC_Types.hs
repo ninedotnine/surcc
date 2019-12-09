@@ -37,7 +37,7 @@ instance Valueable Identifier where
 --     show (Identifier x) = show x
 
 data Program = Program (Maybe ModuleName) Imports Body
-    deriving (Read, Show)
+    deriving Show
 
 newtype ModuleName = ModuleName String deriving (Read, Show)
 type Imports = [Import]
@@ -55,7 +55,7 @@ data Top_Level_Defn = Top_Level_Const_Defn Identifier Raw_Expr
                     | ShortFuncDefn Identifier Param Raw_Expr
                     | SubDefn Identifier (Maybe Param) [Stmt]
                     | MainDefn (Maybe Param) [Stmt]
-                    deriving (Read, Show)
+                    deriving Show
 
 data Raw_Expr = Raw_Expr String deriving (Read, Show)
 
@@ -70,7 +70,7 @@ data Expr = Expr_Number Integer
           | Expr_FuncCall String Expr
           | Expr_Prefix_Oper String Expr
           | Expr_Infix_Oper Expr String Expr -- FIXME get rid of this?
-          deriving (Show)
+          deriving Show
 
 data Stmt = Stmt_While Raw_Expr Stmts
           | Stmt_Until Raw_Expr Stmts
@@ -81,6 +81,6 @@ data Stmt = Stmt_While Raw_Expr Stmts
           | Stmt_Const_Assign Identifier Raw_Expr
           | Stmt_Var_Assign Identifier Raw_Expr
           | Stmt_Return (Maybe Raw_Expr)
-          deriving (Read, Show)
+          deriving (Show)
 
 data Endable_Stmts = Stmt_If_End | Stmt_While_End | Stmt_Unless_End | Stmt_Until_End
