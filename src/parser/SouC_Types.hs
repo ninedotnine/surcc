@@ -24,14 +24,8 @@ empty_state = (0, Map.empty :| [])
 -- type Parser a = Parsec String Indentation a
 type Parser a = Parsec String ParserState a
 
-class Valueable a where
-    value :: a -> String
-
 newtype Identifier = Identifier String
                    deriving (Eq, Read, Show, Ord)
-
-instance Valueable Identifier where
-    value (Identifier v) = v
 
 -- instance Show Identifier where
 --     show (Identifier x) = show x
@@ -58,9 +52,6 @@ data Top_Level_Defn = Top_Level_Const_Defn Identifier Raw_Expr
                     deriving Show
 
 data Raw_Expr = Raw_Expr String deriving (Read, Show)
-
-instance Valueable Raw_Expr where
-    value (Raw_Expr v) = v
 
 data Expr = Expr_Number Integer
           | Expr_CharLit Char

@@ -2,6 +2,16 @@ module CodeGen (generate) where
 
 import SouC_Types
 
+class Valueable a where
+    value :: a -> String
+
+instance Valueable Identifier where
+    value (Identifier v) = v
+
+instance Valueable Raw_Expr where
+    value (Raw_Expr v) = v
+
+
 generate :: Program -> String
 -- generate (Program name imports body) =
 generate (Program _ _ body) = includes ++ concat (map generate_top_level body)

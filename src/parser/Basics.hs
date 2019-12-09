@@ -97,7 +97,7 @@ add_to_bindings :: Identifier -> Raw_Expr -> Parser ()
 add_to_bindings key val = do
     (i, (binds :| deeper_binds)) <- getState
     when (Map.member key binds)
-        (parserFail ("constant `" ++ value key ++ "` already defined"))
+        (parserFail ("constant `" ++ show key ++ "` already defined"))
     putState (i, ((binds <> Map.singleton key val) :| deeper_binds))
 
 parens :: Parser a -> Parser a
