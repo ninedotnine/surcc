@@ -2,10 +2,10 @@
 
 set -o errexit -o nounset
 
-DIR="test/integration"
-TEMPDIR="/tmp/soucc"
+dir="test/integration"
 
-mkdir -p "$TEMPDIR"
+trap 'rm -r "$tempdir"' EXIT
+tempdir=$(mktemp -d "/tmp/souc_temp_XXXX")
 
 fail() {
     echo "test $1 failed: $2"
@@ -14,12 +14,12 @@ fail() {
 
 echo "=== starting integration tests"
 
-for fi in $(ls -1 "${DIR}/outputs/") ; do
+for fi in $(ls -1 "${dir}/outputs/") ; do
     echo -n "> ${fi}... "
-    bin/soucc "${DIR}/inputs/${fi}.souc" > "${TEMPDIR}/${fi}.c" || fail "$fi" "souc won't compile"
-    gcc "${TEMPDIR}/${fi}.c" -o "${TEMPDIR}/${fi}" || fail "$fi" "gcc won't compile"
-    "${TEMPDIR}/$fi" > "${TEMPDIR}/output" || fail "$fi" "fail during c run"
-    diff --brief "${TEMPDIR}/output" "${DIR}/outputs/${fi}" || fail "$fi" "incorrect output"
+    bin/soucc "${dir}/inputs/${fi}.souc" > "${tempdir}/${fi}.c" || fail "$fi" "souc won't compile"
+    gcc "${tempdir}/${fi}.c" -o "${tempdir}/${fi}" || fail "$fi" "gcc won't compile"
+    "${tempdir}/$fi" > "${tempdir}/output" || fail "$fi" "fail during c run"
+    diff --brief "${tempdir}/output" "${dir}/outputs/${fi}" || fail "$fi" "incorrect output"
     echo "OK."
 done
 
