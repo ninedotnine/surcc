@@ -36,7 +36,7 @@ generate_top_level (MainDefn m_param stmts) =
             Just p -> generate_param p
 
 generate_stmts :: Stmts -> String
-generate_stmts stmts = concat $ map generate_stmt stmts
+generate_stmts (Stmts stmts) = concat $ map generate_stmt stmts
 
 generate_stmt :: Stmt -> String
 generate_stmt (Stmt_Return m_raw_expr) = "return " ++ raw_expr ++ "; " where

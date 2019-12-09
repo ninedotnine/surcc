@@ -28,7 +28,7 @@ stmt_block = do
     first_stmt <- statement
     more_stmts <- many (try (endline *> statement))
     decrease_indent_level
-    return (first_stmt:more_stmts)
+    return $ Stmts (first_stmt:more_stmts)
 
 stmt_const_assign :: Identifier -> Parser Stmt
 stmt_const_assign name = do

@@ -45,16 +45,16 @@ type Body = [Top_Level_Defn]
 
 newtype Import = Import String deriving (Read, Show)
 
-type Stmts = [Stmt]
+newtype Stmts = Stmts [Stmt] deriving Show
 
 type Param = [Identifier]
 
 
 data Top_Level_Defn = Top_Level_Const_Defn Identifier Raw_Expr
-                    | FuncDefn Identifier Param [Stmt]
+                    | FuncDefn Identifier Param Stmts
                     | ShortFuncDefn Identifier Param Raw_Expr
-                    | SubDefn Identifier (Maybe Param) [Stmt]
-                    | MainDefn (Maybe Param) [Stmt]
+                    | SubDefn Identifier (Maybe Param) Stmts
+                    | MainDefn (Maybe Param) Stmts
                     deriving Show
 
 data Raw_Expr = Raw_Expr String deriving (Read, Show)

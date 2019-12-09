@@ -51,112 +51,112 @@ run_tests = do
 conster :: Program
 conster = Program Nothing [] [
     Top_Level_Const_Defn (Identifier "x") (Raw_Expr "42"),
-    MainDefn Nothing [
-        Stmt_Return (Just (Raw_Expr "0"))]]
+    MainDefn Nothing (Stmts [
+        Stmt_Return (Just (Raw_Expr "0"))])]
 
 func :: Program
 func = Program Nothing [] [
-    MainDefn Nothing [],
+    MainDefn Nothing (Stmts []),
     ShortFuncDefn (Identifier "f") [Identifier "x"] (Raw_Expr "42")]
 
 func2 :: Program
 func2 = Program Nothing [] [
-    MainDefn Nothing [],
-    FuncDefn (Identifier "f") [ Identifier "x"] [
-        Stmt_Return (Just (Raw_Expr "42"))]]
+    MainDefn Nothing (Stmts []),
+    FuncDefn (Identifier "f") [ Identifier "x"] (Stmts [
+        Stmt_Return (Just (Raw_Expr "42"))])]
 
 mainer :: Program
-mainer = Program Nothing [] [MainDefn Nothing [Stmt_Return (Just (Raw_Expr "0"))]]
+mainer = Program Nothing [] [MainDefn Nothing (Stmts [Stmt_Return (Just (Raw_Expr "0"))])]
 
 mainer2 :: Program
-mainer2 = Program Nothing [] [MainDefn Nothing []]
+mainer2 = Program Nothing [] [MainDefn Nothing (Stmts [])]
 
 subber :: Program
 subber = Program Nothing [] [
-    MainDefn Nothing [
-        Stmt_Sub_Call (Identifier "abort") Nothing]]
+    MainDefn Nothing (Stmts [
+        Stmt_Sub_Call (Identifier "abort") Nothing])]
 
 subber_ass :: Program
 subber_ass = Program Nothing [] [
-    MainDefn Nothing [],
-    SubDefn (Identifier "subby") Nothing [
-        Stmt_Var_Assign (Identifier "x") (Raw_Expr "42")]]
+    MainDefn Nothing (Stmts []),
+    SubDefn (Identifier "subby") Nothing (Stmts [
+        Stmt_Var_Assign (Identifier "x") (Raw_Expr "42")])]
 
 subber_const_ass :: Program
 subber_const_ass = Program Nothing [] [
-    MainDefn Nothing [],
-    SubDefn (Identifier "subby") Nothing [
-        Stmt_Const_Assign (Identifier "x") (Raw_Expr "42")]]
+    MainDefn Nothing (Stmts []),
+    SubDefn (Identifier "subby") Nothing (Stmts [
+        Stmt_Const_Assign (Identifier "x") (Raw_Expr "42")])]
 
 subber_postfix_oper :: Program
 subber_postfix_oper = Program Nothing [] [
-    MainDefn Nothing [],
-    SubDefn (Identifier "subby") Nothing [
+    MainDefn Nothing (Stmts []),
+    SubDefn (Identifier "subby") Nothing (Stmts [
         Stmt_Var_Assign (Identifier "x") (Raw_Expr "41"),
-        Stmt_Postfix_Oper (Identifier "x") "++"]]
+        Stmt_Postfix_Oper (Identifier "x") "++"])]
 
 subber_while :: Program
 subber_while = Program Nothing [] [
-    MainDefn Nothing [],
-    SubDefn (Identifier "subby") Nothing [
-        Stmt_While (Raw_Expr "false") [
+    MainDefn Nothing (Stmts []),
+    SubDefn (Identifier "subby") Nothing (Stmts [
+        Stmt_While (Raw_Expr "false") (Stmts [
             Stmt_Var_Assign (Identifier "x") (Raw_Expr "41"),
-            Stmt_Postfix_Oper (Identifier "x") "++"]]]
+            Stmt_Postfix_Oper (Identifier "x") "++"])])]
 
 subber_if :: Program
 subber_if = Program Nothing [] [
-    MainDefn Nothing [],
-    SubDefn (Identifier "subby") Nothing [
-        Stmt_If (Raw_Expr "false") [
+    MainDefn Nothing (Stmts []),
+    SubDefn (Identifier "subby") Nothing (Stmts [
+        Stmt_If (Raw_Expr "false") (Stmts [
             Stmt_Var_Assign (Identifier "x") (Raw_Expr "41"),
-            Stmt_Postfix_Oper (Identifier "x") "++"]
-            Nothing]]
+            Stmt_Postfix_Oper (Identifier "x") "++"])
+            Nothing])]
 
 subber_if_else :: Program
 subber_if_else = Program Nothing [] [
-    SubDefn (Identifier "subby") Nothing [
+    SubDefn (Identifier "subby") Nothing (Stmts [
         Stmt_Var_Assign (Identifier "x") (Raw_Expr "41"),
-        Stmt_If (Raw_Expr "false") [
-            Stmt_Postfix_Oper (Identifier "x") "++"]
-            (Just [
-                (Stmt_Postfix_Oper (Identifier "x") "--")])],
-    MainDefn Nothing [
-        Stmt_Sub_Call (Identifier "subby") Nothing]]
+        Stmt_If (Raw_Expr "false") (Stmts [
+            Stmt_Postfix_Oper (Identifier "x") "++"])
+            (Just (Stmts [
+                (Stmt_Postfix_Oper (Identifier "x") "--")]))]),
+    MainDefn Nothing (Stmts [
+        Stmt_Sub_Call (Identifier "subby") Nothing])]
 
 subber_unless :: Program
 subber_unless = Program Nothing [] [
-    MainDefn Nothing [],
-    SubDefn (Identifier "subby") Nothing [
-        Stmt_Unless (Raw_Expr "false") [
+    MainDefn Nothing (Stmts []),
+    SubDefn (Identifier "subby") Nothing (Stmts [
+        Stmt_Unless (Raw_Expr "false") (Stmts [
             Stmt_Var_Assign (Identifier "x") (Raw_Expr "41"),
-            Stmt_Postfix_Oper (Identifier "x") "++"]
-            Nothing]]
+            Stmt_Postfix_Oper (Identifier "x") "++"])
+            Nothing])]
 
 subber_unless_else :: Program
 subber_unless_else = Program Nothing [] [
-    SubDefn (Identifier "subby") Nothing [
+    SubDefn (Identifier "subby") Nothing (Stmts [
         Stmt_Var_Assign (Identifier "x") (Raw_Expr "41"),
-        Stmt_Unless (Raw_Expr "false") [
-            Stmt_Postfix_Oper (Identifier "x") "++"]
-            (Just [
-                (Stmt_Postfix_Oper (Identifier "x") "--")])],
-    MainDefn Nothing [
-        Stmt_Sub_Call (Identifier "subby") Nothing]]
+        Stmt_Unless (Raw_Expr "false") (Stmts [
+            Stmt_Postfix_Oper (Identifier "x") "++"])
+            (Just (Stmts [
+                (Stmt_Postfix_Oper (Identifier "x") "--")]))]),
+    MainDefn Nothing (Stmts [
+        Stmt_Sub_Call (Identifier "subby") Nothing])]
 
 sub_while :: Program
 sub_while = Program Nothing [] [
-    SubDefn (Identifier "subby") Nothing [
+    SubDefn (Identifier "subby") Nothing (Stmts [
         Stmt_Var_Assign (Identifier "x") (Raw_Expr "41"),
-        Stmt_While (Raw_Expr "false") [
-            Stmt_Postfix_Oper (Identifier "x") "++"]],
-    MainDefn Nothing [
-        Stmt_Sub_Call (Identifier "subby") Nothing]]
+        Stmt_While (Raw_Expr "false") (Stmts [
+            Stmt_Postfix_Oper (Identifier "x") "++"])]),
+    MainDefn Nothing (Stmts [
+        Stmt_Sub_Call (Identifier "subby") Nothing])]
 
 sub_until :: Program
 sub_until = Program Nothing [] [
-    SubDefn (Identifier "subby") Nothing [
+    SubDefn (Identifier "subby") Nothing (Stmts [
         Stmt_Var_Assign (Identifier "x") (Raw_Expr "41"),
-        Stmt_Until (Raw_Expr "false") [
-            Stmt_Postfix_Oper (Identifier "x") "++"]],
-    MainDefn Nothing [
-        Stmt_Sub_Call (Identifier "subby") Nothing]]
+        Stmt_Until (Raw_Expr "false") (Stmts [
+            Stmt_Postfix_Oper (Identifier "x") "++"])]),
+    MainDefn Nothing (Stmts [
+        Stmt_Sub_Call (Identifier "subby") Nothing])]
