@@ -1,3 +1,11 @@
+currently:
+    working on replacing the "raw_expr" parser with the shunting-yard ASTree
+    shuntingyard stuff could probably use renaming
+        ASTree -> Expr_Tree ?
+    ShuntingYard.hs should probably be moved to src/parser/
+    how can i run a parsec parser from within another one?
+
+
 [ ] implement pragmas, don't just skip them
 [ ] in a line-character comment, '}' should not be allowed immediately after ';'
 [ ] right now, doc comments are only supported before procedures. is that good?
