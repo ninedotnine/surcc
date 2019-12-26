@@ -40,6 +40,7 @@ newtype Precedence = Precedence Integer deriving (Eq, Ord)
 data Term = Lit Integer
           | Var String
           | CharLit Char
+          | StringLit String
     deriving Show
 
 data Token = TermTok Term
@@ -148,7 +149,7 @@ ignore_spaces :: Parsec String Stack_State ()
 ignore_spaces = Parsec.many (Parsec.char ' ') *> return ()
 
 parse_term :: Parsec String Stack_State Token
-parse_term = parse_num <|> parse_char <|> parse_var
+parse_term = parse_num <|> parse_char <|> parse_string <|> parse_var
 
 parse_num :: Parsec String Stack_State Token
 parse_num = TermTok <$> Lit <$> read <$> Parsec.many1 Parsec.digit
@@ -159,6 +160,8 @@ parse_var = TermTok <$> Var <$> Parsec.many1 (Parsec.lower <|> Parsec.char '_')
 parse_char :: Parsec String Stack_State Token
 parse_char = TermTok <$> CharLit <$> ((Parsec.char '\'') *> Parsec.anyChar <* (Parsec.char '\''))
 
+parse_string :: Parsec String Stack_State Token
+parse_string = TermTok <$> StringLit <$> ((Parsec.char '\"') *> Parsec.many (Parsec.noneOf "\"") <* (Parsec.char '\"'))
 
 parse_oper :: Parsec String Stack_State Token
 parse_oper = do
@@ -364,6 +367,7 @@ evaluate :: ASTree -> Integer
 evaluate (Leaf t) = case t of
     Lit x -> x
     CharLit c -> fromIntegral (ord c)
+    StringLit s -> fromIntegral (length s)
     Var _ -> undefined -- no way to evaluate these
 evaluate (Branch op left right) = evaluate left `operate` evaluate right
     where operate = case op of
