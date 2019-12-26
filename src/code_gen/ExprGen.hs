@@ -10,6 +10,7 @@ generate_expr (Branch op x y) = generate_expr x ++ generate_oper op ++ generate_
 
 generate_term :: Term -> String
 generate_term (Lit l) = show l
+generate_term (CharLit c) = "\'" ++ c : "\'"
 generate_term (Var v) = v
 
 generate_oper :: Operator -> String
