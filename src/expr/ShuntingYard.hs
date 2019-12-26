@@ -67,6 +67,7 @@ data Operator = Plus
               | Divide
               | Modulo
               | Hihat
+              | Combine
 
 newtype Tree_Stack = Tree_Stack [ASTree] deriving Show
 
@@ -75,7 +76,7 @@ newtype Tightness = Tight Bool deriving Eq
 type Stack_State = (Oper_Stack, Tree_Stack, Tightness)
 
 valid_op_chars :: String
-valid_op_chars = "+-*/%^"
+valid_op_chars = "+-*/%^<>"
 
 oper_to_char :: Operator -> Char
 oper_to_char Plus   = '+'
@@ -84,6 +85,7 @@ oper_to_char Splat  = '*'
 oper_to_char Divide = '/'
 oper_to_char Modulo = '%'
 oper_to_char Hihat  = '^'
+oper_to_char Combine  = 'm'
 
 instance Show Operator where
     show x = [oper_to_char x]
@@ -95,6 +97,7 @@ get_prec Splat  = Precedence 7
 get_prec Divide = Precedence 7
 get_prec Modulo = Precedence 7
 get_prec Hihat  = Precedence 8
+get_prec Combine  = Precedence 8
 
 
 -- functions to get the current state
@@ -182,7 +185,8 @@ parse_oper_symbol =
     Parsec.char '*' *> return Splat  <|>
     Parsec.char '/' *> return Divide <|>
     Parsec.char '%' *> return Modulo <|>
-    Parsec.char '^' *> return Hihat
+    Parsec.char '^' *> return Hihat <|>
+    Parsec.string "<>" *> return Combine
 
 no_spaces :: String -> Parsec String Stack_State ()
 no_spaces failmsg = Parsec.try ((Parsec.try (Parsec.char ' ') *> Parsec.unexpected failmsg) <|> return ())
@@ -377,6 +381,7 @@ evaluate (Branch op left right) = evaluate left `operate` evaluate right
             Divide -> div
             Modulo -> mod
             Hihat  -> (^)
+            Combine  -> undefined
 
 eval_show :: ASTree -> String
 eval_show = evaluate <&> show

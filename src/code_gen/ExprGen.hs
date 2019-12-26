@@ -21,3 +21,4 @@ generate_oper Splat  = "*"
 generate_oper Divide = "/"
 generate_oper Modulo = "%"
 generate_oper Hihat  = undefined -- FIXME C doesn't have ^
+generate_oper Combine  = "<>"
