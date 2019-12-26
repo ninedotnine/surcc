@@ -47,7 +47,7 @@ newtype Stmts = Stmts [Stmt] deriving Show
 newtype Param = Param [Identifier] deriving (Show)
 
 
-data Top_Level_Defn = Top_Level_Const_Defn Identifier Raw_Expr
+data Top_Level_Defn = Top_Level_Const_Defn Identifier ASTree
                     | FuncDefn Identifier Param Stmts
                     | ShortFuncDefn Identifier Param ASTree
                     | SubDefn Identifier (Maybe Param) Stmts

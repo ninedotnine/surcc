@@ -51,7 +51,7 @@ run_tests = do
 
 conster :: Program
 conster = Program Nothing [] [
-    Top_Level_Const_Defn (Identifier "x") (Raw_Expr "42"),
+    Top_Level_Const_Defn (Identifier "x") (Leaf (Lit 42)),
     MainDefn Nothing (Stmts [
         Stmt_Return (Just (Raw_Expr "0"))])]
 

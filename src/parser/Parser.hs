@@ -69,7 +69,9 @@ top_level_const :: Parser Top_Level_Defn
 top_level_const = do
     const_defn <- try (identifier >>= stmt_const_assign)
     case const_defn of
-        Stmt_Const_Assign iden val -> return $ Top_Level_Const_Defn iden val
+        Stmt_Const_Assign iden (Raw_Expr val) -> case run_shunting_yard val of
+            Right result -> return $ Top_Level_Const_Defn iden result
+            Left _ -> fail "invalid expression"
         _ -> return undefined -- FIXME don't do this
 
 top_level_proc :: Parser Top_Level_Defn
