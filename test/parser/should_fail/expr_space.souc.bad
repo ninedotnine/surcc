@@ -1,0 +1,5 @@
+; the whitespace in this expression is bad!
+bad_spaced(x) = x+ 3
+
+main() = do
+    lol_hosed
