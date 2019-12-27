@@ -152,19 +152,19 @@ ignore_spaces :: Parsec String Stack_State ()
 ignore_spaces = Parsec.many (Parsec.char ' ') *> return ()
 
 parse_term :: Parsec String Stack_State Token
-parse_term = parse_num <|> parse_char <|> parse_string <|> parse_var
+parse_term = TermTok <$> (parse_num <|> parse_char <|> parse_string <|> parse_var)
 
-parse_num :: Parsec String Stack_State Token
-parse_num = TermTok <$> Lit <$> read <$> Parsec.many1 Parsec.digit
+parse_num :: Parsec String Stack_State Term
+parse_num = Lit <$> read <$> Parsec.many1 Parsec.digit
 
-parse_var :: Parsec String Stack_State Token
-parse_var = TermTok <$> Var <$> Parsec.many1 (Parsec.lower <|> Parsec.char '_')
+parse_var :: Parsec String Stack_State Term
+parse_var = Var <$> Parsec.many1 (Parsec.lower <|> Parsec.char '_')
 
-parse_char :: Parsec String Stack_State Token
-parse_char = TermTok <$> CharLit <$> ((Parsec.char '\'') *> Parsec.anyChar <* (Parsec.char '\''))
+parse_char :: Parsec String Stack_State Term
+parse_char = CharLit <$> ((Parsec.char '\'') *> Parsec.anyChar <* (Parsec.char '\''))
 
-parse_string :: Parsec String Stack_State Token
-parse_string = TermTok <$> StringLit <$> ((Parsec.char '\"') *> Parsec.many (Parsec.noneOf "\"") <* (Parsec.char '\"'))
+parse_string :: Parsec String Stack_State Term
+parse_string = StringLit <$> ((Parsec.char '\"') *> Parsec.many (Parsec.noneOf "\"") <* (Parsec.char '\"'))
 
 parse_oper :: Parsec String Stack_State Token
 parse_oper = do
