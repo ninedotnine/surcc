@@ -69,7 +69,7 @@ top_level_const :: Parser Top_Level_Defn
 top_level_const = do
     const_defn <- try (identifier >>= stmt_const_assign)
     case const_defn of
-        Stmt_Const_Assign iden (Raw_Expr val) -> case run_shunting_yard val of
+        Stmt_Const_Assign iden (Raw_Expr val) -> case parse_expression val of
             Right result -> return $ Top_Level_Const_Defn iden result
             Left _ -> fail "invalid expression"
         _ -> return undefined -- FIXME don't do this
@@ -87,7 +87,7 @@ top_level_func func_name = do
 short_top_level_func :: Identifier -> Param -> Parser Top_Level_Defn
 short_top_level_func func_name param = do
     (Raw_Expr body) <- raw_expr
-    case run_shunting_yard body of
+    case parse_expression body of
         Right result -> return $ ShortFuncDefn func_name param result
 --         Left parse_err -> mergeError (fail "invalid expression") parse_err
         Left _ -> fail "invalid expression"

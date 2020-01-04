@@ -1,6 +1,6 @@
 # FLAGS = -dynamic -Wall -Wno-unused-imports -no-keep-o-files -no-keep-hi-files
 SOURCEDIR = src/
-INCLUDE_DIRS = src/parser:src/code_gen
+INCLUDE_DIRS = src/Parser:src/CodeGen
 OUT_DIR = bin
 HI_DIR = cache/hi_files
 OBJ_DIR = cache/obj_files
@@ -17,10 +17,10 @@ build: makedirs
 	ghc $(FLAGS) -o $(OUT_DIR)/soucc src/Main.hs
 
 expr: makedirs
-	ghc $(FLAGS) -o $(OUT_DIR)/expr -main-is Main_Expr src/expr/Main_Expr.hs
+	ghc $(FLAGS) -o $(OUT_DIR)/expr -main-is Main_Expr src/Main_Expr.hs
 
 parser: makedirs
-	ghc $(FLAGS) -o $(OUT_DIR)/parser -main-is Main_Parser src/parser/Main_Parser.hs
+	ghc $(FLAGS) -o $(OUT_DIR)/parser -main-is Main_Parser src/Main_Parser.hs
 
 .PHONY: clean
 clean:

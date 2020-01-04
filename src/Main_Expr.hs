@@ -21,14 +21,14 @@ repl = forever $ do
     putStr "> "
     hFlush stdout
     input <- getLine
-    unless (all isSpace input) (parse_eval_print input)
+    unless (all isSpace input) (parse_eval_print_expression input)
 
 parse_stdin :: IO ()
 parse_stdin = do
     input <- getContents
-    case run_shunting_yard input of
+    case parse_expression input of
         Left err -> putStrLn (show err) >> exitFailure
-        Right tree -> putStrLn (eval_show tree) >> exitSuccess
+        Right tree -> putStrLn (eval_show_astree tree) >> exitSuccess
 
 parse_all :: [String] -> IO ()
-parse_all exprs = mapM_ parse_eval_print exprs
+parse_all exprs = mapM_ parse_eval_print_expression exprs
