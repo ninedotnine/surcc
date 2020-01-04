@@ -20,7 +20,7 @@ module ShuntingYard (
 
 import Control.Monad (when)
 import qualified Text.Parsec as Parsec
-import Text.Parsec (Parsec, (<|>), (<?>))
+import Text.Parsec ((<|>), (<?>))
 
 -- for trim_spaces
 import Data.Char (isSpace)
@@ -88,6 +88,8 @@ newtype Tightness = Tight Bool deriving Eq
 
 type Stack_State = (Oper_Stack, Tree_Stack, Tightness)
 
+type ShuntingYardParser t = Parsec.Parsec String Stack_State t
+
 oper_to_char :: Operator -> Char
 oper_to_char Plus   = '+'
 oper_to_char Minus  = '-'
@@ -120,34 +122,34 @@ get_prec Combine  = Precedence 8
 
 
 -- functions to get the current state
-get_op_stack :: Parsec String Stack_State Oper_Stack
+get_op_stack :: ShuntingYardParser Oper_Stack
 get_op_stack = do
     (stack, _, _) <- Parsec.getState
     return stack
 
-get_tree_stack :: Parsec String Stack_State Tree_Stack
+get_tree_stack :: ShuntingYardParser Tree_Stack
 get_tree_stack = do
     (_, stack, _) <- Parsec.getState
     return stack
 
-get_tightness :: Parsec String Stack_State Tightness
+get_tightness :: ShuntingYardParser Tightness
 get_tightness = do
     (_, _, tightness) <- Parsec.getState
     return tightness
 
 -- functions to change or set the current state
-oper_stack_push :: StackOp -> Parsec String Stack_State ()
+oper_stack_push :: StackOp -> ShuntingYardParser ()
 oper_stack_push op =
     Parsec.modifyState (\(Oper_Stack ops, terms, b) -> (Oper_Stack (op:ops), terms, b))
 
-oper_stack_set :: [StackOp] -> Parsec String Stack_State ()
+oper_stack_set :: [StackOp] -> ShuntingYardParser ()
 oper_stack_set tokes = Parsec.modifyState (\(_,s2,b) -> (Oper_Stack tokes, s2, b))
 
-tree_stack_push :: ASTree -> Parsec String Stack_State ()
+tree_stack_push :: ASTree -> ShuntingYardParser ()
 tree_stack_push tree =
     Parsec.modifyState (\(ops, Tree_Stack vals, b) -> (ops, Tree_Stack (tree:vals), b))
 
-tree_stack_pop :: Parsec String Stack_State ASTree
+tree_stack_pop :: ShuntingYardParser ASTree
 tree_stack_pop = do
     (opers, vals, b) <- Parsec.getState
     case vals of
@@ -157,55 +159,55 @@ tree_stack_pop = do
         Tree_Stack _ -> Parsec.unexpected "?? did i expect a term?"
 
 
-set_spacing_tight :: Bool -> Parsec String Stack_State ()
+set_spacing_tight :: Bool -> ShuntingYardParser ()
 set_spacing_tight b = Parsec.modifyState (\(s1,s2,_) -> (s1, s2, Tight b))
 
 -- functions that build the ASTree
-make_branch :: Operator -> [StackOp] -> Parsec String Stack_State ()
+make_branch :: Operator -> [StackOp] -> ShuntingYardParser ()
 make_branch op tokes = do
     r <- tree_stack_pop
     l <- tree_stack_pop
     tree_stack_push (Branch op l r)
     oper_stack_set tokes
 
-make_twig :: PrefixOperator -> [StackOp] -> Parsec String Stack_State ()
+make_twig :: PrefixOperator -> [StackOp] -> ShuntingYardParser ()
 make_twig op tokes = do
     tree <- tree_stack_pop
     tree_stack_push (Twig op tree)
     oper_stack_set tokes
 
 -- simple spacing-related parsers
-respect_spaces :: Parsec String Stack_State ()
+respect_spaces :: ShuntingYardParser ()
 respect_spaces = Parsec.skipMany1 silent_space
 
-ignore_spaces :: Parsec String Stack_State ()
+ignore_spaces :: ShuntingYardParser ()
 ignore_spaces = Parsec.skipMany silent_space
 
-silent_space :: Parsec String Stack_State Char
+silent_space :: ShuntingYardParser Char
 silent_space = Parsec.char ' ' <?> ""
 
-no_spaces :: String -> Parsec String Stack_State ()
+no_spaces :: String -> ShuntingYardParser ()
 no_spaces failmsg = Parsec.try ((Parsec.try silent_space *> Parsec.unexpected failmsg) <|> return ())
 
-if_loosely_spaced :: Parsec String Stack_State () -> Parsec String Stack_State ()
+if_loosely_spaced :: ShuntingYardParser () -> ShuntingYardParser ()
 if_loosely_spaced action = do
     Tight spaced <- get_tightness
     when (not spaced) action
 
-if_tightly_spaced :: Parsec String Stack_State () -> Parsec String Stack_State ()
+if_tightly_spaced :: ShuntingYardParser () -> ShuntingYardParser ()
 if_tightly_spaced action = do
     Tight spaced <- get_tightness
     when spaced action
 
 -- term parsers
-parse_term_token :: Parsec String Stack_State TermToken
+parse_term_token :: ShuntingYardParser TermToken
 parse_term_token = parse_term_tok <|> parse_left_paren <|> parse_prefix_op
 
-parse_term_tok :: Parsec String Stack_State TermToken
+parse_term_tok :: ShuntingYardParser TermToken
 parse_term_tok = TermTok <$> (parse_num <|> parse_char <|> parse_string <|> parse_var)
 
 
-parse_prefix_op :: Parsec String Stack_State TermToken
+parse_prefix_op :: ShuntingYardParser TermToken
 parse_prefix_op = do
     oper <- parse_oper_symbol
     spacing <- Parsec.optionMaybe respect_spaces
@@ -219,35 +221,35 @@ parse_prefix_op = do
             Parsec.char '$' *> return ToString
             ) <?> "prefix operator"
 
-parse_num :: Parsec String Stack_State Term
+parse_num :: ShuntingYardParser Term
 parse_num = Lit <$> read <$> Parsec.many1 Parsec.digit
 
-parse_var :: Parsec String Stack_State Term
+parse_var :: ShuntingYardParser Term
 parse_var = Var <$> Parsec.many1 (Parsec.lower <|> Parsec.char '_')
 
-parse_char :: Parsec String Stack_State Term
+parse_char :: ShuntingYardParser Term
 parse_char = CharLit <$> ((Parsec.char '\'') *> Parsec.anyChar <* (Parsec.char '\''))
 
-parse_string :: Parsec String Stack_State Term
+parse_string :: ShuntingYardParser Term
 parse_string = StringLit <$> ((Parsec.char '\"') *> Parsec.many (Parsec.noneOf "\"") <* (Parsec.char '\"'))
 
-parse_left_paren :: Parsec String Stack_State TermToken
+parse_left_paren :: ShuntingYardParser TermToken
 parse_left_paren = do
     Parsec.lookAhead (Parsec.try (ignore_spaces *> Parsec.char '(' *> return ()))
     ignore_spaces *> Parsec.char '(' *> return LParen
 
 -- oper parsers
-parse_oper_token :: Parsec String Stack_State OperToken
+parse_oper_token :: ShuntingYardParser OperToken
 parse_oper_token =
     (check_for_oper *> apply_tight_prefix_opers *> parse_infix_oper) <|> parse_right_paren
     <?> "infix operator"
 
-check_for_oper :: Parsec String Stack_State ()
+check_for_oper :: ShuntingYardParser ()
 check_for_oper = Parsec.lookAhead (Parsec.try (ignore_spaces *> Parsec.oneOf valid_op_chars)) *> return ()
     where valid_op_chars = "+-*/%^<>"
 
 
-apply_tight_prefix_opers :: Parsec String Stack_State ()
+apply_tight_prefix_opers :: ShuntingYardParser ()
 apply_tight_prefix_opers = do
     Oper_Stack op_stack <- get_op_stack
     case op_stack of
@@ -259,7 +261,7 @@ apply_tight_prefix_opers = do
             _ -> return ()
 
 
-parse_infix_oper :: Parsec String Stack_State OperToken
+parse_infix_oper :: ShuntingYardParser OperToken
 parse_infix_oper = do
     spacing <- Parsec.optionMaybe respect_spaces
     case spacing of
@@ -282,7 +284,7 @@ parse_infix_oper = do
             Parsec.string "<>" *> return Combine
             ) <?> "infix operator"
 
-parse_right_paren :: Parsec String Stack_State OperToken
+parse_right_paren :: ShuntingYardParser OperToken
 parse_right_paren = do
     spacing <- Parsec.optionMaybe respect_spaces
     _ <- Parsec.char ')'
@@ -291,7 +293,7 @@ parse_right_paren = do
         Just () -> RParenAfterSpace
 
 -- functions that make sure the tree is in the right order
-apply_higher_prec_ops :: Precedence -> Parsec String Stack_State ()
+apply_higher_prec_ops :: Precedence -> ShuntingYardParser ()
 apply_higher_prec_ops current = do
     Oper_Stack op_stack <- get_op_stack
     case op_stack of
@@ -311,7 +313,7 @@ apply_higher_prec_ops current = do
                     apply_higher_prec_ops current
 
 
-look_for :: StackOp -> Parsec String Stack_State ()
+look_for :: StackOp -> ShuntingYardParser ()
 look_for thing = do
 -- pop stuff off the oper_stack until you find `thing`
     Oper_Stack op_stack <- get_op_stack
@@ -331,11 +333,11 @@ look_for thing = do
             StackSpace -> Parsec.parserFail "incorrect spacing or parentheses"
 
 
-find_left_space :: Parsec String Stack_State ()
+find_left_space :: ShuntingYardParser ()
 find_left_space = look_for StackSpace *> set_spacing_tight False
 
 -- for finishing up at the end
-clean_stack :: Parsec String Stack_State ()
+clean_stack :: ShuntingYardParser ()
 clean_stack = do
     if_tightly_spaced find_left_space
     Oper_Stack op_stack <- get_op_stack
@@ -353,7 +355,7 @@ clean_stack = do
         _ -> Parsec.parserFail "incorrect whitespace or parens?"
 
 
-finish_expr :: Parsec String Stack_State ASTree
+finish_expr :: ShuntingYardParser ASTree
 finish_expr = do
     ignore_spaces
     Parsec.optional Parsec.newline <?> ""
@@ -366,9 +368,8 @@ finish_expr = do
         _ -> Parsec.parserFail "invalid expression, something is wrong here."
 
 -- parse_term and parse_oper are alternated until one fails and finish_expr succeeds
-parse_term :: Parsec String Stack_State ASTree
+parse_term :: ShuntingYardParser ASTree
 parse_term = do
-    -- shunting yard, returns a parse tree
     toke <- parse_term_token
     case toke of
         LParen -> do
@@ -388,7 +389,7 @@ parse_term = do
             oper_stack_push (StackSpacedPreOp op)
             parse_term
 
-parse_oper :: Parsec String Stack_State ASTree
+parse_oper :: ShuntingYardParser ASTree
 parse_oper = do
     toke <- parse_oper_token
     case toke of
@@ -413,7 +414,7 @@ parse_oper = do
             oper_stack_push (StackOp op)
             parse_term
 
-parse_expression :: Parsec String Stack_State ASTree
+parse_expression :: ShuntingYardParser ASTree
 parse_expression = parse_term
 
 -- these are little utilities, unrelated to parsing
