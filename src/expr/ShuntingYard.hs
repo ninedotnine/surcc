@@ -248,16 +248,15 @@ parse_infix_oper = do
     if_loosely_spaced (respect_spaces <?> ("space after `" ++ show oper ++ "`"))
     if_tightly_spaced $ no_spaces ("whitespace after `" ++ show oper ++ "`")
     return (Oper oper)
-
-parse_oper_symbol :: Parsec String Stack_State Operator
-parse_oper_symbol =
-    Parsec.char '+' *> return Plus   <|>
-    Parsec.char '-' *> return Minus  <|>
-    Parsec.char '*' *> return Splat  <|>
-    Parsec.char '/' *> return Divide <|>
-    Parsec.char '%' *> return Modulo <|>
-    Parsec.char '^' *> return Hihat <|>
-    Parsec.string "<>" *> return Combine <?> "infix operator"
+    where parse_oper_symbol = (
+            Parsec.char '+' *> return Plus   <|>
+            Parsec.char '-' *> return Minus  <|>
+            Parsec.char '*' *> return Splat  <|>
+            Parsec.char '/' *> return Divide <|>
+            Parsec.char '%' *> return Modulo <|>
+            Parsec.char '^' *> return Hihat  <|>
+            Parsec.string "<>" *> return Combine
+            ) <?> "infix operator"
 
 parse_right_paren :: Parsec String Stack_State OperToken
 parse_right_paren = do
