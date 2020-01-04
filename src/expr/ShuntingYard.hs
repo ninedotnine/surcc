@@ -64,7 +64,7 @@ data StackOp = StackLParen
              | StackSpace
              | StackOp Operator
              | StackPreOp PrefixOperator
-             deriving Show
+             deriving (Show, Eq)
 
 data Operator = Plus
               | Minus
@@ -73,11 +73,13 @@ data Operator = Plus
               | Modulo
               | Hihat
               | Combine
+            deriving Eq
 
 data PrefixOperator = Deref
                     | GetAddr
                     | Negate
                     | ToString
+                    deriving Eq
 
 newtype Tree_Stack = Tree_Stack [ASTree] deriving Show
 
@@ -290,39 +292,23 @@ apply_higher_prec_ops current = do
                     apply_higher_prec_ops current
 
 
-find_left_paren :: Parsec String Stack_State ()
-find_left_paren = do
--- pop stuff off the oper_stack until you find a StackLParen
+look_for :: StackOp -> Parsec String Stack_State ()
+look_for thing = do
+-- pop stuff off the oper_stack until you find `thing`
     Oper_Stack op_stack <- get_op_stack
     case op_stack of
         [] -> Parsec.unexpected "right paren"
         (tok:toks) -> case tok of
-            StackLParen -> Parsec.modifyState (\(_,s2,b) -> (Oper_Stack toks,s2,b)) *> return ()
-            StackLParenFollowedBySpace -> Parsec.parserFail "incorrect spacing or parentheses"
-            StackSpace -> Parsec.parserFail "incorrect spacing or parentheses"
+            t | t == thing -> Parsec.modifyState (\(_,s2,b) -> (Oper_Stack toks,s2,b)) *> return ()
             StackPreOp op -> do
                 make_twig op toks
-                find_left_paren
+                look_for thing
             StackOp op -> do
                 make_branch op toks
-                find_left_paren
-
-find_left_paren_spaced :: Parsec String Stack_State ()
-find_left_paren_spaced = do
--- pop stuff off the oper_stack until you find a StackLParenFollowedBySpace
-    Oper_Stack op_stack <- get_op_stack
-    case op_stack of
-        [] -> Parsec.unexpected "right paren"
-        (tok:toks) -> case tok of
+                look_for thing
             StackLParen -> Parsec.parserFail "incorrectly spaced parentheses"
-            StackLParenFollowedBySpace -> Parsec.modifyState (\(_,s2,b) -> (Oper_Stack toks,s2,b))
+            StackLParenFollowedBySpace -> Parsec.parserFail "incorrectly spaced parentheses"
             StackSpace -> Parsec.parserFail "incorrect spacing or parentheses"
-            StackPreOp op -> do
-                make_twig op toks
-                find_left_paren
-            StackOp op -> do
-                make_branch op toks
-                find_left_paren_spaced
 
 
 find_left_space :: Parsec String Stack_State ()
@@ -338,7 +324,7 @@ find_left_space = do
             StackLParenFollowedBySpace -> Parsec.parserFail "i feel like these should not be allowed actually"
             StackPreOp op -> do
                 make_twig op toks
-                find_left_paren
+                look_for StackLParen
             StackOp op -> do
                 make_branch op toks
                 find_left_space
@@ -391,7 +377,7 @@ expect_infix_op = do
     case toke of
         RParen -> do
             if_tightly_spaced find_left_space
-            find_left_paren
+            look_for StackLParen
             Oper_Stack stack_ops <- get_op_stack
             case stack_ops of
                 (StackSpace:ops) -> Parsec.modifyState (\(_,s2,_) -> (Oper_Stack ops, s2, Tight True))
@@ -399,7 +385,7 @@ expect_infix_op = do
             expect_infix_op <|> finish_expr
         RParenAfterSpace -> do
             if_tightly_spaced find_left_space
-            find_left_paren_spaced
+            look_for StackLParenFollowedBySpace
             Oper_Stack stack_ops <- get_op_stack
             case stack_ops of
                 (StackSpace:ops) -> Parsec.modifyState (\(_,s2,_) -> (Oper_Stack ops, s2, Tight True))
