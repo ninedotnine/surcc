@@ -48,10 +48,12 @@ data OperToken = Oper Operator
                | RParenAfterSpace
 
 data TermToken = TermTok Term
+               | PreOp PrefixOperator
                | LParen
     deriving Show
 
 data ASTree = Branch Operator ASTree ASTree
+            | Twig PrefixOperator ASTree
             | Leaf Term
          deriving Show
 
@@ -60,6 +62,7 @@ data StackOp = StackLParen
              | StackLParenFollowedBySpace
              | StackSpace
              | StackOp Operator
+             | StackPreOp PrefixOperator
              deriving Show
 
 data Operator = Plus
@@ -69,6 +72,11 @@ data Operator = Plus
               | Modulo
               | Hihat
               | Combine
+
+data PrefixOperator = Deref
+                    | GetAddr
+                    | Negate
+                    | ToString
 
 newtype Tree_Stack = Tree_Stack [ASTree] deriving Show
 
@@ -87,6 +95,15 @@ oper_to_char Combine  = 'm'
 
 instance Show Operator where
     show x = [oper_to_char x]
+
+pre_oper_to_char :: PrefixOperator -> Char
+pre_oper_to_char Deref   = '!'
+pre_oper_to_char GetAddr  = '@'
+pre_oper_to_char Negate  = '~'
+pre_oper_to_char ToString = '$'
+
+instance Show PrefixOperator where
+    show x = [pre_oper_to_char x]
 
 get_prec :: Operator -> Precedence
 get_prec Plus   = Precedence 6
@@ -155,6 +172,14 @@ silent_space = Parsec.char ' ' <?> ""
 parse_term :: Parsec String Stack_State TermToken
 parse_term = TermTok <$> (parse_num <|> parse_char <|> parse_string <|> parse_var)
 
+parse_prefix_op :: Parsec String Stack_State TermToken
+parse_prefix_op = PreOp <$> (
+    Parsec.char '!' *> return Deref <|>
+    Parsec.char '@' *> return GetAddr <|>
+    Parsec.char '~' *> return Negate <|>
+    Parsec.char '$' *> return ToString
+    ) <?> "prefix operator"
+
 parse_num :: Parsec String Stack_State Term
 parse_num = Lit <$> read <$> Parsec.many1 Parsec.digit
 
@@ -212,6 +237,11 @@ make_branch op tokes = do
     tree_stack_push (Branch op l r)
     Parsec.modifyState (\(_,s2,b) -> (Oper_Stack tokes, s2, b))
 
+make_twig :: PrefixOperator -> [StackOp] -> Parsec String Stack_State ()
+make_twig op tokes = do
+    tree <- tree_stack_pop
+    tree_stack_push (Twig op tree)
+    Parsec.modifyState (\(_,s2,b) -> (Oper_Stack tokes, s2, b))
 
 clean_stack :: Parsec String Stack_State ()
 clean_stack = do
@@ -219,6 +249,9 @@ clean_stack = do
     Oper_Stack op_stack <- get_op_stack
     case op_stack of
         [] -> return ()
+        (StackPreOp op:tokes) -> do
+            make_twig op tokes
+            clean_stack
         (StackOp op:tokes) -> do
             make_branch op tokes
             clean_stack
@@ -246,6 +279,9 @@ apply_higher_prec_ops current = do
             StackSpace -> return ()
             StackLParen -> return ()
             StackLParenFollowedBySpace -> return ()
+            StackPreOp op -> do
+                make_twig op toks
+--                 apply_higher_prec_ops current -- FIXME should call itself after a prefix op?
             StackOp op -> case (get_prec op `compare` current) of
                 LT -> return ()
                 _ -> do
@@ -263,6 +299,9 @@ find_left_paren = do
             StackLParen -> Parsec.modifyState (\(_,s2,b) -> (Oper_Stack toks,s2,b)) *> return ()
             StackLParenFollowedBySpace -> Parsec.parserFail "incorrect spacing or parentheses"
             StackSpace -> Parsec.parserFail "incorrect spacing or parentheses"
+            StackPreOp op -> do
+                make_twig op toks
+                find_left_paren
             StackOp op -> do
                 make_branch op toks
                 find_left_paren
@@ -277,6 +316,9 @@ find_left_paren_spaced = do
             StackLParen -> Parsec.parserFail "incorrectly spaced parentheses"
             StackLParenFollowedBySpace -> Parsec.modifyState (\(_,s2,b) -> (Oper_Stack toks,s2,b))
             StackSpace -> Parsec.parserFail "incorrect spacing or parentheses"
+            StackPreOp op -> do
+                make_twig op toks
+                find_left_paren
             StackOp op -> do
                 make_branch op toks
                 find_left_paren_spaced
@@ -293,6 +335,9 @@ find_left_space = do
             StackSpace -> Parsec.modifyState (\(_,s2,_) -> (Oper_Stack toks,s2,Tight False))
             StackLParen -> Parsec.parserFail "FIXME this should be allowed"
             StackLParenFollowedBySpace -> Parsec.parserFail "i feel like these should not be allowed actually"
+            StackPreOp op -> do
+                make_twig op toks
+                find_left_paren
             StackOp op -> do
                 make_branch op toks
                 find_left_space
@@ -312,7 +357,7 @@ check_for_oper = Parsec.lookAhead (Parsec.try (ignore_spaces *> Parsec.oneOf val
     where valid_op_chars = "+-*/%^<>"
 
 parse_term_token :: Parsec String Stack_State TermToken
-parse_term_token = parse_term <|> parse_left_paren
+parse_term_token = parse_term <|> parse_left_paren <|> parse_prefix_op
 
 parse_oper_token :: Parsec String Stack_State OperToken
 parse_oper_token = (check_for_oper *> parse_oper) <|> parse_right_paren <?> "infix operator"
@@ -335,6 +380,9 @@ expect_term = do
         TermTok t -> do
             tree_stack_push (Leaf t)
             expect_infix_op <|> finish_expr
+        PreOp op -> do
+            oper_stack_push (StackPreOp op)
+            expect_term
 
 expect_infix_op :: Parsec String Stack_State ASTree
 expect_infix_op = do
@@ -366,6 +414,7 @@ expect_infix_op = do
 
 pretty_show :: ASTree -> String
 pretty_show (Branch oper left right) = "(" ++ show oper ++ " "  ++ pretty_show left ++ " " ++ pretty_show right ++ ")"
+pretty_show (Twig oper tree) = concat ["(", show oper, " ", pretty_show tree, ")"]
 pretty_show (Leaf val) = show val
 
 run_shunting_yard :: String -> Either Parsec.ParseError ASTree
@@ -385,6 +434,12 @@ evaluate (Leaf t) = case t of
     CharLit c -> fromIntegral (ord c)
     StringLit s -> fromIntegral (length s)
     Var _ -> undefined -- no way to evaluate these
+evaluate (Twig op tree) = operate (evaluate tree)
+    where operate = case op of
+            Deref -> (\n -> product [1..n]) -- factorial, just for testing
+            GetAddr -> undefined
+            Negate -> negate
+            ToString -> undefined
 evaluate (Branch op left right) = evaluate left `operate` evaluate right
     where operate = case op of
             Plus   -> (+)
