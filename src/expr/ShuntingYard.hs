@@ -312,22 +312,7 @@ look_for thing = do
 
 
 find_left_space :: Parsec String Stack_State ()
-find_left_space = do
--- pop stuff off the oper_stack until you find a StackSpace
--- and finally set Tight to False
-    Oper_Stack op_stack <- get_op_stack
-    case op_stack of
-        [] -> Parsec.unexpected "incorrect spacing"
-        (tok:toks) -> case tok of
-            StackSpace -> Parsec.modifyState (\(_,s2,_) -> (Oper_Stack toks,s2,Tight False))
-            StackLParen -> Parsec.parserFail "FIXME this should be allowed"
-            StackLParenFollowedBySpace -> Parsec.parserFail "i feel like these should not be allowed actually"
-            StackPreOp op -> do
-                make_twig op toks
-                look_for StackLParen
-            StackOp op -> do
-                make_branch op toks
-                find_left_space
+find_left_space = look_for StackSpace *> set_spacing_tight False
 
 if_loosely_spaced :: Parsec String Stack_State () -> Parsec String Stack_State ()
 if_loosely_spaced action = do
