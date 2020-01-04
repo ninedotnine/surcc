@@ -202,13 +202,18 @@ parse_term_token = parse_term_tok <|> parse_left_paren <|> parse_prefix_op
 parse_term_tok :: Parsec String Stack_State TermToken
 parse_term_tok = TermTok <$> (parse_num <|> parse_char <|> parse_string <|> parse_var)
 
+
 parse_prefix_op :: Parsec String Stack_State TermToken
-parse_prefix_op = PreOp <$> (
-    Parsec.char '!' *> return Deref <|>
-    Parsec.char '@' *> return GetAddr <|>
-    Parsec.char '~' *> return Negate <|>
-    Parsec.char '$' *> return ToString
-    ) <?> "prefix operator"
+parse_prefix_op = do
+    oper <- parse_oper_symbol
+    no_spaces $ "whitespace after prefix oper " ++ show oper
+    return (PreOp oper)
+    where parse_oper_symbol = (
+            Parsec.char '!' *> return Deref   <|>
+            Parsec.char '@' *> return GetAddr <|>
+            Parsec.char '~' *> return Negate  <|>
+            Parsec.char '$' *> return ToString
+            ) <?> "prefix operator"
 
 parse_num :: Parsec String Stack_State Term
 parse_num = Lit <$> read <$> Parsec.many1 Parsec.digit
@@ -229,11 +234,26 @@ parse_left_paren = do
 
 -- oper parsers
 parse_oper_token :: Parsec String Stack_State OperToken
-parse_oper_token = (check_for_oper *> parse_infix_oper) <|> parse_right_paren <?> "infix operator"
+parse_oper_token =
+    (check_for_oper *> apply_prefix_opers *> parse_infix_oper) <|> parse_right_paren
+    <?> "infix operator"
 
 check_for_oper :: Parsec String Stack_State ()
 check_for_oper = Parsec.lookAhead (Parsec.try (ignore_spaces *> Parsec.oneOf valid_op_chars)) *> return ()
     where valid_op_chars = "+-*/%^<>"
+
+
+apply_prefix_opers :: Parsec String Stack_State ()
+apply_prefix_opers = do
+    Oper_Stack op_stack <- get_op_stack
+    case op_stack of
+        [] -> return ()
+        (tok:toks) -> case tok of
+            StackPreOp op -> do
+                make_twig op toks
+                apply_prefix_opers
+            _ -> return ()
+
 
 parse_infix_oper :: Parsec String Stack_State OperToken
 parse_infix_oper = do
@@ -276,9 +296,7 @@ apply_higher_prec_ops current = do
             StackSpace -> return ()
             StackLParen -> return ()
             StackLParenFollowedBySpace -> return ()
-            StackPreOp op -> do
-                make_twig op toks
---                 apply_higher_prec_ops current -- FIXME should call itself after a prefix op?
+            StackPreOp _ -> error "i believe this should be unreachable."
             StackOp op -> case (get_prec op `compare` current) of
                 LT -> return ()
                 _ -> do
