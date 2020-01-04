@@ -143,8 +143,8 @@ begin_spaced_prec = do
 set_spacing_tight :: Bool -> Parsec String Stack_State ()
 set_spacing_tight b = Parsec.modifyState (\(s1,s2,_) -> (s1, s2, Tight b))
 
-read_spaces :: Parsec String Stack_State ()
-read_spaces = Parsec.skipMany1 silent_space
+respect_spaces :: Parsec String Stack_State ()
+respect_spaces = Parsec.skipMany1 silent_space
 
 ignore_spaces :: Parsec String Stack_State ()
 ignore_spaces = Parsec.skipMany silent_space
@@ -169,13 +169,13 @@ parse_string = StringLit <$> ((Parsec.char '\"') *> Parsec.many (Parsec.noneOf "
 
 parse_oper :: Parsec String Stack_State OperToken
 parse_oper = do
-    spacing <- Parsec.optionMaybe read_spaces
+    spacing <- Parsec.optionMaybe respect_spaces
     case spacing of
         Nothing -> begin_spaced_prec
         Just _  -> do
             if_tightly_spaced find_left_space
     oper <- parse_oper_symbol
-    if_loosely_spaced (read_spaces <?> ("space after `" ++ show oper ++ "`"))
+    if_loosely_spaced (respect_spaces <?> ("space after `" ++ show oper ++ "`"))
     if_tightly_spaced $ no_spaces ("whitespace after `" ++ show oper ++ "`")
     return (Oper oper)
 
@@ -199,7 +199,7 @@ parse_left_paren = do
 
 parse_right_paren :: Parsec String Stack_State OperToken
 parse_right_paren = do
-    spacing <- Parsec.optionMaybe read_spaces
+    spacing <- Parsec.optionMaybe respect_spaces
     _ <- Parsec.char ')'
     return $ case spacing of
         Nothing -> RParen
@@ -327,7 +327,7 @@ expect_term = do
     case toke of
         LParen -> do
             if_tightly_spaced (oper_stack_push StackSpace *> set_spacing_tight False)
-            spacing <- Parsec.optionMaybe read_spaces
+            spacing <- Parsec.optionMaybe respect_spaces
             case spacing of
                 Nothing -> oper_stack_push StackLParen
                 Just () -> oper_stack_push StackLParenFollowedBySpace
