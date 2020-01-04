@@ -58,7 +58,6 @@ data ASTree = Branch Operator ASTree ASTree
             | Leaf Term
          deriving Show
 
-newtype Oper_Stack = Oper_Stack [StackOp] deriving Show
 data StackOp = StackLParen
              | StackLParenFollowedBySpace
              | StackSpace
@@ -81,8 +80,8 @@ data PrefixOperator = Deref
                     | ToString
                     deriving Eq
 
+newtype Oper_Stack = Oper_Stack [StackOp] deriving Show
 newtype Tree_Stack = Tree_Stack [ASTree] deriving Show
-
 newtype Tightness = Tight Bool deriving Eq
 
 type Stack_State = (Oper_Stack, Tree_Stack, Tightness)
