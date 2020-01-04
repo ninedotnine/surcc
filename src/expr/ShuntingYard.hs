@@ -49,7 +49,8 @@ data OperToken = Oper Operator
                | RParenAfterSpace
 
 data TermToken = TermTok Term
-               | PreOp PrefixOperator
+               | TightPreOp PrefixOperator
+               | SpacedPreOp PrefixOperator
                | LParen
     deriving Show
 
@@ -62,7 +63,8 @@ data StackOp = StackLParen
              | StackLParenFollowedBySpace
              | StackSpace
              | StackOp Operator
-             | StackPreOp PrefixOperator
+             | StackTightPreOp PrefixOperator
+             | StackSpacedPreOp PrefixOperator
              deriving (Show, Eq)
 
 data Operator = Plus
@@ -206,8 +208,10 @@ parse_term_tok = TermTok <$> (parse_num <|> parse_char <|> parse_string <|> pars
 parse_prefix_op :: Parsec String Stack_State TermToken
 parse_prefix_op = do
     oper <- parse_oper_symbol
-    no_spaces $ "whitespace after prefix oper " ++ show oper
-    return (PreOp oper)
+    spacing <- Parsec.optionMaybe respect_spaces
+    case spacing of
+        Nothing -> return (TightPreOp oper)
+        Just () -> return (SpacedPreOp oper)
     where parse_oper_symbol = (
             Parsec.char '!' *> return Deref   <|>
             Parsec.char '@' *> return GetAddr <|>
@@ -235,7 +239,7 @@ parse_left_paren = do
 -- oper parsers
 parse_oper_token :: Parsec String Stack_State OperToken
 parse_oper_token =
-    (check_for_oper *> apply_prefix_opers *> parse_infix_oper) <|> parse_right_paren
+    (check_for_oper *> apply_tight_prefix_opers *> parse_infix_oper) <|> parse_right_paren
     <?> "infix operator"
 
 check_for_oper :: Parsec String Stack_State ()
@@ -243,15 +247,15 @@ check_for_oper = Parsec.lookAhead (Parsec.try (ignore_spaces *> Parsec.oneOf val
     where valid_op_chars = "+-*/%^<>"
 
 
-apply_prefix_opers :: Parsec String Stack_State ()
-apply_prefix_opers = do
+apply_tight_prefix_opers :: Parsec String Stack_State ()
+apply_tight_prefix_opers = do
     Oper_Stack op_stack <- get_op_stack
     case op_stack of
         [] -> return ()
         (tok:toks) -> case tok of
-            StackPreOp op -> do
+            StackTightPreOp op -> do
                 make_twig op toks
-                apply_prefix_opers
+                apply_tight_prefix_opers
             _ -> return ()
 
 
@@ -296,7 +300,10 @@ apply_higher_prec_ops current = do
             StackSpace -> return ()
             StackLParen -> return ()
             StackLParenFollowedBySpace -> return ()
-            StackPreOp _ -> error "i believe this should be unreachable."
+            StackTightPreOp _ -> error "i believe this should be unreachable."
+            StackSpacedPreOp op -> do
+                make_twig op toks
+                apply_higher_prec_ops current
             StackOp op -> case (get_prec op `compare` current) of
                 LT -> return ()
                 _ -> do
@@ -312,9 +319,10 @@ look_for thing = do
         [] -> Parsec.unexpected "right paren"
         (tok:toks) -> case tok of
             t | t == thing -> oper_stack_set toks
-            StackPreOp op -> do
+            StackTightPreOp op -> do
                 make_twig op toks
                 look_for thing
+            StackSpacedPreOp _ -> error "i believe this should be unreachable."
             StackOp op -> do
                 make_branch op toks
                 look_for thing
@@ -333,7 +341,10 @@ clean_stack = do
     Oper_Stack op_stack <- get_op_stack
     case op_stack of
         [] -> return ()
-        (StackPreOp op:tokes) -> do
+        StackTightPreOp op : tokes -> do
+            make_twig op tokes
+            clean_stack
+        StackSpacedPreOp op : tokes -> do
             make_twig op tokes
             clean_stack
         (StackOp op:tokes) -> do
@@ -370,8 +381,11 @@ parse_term = do
         TermTok t -> do
             tree_stack_push (Leaf t)
             parse_oper <|> finish_expr
-        PreOp op -> do
-            oper_stack_push (StackPreOp op)
+        TightPreOp op -> do
+            oper_stack_push (StackTightPreOp op)
+            parse_term
+        SpacedPreOp op -> do
+            oper_stack_push (StackSpacedPreOp op)
             parse_term
 
 parse_oper :: Parsec String Stack_State ASTree
