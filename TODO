@@ -20,3 +20,4 @@ currently:
 [ ] don't always assume `int`, that was super lazy hacking
 [ ] keep bindings of variables (not only constants)
 [ ] change indentation from 4 spaces to one tab
+[ ] shuntingyard uses `Parsec.string "<>"` which will explode if a < is read first
