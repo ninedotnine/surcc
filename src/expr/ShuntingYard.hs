@@ -76,9 +76,6 @@ newtype Tightness = Tight Bool deriving Eq
 
 type Stack_State = (Oper_Stack, Tree_Stack, Tightness)
 
-valid_op_chars :: String
-valid_op_chars = "+-*/%^<>"
-
 oper_to_char :: Operator -> Char
 oper_to_char Plus   = '+'
 oper_to_char Minus  = '-'
@@ -205,16 +202,6 @@ parse_right_paren = do
         Nothing -> RParen
         Just () -> RParenAfterSpace
 
-check_for_oper :: Parsec String Stack_State ()
-check_for_oper = Parsec.lookAhead (Parsec.try (ignore_spaces *> Parsec.oneOf valid_op_chars)) *> return ()
-
-parse_term_token :: Parsec String Stack_State TermToken
-parse_term_token = parse_term <|> parse_left_paren
-
-parse_oper_token :: Parsec String Stack_State OperToken
-parse_oper_token = (check_for_oper *> parse_oper) <|> parse_right_paren
-
-
 make_branch :: Operator -> [StackOp] -> Parsec String Stack_State ()
 make_branch op tokes = do
     r <- tree_stack_pop
@@ -317,6 +304,15 @@ if_tightly_spaced action = do
     Tight spaced <- get_tightness
     when spaced action
 
+check_for_oper :: Parsec String Stack_State ()
+check_for_oper = Parsec.lookAhead (Parsec.try (ignore_spaces *> Parsec.oneOf valid_op_chars)) *> return ()
+    where valid_op_chars = "+-*/%^<>"
+
+parse_term_token :: Parsec String Stack_State TermToken
+parse_term_token = parse_term <|> parse_left_paren
+
+parse_oper_token :: Parsec String Stack_State OperToken
+parse_oper_token = (check_for_oper *> parse_oper) <|> parse_right_paren
 
 parse_expression :: Parsec String Stack_State ASTree
 parse_expression = expect_term
