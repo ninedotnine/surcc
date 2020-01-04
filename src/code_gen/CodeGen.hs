@@ -2,7 +2,7 @@ module CodeGen (generate) where
 
 import ExprGen (generate_expr)
 import SouC_Types
-import ShuntingYard
+import ExprParser
 
 generate :: Program -> String
 -- generate (Program name imports body) =

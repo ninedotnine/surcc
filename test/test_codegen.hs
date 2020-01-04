@@ -3,7 +3,7 @@
 
 import CodeGen
 import SouC_Types
-import ShuntingYard (ASTree(..), Term(..))
+import ExprParser (ASTree(..), Term(..))
 
 import System.Directory (createDirectoryIfMissing)
 import System.Process (callProcess)

@@ -1,6 +1,6 @@
 # FLAGS = -dynamic -Wall -Wno-unused-imports -no-keep-o-files -no-keep-hi-files
 SOURCEDIR = src/
-INCLUDE_DIRS = src/parser:src/expr:src/code_gen
+INCLUDE_DIRS = src/parser:src/code_gen
 OUT_DIR = bin
 HI_DIR = cache/hi_files
 OBJ_DIR = cache/obj_files

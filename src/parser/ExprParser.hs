@@ -4,7 +4,7 @@
 -- it gives higher precedence to operators which are not separated by spaces.
 
 -- module ShuntingYard (run_shunting_yard, print_shunting_yard, pretty_show) where
-module ShuntingYard (
+module ExprParser (
     pretty_show,
     run_shunting_yard,
     print_shunting_yard,

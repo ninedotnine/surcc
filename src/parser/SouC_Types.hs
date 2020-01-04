@@ -6,7 +6,7 @@ import Text.Parsec (Parsec)
 import qualified Data.Map.Strict as Map (Map, empty)
 import Data.List.NonEmpty ( NonEmpty(..) )
 
-import ShuntingYard
+import ExprParser
 
 
 {-

@@ -12,7 +12,7 @@ import Basics
 import SouC_Types
 import SouC_Expr
 import SouC_Stmts
-import ShuntingYard
+import ExprParser
 
 runSouCParser :: SourceName -> String -> Either ParseError Program
 runSouCParser name input = runParser souCParser empty_state name input

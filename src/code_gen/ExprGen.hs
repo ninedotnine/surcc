@@ -2,7 +2,7 @@ module ExprGen (
     generate_expr
 ) where
 
-import ShuntingYard
+import ExprParser
 
 generate_expr :: ASTree -> String
 generate_expr (Leaf t) = generate_term t

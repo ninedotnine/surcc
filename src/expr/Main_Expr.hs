@@ -6,7 +6,7 @@ import System.Environment (getArgs)
 import System.Exit (exitFailure, exitSuccess)
 import System.IO (hFlush, stdout)
 
-import ShuntingYard
+import ExprParser
 
 main :: IO ()
 main = do
