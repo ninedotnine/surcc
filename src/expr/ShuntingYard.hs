@@ -13,7 +13,8 @@ module ShuntingYard (
     parse_eval_print,
     ASTree(..),
     Term(..),
-    Operator(..)
+    Operator(..),
+    PrefixOperator(..)
 ) where
 
 
