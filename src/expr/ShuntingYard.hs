@@ -43,11 +43,12 @@ data Term = Lit Integer
           | StringLit String
     deriving Show
 
-data Token = TermTok Term
-           | Oper Operator
-           | LParen
-           | RParen
-           | RParenAfterSpace
+data OperToken = Oper Operator
+               | RParen
+               | RParenAfterSpace
+
+data TermToken = TermTok Term
+               | LParen
     deriving Show
 
 data ASTree = Branch Operator ASTree ASTree
@@ -151,7 +152,7 @@ read_spaces = Parsec.many1 (Parsec.char ' ') *> return ()
 ignore_spaces :: Parsec String Stack_State ()
 ignore_spaces = Parsec.many (Parsec.char ' ') *> return ()
 
-parse_term :: Parsec String Stack_State Token
+parse_term :: Parsec String Stack_State TermToken
 parse_term = TermTok <$> (parse_num <|> parse_char <|> parse_string <|> parse_var)
 
 parse_num :: Parsec String Stack_State Term
@@ -166,7 +167,7 @@ parse_char = CharLit <$> ((Parsec.char '\'') *> Parsec.anyChar <* (Parsec.char '
 parse_string :: Parsec String Stack_State Term
 parse_string = StringLit <$> ((Parsec.char '\"') *> Parsec.many (Parsec.noneOf "\"") <* (Parsec.char '\"'))
 
-parse_oper :: Parsec String Stack_State Token
+parse_oper :: Parsec String Stack_State OperToken
 parse_oper = do
     spacing <- Parsec.optionMaybe read_spaces
     case spacing of
@@ -191,12 +192,12 @@ parse_oper_symbol =
 no_spaces :: String -> Parsec String Stack_State ()
 no_spaces failmsg = Parsec.try ((Parsec.try (Parsec.char ' ') *> Parsec.unexpected failmsg) <|> return ())
 
-parse_left_paren :: Parsec String Stack_State Token
+parse_left_paren :: Parsec String Stack_State TermToken
 parse_left_paren = do
     Parsec.lookAhead (Parsec.try (ignore_spaces *> Parsec.char '(' *> return ()))
     ignore_spaces *> Parsec.char '(' *> return LParen
 
-parse_right_paren :: Parsec String Stack_State Token
+parse_right_paren :: Parsec String Stack_State OperToken
 parse_right_paren = do
     spacing <- Parsec.optionMaybe read_spaces
     _ <- Parsec.char ')'
@@ -207,9 +208,11 @@ parse_right_paren = do
 check_for_oper :: Parsec String Stack_State ()
 check_for_oper = Parsec.lookAhead (Parsec.try (ignore_spaces *> Parsec.oneOf valid_op_chars)) *> return ()
 
-parse_token :: Parsec String Stack_State Token
-parse_token = do
-    parse_term <|> (check_for_oper *> parse_oper) <|> parse_left_paren <|> parse_right_paren
+parse_term_token :: Parsec String Stack_State TermToken
+parse_term_token = parse_term <|> parse_left_paren
+
+parse_oper_token :: Parsec String Stack_State OperToken
+parse_oper_token = (check_for_oper *> parse_oper) <|> parse_right_paren
 
 
 make_branch :: Operator -> [StackOp] -> Parsec String Stack_State ()
@@ -321,11 +324,8 @@ parse_expression = expect_term
 expect_term :: Parsec String Stack_State ASTree
 expect_term = do
     -- shunting yard, returns a parse tree
-    toke <- parse_token
+    toke <- parse_term_token
     case toke of
-        RParen -> Parsec.unexpected "very bad RParen ):"
-        RParenAfterSpace -> Parsec.unexpected "very bad (spaced) RParen ):"
-        Oper _ -> Parsec.unexpected "very bad op"
         LParen -> do
             if_tightly_spaced (oper_stack_push StackSpace *> set_spacing_tight False)
             spacing <- Parsec.optionMaybe read_spaces
@@ -339,10 +339,8 @@ expect_term = do
 
 expect_infix_op :: Parsec String Stack_State ASTree
 expect_infix_op = do
-    toke <- parse_token
+    toke <- parse_oper_token
     case toke of
-        LParen -> Parsec.unexpected "very bad lparen :("
-        TermTok _ -> Parsec.unexpected "very bad term"
         RParen -> do
             if_tightly_spaced find_left_space
             find_left_paren
