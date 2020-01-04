@@ -144,10 +144,13 @@ set_spacing_tight :: Bool -> Parsec String Stack_State ()
 set_spacing_tight b = Parsec.modifyState (\(s1,s2,_) -> (s1, s2, Tight b))
 
 read_spaces :: Parsec String Stack_State ()
-read_spaces = Parsec.many1 (Parsec.char ' ') *> return ()
+read_spaces = Parsec.skipMany1 silent_space
 
 ignore_spaces :: Parsec String Stack_State ()
-ignore_spaces = Parsec.many (Parsec.char ' ') *> return ()
+ignore_spaces = Parsec.skipMany silent_space
+
+silent_space :: Parsec String Stack_State Char
+silent_space = Parsec.char ' ' <?> ""
 
 parse_term :: Parsec String Stack_State TermToken
 parse_term = TermTok <$> (parse_num <|> parse_char <|> parse_string <|> parse_var)
@@ -184,10 +187,10 @@ parse_oper_symbol =
     Parsec.char '/' *> return Divide <|>
     Parsec.char '%' *> return Modulo <|>
     Parsec.char '^' *> return Hihat <|>
-    Parsec.string "<>" *> return Combine
+    Parsec.string "<>" *> return Combine <?> "infix operator"
 
 no_spaces :: String -> Parsec String Stack_State ()
-no_spaces failmsg = Parsec.try ((Parsec.try (Parsec.char ' ') *> Parsec.unexpected failmsg) <|> return ())
+no_spaces failmsg = Parsec.try ((Parsec.try silent_space *> Parsec.unexpected failmsg) <|> return ())
 
 parse_left_paren :: Parsec String Stack_State TermToken
 parse_left_paren = do
@@ -225,8 +228,8 @@ clean_stack = do
 finish_expr :: Parsec String Stack_State ASTree
 finish_expr = do
     ignore_spaces
-    Parsec.optional Parsec.newline
-    Parsec.eof
+    Parsec.optional Parsec.newline <?> ""
+    Parsec.eof <?> ""
     clean_stack
     Tree_Stack tree <- get_tree_stack
     case tree of
@@ -312,7 +315,7 @@ parse_term_token :: Parsec String Stack_State TermToken
 parse_term_token = parse_term <|> parse_left_paren
 
 parse_oper_token :: Parsec String Stack_State OperToken
-parse_oper_token = (check_for_oper *> parse_oper) <|> parse_right_paren
+parse_oper_token = (check_for_oper *> parse_oper) <|> parse_right_paren <?> "infix operator"
 
 parse_expression :: Parsec String Stack_State ASTree
 parse_expression = expect_term
