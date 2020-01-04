@@ -133,7 +133,7 @@ get_tightness = do
     (_, _, tightness) <- Parsec.getState
     return tightness
 
--- stack functions
+-- functions to change or set the current state
 oper_stack_push :: StackOp -> Parsec String Stack_State ()
 oper_stack_push op =
     Parsec.modifyState (\(Oper_Stack ops, terms, b) -> (Oper_Stack (op:ops), terms, b))
@@ -155,15 +155,24 @@ tree_stack_pop = do
         Tree_Stack _ -> Parsec.unexpected "?? did i expect a term?"
 
 
-begin_spaced_prec :: Parsec String Stack_State ()
-begin_spaced_prec = do
-    if_loosely_spaced (oper_stack_push StackSpace)
-    set_spacing_tight True
-
-
 set_spacing_tight :: Bool -> Parsec String Stack_State ()
 set_spacing_tight b = Parsec.modifyState (\(s1,s2,_) -> (s1, s2, Tight b))
 
+-- functions that build the ASTree
+make_branch :: Operator -> [StackOp] -> Parsec String Stack_State ()
+make_branch op tokes = do
+    r <- tree_stack_pop
+    l <- tree_stack_pop
+    tree_stack_push (Branch op l r)
+    oper_stack_set tokes
+
+make_twig :: PrefixOperator -> [StackOp] -> Parsec String Stack_State ()
+make_twig op tokes = do
+    tree <- tree_stack_pop
+    tree_stack_push (Twig op tree)
+    oper_stack_set tokes
+
+-- simple spacing-related parsers
 respect_spaces :: Parsec String Stack_State ()
 respect_spaces = Parsec.skipMany1 silent_space
 
@@ -173,8 +182,25 @@ ignore_spaces = Parsec.skipMany silent_space
 silent_space :: Parsec String Stack_State Char
 silent_space = Parsec.char ' ' <?> ""
 
-parse_term :: Parsec String Stack_State TermToken
-parse_term = TermTok <$> (parse_num <|> parse_char <|> parse_string <|> parse_var)
+no_spaces :: String -> Parsec String Stack_State ()
+no_spaces failmsg = Parsec.try ((Parsec.try silent_space *> Parsec.unexpected failmsg) <|> return ())
+
+if_loosely_spaced :: Parsec String Stack_State () -> Parsec String Stack_State ()
+if_loosely_spaced action = do
+    Tight spaced <- get_tightness
+    when (not spaced) action
+
+if_tightly_spaced :: Parsec String Stack_State () -> Parsec String Stack_State ()
+if_tightly_spaced action = do
+    Tight spaced <- get_tightness
+    when spaced action
+
+-- term parsers
+parse_term_token :: Parsec String Stack_State TermToken
+parse_term_token = parse_term_tok <|> parse_left_paren <|> parse_prefix_op
+
+parse_term_tok :: Parsec String Stack_State TermToken
+parse_term_tok = TermTok <$> (parse_num <|> parse_char <|> parse_string <|> parse_var)
 
 parse_prefix_op :: Parsec String Stack_State TermToken
 parse_prefix_op = PreOp <$> (
@@ -196,11 +222,26 @@ parse_char = CharLit <$> ((Parsec.char '\'') *> Parsec.anyChar <* (Parsec.char '
 parse_string :: Parsec String Stack_State Term
 parse_string = StringLit <$> ((Parsec.char '\"') *> Parsec.many (Parsec.noneOf "\"") <* (Parsec.char '\"'))
 
-parse_oper :: Parsec String Stack_State OperToken
-parse_oper = do
+parse_left_paren :: Parsec String Stack_State TermToken
+parse_left_paren = do
+    Parsec.lookAhead (Parsec.try (ignore_spaces *> Parsec.char '(' *> return ()))
+    ignore_spaces *> Parsec.char '(' *> return LParen
+
+-- oper parsers
+parse_oper_token :: Parsec String Stack_State OperToken
+parse_oper_token = (check_for_oper *> parse_infix_oper) <|> parse_right_paren <?> "infix operator"
+
+check_for_oper :: Parsec String Stack_State ()
+check_for_oper = Parsec.lookAhead (Parsec.try (ignore_spaces *> Parsec.oneOf valid_op_chars)) *> return ()
+    where valid_op_chars = "+-*/%^<>"
+
+parse_infix_oper :: Parsec String Stack_State OperToken
+parse_infix_oper = do
     spacing <- Parsec.optionMaybe respect_spaces
     case spacing of
-        Nothing -> begin_spaced_prec
+        Nothing -> do
+            if_loosely_spaced (oper_stack_push StackSpace)
+            set_spacing_tight True
         Just _  -> do
             if_tightly_spaced find_left_space
     oper <- parse_oper_symbol
@@ -218,14 +259,6 @@ parse_oper_symbol =
     Parsec.char '^' *> return Hihat <|>
     Parsec.string "<>" *> return Combine <?> "infix operator"
 
-no_spaces :: String -> Parsec String Stack_State ()
-no_spaces failmsg = Parsec.try ((Parsec.try silent_space *> Parsec.unexpected failmsg) <|> return ())
-
-parse_left_paren :: Parsec String Stack_State TermToken
-parse_left_paren = do
-    Parsec.lookAhead (Parsec.try (ignore_spaces *> Parsec.char '(' *> return ()))
-    ignore_spaces *> Parsec.char '(' *> return LParen
-
 parse_right_paren :: Parsec String Stack_State OperToken
 parse_right_paren = do
     spacing <- Parsec.optionMaybe respect_spaces
@@ -234,46 +267,7 @@ parse_right_paren = do
         Nothing -> RParen
         Just () -> RParenAfterSpace
 
-make_branch :: Operator -> [StackOp] -> Parsec String Stack_State ()
-make_branch op tokes = do
-    r <- tree_stack_pop
-    l <- tree_stack_pop
-    tree_stack_push (Branch op l r)
-    oper_stack_set tokes
-
-make_twig :: PrefixOperator -> [StackOp] -> Parsec String Stack_State ()
-make_twig op tokes = do
-    tree <- tree_stack_pop
-    tree_stack_push (Twig op tree)
-    oper_stack_set tokes
-
-clean_stack :: Parsec String Stack_State ()
-clean_stack = do
-    if_tightly_spaced find_left_space
-    Oper_Stack op_stack <- get_op_stack
-    case op_stack of
-        [] -> return ()
-        (StackPreOp op:tokes) -> do
-            make_twig op tokes
-            clean_stack
-        (StackOp op:tokes) -> do
-            make_branch op tokes
-            clean_stack
-        _ -> Parsec.parserFail "incorrect whitespace or parens?"
-
-
-finish_expr :: Parsec String Stack_State ASTree
-finish_expr = do
-    ignore_spaces
-    Parsec.optional Parsec.newline <?> ""
-    Parsec.eof <?> ""
-    clean_stack
-    Tree_Stack tree <- get_tree_stack
-    case tree of
-        [] -> Parsec.parserFail "bad expression"
-        (result:[]) -> return result
-        _ -> Parsec.parserFail "invalid expression, something is wrong here."
-
+-- functions that make sure the tree is in the right order
 apply_higher_prec_ops :: Precedence -> Parsec String Stack_State ()
 apply_higher_prec_ops current = do
     Oper_Stack op_stack <- get_op_stack
@@ -315,31 +309,37 @@ look_for thing = do
 find_left_space :: Parsec String Stack_State ()
 find_left_space = look_for StackSpace *> set_spacing_tight False
 
-if_loosely_spaced :: Parsec String Stack_State () -> Parsec String Stack_State ()
-if_loosely_spaced action = do
-    Tight spaced <- get_tightness
-    when (not spaced) action
+-- for finishing up at the end
+clean_stack :: Parsec String Stack_State ()
+clean_stack = do
+    if_tightly_spaced find_left_space
+    Oper_Stack op_stack <- get_op_stack
+    case op_stack of
+        [] -> return ()
+        (StackPreOp op:tokes) -> do
+            make_twig op tokes
+            clean_stack
+        (StackOp op:tokes) -> do
+            make_branch op tokes
+            clean_stack
+        _ -> Parsec.parserFail "incorrect whitespace or parens?"
 
-if_tightly_spaced :: Parsec String Stack_State () -> Parsec String Stack_State ()
-if_tightly_spaced action = do
-    Tight spaced <- get_tightness
-    when spaced action
 
-check_for_oper :: Parsec String Stack_State ()
-check_for_oper = Parsec.lookAhead (Parsec.try (ignore_spaces *> Parsec.oneOf valid_op_chars)) *> return ()
-    where valid_op_chars = "+-*/%^<>"
+finish_expr :: Parsec String Stack_State ASTree
+finish_expr = do
+    ignore_spaces
+    Parsec.optional Parsec.newline <?> ""
+    Parsec.eof <?> ""
+    clean_stack
+    Tree_Stack tree <- get_tree_stack
+    case tree of
+        [] -> Parsec.parserFail "bad expression"
+        (result:[]) -> return result
+        _ -> Parsec.parserFail "invalid expression, something is wrong here."
 
-parse_term_token :: Parsec String Stack_State TermToken
-parse_term_token = parse_term <|> parse_left_paren <|> parse_prefix_op
-
-parse_oper_token :: Parsec String Stack_State OperToken
-parse_oper_token = (check_for_oper *> parse_oper) <|> parse_right_paren <?> "infix operator"
-
-parse_expression :: Parsec String Stack_State ASTree
-parse_expression = expect_term
-
-expect_term :: Parsec String Stack_State ASTree
-expect_term = do
+-- parse_term and parse_oper are alternated until one fails and finish_expr succeeds
+parse_term :: Parsec String Stack_State ASTree
+parse_term = do
     -- shunting yard, returns a parse tree
     toke <- parse_term_token
     case toke of
@@ -349,16 +349,16 @@ expect_term = do
             case spacing of
                 Nothing -> oper_stack_push StackLParen
                 Just () -> oper_stack_push StackLParenFollowedBySpace
-            expect_term
+            parse_term
         TermTok t -> do
             tree_stack_push (Leaf t)
-            expect_infix_op <|> finish_expr
+            parse_oper <|> finish_expr
         PreOp op -> do
             oper_stack_push (StackPreOp op)
-            expect_term
+            parse_term
 
-expect_infix_op :: Parsec String Stack_State ASTree
-expect_infix_op = do
+parse_oper :: Parsec String Stack_State ASTree
+parse_oper = do
     toke <- parse_oper_token
     case toke of
         RParen -> do
@@ -368,7 +368,7 @@ expect_infix_op = do
             case stack_ops of
                 (StackSpace:ops) -> oper_stack_set ops *> set_spacing_tight True
                 _ -> return ()
-            expect_infix_op <|> finish_expr
+            parse_oper <|> finish_expr
         RParenAfterSpace -> do
             if_tightly_spaced find_left_space
             look_for StackLParenFollowedBySpace
@@ -376,15 +376,16 @@ expect_infix_op = do
             case stack_ops of
                 (StackSpace:ops) -> oper_stack_set ops *> set_spacing_tight True
                 _ -> return ()
-            expect_infix_op <|> finish_expr
+            parse_oper <|> finish_expr
         Oper op -> do
             apply_higher_prec_ops (get_prec op)
             oper_stack_push (StackOp op)
-            expect_term
+            parse_term
 
+parse_expression :: Parsec String Stack_State ASTree
+parse_expression = parse_term
 
-
-
+-- these are little utilities, unrelated to parsing
 pretty_show :: ASTree -> String
 pretty_show (Branch oper left right) = "(" ++ show oper ++ " "  ++ pretty_show left ++ " " ++ pretty_show right ++ ")"
 pretty_show (Twig oper tree) = concat ["(", show oper, " ", pretty_show tree, ")"]
