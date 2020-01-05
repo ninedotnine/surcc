@@ -70,7 +70,7 @@ data Stmt = Stmt_While ASTree Stmts
           | Stmt_Until ASTree Stmts
           | Stmt_If ASTree Stmts (Maybe Stmts)
           | Stmt_Unless ASTree Stmts (Maybe Stmts)
-          | Stmt_Sub_Call Identifier (Maybe Raw_Expr)
+          | Stmt_Sub_Call Identifier (Maybe ASTree)
           | Stmt_Postfix_Oper Identifier String
           | Stmt_Const_Assign Identifier ASTree
           | Stmt_Var_Assign Identifier ASTree

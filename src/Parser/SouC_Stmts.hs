@@ -52,7 +52,11 @@ stmt_var_assign name = do
 stmt_sub_call :: Identifier -> Parser Stmt
 stmt_sub_call name = do
     m_arg <- optionMaybe (try (spaces *> raw_expr))
-    return $ Stmt_Sub_Call name m_arg
+    case m_arg of
+        Nothing -> return $ Stmt_Sub_Call name Nothing
+        Just (Raw_Expr arg) -> case parse_expression arg of
+            Left err -> parserFail $ "invalid expression:\n" ++ show err
+            Right expr -> return $ Stmt_Sub_Call name (Just expr)
 
 stmt_postfix_oper :: Identifier -> Parser Stmt
 stmt_postfix_oper name = do
