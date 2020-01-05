@@ -122,6 +122,7 @@ evaluate_astree (Twig op tree) = operate (evaluate_astree tree)
             GetAddr -> undefined
             Negate -> negate
             ToString -> undefined
+            whatever -> error $ "can't evaluate" ++ show whatever
 evaluate_astree (Branch op left right) = evaluate_astree left `operate` evaluate_astree right
     where operate = case op of
             Plus   -> (+)
@@ -131,10 +132,12 @@ evaluate_astree (Branch op left right) = evaluate_astree left `operate` evaluate
             Modulo -> mod
             Hihat  -> (^)
             Equals -> undefined -- can't do this on integers
-            Greatr -> undefined -- can't do this on integers
-            Lesser -> undefined -- can't do this on integers
+            GreaterThan -> undefined -- can't do this on integers
+            LesserThan -> undefined -- can't do this on integers
             Combine  -> undefined
-            Amper  -> undefined -- definitely can't do this
+            Apply  -> undefined -- definitely can't do this
+            whatever -> error $ "can't evaluate " ++ show whatever
+
 
 eval_show_astree :: ASTree -> String
 eval_show_astree = evaluate_astree <&> show

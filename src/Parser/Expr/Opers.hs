@@ -57,13 +57,37 @@ parse_infix_oper = do
             char '-' *> return Minus  <|>
             char '*' *> return Splat  <|>
             char '/' *> return Divide <|>
+            str "//" *> return FloorDiv <|>
             char '%' *> return Modulo <|>
             char '^' *> return Hihat  <|>
-            char '&' *> return Amper  <|>
+            char '&' *> return FlipApply  <|>
             str "==" *> return Equals <|>
+            str "=/=" *> return NotEquals <|>
+            str "=~" *> return RegexMatch <|>
             str "<>" *> return Combine <|>
-            char '>' *> return Greatr <|>
-            char '<' *> return Lesser
+            char '>' *> return GreaterThan <|>
+            char '<' *> return LesserThan <|>
+            str "AND" *> return And <|> -- FIXME
+            str "OR" *> return Or <|> -- FIXME
+            str "><" *> return Xor <|>
+            str "IN" *> return In <|> -- FIXME
+            char ',' *> return Tuple <|>
+            char '?' *> return Iff <|>
+            str "??" *> return FromMaybe <|>
+            str ">>" *> return Prepend <|>
+            str "<<" *> return Append <|>
+            char '#' *> return Index <|>
+            str "##" *> return Lookup <|>
+            str "~&" *> return Apply <|>
+            char '&' *> return FlipApply <|>
+            str "<~&>" *> return Map <|>
+            str "<&>" *> return FlipMap <|>
+            str "<~*>" *> return Applicative <|>
+            str "<*>" *> return FlipApplicative <|>
+            str "*>" *> return SequenceRight <|>
+            str "<*" *> return SequenceLeft <|>
+            str ">>=" *> return BindRight <|>
+            str "=<<" *> return BindLeft
             ) <?> "infix operator"
 
 
