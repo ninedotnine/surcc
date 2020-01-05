@@ -44,8 +44,10 @@ stmt_const_assign name = do
 stmt_var_assign :: Identifier -> Parser Stmt
 stmt_var_assign name = do
     _ <- try (spaces <* string "<-")
-    val <- spaces *> raw_expr
-    return $ Stmt_Var_Assign name val
+    Raw_Expr val <- spaces *> raw_expr
+    case parse_expression val of
+        Right expr -> return $ Stmt_Var_Assign name expr
+        Left err -> parserFail $ "invalid expression:\n" ++ show err
 
 stmt_sub_call :: Identifier -> Parser Stmt
 stmt_sub_call name = do

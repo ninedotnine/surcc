@@ -81,7 +81,7 @@ subber_ass :: Program
 subber_ass = Program Nothing [] [
     MainDefn Nothing (Stmts []),
     SubDefn (Identifier "subby") Nothing (Stmts [
-        Stmt_Var_Assign (Identifier "x") (Raw_Expr "42")])]
+        Stmt_Var_Assign (Identifier "x") (Leaf (Lit 42))])]
 
 subber_const_ass :: Program
 subber_const_ass = Program Nothing [] [
@@ -93,7 +93,7 @@ subber_postfix_oper :: Program
 subber_postfix_oper = Program Nothing [] [
     MainDefn Nothing (Stmts []),
     SubDefn (Identifier "subby") Nothing (Stmts [
-        Stmt_Var_Assign (Identifier "x") (Raw_Expr "41"),
+        Stmt_Var_Assign (Identifier "x") (Leaf (Lit 41)),
         Stmt_Postfix_Oper (Identifier "x") "++"])]
 
 subber_while :: Program
@@ -101,7 +101,7 @@ subber_while = Program Nothing [] [
     MainDefn Nothing (Stmts []),
     SubDefn (Identifier "subby") Nothing (Stmts [
         Stmt_While (Leaf (StringLit "false")) (Stmts [
-            Stmt_Var_Assign (Identifier "x") (Raw_Expr "41"),
+            Stmt_Var_Assign (Identifier "x") (Leaf (Lit 41)),
             Stmt_Postfix_Oper (Identifier "x") "++"])])]
 
 subber_if :: Program
@@ -109,14 +109,14 @@ subber_if = Program Nothing [] [
     MainDefn Nothing (Stmts []),
     SubDefn (Identifier "subby") Nothing (Stmts [
         Stmt_If (Leaf (StringLit "false")) (Stmts [
-            Stmt_Var_Assign (Identifier "x") (Raw_Expr "41"),
+            Stmt_Var_Assign (Identifier "x") (Leaf (Lit 41)),
             Stmt_Postfix_Oper (Identifier "x") "++"])
             Nothing])]
 
 subber_if_else :: Program
 subber_if_else = Program Nothing [] [
     SubDefn (Identifier "subby") Nothing (Stmts [
-        Stmt_Var_Assign (Identifier "x") (Raw_Expr "41"),
+        Stmt_Var_Assign (Identifier "x") (Leaf (Lit 41)),
         Stmt_If (Leaf (Lit 0)) (Stmts [
             Stmt_Postfix_Oper (Identifier "x") "++"])
             (Just (Stmts [
@@ -129,14 +129,14 @@ subber_unless = Program Nothing [] [
     MainDefn Nothing (Stmts []),
     SubDefn (Identifier "subby") Nothing (Stmts [
         Stmt_Unless (Leaf (StringLit "false")) (Stmts [
-            Stmt_Var_Assign (Identifier "x") (Raw_Expr "41"),
+            Stmt_Var_Assign (Identifier "x") (Leaf (Lit 41)),
             Stmt_Postfix_Oper (Identifier "x") "++"])
             Nothing])]
 
 subber_unless_else :: Program
 subber_unless_else = Program Nothing [] [
     SubDefn (Identifier "subby") Nothing (Stmts [
-        Stmt_Var_Assign (Identifier "x") (Raw_Expr "41"),
+        Stmt_Var_Assign (Identifier "x") (Leaf (Lit 41)),
         Stmt_Unless (Leaf (StringLit "false")) (Stmts [
             Stmt_Postfix_Oper (Identifier "x") "++"])
             (Just (Stmts [
@@ -147,7 +147,7 @@ subber_unless_else = Program Nothing [] [
 sub_while :: Program
 sub_while = Program Nothing [] [
     SubDefn (Identifier "subby") Nothing (Stmts [
-        Stmt_Var_Assign (Identifier "x") (Raw_Expr "41"),
+        Stmt_Var_Assign (Identifier "x") (Leaf (Lit 41)),
         Stmt_While (Leaf (StringLit "false")) (Stmts [
             Stmt_Postfix_Oper (Identifier "x") "++"])]),
     MainDefn Nothing (Stmts [
@@ -156,7 +156,7 @@ sub_while = Program Nothing [] [
 sub_until :: Program
 sub_until = Program Nothing [] [
     SubDefn (Identifier "subby") Nothing (Stmts [
-        Stmt_Var_Assign (Identifier "x") (Raw_Expr "41"),
+        Stmt_Var_Assign (Identifier "x") (Leaf (Lit 41)),
         Stmt_Until (Leaf (StringLit "false")) (Stmts [
             Stmt_Postfix_Oper (Identifier "x") "++"])]),
     MainDefn Nothing (Stmts [

@@ -1,5 +1,6 @@
 con = "spacesare"<>"notaccepted"<>"yet"
 
 main() = do
-    var <- 42<*/>*<>29++<+<-<843
+    val = 829
+    var <- 42 <> 29 + (! @val)
     print var<>con

@@ -1,5 +1,7 @@
 con = "const" <> "ant"
 
+fishy(x) = x <> "fishy"
+
 main() = do
-    var <- 42 <*/>*<> 29 ++<+<-< 843 ><> "fishy"
+    var <- ~42 <> 29 & fishy
     print var

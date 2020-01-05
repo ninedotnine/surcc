@@ -1,5 +1,7 @@
 con = "spacesare"<>"notaccepted"<>"yet"
 
 main() = do
-    var <- 42<*/>*<>29++<+<-<843><>"huh"
+    val = 843
+    addr_val = @val
+    var <- 42 == 29 <> !addr_val
     print var<>con

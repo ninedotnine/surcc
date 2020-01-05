@@ -73,7 +73,7 @@ data Stmt = Stmt_While ASTree Stmts
           | Stmt_Sub_Call Identifier (Maybe Raw_Expr)
           | Stmt_Postfix_Oper Identifier String
           | Stmt_Const_Assign Identifier ASTree
-          | Stmt_Var_Assign Identifier Raw_Expr
+          | Stmt_Var_Assign Identifier ASTree
           | Stmt_Return (Maybe Raw_Expr)
           deriving (Show)
 
