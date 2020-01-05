@@ -128,7 +128,7 @@ subber_unless :: Program
 subber_unless = Program Nothing [] [
     MainDefn Nothing (Stmts []),
     SubDefn (Identifier "subby") Nothing (Stmts [
-        Stmt_Unless (Raw_Expr "false") (Stmts [
+        Stmt_Unless (Leaf (StringLit "false")) (Stmts [
             Stmt_Var_Assign (Identifier "x") (Raw_Expr "41"),
             Stmt_Postfix_Oper (Identifier "x") "++"])
             Nothing])]
@@ -137,7 +137,7 @@ subber_unless_else :: Program
 subber_unless_else = Program Nothing [] [
     SubDefn (Identifier "subby") Nothing (Stmts [
         Stmt_Var_Assign (Identifier "x") (Raw_Expr "41"),
-        Stmt_Unless (Raw_Expr "false") (Stmts [
+        Stmt_Unless (Leaf (StringLit "false")) (Stmts [
             Stmt_Postfix_Oper (Identifier "x") "++"])
             (Just (Stmts [
                 (Stmt_Postfix_Oper (Identifier "x") "--")]))]),

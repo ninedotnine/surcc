@@ -86,11 +86,13 @@ stmt_if = do
 
 stmt_unless :: Parser Stmt
 stmt_unless = do
-    condition <- try (reserved "unless") *> spaces *> raw_expr <* optional_do <* endline
+    Raw_Expr condition <- try (reserved "unless") *> spaces *> raw_expr <* optional_do <* endline
     thenDo <- stmt_block
     elseDo <- optionMaybe (try (endline *> indent_depth *> reserved "else") *> endline *> stmt_block)
     _ <- optional_end Stmt_Unless_End -- FIXME use this for type-checking
-    return $ Stmt_Unless condition thenDo elseDo
+    case parse_expression condition of
+        Right tree -> return $ Stmt_Unless tree thenDo elseDo
+        Left err -> parserFail $ "failed expression:\n" ++ show err
 
 stmt_return :: Parser Stmt
 stmt_return = do
