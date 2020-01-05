@@ -130,6 +130,7 @@ evaluate_astree (Branch op left right) = evaluate_astree left `operate` evaluate
             Divide -> div
             Modulo -> mod
             Hihat  -> (^)
+            Equals -> undefined -- can't do this on integers
             Combine  -> undefined
 
 eval_show_astree :: ASTree -> String

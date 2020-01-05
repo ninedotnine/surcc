@@ -22,6 +22,7 @@ generate_oper Splat  = "*"
 generate_oper Divide = "/"
 generate_oper Modulo = "%"
 generate_oper Hihat  = undefined -- FIXME C doesn't have ^
+generate_oper Equals = "=="
 generate_oper Combine  = "<>"
 
 generate_prefix_expr :: PrefixOperator -> String

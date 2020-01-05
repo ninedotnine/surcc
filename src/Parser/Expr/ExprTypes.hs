@@ -37,6 +37,7 @@ data Operator = Plus
               | Divide
               | Modulo
               | Hihat
+              | Equals
               | Combine
             deriving Eq
 
@@ -65,12 +66,14 @@ oper_to_char Splat  = '*'
 oper_to_char Divide = '/'
 oper_to_char Modulo = '%'
 oper_to_char Hihat  = '^'
+oper_to_char Equals = '?'
 oper_to_char Combine  = 'm'
 
 instance Show Operator where
     show x = [oper_to_char x]
 
 get_prec :: Operator -> Precedence
+get_prec Equals = Precedence 5
 get_prec Plus   = Precedence 6
 get_prec Minus  = Precedence 6
 get_prec Splat  = Precedence 7
