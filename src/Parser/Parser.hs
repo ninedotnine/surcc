@@ -71,7 +71,7 @@ top_level_const = do
     case const_defn of
         Stmt_Const_Assign iden (Raw_Expr val) -> case parse_expression val of
             Right result -> return $ Top_Level_Const_Defn iden result
-            Left _ -> fail "invalid expression"
+            Left err -> fail $ "invalid expression\n" ++ show err
         _ -> return undefined -- FIXME don't do this
 
 top_level_proc :: Parser Top_Level_Defn
@@ -90,7 +90,7 @@ short_top_level_func func_name param = do
     case parse_expression body of
         Right result -> return $ ShortFuncDefn func_name param result
 --         Left parse_err -> mergeError (fail "invalid expression") parse_err
-        Left _ -> fail "invalid expression"
+        Left err -> fail $ "invalid expression\n" ++ show err
 
 long_top_level_func :: Identifier -> Param -> Parser Top_Level_Defn
 long_top_level_func func_name param = do
