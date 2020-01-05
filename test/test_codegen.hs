@@ -100,7 +100,7 @@ subber_while :: Program
 subber_while = Program Nothing [] [
     MainDefn Nothing (Stmts []),
     SubDefn (Identifier "subby") Nothing (Stmts [
-        Stmt_While (Raw_Expr "false") (Stmts [
+        Stmt_While (Leaf (StringLit "false")) (Stmts [
             Stmt_Var_Assign (Identifier "x") (Raw_Expr "41"),
             Stmt_Postfix_Oper (Identifier "x") "++"])])]
 
@@ -148,7 +148,7 @@ sub_while :: Program
 sub_while = Program Nothing [] [
     SubDefn (Identifier "subby") Nothing (Stmts [
         Stmt_Var_Assign (Identifier "x") (Raw_Expr "41"),
-        Stmt_While (Raw_Expr "false") (Stmts [
+        Stmt_While (Leaf (StringLit "false")) (Stmts [
             Stmt_Postfix_Oper (Identifier "x") "++"])]),
     MainDefn Nothing (Stmts [
         Stmt_Sub_Call (Identifier "subby") Nothing])]

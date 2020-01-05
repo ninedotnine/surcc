@@ -62,10 +62,12 @@ stmt_loop = stmt_while <|> stmt_until
 
 stmt_while :: Parser Stmt
 stmt_while = do
-    condition <- try (reserved "while") *> spaces *> raw_expr <* optional_do <* endline
+    Raw_Expr condition <- try (reserved "while") *> spaces *> raw_expr <* optional_do <* endline
     stmts <- stmt_block
     _ <- optional_end Stmt_While_End -- FIXME use this for type-checking
-    return $ Stmt_While condition stmts
+    case parse_expression condition of
+        Right expr -> return $ Stmt_While expr stmts
+        Left err -> parserFail $ "invalid expression:\n" ++ show err
 
 stmt_until :: Parser Stmt
 stmt_until = do

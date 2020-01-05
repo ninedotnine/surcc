@@ -66,7 +66,7 @@ data Expr = Expr_Number Integer
           | Expr_Infix_Oper Expr String Expr -- FIXME get rid of this?
           deriving Show
 
-data Stmt = Stmt_While Raw_Expr Stmts
+data Stmt = Stmt_While ASTree Stmts
           | Stmt_Until Raw_Expr Stmts
           | Stmt_If ASTree Stmts (Maybe Stmts)
           | Stmt_Unless ASTree Stmts (Maybe Stmts)
