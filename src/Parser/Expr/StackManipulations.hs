@@ -97,7 +97,9 @@ look_for thing = do
             StackTightPreOp op -> do
                 make_twig op toks
                 look_for thing
-            StackSpacedPreOp _ -> error "i believe this should be unreachable."
+            StackSpacedPreOp op -> do
+                make_twig op toks
+                look_for thing
             StackOp op -> do
                 make_branch op toks
                 look_for thing
