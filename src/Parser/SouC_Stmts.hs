@@ -76,9 +76,7 @@ stmt_cond = stmt_if <|> stmt_unless
 stmt_if :: Parser Stmt
 stmt_if = do
     condition <- try (reserved "if") *> spaces *> raw_expr <* optional_do <* endline
---     thenDo <- many1 (statement <* many1 endline)
     thenDo <- stmt_block
---     elseDo <- optionMaybe (reserved "else" *> endline *> increase_indent_level *> many1 (statement <* many1 endline) <* decrease_indent_level)
     elseDo <- optionMaybe (try (endline *> indent_depth *> reserved "else") *> endline *> stmt_block)
     _ <- optional_end Stmt_If_End -- FIXME use this for type-checking
     return $ Stmt_If condition thenDo elseDo
