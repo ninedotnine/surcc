@@ -59,18 +59,15 @@ data StackOp = StackLParen
              | StackSpacedPreOp PrefixOperator
              deriving (Show, Eq)
 
-oper_to_char :: Operator -> Char
-oper_to_char Plus   = '+'
-oper_to_char Minus  = '-'
-oper_to_char Splat  = '*'
-oper_to_char Divide = '/'
-oper_to_char Modulo = '%'
-oper_to_char Hihat  = '^'
-oper_to_char Equals = '?'
-oper_to_char Combine  = 'm'
-
 instance Show Operator where
-    show x = [oper_to_char x]
+    show Plus   = "+"
+    show Minus  = "-"
+    show Splat  = "*"
+    show Divide = "/"
+    show Modulo = "%"
+    show Hihat  = "^"
+    show Equals = "=="
+    show Combine  = "<>"
 
 get_prec :: Operator -> Precedence
 get_prec Equals = Precedence 5
@@ -88,14 +85,11 @@ data PrefixOperator = Deref
                     | ToString
                     deriving Eq
 
-pre_oper_to_char :: PrefixOperator -> Char
-pre_oper_to_char Deref   = '!'
-pre_oper_to_char GetAddr  = '@'
-pre_oper_to_char Negate  = '~'
-pre_oper_to_char ToString = '$'
-
 instance Show PrefixOperator where
-    show x = [pre_oper_to_char x]
+    show Deref   = "!"
+    show GetAddr = "@"
+    show Negate  = "~"
+    show ToString = "$"
 
 -- the oper stack is a temporary storage place for opers
 -- the tree stack holds the result, the output, as well as being used for
