@@ -122,6 +122,24 @@ instance Show Operator where
     show BindLeft       = "=<<"
 
 get_prec :: Operator -> Precedence
+get_prec Iff            = Precedence 1
+get_prec Tuple          = Precedence 2
+get_prec And            = Precedence 3
+get_prec Or             = Precedence 3
+get_prec Xor            = Precedence 3
+get_prec In             = Precedence 3
+get_prec Apply          = Precedence 4
+get_prec FlipApply      = Precedence 4
+get_prec BindRight      = Precedence 4
+get_prec BindLeft       = Precedence 4
+get_prec Index          = Precedence 5
+get_prec Lookup         = Precedence 5
+get_prec Map            = Precedence 5
+get_prec FlipMap        = Precedence 5
+get_prec Applicative    = Precedence 5
+get_prec FlipApplicative = Precedence 5
+get_prec SequenceRight  = Precedence 5
+get_prec SequenceLeft   = Precedence 5
 get_prec Equals         = Precedence 5
 get_prec NotEquals      = Precedence 5
 get_prec RegexMatch     = Precedence 5
@@ -134,28 +152,10 @@ get_prec Divide         = Precedence 7
 get_prec FloorDiv       = Precedence 7
 get_prec Modulo         = Precedence 7
 get_prec Hihat          = Precedence 8
-get_prec And            = Precedence 3
-get_prec Or             = Precedence 3
-get_prec Xor            = Precedence 3
-get_prec In             = Precedence 3
-get_prec Tuple          = Precedence 2
-get_prec Iff            = Precedence 1
 get_prec FromMaybe      = Precedence 9
 get_prec Prepend        = Precedence 10
 get_prec Append         = Precedence 10
 get_prec Combine        = Precedence 10
-get_prec Index          = Precedence 5
-get_prec Lookup         = Precedence 5
-get_prec Apply          = Precedence 4
-get_prec FlipApply      = Precedence 4
-get_prec Map            = Precedence 5
-get_prec FlipMap        = Precedence 5
-get_prec Applicative    = Precedence 5
-get_prec FlipApplicative = Precedence 5
-get_prec SequenceRight  = Precedence 5
-get_prec SequenceLeft   = Precedence 5
-get_prec BindRight      = Precedence 4
-get_prec BindLeft       = Precedence 4
 
 data PrefixOperator = Deref
                     | GetAddr
