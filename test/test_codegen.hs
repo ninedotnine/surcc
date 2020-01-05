@@ -87,7 +87,7 @@ subber_const_ass :: Program
 subber_const_ass = Program Nothing [] [
     MainDefn Nothing (Stmts []),
     SubDefn (Identifier "subby") Nothing (Stmts [
-        Stmt_Const_Assign (Identifier "x") (Raw_Expr "42")])]
+        Stmt_Const_Assign (Identifier "x") (Leaf (Lit 42))])]
 
 subber_postfix_oper :: Program
 subber_postfix_oper = Program Nothing [] [

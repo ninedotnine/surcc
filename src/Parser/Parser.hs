@@ -67,12 +67,13 @@ main_defn = do
 
 top_level_const :: Parser Top_Level_Defn
 top_level_const = do
-    const_defn <- try (identifier >>= stmt_const_assign)
-    case const_defn of
-        Stmt_Const_Assign iden (Raw_Expr val) -> case parse_expression val of
-            Right result -> return $ Top_Level_Const_Defn iden result
-            Left err -> fail $ "invalid expression\n" ++ show err
-        _ -> return undefined -- FIXME don't do this
+    name <- try (identifier <* spaces <* char '=')
+    Raw_Expr val <- spaces *> raw_expr
+    case parse_expression val of
+        Right expr -> do
+            add_to_bindings name expr
+            return $ Top_Level_Const_Defn name expr
+        Left err -> parserFail $ "invalid expression:\n" ++ show err
 
 top_level_proc :: Parser Top_Level_Defn
 top_level_proc = do

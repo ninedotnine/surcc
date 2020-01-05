@@ -9,6 +9,7 @@ import qualified Data.Map.Strict  as Map (singleton, member)
 import Data.List.NonEmpty ( NonEmpty(..) )
 
 import SouC_Types
+import ExprParser
 
 reserved_words :: Parser String
 reserved_words = (foldr (<|>) (string "if") $ map (\s -> string s <* notFollowedBy identifier_char) [ "if", "unless", "else", "while", "until", "for", "in", "do", "end", "where", "return", "break", "continue", "case", "and", "or", "atomic", "module", "import", "unary", "infix", "postfix", "typedef", "newtype", "datatype", "deriving", "typeclass", "define", "attribute", "assert", "trace", "undefined",
@@ -93,7 +94,7 @@ indent_depth = do
     (level, _) <- getState
     count (4 * level) space *> return () <?> "indent" -- FIXME indent shouldn't have to be exactly 4 spaces
 
-add_to_bindings :: Identifier -> Raw_Expr -> Parser ()
+add_to_bindings :: Identifier -> ASTree -> Parser ()
 add_to_bindings key val = do
     (i, (binds :| deeper_binds)) <- getState
     when (Map.member key binds)

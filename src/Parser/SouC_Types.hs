@@ -14,7 +14,7 @@ import ExprParser
 -- type Indentation = (Int, [Int])
 -}
 
-type Bindings = Map.Map Identifier Raw_Expr -- FIXME: is raw_expr correct here?
+type Bindings = Map.Map Identifier ASTree -- FIXME: is ASTree correct here?
 
 type Indentation = Int -- for now, indentation must be exactly 4 spaces
 
@@ -72,7 +72,7 @@ data Stmt = Stmt_While Raw_Expr Stmts
           | Stmt_Unless ASTree Stmts (Maybe Stmts)
           | Stmt_Sub_Call Identifier (Maybe Raw_Expr)
           | Stmt_Postfix_Oper Identifier String
-          | Stmt_Const_Assign Identifier Raw_Expr
+          | Stmt_Const_Assign Identifier ASTree
           | Stmt_Var_Assign Identifier Raw_Expr
           | Stmt_Return (Maybe Raw_Expr)
           deriving (Show)

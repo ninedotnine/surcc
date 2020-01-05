@@ -34,9 +34,12 @@ stmt_block = do
 stmt_const_assign :: Identifier -> Parser Stmt
 stmt_const_assign name = do
     _ <- try (spaces <* char '=')
-    val <- spaces *> raw_expr
-    add_to_bindings name val
-    return $ Stmt_Const_Assign name val
+    Raw_Expr val <- spaces *> raw_expr
+    case parse_expression val of
+        Right expr -> do
+            add_to_bindings name expr
+            return $ Stmt_Const_Assign name expr
+        Left err -> parserFail $ "invalid expression:\n" ++ show err
 
 stmt_var_assign :: Identifier -> Parser Stmt
 stmt_var_assign name = do
