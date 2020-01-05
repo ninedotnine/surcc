@@ -115,7 +115,7 @@ evaluate_astree (Leaf t) = case t of
     Lit x -> x
     CharLit c -> fromIntegral (ord c)
     StringLit s -> fromIntegral (length s)
-    Var _ -> undefined -- no way to evaluate these
+    Var _ -> 42 -- all identifiers are bound to this, sure
 evaluate_astree (Twig op tree) = operate (evaluate_astree tree)
     where operate = case op of
             Deref -> (\n -> product [1..n]) -- factorial, just for testing

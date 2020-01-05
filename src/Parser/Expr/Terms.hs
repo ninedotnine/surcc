@@ -34,7 +34,10 @@ parse_num :: ShuntingYardParser Term
 parse_num = Lit <$> read <$> Parsec.many1 Parsec.digit
 
 parse_var :: ShuntingYardParser Term
-parse_var = Var <$> Parsec.many1 (Parsec.lower <|> Parsec.char '_')
+parse_var = do
+    first <- Parsec.lower <|> Parsec.char '_'
+    rest <- Parsec.many (Parsec.lower <|> Parsec.char '_' <|> Parsec.digit)
+    return $ Var (first:rest)
 
 parse_char :: ShuntingYardParser Term
 parse_char = CharLit <$> ((Parsec.char '\'') *> Parsec.anyChar <* (Parsec.char '\''))
