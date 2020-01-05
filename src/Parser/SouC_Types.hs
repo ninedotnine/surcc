@@ -68,7 +68,7 @@ data Expr = Expr_Number Integer
 
 data Stmt = Stmt_While Raw_Expr Stmts
           | Stmt_Until Raw_Expr Stmts
-          | Stmt_If Raw_Expr Stmts (Maybe Stmts)
+          | Stmt_If ASTree Stmts (Maybe Stmts)
           | Stmt_Unless Raw_Expr Stmts (Maybe Stmts)
           | Stmt_Sub_Call Identifier (Maybe Raw_Expr)
           | Stmt_Postfix_Oper Identifier String

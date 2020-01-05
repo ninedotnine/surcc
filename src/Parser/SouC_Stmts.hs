@@ -7,6 +7,7 @@ import Text.Parsec hiding (space, spaces, string)
 import SouC_Types
 import SouC_Expr
 import Basics
+import ExprParser
 
 statement :: Parser Stmt
 statement = do
@@ -75,11 +76,13 @@ stmt_cond = stmt_if <|> stmt_unless
 
 stmt_if :: Parser Stmt
 stmt_if = do
-    condition <- try (reserved "if") *> spaces *> raw_expr <* optional_do <* endline
+    Raw_Expr condition <- try (reserved "if") *> spaces *> raw_expr <* optional_do <* endline
     thenDo <- stmt_block
     elseDo <- optionMaybe (try (endline *> indent_depth *> reserved "else") *> endline *> stmt_block)
     _ <- optional_end Stmt_If_End -- FIXME use this for type-checking
-    return $ Stmt_If condition thenDo elseDo
+    case parse_expression condition of
+        Right tree -> return $ Stmt_If tree thenDo elseDo
+        Left err -> parserFail $ "failed expression:\n" ++ show err
 
 stmt_unless :: Parser Stmt
 stmt_unless = do

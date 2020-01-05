@@ -108,7 +108,7 @@ subber_if :: Program
 subber_if = Program Nothing [] [
     MainDefn Nothing (Stmts []),
     SubDefn (Identifier "subby") Nothing (Stmts [
-        Stmt_If (Raw_Expr "false") (Stmts [
+        Stmt_If (Leaf (StringLit "false")) (Stmts [
             Stmt_Var_Assign (Identifier "x") (Raw_Expr "41"),
             Stmt_Postfix_Oper (Identifier "x") "++"])
             Nothing])]
@@ -117,7 +117,7 @@ subber_if_else :: Program
 subber_if_else = Program Nothing [] [
     SubDefn (Identifier "subby") Nothing (Stmts [
         Stmt_Var_Assign (Identifier "x") (Raw_Expr "41"),
-        Stmt_If (Raw_Expr "false") (Stmts [
+        Stmt_If (Leaf (Lit 0)) (Stmts [
             Stmt_Postfix_Oper (Identifier "x") "++"])
             (Just (Stmts [
                 (Stmt_Postfix_Oper (Identifier "x") "--")]))]),
