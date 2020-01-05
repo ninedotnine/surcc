@@ -9,7 +9,7 @@ f(x) = do
 
 {;> this is the id function. it returns f(x). <;}
 id(x) = do
-    return f(x)
+    return x & f
 
 {;> this function returns double its arg. <;}
 double(x) = do
@@ -18,4 +18,4 @@ double(x) = do
 {;> this function combines its arg with double(itself). 
     x must be a member of a semigroup <;}
 combine(x) = do
-    return double(x) <> double(x)
+    return x&double <> x&double

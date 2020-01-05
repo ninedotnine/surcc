@@ -110,4 +110,8 @@ stmt_unless = do
 stmt_return :: Parser Stmt
 stmt_return = do
     result <- reserved "return" *> spaces *> optionMaybe raw_expr
-    return (Stmt_Return result)
+    case result of
+        Nothing -> return (Stmt_Return Nothing)
+        Just (Raw_Expr raw_exp) -> case parse_expression raw_exp of
+            Right expr -> return (Stmt_Return (Just expr))
+            Left err -> parserFail $ "failed expression:\n" ++ show err

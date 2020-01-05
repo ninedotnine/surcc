@@ -53,7 +53,7 @@ conster :: Program
 conster = Program Nothing [] [
     Top_Level_Const_Defn (Identifier "x") (Leaf (Lit 42)),
     MainDefn Nothing (Stmts [
-        Stmt_Return (Just (Raw_Expr "0"))])]
+        Stmt_Return (Just (Leaf (Lit 0)))])]
 
 func :: Program
 func = Program Nothing [] [
@@ -64,10 +64,10 @@ func2 :: Program
 func2 = Program Nothing [] [
     MainDefn Nothing (Stmts []),
     FuncDefn (Identifier "f") (Param  [Identifier "x"]) (Stmts [
-        Stmt_Return (Just (Raw_Expr "42"))])]
+        Stmt_Return (Just (Leaf (Lit 42)))])]
 
 mainer :: Program
-mainer = Program Nothing [] [MainDefn Nothing (Stmts [Stmt_Return (Just (Raw_Expr "0"))])]
+mainer = Program Nothing [] [MainDefn Nothing (Stmts [Stmt_Return (Just (Leaf (Lit 0)))])]
 
 mainer2 :: Program
 mainer2 = Program Nothing [] [MainDefn Nothing (Stmts [])]

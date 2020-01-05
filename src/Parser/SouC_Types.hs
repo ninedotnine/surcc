@@ -74,7 +74,7 @@ data Stmt = Stmt_While ASTree Stmts
           | Stmt_Postfix_Oper Identifier String
           | Stmt_Const_Assign Identifier ASTree
           | Stmt_Var_Assign Identifier ASTree
-          | Stmt_Return (Maybe Raw_Expr)
+          | Stmt_Return (Maybe ASTree)
           deriving (Show)
 
 data Endable_Stmts = Stmt_If_End | Stmt_While_End | Stmt_Unless_End | Stmt_Until_End
