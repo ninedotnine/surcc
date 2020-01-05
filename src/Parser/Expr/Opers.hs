@@ -17,8 +17,9 @@ parse_oper_token =
 
 check_for_oper :: ShuntingYardParser ()
 check_for_oper = Parsec.lookAhead (Parsec.try (ignore_spaces *> Parsec.oneOf valid_op_chars)) *> return ()
-    where valid_op_chars = "+-*/%^<>=&"
 
+valid_op_chars :: String
+valid_op_chars = "+-*/%^<>=&"
 
 apply_tight_prefix_opers :: ShuntingYardParser ()
 apply_tight_prefix_opers = do
@@ -46,8 +47,11 @@ parse_infix_oper = do
     if_tightly_spaced $ no_spaces ("whitespace after `" ++ show oper ++ "`")
     return (Oper oper)
     where
-        str = Parsec.try . Parsec.string
-        char = Parsec.char
+        str :: String -> ShuntingYardParser String
+        char :: Char -> ShuntingYardParser Char
+        str s = Parsec.try (Parsec.string s) <* Parsec.notFollowedBy (Parsec.oneOf valid_op_chars)
+        char c = Parsec.char c <* Parsec.notFollowedBy (Parsec.oneOf valid_op_chars)
+
         parse_oper_symbol = (
             char '+' *> return Plus   <|>
             char '-' *> return Minus  <|>
