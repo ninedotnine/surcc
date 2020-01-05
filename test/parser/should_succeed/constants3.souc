@@ -1,0 +1,5 @@
+con = 42
+con2 = $con
+
+main() = do
+    print (con + con2)
