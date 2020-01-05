@@ -17,7 +17,7 @@ parse_oper_token =
 
 check_for_oper :: ShuntingYardParser ()
 check_for_oper = Parsec.lookAhead (Parsec.try (ignore_spaces *> Parsec.oneOf valid_op_chars)) *> return ()
-    where valid_op_chars = "+-*/%^<>="
+    where valid_op_chars = "+-*/%^<>=&"
 
 
 apply_tight_prefix_opers :: ShuntingYardParser ()
@@ -55,6 +55,7 @@ parse_infix_oper = do
             char '/' *> return Divide <|>
             char '%' *> return Modulo <|>
             char '^' *> return Hihat  <|>
+            char '&' *> return Amper  <|>
             str "==" *> return Equals <|>
             str "<>" *> return Combine
             ) <?> "infix operator"

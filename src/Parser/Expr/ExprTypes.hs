@@ -39,6 +39,7 @@ data Operator = Plus
               | Hihat
               | Equals
               | Combine
+              | Amper
             deriving Eq
 
 data TermToken = TermTok Term
@@ -68,8 +69,10 @@ instance Show Operator where
     show Hihat  = "^"
     show Equals = "=="
     show Combine  = "<>"
+    show Amper = "&"
 
 get_prec :: Operator -> Precedence
+get_prec Amper  = Precedence 4
 get_prec Equals = Precedence 5
 get_prec Plus   = Precedence 6
 get_prec Minus  = Precedence 6

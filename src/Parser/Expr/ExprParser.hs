@@ -132,6 +132,7 @@ evaluate_astree (Branch op left right) = evaluate_astree left `operate` evaluate
             Hihat  -> (^)
             Equals -> undefined -- can't do this on integers
             Combine  -> undefined
+            Amper  -> undefined -- definitely can't do this
 
 eval_show_astree :: ASTree -> String
 eval_show_astree = evaluate_astree <&> show
