@@ -86,76 +86,76 @@ data StackOp = StackLParen
              deriving (Show, Eq)
 
 instance Show Operator where
-    show Plus   = "+"
-    show Minus  = "-"
-    show Splat  = "*"
-    show Divide = "/"
-    show FloorDiv = "//"
-    show Modulo = "%"
-    show Hihat  = "^"
-    show Equals = "=="
-    show Combine  = "<>"
-    show NotEquals = "=/="
-    show RegexMatch = "=~"
-    show GreaterThan = ">"
-    show LesserThan = "<"
-    show And = "&&" -- FIXME
-    show Or = "||" -- FIXME
-    show Xor = "><"
-    show In = ">|#|<"
-    show Tuple = ","
-    show Iff = "?"
-    show FromMaybe = "??"
-    show Prepend = ">>"
-    show Append = "<<"
-    show Index = "#"
-    show Lookup = "##"
-    show Apply = "~&"
-    show FlipApply = "&"
-    show Map = "<~&>"
-    show FlipMap = "<&>"
-    show Applicative = "<~*>"
+    show Plus           = "+"
+    show Minus          = "-"
+    show Splat          = "*"
+    show Divide         = "/"
+    show FloorDiv       = "//"
+    show Modulo         = "%"
+    show Hihat          = "^"
+    show Equals         = "=="
+    show Combine        = "<>"
+    show NotEquals      = "=/="
+    show RegexMatch     = "=~"
+    show GreaterThan    = ">"
+    show LesserThan     = "<"
+    show And            = "&&" -- FIXME
+    show Or             = "||" -- FIXME
+    show Xor            = "><"
+    show In             = ">|#|<"
+    show Tuple          = ","
+    show Iff            = "?"
+    show FromMaybe      = "??"
+    show Prepend        = ">>"
+    show Append         = "<<"
+    show Index          = "#"
+    show Lookup         = "##"
+    show Apply          = "~&"
+    show FlipApply      = "&"
+    show Map            = "<~&>"
+    show FlipMap        = "<&>"
+    show Applicative    = "<~*>"
     show FlipApplicative = "<*>"
-    show SequenceRight = "*>"
-    show SequenceLeft = "<*"
-    show BindRight = ">>="
-    show BindLeft = "=<<"
+    show SequenceRight  = "*>"
+    show SequenceLeft   = "<*"
+    show BindRight      = ">>="
+    show BindLeft       = "=<<"
 
 get_prec :: Operator -> Precedence
-get_prec Equals = Precedence 5
-get_prec NotEquals = Precedence 5
-get_prec RegexMatch = Precedence 5
-get_prec GreaterThan = Precedence 5
-get_prec LesserThan = Precedence 5
-get_prec Plus   = Precedence 6
-get_prec Minus  = Precedence 6
-get_prec Splat  = Precedence 7
-get_prec Divide = Precedence 7
-get_prec FloorDiv = Precedence 7
-get_prec Modulo = Precedence 7
-get_prec Hihat  = Precedence 8
-get_prec And = Precedence 3
-get_prec Or = Precedence 3
-get_prec Xor = Precedence 3
-get_prec In = Precedence 3
-get_prec Tuple = Precedence 2
-get_prec Iff = Precedence 1
-get_prec FromMaybe = Precedence 9
-get_prec Prepend = Precedence 10
-get_prec Append = Precedence 10
-get_prec Combine = Precedence 10
-get_prec Index = Precedence 5
-get_prec Lookup = Precedence 5
-get_prec Apply = Precedence 4
-get_prec FlipApply = Precedence 4
-get_prec Map = Precedence 5
-get_prec FlipMap = Precedence 5
-get_prec Applicative = Precedence 5
+get_prec Equals         = Precedence 5
+get_prec NotEquals      = Precedence 5
+get_prec RegexMatch     = Precedence 5
+get_prec GreaterThan    = Precedence 5
+get_prec LesserThan     = Precedence 5
+get_prec Plus           = Precedence 6
+get_prec Minus          = Precedence 6
+get_prec Splat          = Precedence 7
+get_prec Divide         = Precedence 7
+get_prec FloorDiv       = Precedence 7
+get_prec Modulo         = Precedence 7
+get_prec Hihat          = Precedence 8
+get_prec And            = Precedence 3
+get_prec Or             = Precedence 3
+get_prec Xor            = Precedence 3
+get_prec In             = Precedence 3
+get_prec Tuple          = Precedence 2
+get_prec Iff            = Precedence 1
+get_prec FromMaybe      = Precedence 9
+get_prec Prepend        = Precedence 10
+get_prec Append         = Precedence 10
+get_prec Combine        = Precedence 10
+get_prec Index          = Precedence 5
+get_prec Lookup         = Precedence 5
+get_prec Apply          = Precedence 4
+get_prec FlipApply      = Precedence 4
+get_prec Map            = Precedence 5
+get_prec FlipMap        = Precedence 5
+get_prec Applicative    = Precedence 5
 get_prec FlipApplicative = Precedence 5
-get_prec SequenceRight = Precedence 5
-get_prec SequenceLeft = Precedence 5
-get_prec BindRight = Precedence 4
-get_prec BindLeft = Precedence 4
+get_prec SequenceRight  = Precedence 5
+get_prec SequenceLeft   = Precedence 5
+get_prec BindRight      = Precedence 4
+get_prec BindLeft       = Precedence 4
 
 data PrefixOperator = Deref
                     | GetAddr
@@ -166,12 +166,12 @@ data PrefixOperator = Deref
                     deriving Eq
 
 instance Show PrefixOperator where
-    show Deref   = "!"
-    show GetAddr = "@"
-    show Negate  = "~"
+    show Deref    = "!"
+    show GetAddr  = "@"
+    show Negate   = "~"
     show ToString = "$"
-    show Pure = "^*^"
-    show Join = ">*<"
+    show Pure     = "^*^"
+    show Join     = ">*<"
 
 -- the oper stack is a temporary storage place for opers
 -- the tree stack holds the result, the output, as well as being used for
