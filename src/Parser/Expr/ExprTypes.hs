@@ -17,13 +17,14 @@ module Expr.ExprTypes (
 ) where
 
 import qualified Text.Parsec as Parsec
+import Data.Word (Word8)
 
 data ASTree = Branch Operator ASTree ASTree
             | Twig PrefixOperator ASTree
             | Leaf Term
          deriving Show
 
-newtype Precedence = Precedence Integer deriving (Eq, Ord)
+newtype Precedence = Precedence Word8 deriving (Eq, Ord)
 
 data Term = Lit Integer
           | Var String
