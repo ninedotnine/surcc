@@ -45,15 +45,18 @@ parse_infix_oper = do
     if_loosely_spaced (respect_spaces <?> ("space after `" ++ show oper ++ "`"))
     if_tightly_spaced $ no_spaces ("whitespace after `" ++ show oper ++ "`")
     return (Oper oper)
-    where parse_oper_symbol = (
-            Parsec.char '+' *> return Plus   <|>
-            Parsec.char '-' *> return Minus  <|>
-            Parsec.char '*' *> return Splat  <|>
-            Parsec.char '/' *> return Divide <|>
-            Parsec.char '%' *> return Modulo <|>
-            Parsec.char '^' *> return Hihat  <|>
-            Parsec.string "==" *> return Equals <|>
-            Parsec.string "<>" *> return Combine
+    where
+        str = Parsec.try . Parsec.string
+        char = Parsec.char
+        parse_oper_symbol = (
+            char '+' *> return Plus   <|>
+            char '-' *> return Minus  <|>
+            char '*' *> return Splat  <|>
+            char '/' *> return Divide <|>
+            char '%' *> return Modulo <|>
+            char '^' *> return Hihat  <|>
+            str "==" *> return Equals <|>
+            str "<>" *> return Combine
             ) <?> "infix operator"
 
 
