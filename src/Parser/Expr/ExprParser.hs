@@ -131,6 +131,8 @@ evaluate_astree (Branch op left right) = evaluate_astree left `operate` evaluate
             Modulo -> mod
             Hihat  -> (^)
             Equals -> undefined -- can't do this on integers
+            Greatr -> undefined -- can't do this on integers
+            Lesser -> undefined -- can't do this on integers
             Combine  -> undefined
             Amper  -> undefined -- definitely can't do this
 

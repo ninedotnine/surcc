@@ -38,6 +38,8 @@ data Operator = Plus
               | Modulo
               | Hihat
               | Equals
+              | Greatr
+              | Lesser
               | Combine
               | Amper
             deriving Eq
@@ -68,12 +70,16 @@ instance Show Operator where
     show Modulo = "%"
     show Hihat  = "^"
     show Equals = "=="
+    show Greatr = ">"
+    show Lesser = "<"
     show Combine  = "<>"
     show Amper = "&"
 
 get_prec :: Operator -> Precedence
 get_prec Amper  = Precedence 4
 get_prec Equals = Precedence 5
+get_prec Greatr = Precedence 5
+get_prec Lesser = Precedence 5
 get_prec Plus   = Precedence 6
 get_prec Minus  = Precedence 6
 get_prec Splat  = Precedence 7

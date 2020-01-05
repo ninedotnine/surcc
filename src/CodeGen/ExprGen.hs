@@ -24,6 +24,8 @@ generate_oper Modulo = "%"
 generate_oper Hihat  = undefined -- FIXME C doesn't have ^
 generate_oper Equals = "=="
 generate_oper Combine  = "<>"
+generate_oper Greatr  = ">"
+generate_oper Lesser  = "<"
 generate_oper Amper  = undefined -- this seems like a challenge to be handled elsewhere
 
 generate_prefix_expr :: PrefixOperator -> String

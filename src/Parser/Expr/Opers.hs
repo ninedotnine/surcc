@@ -57,7 +57,9 @@ parse_infix_oper = do
             char '^' *> return Hihat  <|>
             char '&' *> return Amper  <|>
             str "==" *> return Equals <|>
-            str "<>" *> return Combine
+            str "<>" *> return Combine <|>
+            char '>' *> return Greatr <|>
+            char '<' *> return Lesser
             ) <?> "infix operator"
 
 
