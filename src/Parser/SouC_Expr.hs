@@ -8,6 +8,8 @@ import qualified Data.Map.Strict as Map (Map)
 import Common
 import Parser.Basics
 
+data Raw_Expr = Raw_Expr String deriving (Read, Show)
+
 run_raw_expr_parser :: String -> String
 run_raw_expr_parser input = do
     case runParser (raw_expr <* eof) empty_state "raw_expr" input of

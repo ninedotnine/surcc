@@ -4,7 +4,6 @@ module Common (
     Identifier(..),
     Stmts(..),
     Program(..),
-    Raw_Expr(..),
     Top_Level_Defn(..),
     Expr(..),
     Endable_Stmts(..),
@@ -71,8 +70,6 @@ data Top_Level_Defn = Top_Level_Const_Defn Identifier ASTree
                     | SubDefn Identifier (Maybe Param) Stmts
                     | MainDefn (Maybe Param) Stmts
                     deriving Show
-
-data Raw_Expr = Raw_Expr String deriving (Read, Show)
 
 data Expr = Expr_Number Integer
           | Expr_CharLit Char
