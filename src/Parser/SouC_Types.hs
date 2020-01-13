@@ -1,4 +1,22 @@
-module Parser.SouC_Types where
+module Parser.SouC_Types (
+    Stmt(..),
+    Param(..),
+    Identifier(..),
+    Stmts(..),
+    Program(..),
+    Raw_Expr(..),
+    Top_Level_Defn(..),
+    Expr(..),
+    Endable_Stmts(..),
+    ModuleName(..),
+    Import(..),
+    Imports,
+
+    Parser,
+    ParserState,
+    empty_state
+
+    ) where
 
 import Text.Parsec (Parsec)
 

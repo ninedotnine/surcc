@@ -1,7 +1,15 @@
 module CodeGen.CodeGen (generate) where
 
 import CodeGen.ExprGen (generate_expr)
-import Parser.SouC_Types
+import Parser.SouC_Types (
+    Stmt(..),
+    Param(..),
+    Identifier(..),
+    Stmts(..),
+    Program(..),
+    Raw_Expr(..),
+    Top_Level_Defn(..)
+    )
 import Parser.ExprParser
 
 generate :: Program -> String

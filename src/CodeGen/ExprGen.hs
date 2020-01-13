@@ -2,7 +2,12 @@ module CodeGen.ExprGen (
     generate_expr
 ) where
 
-import Parser.ExprParser
+import Parser.ExprParser (
+    ASTree(..),
+    Term(..),
+    Operator(..),
+    PrefixOperator(..)
+    )
 
 generate_expr :: ASTree -> String
 generate_expr (Leaf t) = generate_term t
