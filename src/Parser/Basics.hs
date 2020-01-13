@@ -149,18 +149,9 @@ optional_do :: SouCParser ()
 optional_do = skipMany space *> optional (reserved "do") *> return ()
 
 optional_end_name :: Identifier -> SouCParser ()
--- optional_end_name (Identifier name) = (try (endline *> reserved "end")) *> optional (spaces *> string name) *> return ()
 optional_end_name (Identifier name) = do
     optional (try (endline *> indent_depth *> reserved "end"))
     optional (try (spaces *> string name))
-
-{-
-optional_end :: Endable_Stmts -> SouCParser ()
-optional_end stmt_type = optional ((indent_depth *> reserved "end") *> optional (spaces *> string word)) *> return ()
-    where word = case stmt_type of
-            Stmt_While_End -> "while"
-            Stmt_If_End -> "if"
-            -}
 
 optional_end :: Endable_Stmts -> SouCParser String
 optional_end stmt_type = do
