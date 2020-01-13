@@ -3,6 +3,7 @@ module Common (
     Param(..),
     Identifier(..),
     Stmts(..),
+    CheckedProgram(..),
     Program(..),
     Top_Level_Defn(..),
     Expr(..),
@@ -51,6 +52,9 @@ newtype Identifier = Identifier String
 --     show (Identifier x) = show x
 
 data Program = Program (Maybe ModuleName) Imports Body
+    deriving Show
+
+data CheckedProgram = CheckedProgram (Maybe ModuleName) Imports Body
     deriving Show
 
 newtype ModuleName = ModuleName String deriving (Read, Show)

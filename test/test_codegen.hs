@@ -12,7 +12,7 @@ import System.Process (callProcess)
 tmpdir :: FilePath
 tmpdir = "/tmp/souc_code_gen_test/"
 
-test :: Program -> String -> IO ()
+test :: CheckedProgram -> String -> IO ()
 test prog name = do
     putStr name >> putStr "... "
 --     print prog
@@ -49,63 +49,63 @@ run_tests = do
     test sub_while "sub_while"
     test sub_until "sub_until"
 
-conster :: Program
-conster = Program Nothing [] [
+conster :: CheckedProgram
+conster = CheckedProgram Nothing [] [
     Top_Level_Const_Defn (Identifier "x") (Leaf (Lit 42)),
     MainDefn Nothing (Stmts [
         Stmt_Return (Just (Leaf (Lit 0)))])]
 
-func :: Program
-func = Program Nothing [] [
+func :: CheckedProgram
+func = CheckedProgram Nothing [] [
     MainDefn Nothing (Stmts []),
     ShortFuncDefn (Identifier "f") (Param [Identifier "x"]) (Leaf (Lit 42))]
 
-func2 :: Program
-func2 = Program Nothing [] [
+func2 :: CheckedProgram
+func2 = CheckedProgram Nothing [] [
     MainDefn Nothing (Stmts []),
     FuncDefn (Identifier "f") (Param  [Identifier "x"]) (Stmts [
         Stmt_Return (Just (Leaf (Lit 42)))])]
 
-mainer :: Program
-mainer = Program Nothing [] [MainDefn Nothing (Stmts [Stmt_Return (Just (Leaf (Lit 0)))])]
+mainer :: CheckedProgram
+mainer = CheckedProgram Nothing [] [MainDefn Nothing (Stmts [Stmt_Return (Just (Leaf (Lit 0)))])]
 
-mainer2 :: Program
-mainer2 = Program Nothing [] [MainDefn Nothing (Stmts [])]
+mainer2 :: CheckedProgram
+mainer2 = CheckedProgram Nothing [] [MainDefn Nothing (Stmts [])]
 
-subber :: Program
-subber = Program Nothing [] [
+subber :: CheckedProgram
+subber = CheckedProgram Nothing [] [
     MainDefn Nothing (Stmts [
         Stmt_Sub_Call (Identifier "abort") Nothing])]
 
-subber_ass :: Program
-subber_ass = Program Nothing [] [
+subber_ass :: CheckedProgram
+subber_ass = CheckedProgram Nothing [] [
     MainDefn Nothing (Stmts []),
     SubDefn (Identifier "subby") Nothing (Stmts [
         Stmt_Var_Assign (Identifier "x") (Leaf (Lit 42))])]
 
-subber_const_ass :: Program
-subber_const_ass = Program Nothing [] [
+subber_const_ass :: CheckedProgram
+subber_const_ass = CheckedProgram Nothing [] [
     MainDefn Nothing (Stmts []),
     SubDefn (Identifier "subby") Nothing (Stmts [
         Stmt_Const_Assign (Identifier "x") (Leaf (Lit 42))])]
 
-subber_postfix_oper :: Program
-subber_postfix_oper = Program Nothing [] [
+subber_postfix_oper :: CheckedProgram
+subber_postfix_oper = CheckedProgram Nothing [] [
     MainDefn Nothing (Stmts []),
     SubDefn (Identifier "subby") Nothing (Stmts [
         Stmt_Var_Assign (Identifier "x") (Leaf (Lit 41)),
         Stmt_Postfix_Oper (Identifier "x") "++"])]
 
-subber_while :: Program
-subber_while = Program Nothing [] [
+subber_while :: CheckedProgram
+subber_while = CheckedProgram Nothing [] [
     MainDefn Nothing (Stmts []),
     SubDefn (Identifier "subby") Nothing (Stmts [
         Stmt_While (Leaf (StringLit "false")) (Stmts [
             Stmt_Var_Assign (Identifier "x") (Leaf (Lit 41)),
             Stmt_Postfix_Oper (Identifier "x") "++"])])]
 
-subber_if :: Program
-subber_if = Program Nothing [] [
+subber_if :: CheckedProgram
+subber_if = CheckedProgram Nothing [] [
     MainDefn Nothing (Stmts []),
     SubDefn (Identifier "subby") Nothing (Stmts [
         Stmt_If (Leaf (StringLit "false")) (Stmts [
@@ -113,8 +113,8 @@ subber_if = Program Nothing [] [
             Stmt_Postfix_Oper (Identifier "x") "++"])
             Nothing])]
 
-subber_if_else :: Program
-subber_if_else = Program Nothing [] [
+subber_if_else :: CheckedProgram
+subber_if_else = CheckedProgram Nothing [] [
     SubDefn (Identifier "subby") Nothing (Stmts [
         Stmt_Var_Assign (Identifier "x") (Leaf (Lit 41)),
         Stmt_If (Leaf (Lit 0)) (Stmts [
@@ -124,8 +124,8 @@ subber_if_else = Program Nothing [] [
     MainDefn Nothing (Stmts [
         Stmt_Sub_Call (Identifier "subby") Nothing])]
 
-subber_unless :: Program
-subber_unless = Program Nothing [] [
+subber_unless :: CheckedProgram
+subber_unless = CheckedProgram Nothing [] [
     MainDefn Nothing (Stmts []),
     SubDefn (Identifier "subby") Nothing (Stmts [
         Stmt_Unless (Leaf (StringLit "false")) (Stmts [
@@ -133,8 +133,8 @@ subber_unless = Program Nothing [] [
             Stmt_Postfix_Oper (Identifier "x") "++"])
             Nothing])]
 
-subber_unless_else :: Program
-subber_unless_else = Program Nothing [] [
+subber_unless_else :: CheckedProgram
+subber_unless_else = CheckedProgram Nothing [] [
     SubDefn (Identifier "subby") Nothing (Stmts [
         Stmt_Var_Assign (Identifier "x") (Leaf (Lit 41)),
         Stmt_Unless (Leaf (StringLit "false")) (Stmts [
@@ -144,8 +144,8 @@ subber_unless_else = Program Nothing [] [
     MainDefn Nothing (Stmts [
         Stmt_Sub_Call (Identifier "subby") Nothing])]
 
-sub_while :: Program
-sub_while = Program Nothing [] [
+sub_while :: CheckedProgram
+sub_while = CheckedProgram Nothing [] [
     SubDefn (Identifier "subby") Nothing (Stmts [
         Stmt_Var_Assign (Identifier "x") (Leaf (Lit 41)),
         Stmt_While (Leaf (StringLit "false")) (Stmts [
@@ -153,8 +153,8 @@ sub_while = Program Nothing [] [
     MainDefn Nothing (Stmts [
         Stmt_Sub_Call (Identifier "subby") Nothing])]
 
-sub_until :: Program
-sub_until = Program Nothing [] [
+sub_until :: CheckedProgram
+sub_until = CheckedProgram Nothing [] [
     SubDefn (Identifier "subby") Nothing (Stmts [
         Stmt_Var_Assign (Identifier "x") (Leaf (Lit 41)),
         Stmt_Until (Leaf (StringLit "false")) (Stmts [

@@ -6,14 +6,14 @@ import Common (
     Param(..),
     Identifier(..),
     Stmts(..),
-    Program(..),
+    CheckedProgram(..),
     Top_Level_Defn(..)
     )
 import Parser.ExprParser
 
-generate :: Program -> String
+generate :: CheckedProgram -> String
 -- generate (Program name imports body) =
-generate (Program _ _ body) = includes ++ concat (map gen body)
+generate (CheckedProgram _ _ body) = includes ++ concat (map gen body)
     where includes =
             "#include <stdio.h>\n#include <stdbool.h>\n#include <stdlib.h>\n"
 
