@@ -13,10 +13,12 @@ import Parser.ExprParser
 
 data Endable_Stmts = Stmt_If_End | Stmt_While_End | Stmt_Unless_End | Stmt_Until_End
 
+reserved :: String -> SouCParser String
+reserved s = string s <* notFollowedBy identifier_char
+
 reserved_word :: SouCParser String
 reserved_word =
-    choice (map word long_list) <?> "reserved word" where
-        word s = string s <* notFollowedBy identifier_char
+    choice (map reserved long_list) <?> "reserved word" where
         long_list = [
             -- these are in use, or i expect will be soon
             "if", "unless", "else", "while", "until",
@@ -142,9 +144,6 @@ add_to_bindings key val = do
 
 parens :: SouCParser a -> SouCParser a
 parens = between (char '(') (char ')')
-
-reserved :: String -> SouCParser String
-reserved = string -- FIXME
 
 optional_do :: SouCParser ()
 optional_do = skipMany space *> optional (reserved "do") *> return ()
