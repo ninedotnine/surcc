@@ -1,4 +1,4 @@
-module SouC_Types where
+module Parser.SouC_Types where
 
 import Text.Parsec (Parsec)
 
@@ -6,7 +6,7 @@ import Text.Parsec (Parsec)
 import qualified Data.Map.Strict as Map (Map, empty)
 import Data.List.NonEmpty ( NonEmpty(..) )
 
-import ExprParser
+import Parser.ExprParser
 
 
 {-

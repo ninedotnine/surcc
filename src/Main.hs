@@ -1,8 +1,8 @@
 module Main where
 
-import SouC_Types
+import Parser.SouC_Types
 import CodeGen.CodeGen
-import Parser
+import Parser.Parser
 
 -- import Text.Parsec.String (parseFromFile)
 import Text.Parsec.Error (ParseError)

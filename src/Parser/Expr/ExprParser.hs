@@ -3,7 +3,7 @@
 -- it does not make any attempt at associativity, although this is possible.
 -- it gives higher precedence to operators which are not separated by spaces.
 
-module Expr.ExprParser (
+module Parser.Expr.ExprParser (
     pretty_show_expression,
     parse_expression,
     parse_print_expression,
@@ -27,11 +27,11 @@ import Data.List (dropWhile, dropWhileEnd)
 
 import Data.Char (ord) -- for evaluate
 
-import Expr.StackManipulations
-import Expr.ExprTypes
-import Expr.RegardingSpaces
-import Expr.Terms
-import Expr.Opers
+import Parser.Expr.StackManipulations
+import Parser.Expr.ExprTypes
+import Parser.Expr.RegardingSpaces
+import Parser.Expr.Terms
+import Parser.Expr.Opers
 
 -- parse_term and parse_oper are alternated until one fails and finish_expr succeeds
 parse_term :: ShuntingYardParser ASTree

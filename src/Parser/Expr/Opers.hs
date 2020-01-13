@@ -1,14 +1,14 @@
 -- oper parsers
-module Expr.Opers (
+module Parser.Expr.Opers (
     parse_oper_token
 ) where
 
 import qualified Text.Parsec as Parsec
 import Text.Parsec ((<|>), (<?>))
 
-import Expr.ExprTypes
-import Expr.RegardingSpaces
-import Expr.StackManipulations
+import Parser.Expr.ExprTypes
+import Parser.Expr.RegardingSpaces
+import Parser.Expr.StackManipulations
 
 parse_oper_token :: ShuntingYardParser OperToken
 parse_oper_token =

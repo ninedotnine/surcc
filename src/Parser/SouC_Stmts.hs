@@ -1,13 +1,13 @@
-module SouC_Stmts where
+module Parser.SouC_Stmts where
 
 import Debug.Trace
 
 import Text.Parsec hiding (space, spaces, string)
 
-import SouC_Types
-import SouC_Expr
-import Basics
-import ExprParser
+import Parser.SouC_Types
+import Parser.SouC_Expr
+import Parser.Basics
+import Parser.ExprParser
 
 statement :: Parser Stmt
 statement = do

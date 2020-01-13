@@ -1,6 +1,6 @@
 -- simple spacing-related parsers
 
-module Expr.RegardingSpaces (
+module Parser.Expr.RegardingSpaces (
     get_tightness,
     set_spacing_tight,
     respect_spaces,
@@ -15,7 +15,7 @@ import Control.Monad (when)
 import qualified Text.Parsec as Parsec
 import Text.Parsec ((<|>), (<?>))
 
-import Expr.ExprTypes
+import Parser.Expr.ExprTypes
 
 get_tightness :: ShuntingYardParser Tightness
 get_tightness = do

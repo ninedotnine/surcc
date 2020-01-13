@@ -1,4 +1,4 @@
-module Parser where
+module Parser.Parser where
 
 -- import System
 -- import System.FilePath
@@ -8,11 +8,11 @@ import Text.Parsec hiding (space, spaces, string)
 -- iortsmport Control.Monad
 
 -- import Souc_Expr
-import Basics
-import SouC_Types
-import SouC_Expr
-import SouC_Stmts
-import ExprParser
+import Parser.Basics
+import Parser.SouC_Types
+import Parser.SouC_Expr
+import Parser.SouC_Stmts
+import Parser.ExprParser
 
 runSouCParser :: SourceName -> String -> Either ParseError Program
 runSouCParser name input = runParser souCParser empty_state name input

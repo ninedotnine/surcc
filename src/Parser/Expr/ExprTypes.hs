@@ -1,5 +1,5 @@
 -- all the types needed to implement shunting yard
-module Expr.ExprTypes (
+module Parser.Expr.ExprTypes (
     ShuntingYardParser,
     ASTree(..),
     Term(..),

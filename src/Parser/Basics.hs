@@ -1,4 +1,4 @@
-module Basics where
+module Parser.Basics where
 
 import Debug.Trace
 
@@ -8,8 +8,8 @@ import qualified Text.Parsec
 import qualified Data.Map.Strict  as Map (singleton, member)
 import Data.List.NonEmpty ( NonEmpty(..) )
 
-import SouC_Types
-import ExprParser
+import Parser.SouC_Types
+import Parser.ExprParser
 
 reserved_words :: Parser String
 reserved_words = (foldr (<|>) (string "if") $ map (\s -> string s <* notFollowedBy identifier_char) [ "if", "unless", "else", "while", "until", "for", "in", "do", "end", "where", "return", "break", "continue", "case", "and", "or", "atomic", "module", "import", "unary", "infix", "postfix", "typedef", "newtype", "datatype", "deriving", "typeclass", "define", "attribute", "assert", "trace", "undefined",

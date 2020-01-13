@@ -1,8 +1,8 @@
 module CodeGen.CodeGen (generate) where
 
 import CodeGen.ExprGen (generate_expr)
-import SouC_Types
-import ExprParser
+import Parser.SouC_Types
+import Parser.ExprParser
 
 generate :: Program -> String
 -- generate (Program name imports body) =

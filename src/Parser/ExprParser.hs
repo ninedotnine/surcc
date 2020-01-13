@@ -1,4 +1,4 @@
-module ExprParser (
+module Parser.ExprParser (
 --     pretty_show_expression,
     parse_expression,
 --     parse_print_expression,
@@ -11,4 +11,4 @@ module ExprParser (
     PrefixOperator(..)
     ) where
 
-import Expr.ExprParser
+import Parser.Expr.ExprParser

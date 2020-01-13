@@ -1,13 +1,13 @@
 -- term parsers
-module Expr.Terms (
+module Parser.Expr.Terms (
     parse_term_token
 ) where
 
 import qualified Text.Parsec as Parsec
 import Text.Parsec ((<|>), (<?>))
 
-import Expr.ExprTypes
-import Expr.RegardingSpaces
+import Parser.Expr.ExprTypes
+import Parser.Expr.RegardingSpaces
 
 parse_term_token :: ShuntingYardParser TermToken
 parse_term_token = parse_term_tok <|> parse_left_paren <|> parse_prefix_op

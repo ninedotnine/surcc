@@ -1,4 +1,4 @@
-module Expr.StackManipulations (
+module Parser.Expr.StackManipulations (
     get_op_stack,
     get_tree_stack,
     oper_stack_push,
@@ -15,8 +15,8 @@ module Expr.StackManipulations (
 
 import qualified Text.Parsec as Parsec
 
-import Expr.ExprTypes
-import Expr.RegardingSpaces
+import Parser.Expr.ExprTypes
+import Parser.Expr.RegardingSpaces
 
 -- functions to get the current state
 get_op_stack :: ShuntingYardParser Oper_Stack

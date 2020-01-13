@@ -1,12 +1,12 @@
-module SouC_Expr where
+module Parser.SouC_Expr where
 
 import Debug.Trace
 
 import Text.Parsec hiding (space, spaces, string)
 import qualified Data.Map.Strict as Map (Map)
 
-import SouC_Types
-import Basics
+import Parser.SouC_Types
+import Parser.Basics
 
 run_raw_expr_parser :: String -> String
 run_raw_expr_parser input = do

@@ -1,10 +1,9 @@
 # FLAGS = -dynamic -Wall -Wno-unused-imports -no-keep-o-files -no-keep-hi-files
 SOURCEDIR = src/
-INCLUDE_DIRS = src/Parser
 OUT_DIR = bin
 HI_DIR = cache/hi_files
 OBJ_DIR = cache/obj_files
-FLAGS = -Wall -dynamic -j -hidir $(HI_DIR) -odir $(OBJ_DIR) -i$(SOURCEDIR):$(INCLUDE_DIRS)  -Wno-unused-imports -Wall-missed-specialisations
+FLAGS = -Wall -dynamic -j -hidir $(HI_DIR) -odir $(OBJ_DIR) -i$(SOURCEDIR)  -Wno-unused-imports -Wall-missed-specialisations
 
 default: all test
 
@@ -36,7 +35,7 @@ test_parser: parser
 
 .PHONY: test_codegen
 test_codegen:
-	@runghc -Wall -i$(SOURCEDIR):$(INCLUDE_DIRS) test/test_codegen.hs
+	@runghc -Wall -i$(SOURCEDIR) test/test_codegen.hs
 
 .PHONY: test_integration
 test_integration: build

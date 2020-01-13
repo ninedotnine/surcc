@@ -2,8 +2,8 @@
 {-# OPTIONS_GHC -Wall #-}
 
 import CodeGen.CodeGen
-import SouC_Types
-import ExprParser (ASTree(..), Term(..))
+import Parser.SouC_Types
+import Parser.ExprParser (ASTree(..), Term(..))
 
 import System.Directory (createDirectoryIfMissing)
 import System.Process (callProcess)
