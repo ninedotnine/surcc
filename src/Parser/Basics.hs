@@ -15,7 +15,7 @@ data Endable_Stmts = Stmt_If_End | Stmt_While_End | Stmt_Unless_End | Stmt_Until
 
 reserved_words :: SouCParser String
 reserved_words =
-    foldr (<|>) (word "if") (map word long_list) <?> "reserved word" where
+    choice (map word long_list) <?> "reserved word" where
         word s = string s <* notFollowedBy identifier_char
         long_list = [
             -- these are in use, or i expect will be soon
