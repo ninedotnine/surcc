@@ -6,7 +6,7 @@ module Common (
     Program(..),
     Top_Level_Defn(..),
     Expr(..),
-    Endable_Stmts(..),
+--     Endable_Stmts(..),
     ModuleName(..),
     Import(..),
     Imports,
@@ -91,5 +91,3 @@ data Stmt = Stmt_While ASTree Stmts
           | Stmt_Var_Assign Identifier ASTree
           | Stmt_Return (Maybe ASTree)
           deriving (Show)
-
-data Endable_Stmts = Stmt_If_End | Stmt_While_End | Stmt_Unless_End | Stmt_Until_End
