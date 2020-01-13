@@ -4,7 +4,7 @@ import Debug.Trace
 
 import Control.Monad (when)
 import Text.Parsec hiding (space, spaces, string, newline)
-import qualified Text.Parsec
+import qualified Text.Parsec (string)
 import qualified Data.Map.Strict  as Map (singleton, member)
 import Data.List.NonEmpty ( NonEmpty(..) )
 
