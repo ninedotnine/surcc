@@ -39,7 +39,7 @@ test_codegen:
 	@runghc -Wall -i$(SOURCEDIR):$(INCLUDE_DIRS) test/test_codegen.hs
 
 .PHONY: test_integration
-test_integration:
+test_integration: build
 	@test/integration_test
 
 .PHONY: test_expr_parser
