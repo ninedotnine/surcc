@@ -1,6 +1,6 @@
 
 main() = do
-    if "ok"
-        print ("wtf paren"
-    end if)
+	if "ok"
+		print ("wtf paren"
+	end if)
 end main

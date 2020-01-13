@@ -2,6 +2,6 @@ import Commens
 
 {; comment } } } ;}
 main() = do
-    x <- 42 {; a comment that extends to the next line
-    print x ;}
-    print x
+	x <- 42 {; a comment that extends to the next line
+	print x ;}
+	print x

@@ -1,8 +1,8 @@
 import ModuleName
 
 main() = do
-    if 85 do
-        print "sub call"
-        if "nested"
-            print "hello"
-            print "another sub call"
+	if 85 do
+		print "sub call"
+		if "nested"
+			print "hello"
+			print "another sub call"

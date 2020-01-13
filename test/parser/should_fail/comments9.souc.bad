@@ -3,8 +3,8 @@ import DoCommens
 ; comments like this should not be allowed.
 
 main() {; sup ;} = do
-    x <- f $ 42 ; a comment
-    print x
+	x <- f $ 42 ; a comment
+	print x
 
 f(x) = do
-    print x
+	print x

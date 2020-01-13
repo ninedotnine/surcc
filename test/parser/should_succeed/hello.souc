@@ -1,6 +1,6 @@
 main() = do
-    putStrLn "hello" 
-    if 38
-        putChar 'p'
-    end
+	putStrLn "hello" 
+	if 38
+		putChar 'p'
+	end
 end

@@ -92,7 +92,7 @@ decrease_indent_level = modifyState (\(x,m) -> (x-1,m))
 indent_depth :: SouCParser ()
 indent_depth = do
     (level, _) <- getState
-    count (4 * level) space *> return () <?> "indent" -- FIXME indent shouldn't have to be exactly 4 spaces
+    count level tab *> return () <?> "indent"
 
 add_to_bindings :: Identifier -> ASTree -> SouCParser ()
 add_to_bindings key val = do

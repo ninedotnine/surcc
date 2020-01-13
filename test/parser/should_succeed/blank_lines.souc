@@ -8,13 +8,13 @@ import Sumtin_Unrelated
 
 
 output(param) = do
-    print param
+	print param
 end
 
 
 
 main() = do
-    output 42
+	output 42
 end
 
 

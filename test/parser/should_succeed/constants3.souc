@@ -2,4 +2,4 @@ con = 42
 con2 = $con
 
 main() = do
-    print (con + con2)
+	print (con + con2)

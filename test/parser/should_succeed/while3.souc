@@ -1,4 +1,4 @@
 main() = do
-    while true do
-        print "sub call"
-        explode
+	while true do
+		print "sub call"
+		explode

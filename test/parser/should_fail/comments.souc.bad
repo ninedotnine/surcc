@@ -1,5 +1,5 @@
 import Modu
 
 main() = do
-    x <- ; bad place for a comment
-    print x
+	x <- ; bad place for a comment
+	print x

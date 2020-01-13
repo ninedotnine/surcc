@@ -1,2 +1,2 @@
 main() = do
-    while true explode
+	while true explode

@@ -1,8 +1,8 @@
 main() = do
-    until true do
-        print "sub call"
-        explode
-    until false 
-        explode
-    end until
+	until true do
+		print "sub call"
+		explode
+	until false 
+		explode
+	end until
 end main

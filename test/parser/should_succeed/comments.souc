@@ -2,8 +2,8 @@ import Import ; comments!
 ; sup
 
 main() = do ; let's hope
-    subrtn ; yeah!
-    x <- 9 + 2 ; will it okay?
-    print x ; wild
+	subrtn ; yeah!
+	x <- 9 + 2 ; will it okay?
+	print x ; wild
 ; cool!
  ; what!?

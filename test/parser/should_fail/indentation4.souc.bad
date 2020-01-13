@@ -1,5 +1,5 @@
 main() = do
-    if "ok"
-        print "bad indents"
-        end if
-    end main
+	if "ok"
+		print "bad indents"
+		end if
+	end main

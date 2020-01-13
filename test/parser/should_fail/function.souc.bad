@@ -2,8 +2,8 @@ import Funcs
 
 {;> this is the main routine. it returns no value. <;}
 main() = do
-    x <- f $ 42 ; a comment
-    print x ;}
+	x <- f $ 42 ; a comment
+	print x ;}
 
 {;> this is the f function. it returns f(x). <;}
 f(x) = return x ; return not allowed except with `do`

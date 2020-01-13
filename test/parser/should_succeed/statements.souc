@@ -1,8 +1,8 @@
 main() = do
-    x <- 41
-    sub_call x
-    print x
+	x <- 41
+	sub_call x
+	print x
 
 sub_call(i) = do
-    x++
+	x++
 end

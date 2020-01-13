@@ -1,12 +1,12 @@
 import ModuleName
 
 main() = do
-    if "hello" do
-        print "hello"
-        if "nested"
-            print "whoa"
-        else
-            print "dude"
-    else
-        print "oh no"
+	if "hello" do
+		print "hello"
+		if "nested"
+			print "whoa"
+		else
+			print "dude"
+	else
+		print "oh no"
 end main

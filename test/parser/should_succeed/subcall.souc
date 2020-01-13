@@ -1,5 +1,5 @@
 import Module
 
 main() = do
-    print 42
+	print 42
 end main

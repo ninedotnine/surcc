@@ -1,6 +1,6 @@
 main() = do
-    until true do
-        print "sub call"
-        else
-            explode
+	until true do
+		print "sub call"
+		else
+			explode
 end until

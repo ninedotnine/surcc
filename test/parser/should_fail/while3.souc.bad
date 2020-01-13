@@ -1,4 +1,4 @@
 main() = do
-    while true
-        explode
-    end if
+	while true
+		explode
+	end if

@@ -1,10 +1,10 @@
 import ModuleName
 
 main() = do
-    if "hello" do
-        print "hello"
-        print "whoa"
-    else
-        print "sup"
-        print "oh no"
+	if "hello" do
+		print "hello"
+		print "whoa"
+	else
+		print "sup"
+		print "oh no"
 end main

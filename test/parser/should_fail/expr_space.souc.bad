@@ -2,4 +2,4 @@
 bad_spaced(x) = x+ 3
 
 main() = do
-    lol_hosed
+	lol_hosed

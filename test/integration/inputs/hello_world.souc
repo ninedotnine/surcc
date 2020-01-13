@@ -1,2 +1,2 @@
 main() = do
-    puts "hello world"
+	puts "hello world"

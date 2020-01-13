@@ -1,10 +1,10 @@
 main() = do
-    until true do
-        print "sub call"
-    sbroutin
+	until true do
+		print "sub call"
+	sbroutin
 end
 
 sbroutin() = do
-    until true do
-        print "sub call"
+	until true do
+		print "sub call"
 end until

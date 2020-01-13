@@ -1,5 +1,5 @@
 main() = do
-    if "ok"
-    print "this is bad"
-    end if
+	if "ok"
+	print "this is bad"
+	end if
 end main

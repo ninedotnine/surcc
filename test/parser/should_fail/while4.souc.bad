@@ -1,4 +1,4 @@
 main() = do
-    while true
-        42
-    end while
+	while true
+		42
+	end while

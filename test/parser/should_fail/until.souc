@@ -1,4 +1,4 @@
 main() = do
-    until true do
-        print "sub call"
-    end while
+	until true do
+		print "sub call"
+	end while

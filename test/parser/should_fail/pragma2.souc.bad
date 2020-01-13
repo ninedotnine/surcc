@@ -3,5 +3,5 @@ import Directovis
 {^; bad newline
 ;^}
 main() = do
-    x <- 42 ; a comment
-    print x ;}
+	x <- 42 ; a comment
+	print x ;}

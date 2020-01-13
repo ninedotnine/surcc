@@ -1,7 +1,7 @@
 import ModuleName
 
 main() = do
-    if 85
-        if "nested"
-            print "hello"
+	if 85
+		if "nested"
+			print "hello"
 end main

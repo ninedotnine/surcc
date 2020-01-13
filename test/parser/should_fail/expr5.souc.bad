@@ -1,5 +1,5 @@
 import Import
 
 main() = do
-    print expr++)
+	print expr++)
 end main
