@@ -1,7 +1,7 @@
 module Main_Parser where
 
 
-import Parser.SouC_Types
+import Common
 -- import Text.Parsec.String (parseFromFile)
 import Text.Parsec.Error (ParseError)
 import System.Environment (getArgs)

@@ -1,4 +1,4 @@
-module Common where
+module Common (
     Stmt(..),
     Param(..),
     Identifier(..),
@@ -12,7 +12,7 @@ module Common where
     Import(..),
     Imports,
 
-    Parser,
+    SouCParser,
     ParserState,
     empty_state
 
@@ -42,8 +42,8 @@ type ParserState = (Indentation, NonEmpty Bindings)
 empty_state :: ParserState
 empty_state = (0, Map.empty :| [])
 
--- type Parser a = Parsec String Indentation a
-type Parser a = Parsec String ParserState a
+-- type SouCParser a = Parsec String Indentation a
+type SouCParser a = Parsec String ParserState a
 
 newtype Identifier = Identifier String
                    deriving (Eq, Read, Show, Ord)

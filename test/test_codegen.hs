@@ -2,7 +2,7 @@
 {-# OPTIONS_GHC -Wall #-}
 
 import CodeGen.CodeGen
-import Parser.SouC_Types
+import Common
 import Parser.ExprParser (ASTree(..), Term(..))
 
 import System.Directory (createDirectoryIfMissing)

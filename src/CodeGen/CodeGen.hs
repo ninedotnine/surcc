@@ -1,7 +1,7 @@
 module CodeGen.CodeGen (generate) where
 
 import CodeGen.ExprGen (generate_expr)
-import Parser.SouC_Types (
+import Common (
     Stmt(..),
     Param(..),
     Identifier(..),

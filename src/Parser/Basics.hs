@@ -8,7 +8,7 @@ import qualified Text.Parsec
 import qualified Data.Map.Strict  as Map (singleton, member)
 import Data.List.NonEmpty ( NonEmpty(..) )
 
-import Parser.SouC_Types
+import Common
 import Parser.ExprParser
 
 reserved_words :: SouCParser String

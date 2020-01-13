@@ -1,6 +1,6 @@
 module Main where
 
-import Parser.SouC_Types
+import Common
 import CodeGen.CodeGen
 import Parser.SouCParser
 

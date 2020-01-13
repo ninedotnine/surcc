@@ -5,7 +5,7 @@ import Debug.Trace
 import Text.Parsec hiding (space, spaces, string)
 import qualified Data.Map.Strict as Map (Map)
 
-import Parser.SouC_Types
+import Common
 import Parser.Basics
 
 run_raw_expr_parser :: String -> String
