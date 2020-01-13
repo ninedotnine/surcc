@@ -7,7 +7,7 @@ import Text.Parsec.Error (ParseError)
 import System.Environment (getArgs)
 import System.Exit (exitFailure, exitSuccess)
 
-import Parser.Parser
+import Parser.SouCParser
 
 {-
 parseFromFile :: String -> IO Stmt

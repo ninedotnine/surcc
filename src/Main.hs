@@ -2,7 +2,7 @@ module Main where
 
 import Parser.SouC_Types
 import CodeGen.CodeGen
-import Parser.Parser
+import Parser.SouCParser
 
 -- import Text.Parsec.String (parseFromFile)
 import Text.Parsec.Error (ParseError)
