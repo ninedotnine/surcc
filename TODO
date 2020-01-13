@@ -1,8 +1,6 @@
 currently:
-    working on replacing the "raw_expr" parser with the shunting-yard ASTree
     shuntingyard stuff could probably use renaming
         ASTree -> Expr_Tree ?
-    ShuntingYard.hs should probably be moved to src/parser/
     how can i run a parsec parser from within another one?
 
 
@@ -19,5 +17,4 @@ currently:
 [ ] generating params is really not implemented at all
 [ ] don't always assume `int`, that was super lazy hacking
 [ ] keep bindings of variables (not only constants)
-[ ] change indentation from 4 spaces to one tab
 [ ] shuntingyard uses `Parsec.string "<>"` which will explode if a < is read first
