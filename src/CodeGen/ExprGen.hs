@@ -1,4 +1,4 @@
-module ExprGen (
+module CodeGen.ExprGen (
     generate_expr
 ) where
 

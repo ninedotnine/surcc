@@ -1,7 +1,7 @@
 -- this test only ensures that *something* is generated for each program tree.
 {-# OPTIONS_GHC -Wall #-}
 
-import CodeGen
+import CodeGen.CodeGen
 import SouC_Types
 import ExprParser (ASTree(..), Term(..))
 

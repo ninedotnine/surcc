@@ -1,7 +1,7 @@
 module Main where
 
 import SouC_Types
-import CodeGen
+import CodeGen.CodeGen
 import Parser
 
 -- import Text.Parsec.String (parseFromFile)

@@ -1,6 +1,6 @@
-module CodeGen (generate) where
+module CodeGen.CodeGen (generate) where
 
-import ExprGen (generate_expr)
+import CodeGen.ExprGen (generate_expr)
 import SouC_Types
 import ExprParser
 
