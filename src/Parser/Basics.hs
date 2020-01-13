@@ -13,8 +13,8 @@ import Parser.ExprParser
 
 data Endable_Stmts = Stmt_If_End | Stmt_While_End | Stmt_Unless_End | Stmt_Until_End
 
-reserved_words :: SouCParser String
-reserved_words =
+reserved_word :: SouCParser String
+reserved_word =
     choice (map word long_list) <?> "reserved word" where
         word s = string s <* notFollowedBy identifier_char
         long_list = [
@@ -112,7 +112,7 @@ identifier = Identifier <$> raw_identifier
 
 raw_identifier :: SouCParser String
 raw_identifier = do
-    notFollowedBy (reserved_words)
+    notFollowedBy reserved_word
     first <- lower <|> char '_'
     rest <- many identifier_char
     return (first:rest)
