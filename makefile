@@ -1,25 +1,32 @@
-# FLAGS = -dynamic -Wall -Wno-unused-imports -no-keep-o-files -no-keep-hi-files
-SOURCEDIR = src/
-OUT_DIR = bin
-HI_DIR = cache/hi_files
-OBJ_DIR = cache/obj_files
-FLAGS = -Wall -dynamic -j -hidir $(HI_DIR) -odir $(OBJ_DIR) -i$(SOURCEDIR)  -Wno-unused-imports -Wall-missed-specialisations
+SOURCEDIR := src/
+OUT_DIR := bin
+HI_DIR := cache/hi_files
+OBJ_DIR := cache/obj_files
+FLAGS := -Wall -dynamic -j -hidir $(HI_DIR) -odir $(OBJ_DIR) -i$(SOURCEDIR)  -Wno-unused-imports -Wall-missed-specialisations
+
+.PHONY: soucc expr parser all default
 
 default: all test
 
-all: build expr parser
+all: soucc expr parser
 
-makedirs:
-	@mkdir -p $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
+soucc: $(OUT_DIR)/soucc
 
-build: makedirs
+$(OUT_DIR)/soucc: | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
 	ghc $(FLAGS) -o $(OUT_DIR)/soucc src/Main.hs
 
-expr: makedirs
+expr: $(OUT_DIR)/expr
+
+$(OUT_DIR)/expr: | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
 	ghc $(FLAGS) -o $(OUT_DIR)/expr -main-is Main_Expr src/Main_Expr.hs
 
-parser: makedirs
+parser: $(OUT_DIR)/parser
+
+$(OUT_DIR)/parser: | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
 	ghc $(FLAGS) -o $(OUT_DIR)/parser -main-is Main_Parser src/Main_Parser.hs
+
+$(OUT_DIR) $(HI_DIR) $(OBJ_DIR):
+	mkdir -p $@
 
 .PHONY: clean
 clean:
@@ -30,7 +37,7 @@ test: test_parser test_codegen test_expr_parser test_integration
 	@echo "all tests successful! :^D"
 
 .PHONY: test_parser
-test_parser: parser
+test_parser: $(OUT_DIR)/parser
 	@test/test_parser
 
 .PHONY: test_codegen
@@ -38,10 +45,9 @@ test_codegen:
 	@runghc -Wall -i$(SOURCEDIR) test/test_codegen.hs
 
 .PHONY: test_integration
-test_integration: build
+test_integration: $(OUT_DIR)/soucc
 	@test/integration_test
 
 .PHONY: test_expr_parser
-test_expr_parser: parser expr
+test_expr_parser: $(OUT_DIR)/parser $(OUT_DIR)/expr
 	@test/test_expr_parser
-
