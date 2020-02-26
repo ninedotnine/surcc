@@ -52,3 +52,9 @@ test_integration: $(OUT_DIR)/soucc
 .PHONY: test_expr_parser
 test_expr_parser: $(OUT_DIR)/parser $(OUT_DIR)/expr
 	@test/test_expr_parser
+
+.PHONY: deps
+deps: | $(CACHE_DIR)
+	ghc -M -dep-suffix '' $(FLAGS) -dep-makefile $(CACHE_DIR)/soucc-deps src/Main.hs
+	ghc -M -dep-suffix '' $(FLAGS) -dep-makefile $(CACHE_DIR)/expr-deps src/Main_Expr.hs
+	ghc -M -dep-suffix '' $(FLAGS) -dep-makefile $(CACHE_DIR)/parser-deps src/Main_Parser.hs
