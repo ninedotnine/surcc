@@ -1,7 +1,8 @@
 SOURCEDIR := src/
 OUT_DIR := bin
-HI_DIR := cache/hi_files
-OBJ_DIR := cache/obj_files
+CACHE_DIR := cache
+HI_DIR := $(CACHE_DIR)/hi_files
+OBJ_DIR := $(CACHE_DIR)/obj_files
 FLAGS := -Wall -dynamic -j -hidir $(HI_DIR) -odir $(OBJ_DIR) -i$(SOURCEDIR)  -Wno-unused-imports -Wall-missed-specialisations
 
 .PHONY: soucc expr parser all default
@@ -25,12 +26,12 @@ parser: $(OUT_DIR)/parser
 $(OUT_DIR)/parser: | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
 	ghc $(FLAGS) -o $(OUT_DIR)/parser -main-is Main_Parser src/Main_Parser.hs
 
-$(OUT_DIR) $(HI_DIR) $(OBJ_DIR):
+$(OUT_DIR) $(CACHE_DIR) $(HI_DIR) $(OBJ_DIR):
 	mkdir -p $@
 
 .PHONY: clean
 clean:
-	rm -fr $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
+	rm -fr $(OUT_DIR) $(CACHE_DIR)
 
 .PHONY: test
 test: test_parser test_codegen test_expr_parser test_integration 
