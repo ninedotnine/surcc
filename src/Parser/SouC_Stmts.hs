@@ -11,7 +11,7 @@ import Parser.ExprParser
 
 statement :: SouCParser Stmt
 statement = do
-    try indent_depth
+    indent_depth
     stmt_cond <|> stmt_loop <|> stmt_return <|> stmt_beginning_with_identifier
 
 
