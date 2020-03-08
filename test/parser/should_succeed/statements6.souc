@@ -1,0 +1,31 @@
+; for people who love empty lines
+
+subroutin(i) = do
+	print i
+
+	x <- 0
+
+	while x < 10 do
+
+		print x
+
+		x++
+
+	end
+
+end
+
+subby() = do
+
+	print "uh"
+end
+
+
+main() = do
+
+	x <- 41
+	subroutin x
+
+	print x
+
+end

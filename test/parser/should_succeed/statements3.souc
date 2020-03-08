@@ -1,0 +1,9 @@
+main() = do
+	x <- 41
+	subroutin x
+
+	print x
+
+subroutin(i) = do
+	print i
+end

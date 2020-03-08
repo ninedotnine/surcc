@@ -1,0 +1,8 @@
+import Commens
+
+{; comment ;}
+main() = do
+	print x
+	; print 4
+
+x = 4

@@ -62,6 +62,9 @@ space = char ' ' *> return ()
 spaces :: SouCParser ()
 spaces = many1 space *> return ()
 
+space_or_tab :: SouCParser ()
+space_or_tab = space <|> tab *> return ()
+
 newline :: SouCParser ()
 newline = char '\n' *> return ()
 
@@ -72,7 +75,7 @@ endline :: SouCParser ()
 endline = skipMany space *> (line_comment <|> block_comment <|> newline) <?> "end-of-line"
 
 line_comment :: SouCParser ()
-line_comment = char ';' *> manyTill anyChar newline *> return ()
+line_comment = try (skipMany space_or_tab *> char ';') *> manyTill anyChar newline *> return ()
 
 block_comment :: SouCParser ()
 block_comment = try (string "{;" *> notFollowedBy (char '>')) *> block_comment_depth 1 *> endline
@@ -85,6 +88,12 @@ block_comment = try (string "{;" *> notFollowedBy (char '>')) *> block_comment_d
 
 doc_comment :: SouCParser ()
 doc_comment = string "{;>" *> skipManyTill anyChar (string "<;}") *> endline *> optional endline
+
+blank_line :: SouCParser ()
+blank_line = try (skipMany space_or_tab *> newline)
+
+meaningless_stuff :: SouCParser ()
+meaningless_stuff = skipMany (line_comment <|> blank_line)
 
 -- pragma :: SouCParser Pragma -- FIXME
 pragma :: SouCParser ()
@@ -132,6 +141,7 @@ decrease_indent_level = modifyState (\(x,m) -> (x-1,m))
 
 indent_depth :: SouCParser ()
 indent_depth = do
+    optional meaningless_stuff
     (level, _) <- getState
     count level tab *> return () <?> "indent"
 
