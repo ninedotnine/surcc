@@ -13,9 +13,11 @@ import Common
 import Parser.SouC_Expr
 import Parser.SouC_Stmts
 import Parser.ExprParser
+import Parser.TabChecker
 
 runSouCParser :: SourceName -> String -> Either ParseError Program
-runSouCParser name input = runParser souCParser empty_state name input
+runSouCParser name input =
+    check_tabs name input >> runParser souCParser empty_state name input
 
 souCParser :: SouCParser Program
 souCParser = do
