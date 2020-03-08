@@ -92,8 +92,8 @@ doc_comment = string "{;>" *> skipManyTill anyChar (string "<;}") *> endline *> 
 blank_line :: SouCParser ()
 blank_line = try (skipMany space_or_tab *> newline)
 
-meaningless_stuff :: SouCParser ()
-meaningless_stuff = skipMany (line_comment <|> blank_line)
+meaningless_fluff :: SouCParser ()
+meaningless_fluff = skipMany (line_comment <|> blank_line)
 
 -- pragma :: SouCParser Pragma -- FIXME
 pragma :: SouCParser ()
@@ -141,7 +141,7 @@ decrease_indent_level = modifyState (\(x,m) -> (x-1,m))
 
 indent_depth :: SouCParser ()
 indent_depth = do
-    optional meaningless_stuff
+    optional meaningless_fluff
     (level, _) <- getState
     count level tab *> return () <?> "indent"
 
