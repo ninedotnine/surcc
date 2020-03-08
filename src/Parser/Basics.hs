@@ -57,7 +57,7 @@ reserved_word =
             "when", "with", "write", "yield", "zen"]
 
 space :: SouCParser ()
-space = char ' ' *> return ()
+space = char ' ' *> return () <?> ""
 
 spaces :: SouCParser ()
 spaces = many1 space *> return ()
@@ -66,7 +66,7 @@ space_or_tab :: SouCParser ()
 space_or_tab = space <|> tab *> return ()
 
 newline :: SouCParser ()
-newline = char '\n' *> return ()
+newline = char '\n' *> return () <?> "newline"
 
 keep_spaces :: SouCParser String
 keep_spaces = many (char ' ')
@@ -75,10 +75,10 @@ endline :: SouCParser ()
 endline = skipMany space *> (line_comment <|> block_comment <|> newline) <?> "end-of-line"
 
 line_comment :: SouCParser ()
-line_comment = try (skipMany space_or_tab *> char ';') *> manyTill anyChar newline *> return ()
+line_comment = try (skipMany space_or_tab *> char ';') *> manyTill anyChar newline *> return () <?> ""
 
 block_comment :: SouCParser ()
-block_comment = try (string "{;" *> notFollowedBy (char '>')) *> block_comment_depth 1 *> endline
+block_comment = try (string "{;" *> notFollowedBy (char '>')) *> block_comment_depth 1 *> endline <?> ""
     where
         nest n = string "{;" *> block_comment_depth n
         end = string ";}" *> return ()
@@ -87,7 +87,7 @@ block_comment = try (string "{;" *> notFollowedBy (char '>')) *> block_comment_d
         block_comment_depth n = skipManyTill anyChar ((nest (n+1)) <|> end *> block_comment_depth (n-1))
 
 doc_comment :: SouCParser ()
-doc_comment = string "{;>" *> skipManyTill anyChar (string "<;}") *> endline *> optional endline
+doc_comment = string "{;>" *> skipManyTill anyChar (string "<;}") *> endline *> optional endline <?> ""
 
 blank_line :: SouCParser ()
 blank_line = try (skipMany space_or_tab *> newline)
