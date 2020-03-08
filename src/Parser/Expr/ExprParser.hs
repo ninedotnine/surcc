@@ -23,7 +23,7 @@ import Text.Parsec ((<|>), (<?>))
 -- for trim_spaces
 import Data.Char (isSpace)
 import Data.Functor ((<&>))
-import Data.List (dropWhile, dropWhileEnd)
+import Data.List (dropWhileEnd)
 
 import Data.Char (ord) -- for evaluate
 
