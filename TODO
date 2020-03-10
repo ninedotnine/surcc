@@ -18,3 +18,4 @@ currently:
 [ ] don't always assume `int`, that was super lazy hacking
 [ ] keep bindings of variables (not only constants)
 [ ] shuntingyard uses `Parsec.string "<>"` which will explode if a < is read first
+[ ] do bindings after program tree is built, not in the parser
