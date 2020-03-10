@@ -73,7 +73,7 @@ souc_string :: SouCParser Expr
 souc_string = Expr_StringLit <$> between (char '"') (char '"') (many (noneOf "\""))
 
 string_char :: SouCParser Char
-string_char = alphaNum <|> char ' ' -- FIXME many other chars are allowed in strings, just not '"'
+string_char = noneOf "\""
 
 raw_souc_string :: SouCParser String
 raw_souc_string = do

@@ -1,5 +1,10 @@
 con = 42
 con2 = $con
 
+con3 = 'k'
+con4 = "ok"
+con5 = "can we handle spaces"
+con6 = "that, and punctuation!?"
+
 main() = do
 	print (con + con2)
