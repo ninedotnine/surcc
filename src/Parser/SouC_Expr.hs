@@ -54,11 +54,9 @@ postfix_oper :: SouCParser String
 postfix_oper = many1 oper_char
 
 raw_number_lit :: SouCParser String
-raw_number_lit = (octInt <|> hexInt <|> int) <?> "lit"
+raw_number_lit = hexInt <|> int <?> "lit"
     where
-        int, octInt, hexInt :: SouCParser String
         hexInt = string "0x" *> (("0x"++) <$> many1 hexDigit)
-        octInt = try (char '0' *> (("0o"++) <$> many1 octDigit)) -- FIXME decide whether i even want octal lits
         int = many1 digit
 
 string_char :: SouCParser Char
