@@ -19,9 +19,6 @@ run_raw_expr_parser input = do
 raw_expr :: SouCParser Raw_Expr
 raw_expr = Raw_Expr <$> expr_internal
 
--- expr :: SouCParser Expr
--- expr = undefined
-
 expr_internal :: SouCParser String
 expr_internal = (prefix_oper <> keep_spaces <> expr_internal)
     <|> ((string "(" <* skipMany space) <> expr_inside_parens <> (skipMany space *> string ")"))
