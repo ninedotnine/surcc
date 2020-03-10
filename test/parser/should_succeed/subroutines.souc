@@ -1,0 +1,11 @@
+main() = do
+	write_4
+	write_5
+
+write_4() = do
+	x <- 4
+	print x
+
+write_5() = do
+	x <- 5
+	print x

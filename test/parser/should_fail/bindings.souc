@@ -1,0 +1,5 @@
+main() = do
+	print "are these bindings ok?"
+
+x = 3
+x = 4

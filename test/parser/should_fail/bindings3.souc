@@ -1,0 +1,5 @@
+x = 3
+
+main() = do
+	x = 4
+	print x
