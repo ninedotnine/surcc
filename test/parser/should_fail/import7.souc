@@ -1,0 +1,6 @@
+module mymodule
+
+import dir/.
+
+main() = do
+	print "imported"

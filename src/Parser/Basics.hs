@@ -128,6 +128,18 @@ raw_identifier = do
     rest <- many identifier_char
     return (first:rest)
 
+module_path :: SouCParser String
+module_path = do
+    leading_slash <- option "" slash
+    dir <- many $ lookAhead (try (name <> slash)) *> (name <> slash)
+    path <- raw_identifier
+    return (leading_slash ++ concat dir ++ path)
+        where
+            dot = string "."
+            dotdot = string ".."
+            slash = string "/"
+            name = (many1 identifier_char) <|> dotdot <|> dot
+
 -- for pattern matching
 pattern :: SouCParser Param
 pattern = Param <$> identifier `sepBy1` oneOf ","

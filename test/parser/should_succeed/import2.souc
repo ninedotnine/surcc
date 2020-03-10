@@ -1,0 +1,6 @@
+module mymodule
+
+import /home/souc/lib/mymodule
+
+main() = do
+	print "imported"

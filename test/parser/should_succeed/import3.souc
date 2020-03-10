@@ -1,0 +1,12 @@
+module mymodule
+
+import system
+import uuid
+import ./mylib
+import ../myuplib
+import ./.././pointlessly_verbose/././haha
+import /usr/share/modules/a_module
+import /home/SOUC/modules/m/some_other_module
+
+main() = do
+	print "imported"

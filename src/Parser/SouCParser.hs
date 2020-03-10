@@ -41,7 +41,7 @@ imports = do
 
 souc_import :: SouCParser Import
 souc_import = do
-    name <- string "import" *> spaces *> raw_identifier <* skipMany1 endline
+    name <- string "import" *> spaces *> module_path <* skipMany1 endline
     return $ Import(name)
 
 parseDefs :: SouCParser [Top_Level_Defn]

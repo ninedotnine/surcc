@@ -1,0 +1,8 @@
+module mymodule
+
+import system
+import uuid
+import ./mylib
+
+main() = do
+	print "imported"
