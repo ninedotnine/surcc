@@ -1,4 +1,4 @@
-import Import
+import importee
 
 main() = do
 	print expr++)

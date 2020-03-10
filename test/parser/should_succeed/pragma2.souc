@@ -1,4 +1,4 @@
-import Pragmatic
+import pragmatic
 
 {^; make main fast ;^}
 main() = do

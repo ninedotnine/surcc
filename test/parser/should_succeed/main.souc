@@ -1,4 +1,4 @@
-import Module
+import mymodule
 
 main() = do
 	var = 4

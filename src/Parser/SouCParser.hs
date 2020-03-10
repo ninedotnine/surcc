@@ -30,7 +30,7 @@ souCParser = do
 
 module_name :: SouCParser (Maybe ModuleName)
 module_name = do
-    name <- string "module" *> space *> upper_name <* endline <* (many pragma) <* endline
+    name <- string "module" *> space *> raw_identifier <* endline <* (many pragma) <* endline
     return $ Just (ModuleName(name))
 
 imports :: SouCParser Imports
@@ -41,7 +41,7 @@ imports = do
 
 souc_import :: SouCParser Import
 souc_import = do
-    name <- string "import" *> spaces *> upper_name <* skipMany1 endline
+    name <- string "import" *> spaces *> raw_identifier <* skipMany1 endline
     return $ Import(name)
 
 parseDefs :: SouCParser [Top_Level_Defn]

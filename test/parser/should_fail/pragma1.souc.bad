@@ -1,4 +1,4 @@
-import Directovis
+import directovis
 
 {^; this is unclosed
 main() = do

@@ -1,8 +1,8 @@
-module Sup
+module sup
 {^; make imports good ;^}
 
-import Pragmatic
-import SoPragma
+import pragmatic
+import soPragma
 
 {^; make main fast ;^}
 

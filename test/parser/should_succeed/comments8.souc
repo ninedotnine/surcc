@@ -1,4 +1,4 @@
-import Commens
+import commens
 
 {; comment ;} ;} ;} ;} technically OK, because it begins with ';'
 main() = do

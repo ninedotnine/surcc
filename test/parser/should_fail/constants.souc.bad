@@ -1,5 +1,5 @@
-import BadImport
-import OopsFailure
+import badimport
+import oopsfailure
 
 con = 4
 con2 = 5

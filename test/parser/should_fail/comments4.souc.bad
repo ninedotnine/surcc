@@ -1,4 +1,4 @@
-import Commens
+import commens
 
 {; comment {; nested comment ;} 
 main() = do

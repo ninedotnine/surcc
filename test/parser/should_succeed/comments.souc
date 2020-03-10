@@ -1,4 +1,4 @@
-import Import ; comments!
+import importee ; comments!
 ; sup
 
 main() = do ; let's hope

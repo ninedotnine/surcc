@@ -1,4 +1,4 @@
-import Hue
+import hue
 
 main() = do
 	x <- 42

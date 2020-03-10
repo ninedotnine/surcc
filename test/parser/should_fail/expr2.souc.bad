@@ -1,4 +1,4 @@
-import Import
+import import
 
 main() = do
 	print x <> huaens <>

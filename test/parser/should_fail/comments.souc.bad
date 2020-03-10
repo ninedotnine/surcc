@@ -1,4 +1,4 @@
-import Modu
+import modu
 
 main() = do
 	x <- ; bad place for a comment

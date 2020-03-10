@@ -1,9 +1,9 @@
-module Blanklines
+module blanklines
 
-import Somethn
-import SomethnElse
+import somethn
+import somethnelse
 
-import Sumtin_Unrelated
+import sumtin_unrelated
 
 
 output(param) = do

@@ -1,4 +1,4 @@
-import Funcs
+import funcs
 
 {;> this is the main routine. it returns no value. <;}
 main() = do
