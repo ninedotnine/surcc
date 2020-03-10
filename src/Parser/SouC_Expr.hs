@@ -66,10 +66,10 @@ string_char = noneOf "\""
 
 raw_souc_string :: SouCParser String
 raw_souc_string = do
-    rest <- try (char '"') *> (many string_char) <> (string "\"")
+    rest <- (char '"') *> (many string_char) <> (string "\"")
     return $ '"' : rest
 
 raw_souc_char :: SouCParser String
 raw_souc_char = do
-    ch <- try (char '\'') *> anyChar <* (char '\'')
+    ch <- (char '\'') *> anyChar <* (char '\'')
     return $ '\'' : ch : "'"
