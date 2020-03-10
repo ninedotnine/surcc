@@ -53,14 +53,6 @@ infix_oper = many1 oper_char
 postfix_oper :: SouCParser String
 postfix_oper = many1 oper_char
 
-number_lit :: SouCParser Expr
-number_lit = Expr_Number <$> ((try octInt <|> try hexInt <|> int) <?> "lit")
-    where
-        int, octInt, hexInt :: SouCParser Integer
-        octInt = char '0' *> (read . ("0o"++) <$> many1 octDigit)
-        hexInt = string "0x" *> (read . ("0x"++) <$> many1 hexDigit)
-        int = read <$> (many1 digit)
-
 raw_number_lit :: SouCParser String
 raw_number_lit = ((try octInt <|> try hexInt <|> int) <?> "lit")
     where
@@ -69,9 +61,6 @@ raw_number_lit = ((try octInt <|> try hexInt <|> int) <?> "lit")
         hexInt = string "0x" *> (("0x"++) <$> many1 hexDigit)
         int = (many1 digit)
 
-souc_string :: SouCParser Expr
-souc_string = Expr_StringLit <$> between (char '"') (char '"') (many (noneOf "\""))
-
 string_char :: SouCParser Char
 string_char = noneOf "\""
 
@@ -79,9 +68,6 @@ raw_souc_string :: SouCParser String
 raw_souc_string = do
     rest <- try (char '"') *> (many string_char) <> (string "\"")
     return $ '"' : rest
-
-souc_char :: SouCParser Expr
-souc_char = Expr_CharLit <$> between (char '\'') (char '\'') anyChar
 
 raw_souc_char :: SouCParser String
 raw_souc_char = do

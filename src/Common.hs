@@ -6,7 +6,6 @@ module Common (
     CheckedProgram(..),
     Program(..),
     Top_Level_Defn(..),
-    Expr(..),
 --     Endable_Stmts(..),
     ModuleName(..),
     Import(..),
@@ -74,16 +73,6 @@ data Top_Level_Defn = Top_Level_Const_Defn Identifier ASTree
                     | SubDefn Identifier (Maybe Param) Stmts
                     | MainDefn (Maybe Param) Stmts
                     deriving Show
-
-data Expr = Expr_Number Integer
-          | Expr_CharLit Char
-          | Expr_StringLit String
-          | Expr_Identifier Identifier
-          | Expr_BoolLit Bool -- FIXME generalize this. bools are just like any other `datatype`
-          | Expr_FuncCall String Expr
-          | Expr_Prefix_Oper String Expr
-          | Expr_Infix_Oper Expr String Expr -- FIXME get rid of this?
-          deriving Show
 
 data Stmt = Stmt_While ASTree Stmts
           | Stmt_Until ASTree Stmts
