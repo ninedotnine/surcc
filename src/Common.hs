@@ -2,6 +2,7 @@ module Common (
     Stmt(..),
     Param(..),
     Identifier(..),
+    TypeName(..),
     Stmts(..),
     CheckedProgram(..),
     Program(..),
@@ -64,7 +65,9 @@ newtype Import = Import String deriving (Read, Show)
 
 newtype Stmts = Stmts [Stmt] deriving Show
 
-newtype Param = Param [Identifier] deriving (Show)
+newtype TypeName = TypeName String deriving Show
+
+data Param = Param [Identifier] (Maybe TypeName) deriving (Show)
 
 
 data Top_Level_Defn = Top_Level_Const_Defn Identifier ASTree

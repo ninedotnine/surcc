@@ -142,8 +142,17 @@ module_path = do
 
 -- for pattern matching
 pattern :: SouCParser Param
-pattern = Param <$> identifier `sepBy1` oneOf ","
+pattern = do
+    name <- identifier `sepBy1` oneOf ","
+    sig <- optionMaybe type_signature
+    return (Param name sig)
 
+type_signature :: SouCParser TypeName
+type_signature = do
+    char ':' *> skipMany space
+    first <- upper
+    rest <- many (lower <|> upper <|> digit)
+    return (TypeName (first:rest))
 
 increase_indent_level :: SouCParser ()
 increase_indent_level = modifyState (\(x,m) -> (x+1,m))

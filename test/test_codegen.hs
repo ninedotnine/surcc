@@ -58,12 +58,12 @@ conster = CheckedProgram Nothing [] [
 func :: CheckedProgram
 func = CheckedProgram Nothing [] [
     MainDefn Nothing (Stmts []),
-    ShortFuncDefn (Identifier "f") (Param [Identifier "x"]) (Leaf (Lit 42))]
+    ShortFuncDefn (Identifier "f") (Param [Identifier "x"] Nothing) (Leaf (Lit 42))]
 
 func2 :: CheckedProgram
 func2 = CheckedProgram Nothing [] [
     MainDefn Nothing (Stmts []),
-    FuncDefn (Identifier "f") (Param  [Identifier "x"]) (Stmts [
+    FuncDefn (Identifier "f") (Param  [Identifier "x"] Nothing) (Stmts [
         Stmt_Return (Just (Leaf (Lit 42)))])]
 
 mainer :: CheckedProgram
