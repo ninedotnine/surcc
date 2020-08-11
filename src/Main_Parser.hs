@@ -49,17 +49,30 @@ print_file_contents filename = do
 
 
 prettyPrint :: Top_Level_Defn -> IO ()
-prettyPrint (SubDefn name param (Stmts stmts)) = do
+prettyPrint (SubDefn name param (Just (TypeName t)) (Stmts stmts)) = do
+    putStr $ "sub " ++ show name ++ " returns (should be IO): " ++ t ++ " takes "
+    putStrLn $ show param
+    putStrLn (unlines (map prettifyStmt stmts))
+prettyPrint (SubDefn name param Nothing (Stmts stmts)) = do
     putStr $ "sub " ++ show name ++ " takes "
     putStrLn $ show param
     putStrLn (unlines (map prettifyStmt stmts))
-prettyPrint (FuncDefn name param (Stmts stmts)) = do
-    putStrLn $ "fn " ++ show name ++ " takn " ++ show param ++ " " ++ (unlines $  (map ((' ':) . prettifyStmt) stmts))
-prettyPrint (ShortFuncDefn name param expr) = do
+prettyPrint (FuncDefn name param (Just (TypeName t)) (Stmts stmts)) = do
+    putStrLn $ "fn " ++ show name ++ " takn " ++ show param ++ " returns: " ++ t ++ (
+                unlines $  (map ((' ':) . prettifyStmt) stmts))
+prettyPrint (FuncDefn name param Nothing (Stmts stmts)) = do
+    putStrLn $ "fn " ++ show name ++ " takn " ++ show param ++ " " ++ (
+                unlines $  (map ((' ':) . prettifyStmt) stmts))
+prettyPrint (ShortFuncDefn name param (Just (TypeName t)) expr) = do
+    putStrLn $ "fn" ++ show name ++ " takn " ++ show param ++ " returns: " ++ t ++ " = " ++ show expr
+prettyPrint (ShortFuncDefn name param Nothing expr) = do
     putStrLn $ "fn" ++ show name ++ " takn " ++ show param ++ " = " ++ show expr
 prettyPrint (Top_Level_Const_Defn name val) = do
     putStrLn $ "const " ++ show name ++ " = " ++ show val
-prettyPrint (MainDefn param (Stmts stmts)) = do
+prettyPrint (MainDefn param (Just (TypeName t)) (Stmts stmts)) = do
+    putStrLn $ "fn main with args? " ++ show param ++ " returns (IO?): " ++ t ++ " = "
+    putStrLn $ unlines (map ((' ':) . prettifyStmt) stmts)
+prettyPrint (MainDefn param Nothing (Stmts stmts)) = do
     putStrLn $ "fn main with args? " ++ show param ++ " = "
     putStrLn $ unlines (map ((' ':) . prettifyStmt) stmts)
 

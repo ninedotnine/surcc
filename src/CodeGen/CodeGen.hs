@@ -34,19 +34,19 @@ instance Generatable Param where
 instance Generatable Top_Level_Defn where
     gen (Top_Level_Const_Defn name expr) =
         "const int " ++ gen name ++ " = " ++ gen expr ++ ";\n"
-    gen (FuncDefn name param stmts) =
+    gen (FuncDefn name param _ stmts) =
         "int " ++ gen name ++ "(" ++ gen param ++ ") {" ++ body ++ "}\n"
             where body = gen stmts
-    gen (ShortFuncDefn name param expr) =
+    gen (ShortFuncDefn name param _ expr) =
         "int " ++ gen name ++ "(" ++ gen param  ++ ") { return " ++
         gen expr ++ "; }\n"
-    gen (SubDefn name m_param stmts) =
+    gen (SubDefn name m_param _ stmts) =
         "void " ++ gen name ++ "(" ++ param ++ ") { " ++ body ++ "}\n" where
             body = gen stmts
             param = case m_param of
                 Nothing -> "void"
                 Just p -> gen p
-    gen (MainDefn m_param stmts) =
+    gen (MainDefn m_param _ stmts) =
         "int main (" ++ param ++ ") { " ++ body ++ "}\n" where
             body = gen stmts
             param = case m_param of

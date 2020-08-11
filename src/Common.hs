@@ -71,10 +71,10 @@ data Param = Param [Identifier] (Maybe TypeName) deriving (Show)
 
 
 data Top_Level_Defn = Top_Level_Const_Defn Identifier ASTree
-                    | FuncDefn Identifier Param Stmts
-                    | ShortFuncDefn Identifier Param ASTree
-                    | SubDefn Identifier (Maybe Param) Stmts
-                    | MainDefn (Maybe Param) Stmts
+                    | FuncDefn Identifier Param (Maybe TypeName) Stmts
+                    | ShortFuncDefn Identifier Param (Maybe TypeName) ASTree
+                    | SubDefn Identifier (Maybe Param) (Maybe TypeName) Stmts
+                    | MainDefn (Maybe Param) (Maybe TypeName) Stmts
                     deriving Show
 
 data Stmt = Stmt_While ASTree Stmts

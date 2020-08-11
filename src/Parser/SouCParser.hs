@@ -62,10 +62,12 @@ parse_def = do
 main_defn :: SouCParser Top_Level_Defn
 main_defn = do
     _ <- string "main("
-    param <- optionMaybe pattern <* char ')' <* spaces <* char '=' <* spaces <* string "do" <* endline
+    param <- optionMaybe pattern <* char ')'
+    sig <- optionMaybe type_signature
+    _ <- spaces <* char '=' <* spaces <* string "do" <* endline
     stmts <- stmt_block
     optional_end_name (Identifier "main")
-    return $ MainDefn param stmts
+    return $ MainDefn param sig stmts
 
 top_level_const :: SouCParser Top_Level_Defn
 top_level_const = do
@@ -84,26 +86,30 @@ top_level_proc = do
 
 top_level_func :: Identifier -> SouCParser Top_Level_Defn
 top_level_func func_name = do
-    param <- pattern <* char ')' <* spaces <* char '=' <* spaces
-    short_top_level_func func_name param <|> long_top_level_func func_name param
+    param <- pattern <* char ')'
+    sig <- optionMaybe type_signature
+    _ <- spaces <* char '=' <* spaces
+    short_top_level_func func_name param sig <|> long_top_level_func func_name param sig
 
-short_top_level_func :: Identifier -> Param -> SouCParser Top_Level_Defn
-short_top_level_func func_name param = do
+short_top_level_func :: Identifier -> Param -> Maybe TypeName -> SouCParser Top_Level_Defn
+short_top_level_func func_name param sig = do
     (Raw_Expr body) <- raw_expr
     case parse_expression body of
-        Right result -> return $ ShortFuncDefn func_name param result
+        Right result -> return $ ShortFuncDefn func_name param sig result
 --         Left parse_err -> mergeError (fail "invalid expression") parse_err
         Left err -> fail $ "invalid expression\n" ++ show err
 
-long_top_level_func :: Identifier -> Param -> SouCParser Top_Level_Defn
-long_top_level_func func_name param = do
+long_top_level_func :: Identifier -> Param -> Maybe TypeName -> SouCParser Top_Level_Defn
+long_top_level_func func_name param sig = do
     stmts <- string "do" *> endline *> stmt_block
     optional_end_name func_name
-    return $ FuncDefn func_name param stmts
+    return $ FuncDefn func_name param sig stmts
 
 top_level_sub :: Identifier -> SouCParser Top_Level_Defn
 top_level_sub sub_name = do
-    param <- optionMaybe pattern <* char ')' <* spaces <* char '=' <* spaces <* string "do" <* endline
+    param <- optionMaybe pattern <* char ')'
+    sig <- optionMaybe type_signature
+    _ <- spaces <* char '=' <* spaces <* string "do" <* endline
     stmts <- stmt_block
     optional_end_name sub_name
-    return $ SubDefn sub_name param stmts
+    return $ SubDefn sub_name param sig stmts
