@@ -1,0 +1,8 @@
+import hue
+
+main() = do
+	x <- 42
+	x <- x+1
+	x <- x+2
+	print x
+
