@@ -1,0 +1,8 @@
+main() = do
+	x <- 41: Integer
+	sub_call x:String
+	print x: LOLBorked
+
+sub_call(i) = do
+	x++
+end

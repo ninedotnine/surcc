@@ -32,11 +32,11 @@ fn_call :: SouCParser String
 fn_call = try (raw_identifier <> string "(") <> expr_internal <> string ")"
 
 term :: SouCParser String
-term = fn_call
+term = (fn_call
     <|> raw_identifier
     <|> raw_souc_char
     <|> raw_souc_string
-    <|> raw_number_lit
+    <|> raw_number_lit) <> option "" type_sig
 
 oper_char :: SouCParser Char
 oper_char = oneOf "#$%&*+-/<=>?\\^|~"
@@ -68,3 +68,10 @@ raw_souc_char :: SouCParser String
 raw_souc_char = do
     ch <- (char '\'') *> anyChar <* (char '\'')
     return $ '\'' : ch : "'"
+
+type_sig :: SouCParser String
+type_sig = do
+    setup <- (char ':' *> return ":") <> keep_spaces
+    first <- upper
+    rest <- many (lower <|> upper <|> digit)
+    return (setup ++ first : rest)
