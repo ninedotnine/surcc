@@ -1,0 +1,4 @@
+main() = do
+	x: Int = 5
+	y: What <- "wah"
+	print $x
