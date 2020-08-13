@@ -89,7 +89,7 @@ top_level_func func_name = do
     param <- pattern <* char ')'
     sig <- optionMaybe type_signature
     _ <- spaces <* char '=' <* spaces
-    short_top_level_func func_name param sig <|> long_top_level_func func_name param sig
+    long_top_level_func func_name param sig <|> short_top_level_func func_name param sig
 
 short_top_level_func :: Identifier -> Param -> Maybe TypeName -> SouCParser Top_Level_Defn
 short_top_level_func func_name param sig = do

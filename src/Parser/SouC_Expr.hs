@@ -8,7 +8,7 @@ module Parser.SouC_Expr (
 
 import Debug.Trace
 
-import Text.Parsec hiding (space, spaces, string)
+import Text.Parsec hiding (newline, space, spaces, string)
 import qualified Data.Map.Strict as Map (Map)
 
 import Common
@@ -23,61 +23,22 @@ run_raw_expr_parser input = do
         Right r -> show r
 
 raw_expr :: SouCParser Raw_Expr
-raw_expr = Raw_Expr <$> expr_internal
+raw_expr = Raw_Expr <$> dumb_raw_expr
 
-expr_internal :: SouCParser String
-expr_internal = (prefix_oper <> keep_spaces <> expr_internal)
-    <|> ((string "(" <* skipMany space) <> expr_inside_parens <> (skipMany space *> string ")"))
-    <|> (try (term <> keep_spaces <> infix_oper) <> keep_spaces <> expr_internal) -- FIXME whitespace must be equal
-    <|> term
+ -- FIXME eventually this must skip newlines when inside parens, brackets, braces
+dumb_raw_expr :: SouCParser String
+dumb_raw_expr = fmap pure expr_char <> manyTill expr_char (lookAhead (eol <|> do_keyword)) where
+    expr_char = oper_char <|> funky_expr_char <|> identifier_char
+    do_keyword = try (string "do" *> (oneOf " \n")) *> return ()
+    eol = try endline
 
-expr_inside_parens :: SouCParser String
-expr_inside_parens = expr_internal  -- FIXME eventually this must skip newlines
-
-fn_call :: SouCParser String
-fn_call = try (raw_identifier <> string "(") <> expr_internal <> string ")"
-
-term :: SouCParser String
-term = (fn_call
-    <|> raw_identifier
-    <|> raw_souc_char
-    <|> raw_souc_string
-    <|> raw_number_lit) <> option "" type_sig
+funky_expr_char :: SouCParser Char
+funky_expr_char = oneOf " \"'()[]{}:"
 
 oper_char :: SouCParser Char
-oper_char = oneOf "#$%&*+-/<=>?\\^|~,"
-
-prefix_oper :: SouCParser String
-prefix_oper = many1 oper_char <|> string "@" <|> string "!"
-
-infix_oper :: SouCParser String
-infix_oper = many1 oper_char
+oper_char = infix_oper_char <|> prefix_oper_char where
+    infix_oper_char  = oneOf "#$%&*+-/<=>?\\^|~,"
+    prefix_oper_char = oneOf "@!"
 
 postfix_oper :: SouCParser String
 postfix_oper = many1 oper_char
-
-raw_number_lit :: SouCParser String
-raw_number_lit = hexInt <|> int <?> "lit"
-    where
-        hexInt = string "0x" *> (("0x"++) <$> many1 hexDigit)
-        int = many1 digit
-
-string_char :: SouCParser Char
-string_char = noneOf "\""
-
-raw_souc_string :: SouCParser String
-raw_souc_string = do
-    rest <- (char '"') *> (many string_char) <> (string "\"")
-    return $ '"' : rest
-
-raw_souc_char :: SouCParser String
-raw_souc_char = do
-    ch <- (char '\'') *> anyChar <* (char '\'')
-    return $ '\'' : ch : "'"
-
-type_sig :: SouCParser String
-type_sig = do
-    setup <- (char ':' *> return ":") <> keep_spaces
-    first <- upper
-    rest <- many (lower <|> upper <|> digit)
-    return (setup ++ first : rest)
