@@ -45,7 +45,7 @@ term = (fn_call
     <|> raw_number_lit) <> option "" type_sig
 
 oper_char :: SouCParser Char
-oper_char = oneOf "#$%&*+-/<=>?\\^|~"
+oper_char = oneOf "#$%&*+-/<=>?\\^|~,"
 
 prefix_oper :: SouCParser String
 prefix_oper = many1 oper_char <|> string "@" <|> string "!"
