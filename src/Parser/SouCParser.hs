@@ -71,7 +71,7 @@ main_defn = do
 
 top_level_const :: SouCParser Top_Level_Defn
 top_level_const = do
-    name <- try (identifier <* spaces <* char '=')
+    name <- try (identifier <* optional_sig <* spaces <* char '=')
     Raw_Expr val <- spaces *> raw_expr
     case parse_expression val of
         Right expr -> do

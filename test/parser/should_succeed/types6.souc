@@ -1,0 +1,8 @@
+x: Integer = 41: Integer
+
+main(stdout: OutputStream): IO = do
+	x <- cool_fn + x: Integer
+	print ((x): LOLBorked)
+end
+
+cool_fn(x: Integer): Integer = (x + 1): Integer
