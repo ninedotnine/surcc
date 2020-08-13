@@ -47,6 +47,7 @@ parse_term = do
             parse_term
         TermTok t -> do
             tree_stack_push (Leaf t)
+            optional_sig
             parse_oper <|> finish_expr
         TightPreOp op -> do
             oper_stack_push (StackTightPreOp op)
@@ -63,6 +64,7 @@ parse_oper = do
             if_tightly_spaced find_left_space
             look_for StackLParen
             Oper_Stack stack_ops <- get_op_stack
+            optional_sig
             case stack_ops of
                 (StackSpace:ops) -> oper_stack_set ops *> set_spacing_tight True
                 _ -> return ()
@@ -71,6 +73,7 @@ parse_oper = do
             if_tightly_spaced find_left_space
             look_for StackLParenFollowedBySpace
             Oper_Stack stack_ops <- get_op_stack
+            optional_sig
             case stack_ops of
                 (StackSpace:ops) -> oper_stack_set ops *> set_spacing_tight True
                 _ -> return ()
@@ -104,6 +107,16 @@ parse_expression input = Parsec.runParser parse_term start_state "input" (trim_s
     where
         start_state = (Oper_Stack [], Tree_Stack [], Tight False)
         trim_spaces = dropWhile isSpace <&> dropWhileEnd isSpace
+
+
+optional_sig :: ShuntingYardParser ()
+optional_sig = Parsec.optional type_sig where
+    type_sig :: ShuntingYardParser String
+    type_sig = do
+        Parsec.char ':' *> ignore_spaces
+        first <- Parsec.upper
+        rest <- Parsec.many (Parsec.lower <|> Parsec.upper <|> Parsec.digit)
+        return (first:rest)
 
 parse_print_expression :: String -> IO ()
 parse_print_expression input = case parse_expression input of

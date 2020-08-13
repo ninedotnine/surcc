@@ -1,0 +1,7 @@
+x = 42
+y = 'c'
+z = "ceu"
+ah = (x) + y
+ah1 = ((((x))+((y))+(z)))
+ah2 = (x: Int) + y
+ah3 =  ((x): Int + y)

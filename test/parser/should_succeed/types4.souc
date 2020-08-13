@@ -1,0 +1,15 @@
+w = 9: What
+x = 4: Okay + 4: Huh
+y = (4: Okay + 4: Huh)
+z = ((x): Integer + (y): Typey)
+a = ((x): Integer + ((y)): Typey)
+b = (((((x))): Integer + ((((y))): Typey)))
+
+main(stdout: OutputStream): IO = do
+	x <- cool_fn + (41:Integer)
+	print (x: LOLBorked)
+	print ((x): LOLBorked)
+	print ((((x)): LOLBorked))
+end
+
+cool_fn(x: Integer): Integer = ((x + 1): Integer)
