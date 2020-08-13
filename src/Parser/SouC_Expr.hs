@@ -1,4 +1,10 @@
-module Parser.SouC_Expr where
+module Parser.SouC_Expr (
+    Raw_Expr(..),
+    raw_expr,
+    run_raw_expr_parser,
+    postfix_oper -- fixme why is this in this module?
+) where
+
 
 import Debug.Trace
 
