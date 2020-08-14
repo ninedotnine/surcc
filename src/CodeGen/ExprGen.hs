@@ -19,7 +19,7 @@ generate_term (LitInt l) = show l
 generate_term (LitChar c) = "\'" ++ c : "\'"
 generate_term (LitBool b) = if b then "true" else "false"
 generate_term (LitString s) = show s
-generate_term (Var v) = v
+generate_term (Var v _) = v
 
 generate_oper :: Operator -> String
 generate_oper Plus              = "+"

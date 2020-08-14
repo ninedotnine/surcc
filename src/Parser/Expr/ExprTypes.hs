@@ -30,8 +30,15 @@ data Term = LitInt Integer
           | LitChar Char
           | LitBool Bool
           | LitString String
-          | Var String
+          | Var String (Maybe Type)
     deriving (Eq, Show)
+
+data Type = TypeInt
+          | TypeBool
+          | TypeChar
+          | TypeString
+          | TypeArrow Type Type
+          deriving (Eq, Show)
 
 data Operator = Plus
               | Minus
