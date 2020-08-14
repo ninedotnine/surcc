@@ -125,9 +125,9 @@ parse_print_expression input = case parse_expression input of
 
 evaluate_astree :: ASTree -> Integer
 evaluate_astree (Leaf t) = case t of
-    Lit x -> x
-    CharLit c -> fromIntegral (ord c)
-    StringLit s -> fromIntegral (length s)
+    LitInt x -> x
+    LitChar c -> fromIntegral (ord c)
+    LitString s -> fromIntegral (length s)
     Var _ -> 42 -- all identifiers are bound to this, sure
 evaluate_astree (Twig op tree) = operate (evaluate_astree tree)
     where operate = case op of

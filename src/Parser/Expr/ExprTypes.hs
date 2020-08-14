@@ -26,10 +26,10 @@ data ASTree = Branch Operator ASTree ASTree
 
 newtype Precedence = Precedence Word8 deriving (Eq, Ord)
 
-data Term = Lit Integer
+data Term = LitInt Integer
+          | LitChar Char
+          | LitString String
           | Var String
-          | CharLit Char
-          | StringLit String
     deriving Show
 
 data Operator = Plus

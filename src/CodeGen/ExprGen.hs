@@ -15,9 +15,9 @@ generate_expr (Twig op t) = generate_prefix_expr op ++ generate_expr t
 generate_expr (Branch op x y) = generate_expr x ++ generate_oper op ++ generate_expr y
 
 generate_term :: Term -> String
-generate_term (Lit l) = show l
-generate_term (CharLit c) = "\'" ++ c : "\'"
-generate_term (StringLit s) = show s
+generate_term (LitInt l) = show l
+generate_term (LitChar c) = "\'" ++ c : "\'"
+generate_term (LitString s) = show s
 generate_term (Var v) = v
 
 generate_oper :: Operator -> String

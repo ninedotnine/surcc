@@ -34,7 +34,7 @@ parse_prefix_op = do
             ) <?> "prefix operator"
 
 parse_num :: ShuntingYardParser Term
-parse_num = Lit <$> read <$> Parsec.many1 Parsec.digit
+parse_num = LitInt <$> read <$> Parsec.many1 Parsec.digit
 
 parse_var :: ShuntingYardParser Term
 parse_var = do
@@ -43,10 +43,10 @@ parse_var = do
     return $ Var (first:rest)
 
 parse_char :: ShuntingYardParser Term
-parse_char = CharLit <$> ((Parsec.char '\'') *> Parsec.anyChar <* (Parsec.char '\''))
+parse_char = LitChar <$> ((Parsec.char '\'') *> Parsec.anyChar <* (Parsec.char '\''))
 
 parse_string :: ShuntingYardParser Term
-parse_string = StringLit <$> ((Parsec.char '\"') *> Parsec.many (Parsec.noneOf "\"") <* (Parsec.char '\"'))
+parse_string = LitString <$> ((Parsec.char '\"') *> Parsec.many (Parsec.noneOf "\"") <* (Parsec.char '\"'))
 
 parse_left_paren :: ShuntingYardParser TermToken
 parse_left_paren = do
