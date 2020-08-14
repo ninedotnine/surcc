@@ -17,6 +17,7 @@ generate_expr (Branch op x y) = generate_expr x ++ generate_oper op ++ generate_
 generate_term :: Term -> String
 generate_term (LitInt l) = show l
 generate_term (LitChar c) = "\'" ++ c : "\'"
+generate_term (LitBool b) = if b then "true" else "false"
 generate_term (LitString s) = show s
 generate_term (Var v) = v
 

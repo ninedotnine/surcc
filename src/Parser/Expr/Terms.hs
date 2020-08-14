@@ -14,7 +14,7 @@ parse_term_token = parse_term_tok <|> parse_left_paren <|> parse_prefix_op
 
 parse_term_tok :: ShuntingYardParser TermToken
 parse_term_tok = do
-    val <- TermTok <$> (parse_num <|> parse_char <|> parse_string <|> parse_var)
+    val <- TermTok <$> (parse_num <|> parse_char <|> parse_string <|> parse_bool <|> parse_var)
     Parsec.optional type_sig
     return val
 
@@ -35,6 +35,9 @@ parse_prefix_op = do
 
 parse_num :: ShuntingYardParser Term
 parse_num = LitInt <$> read <$> Parsec.many1 Parsec.digit
+
+parse_bool :: ShuntingYardParser Term
+parse_bool = LitBool <$> read <$> (Parsec.string "True" <|> Parsec.string "False")
 
 parse_var :: ShuntingYardParser Term
 parse_var = do

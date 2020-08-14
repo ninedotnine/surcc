@@ -127,6 +127,7 @@ evaluate_astree :: ASTree -> Integer
 evaluate_astree (Leaf t) = case t of
     LitInt x -> x
     LitChar c -> fromIntegral (ord c)
+    LitBool b -> if b then 1 else 0
     LitString s -> fromIntegral (length s)
     Var _ -> 42 -- all identifiers are bound to this, sure
 evaluate_astree (Twig op tree) = operate (evaluate_astree tree)

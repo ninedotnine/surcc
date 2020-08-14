@@ -28,6 +28,7 @@ newtype Precedence = Precedence Word8 deriving (Eq, Ord)
 
 data Term = LitInt Integer
           | LitChar Char
+          | LitBool Bool
           | LitString String
           | Var String
     deriving Show
