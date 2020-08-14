@@ -31,7 +31,7 @@ data Term = LitInt Integer
           | LitBool Bool
           | LitString String
           | Var String
-    deriving Show
+    deriving (Eq, Show)
 
 data Operator = Plus
               | Minus
