@@ -76,7 +76,7 @@ top_level_const = do
     case parse_expression val of
         Right expr -> do
             add_to_bindings name expr
-            return $ Top_Level_Const_Defn name expr
+            return $ Top_Level_Const_Defn name Nothing expr
         Left err -> parserFail $ "invalid expression:\n" ++ show err
 
 top_level_proc :: SouCParser Top_Level_Defn

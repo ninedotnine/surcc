@@ -32,7 +32,7 @@ instance Generatable Param where
     gen _ = "FIXME LOL"
 
 instance Generatable Top_Level_Defn where
-    gen (Top_Level_Const_Defn name expr) =
+    gen (Top_Level_Const_Defn name _ expr) =
         "const int " ++ gen name ++ " = " ++ gen expr ++ ";\n"
     gen (FuncDefn name param _ stmts) =
         "int " ++ gen name ++ "(" ++ gen param ++ ") {" ++ body ++ "}\n"

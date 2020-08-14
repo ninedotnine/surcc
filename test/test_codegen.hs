@@ -51,7 +51,7 @@ run_tests = do
 
 conster :: CheckedProgram
 conster = CheckedProgram Nothing [] [
-    Top_Level_Const_Defn (Identifier "x") (Leaf (LitInt 42)),
+    Top_Level_Const_Defn (Identifier "x") Nothing (Leaf (LitInt 42)),
     MainDefn Nothing Nothing (Stmts [
         Stmt_Return (Just (Leaf (LitInt 0)))])]
 

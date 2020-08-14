@@ -70,7 +70,7 @@ newtype TypeName = TypeName String deriving Show
 data Param = Param [Identifier] (Maybe TypeName) deriving (Show)
 
 
-data Top_Level_Defn = Top_Level_Const_Defn Identifier ASTree
+data Top_Level_Defn = Top_Level_Const_Defn Identifier (Maybe TypeName) ASTree
                     | FuncDefn Identifier Param (Maybe TypeName) Stmts
                     | ShortFuncDefn Identifier Param (Maybe TypeName) ASTree
                     | SubDefn Identifier (Maybe Param) (Maybe TypeName) Stmts
