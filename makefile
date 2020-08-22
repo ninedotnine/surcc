@@ -9,16 +9,19 @@ FLAGS := -Wall -dynamic -j -hidir $(HI_DIR) -odir $(OBJ_DIR) -i$(SOURCEDIR)  -Wn
 
 default: all test
 
-all: soucc expr parser
+all: bin/soucc bin/expr bin/parser
 
-soucc: | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
-	@ghc $(FLAGS) -o $(OUT_DIR)/soucc src/Main.hs
+soucc: bin/soucc
+bin/soucc: src/Main.hs | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
+	ghc $(FLAGS) -o $(OUT_DIR)/soucc $<
 
-expr: | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
-	@ghc $(FLAGS) -o $(OUT_DIR)/expr -main-is Main_Expr src/Main_Expr.hs
+expr: bin/expr
+bin/expr: src/Main_Expr.hs | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
+	ghc $(FLAGS) -o $(OUT_DIR)/expr -main-is Main_Expr $<
 
-parser: | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
-	@ghc $(FLAGS) -o $(OUT_DIR)/parser -main-is Main_Parser src/Main_Parser.hs
+parser: bin/parser
+bin/parser: src/Main_Parser.hs | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
+	ghc $(FLAGS) -o $(OUT_DIR)/parser -main-is Main_Parser $<
 
 $(OUT_DIR) $(CACHE_DIR) $(HI_DIR) $(OBJ_DIR):
 	mkdir -p $@
