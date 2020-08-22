@@ -54,6 +54,16 @@ test (prog, expected, name) = do
         then putStrLn "OK."
         else putStrLn "FAILED! bad result" >> exitFailure
 
+program_header :: [Top_Level_Defn] -> Program
+program_header = Program Nothing [] -- no name, no imports
+
+checked_program_header :: [Top_Level_Defn] -> CheckedProgram
+checked_program_header = CheckedProgram Nothing []
+
+notype :: Maybe TypeName
+notype = Nothing
+
+-- tests begin here
 
 conster :: Program
 conster =  Program Nothing [] [
