@@ -1,6 +1,7 @@
 {-# OPTIONS_GHC -Wall #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
 {-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 import TypeChecker.TypeChecker
 import Common
@@ -8,6 +9,8 @@ import Parser.ExprParser (ASTree(..), Term(..))
 
 import System.Directory (createDirectoryIfMissing)
 import System.Exit (exitFailure)
+import Data.String (IsString(..))
+
 -- import System.IO
 
 tmpdir :: FilePath
@@ -39,6 +42,9 @@ instance Eq ModuleName where
 
 instance Eq Import where
     Import s0 == Import s1 = s0 == s1
+
+instance IsString TypeName where
+    fromString = TypeName
 
 test :: Test -> IO ()
 test (prog, expected, name) = do
