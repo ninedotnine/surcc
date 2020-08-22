@@ -16,11 +16,11 @@ bin/soucc: src/Main.hs | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
 	ghc $(FLAGS) -o $(OUT_DIR)/soucc $<
 
 expr: bin/expr
-bin/expr: src/Main_Expr.hs | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
+bin/expr: src/Main_Expr.hs soucc | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
 	ghc $(FLAGS) -o $(OUT_DIR)/expr -main-is Main_Expr $<
 
 parser: bin/parser
-bin/parser: src/Main_Parser.hs | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
+bin/parser: src/Main_Parser.hs soucc | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
 	ghc $(FLAGS) -o $(OUT_DIR)/parser -main-is Main_Parser $<
 
 $(OUT_DIR) $(CACHE_DIR) $(HI_DIR) $(OBJ_DIR):
