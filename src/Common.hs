@@ -3,6 +3,7 @@ module Common (
     Param(..),
     Identifier(..),
     TypeName(..),
+    TypeError(..),
     Stmts(..),
     CheckedProgram(..),
     Program(..),
@@ -63,11 +64,13 @@ type Body = [Top_Level_Defn]
 
 newtype Import = Import String deriving (Read, Show)
 
-newtype Stmts = Stmts [Stmt] deriving Show
+newtype Stmts = Stmts [Stmt] deriving (Show, Eq)
 
-newtype TypeName = TypeName String deriving Show
+newtype TypeName = TypeName String deriving (Show, Eq)
 
-data Param = Param [Identifier] (Maybe TypeName) deriving (Show)
+data TypeError = TypeError TypeName TypeName deriving (Show, Eq)
+
+data Param = Param [Identifier] (Maybe TypeName) deriving (Show, Eq)
 
 
 data Top_Level_Defn = Top_Level_Const_Defn Identifier (Maybe TypeName) ASTree
@@ -75,7 +78,7 @@ data Top_Level_Defn = Top_Level_Const_Defn Identifier (Maybe TypeName) ASTree
                     | ShortFuncDefn Identifier Param (Maybe TypeName) ASTree
                     | SubDefn Identifier (Maybe Param) (Maybe TypeName) Stmts
                     | MainDefn (Maybe Param) (Maybe TypeName) Stmts
-                    deriving Show
+                    deriving (Show, Eq)
 
 data Stmt = Stmt_While ASTree Stmts
           | Stmt_Until ASTree Stmts
@@ -86,4 +89,4 @@ data Stmt = Stmt_While ASTree Stmts
           | Stmt_Const_Assign Identifier ASTree
           | Stmt_Var_Assign Identifier ASTree
           | Stmt_Return (Maybe ASTree)
-          deriving (Show)
+          deriving (Show, Eq)

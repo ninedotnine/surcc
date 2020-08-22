@@ -5,5 +5,5 @@ module TypeChecker.TypeChecker (
 import Common
 
 -- FIXME this should fail sometimes lol
-type_check :: Program -> Either String CheckedProgram
+type_check :: Program -> Either TypeError CheckedProgram
 type_check (Program name imports defns) = Right $ CheckedProgram name imports defns

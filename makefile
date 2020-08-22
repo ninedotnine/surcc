@@ -28,12 +28,16 @@ clean:
 	rm -fr $(OUT_DIR) $(CACHE_DIR)
 
 .PHONY: test
-test: test_parser test_codegen test_expr_parser test_integration 
+test: test_parser test_type_checker test_codegen test_expr_parser test_integration
 	@echo "all tests successful! :^D"
 
 .PHONY: test_parser
 test_parser: $(OUT_DIR)/parser
 	@test/test_parser
+
+.PHONY: test_type_checker
+test_type_checker:
+	@runghc -Wall -i$(SOURCEDIR) test/type_checker.hs
 
 .PHONY: test_codegen
 test_codegen:
