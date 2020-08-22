@@ -13,15 +13,15 @@ all: $(OUT_DIR)/soucc $(OUT_DIR)/expr $(OUT_DIR)/parser
 
 soucc: $(OUT_DIR)/soucc
 $(OUT_DIR)/soucc: src/Main.hs | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
-	ghc $(FLAGS) -o $(OUT_DIR)/soucc $<
+	@ghc $(FLAGS) -o $(OUT_DIR)/soucc $<
 
 expr: $(OUT_DIR)/expr
 $(OUT_DIR)/expr: src/Main_Expr.hs $(OUT_DIR)/soucc | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
-	ghc $(FLAGS) -o $(OUT_DIR)/expr -main-is Main_Expr $<
+	@ghc $(FLAGS) -o $(OUT_DIR)/expr -main-is Main_Expr $<
 
 parser: $(OUT_DIR)/parser
 $(OUT_DIR)/parser: src/Main_Parser.hs $(OUT_DIR)/soucc | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
-	ghc $(FLAGS) -o $(OUT_DIR)/parser -main-is Main_Parser $<
+	@ghc $(FLAGS) -o $(OUT_DIR)/parser -main-is Main_Parser $<
 
 $(OUT_DIR) $(CACHE_DIR) $(HI_DIR) $(OBJ_DIR):
 	mkdir -p $@
