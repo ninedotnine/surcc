@@ -17,7 +17,7 @@ soucc: src/Main.hs | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
 expr: soucc | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
 	@ghc $(FLAGS) -o $(OUT_DIR)/expr -main-is Main_Expr src/Main_Expr.hs
 
-parser: soucc | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
+parser: soucc expr | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
 	@ghc $(FLAGS) -o $(OUT_DIR)/parser -main-is Main_Parser src/Main_Parser.hs
 
 $(OUT_DIR) $(CACHE_DIR) $(HI_DIR) $(OBJ_DIR):
