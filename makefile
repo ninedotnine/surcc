@@ -5,18 +5,6 @@ HI_DIR := $(CACHE_DIR)/hi_files
 OBJ_DIR := $(CACHE_DIR)/obj_files
 FLAGS := -Wall -dynamic -j -hidir $(HI_DIR) -odir $(OBJ_DIR) -i$(SOURCEDIR)  -Wno-unused-imports -Wall-missed-specialisations
 
-SRCDIR := src
-
-# SRCS := $(wildcard $(SRCDIR)/*.hs $(SRCDIR)/*/*.hs)
-SRCS := $(wildcard $(SRCDIR)/*.hs $(SRCDIR)/*/*.hs $(SRCDIR)/*/*/*.hs)
-OBJS := $(patsubst $(SRCDIR)/%.hs,$(OBJ_DIR)/%.o,$(SRCS))
-HIS := $(patsubst $(SRCDIR)/%.hs,$(HI_DIR)/%.hi,$(SRCS))
-
-testy:
-	@echo $(SRCS)
-	@echo $(OBJS)
-	@echo $(HIS)
-
 .PHONY: soucc expr parser all default
 
 default: all test
