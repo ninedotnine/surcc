@@ -9,19 +9,16 @@ FLAGS := -Wall -dynamic -j -hidir $(HI_DIR) -odir $(OBJ_DIR) -i$(SOURCEDIR)  -Wn
 
 default: all test
 
-all: $(OUT_DIR)/soucc $(OUT_DIR)/expr $(OUT_DIR)/parser
+all: soucc expr parser
 
-soucc: $(OUT_DIR)/soucc
-$(OUT_DIR)/soucc: src/Main.hs $(SRCS) | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
-	ghc $(FLAGS) -o $@ $<
+soucc: src/Main.hs | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
+	@ghc $(FLAGS) -o $(OUT_DIR)/soucc $<
 
-expr: $(OUT_DIR)/expr
-$(OUT_DIR)/expr: src/Main_Expr.hs $(OUT_DIR)/soucc | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
-	ghc $(FLAGS) -o $@ -main-is Main_Expr $<
+expr: soucc | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
+	@ghc $(FLAGS) -o $(OUT_DIR)/expr -main-is Main_Expr src/Main_Expr.hs
 
-parser: $(OUT_DIR)/parser
-$(OUT_DIR)/parser: src/Main_Parser.hs $(OUT_DIR)/soucc | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
-	ghc $(FLAGS) -o $@ -main-is Main_Parser $<
+parser: soucc | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
+	@ghc $(FLAGS) -o $(OUT_DIR)/parser -main-is Main_Parser src/Main_Parser.hs
 
 $(OUT_DIR) $(CACHE_DIR) $(HI_DIR) $(OBJ_DIR):
 	mkdir -p $@
