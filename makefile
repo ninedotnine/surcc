@@ -35,13 +35,10 @@ test: test_parser test_type_checker test_codegen test_expr_parser test_integrati
 test_parser: parser
 	@test/test_parser
 
-.PHONY: test_type_checker
-test_type_checker:
-	@runghc -Wall -i$(SOURCEDIR) test/type_checker.hs
-
-.PHONY: test_codegen
-test_codegen:
-	@runghc -Wall -i$(SOURCEDIR) test/test_codegen.hs
+.PHONY: test_codegen test_type_checker
+test_codegen test_type_checker: all | $(OUT_DIR)
+	@ghc $(FLAGS) -o $(OUT_DIR)/$@ test/$@.hs
+	$(OUT_DIR)/$@
 
 .PHONY: test_integration
 test_integration: soucc
