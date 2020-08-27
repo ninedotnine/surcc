@@ -32,7 +32,7 @@ test: test_parser test_type_checker test_codegen test_expr_parser test_integrati
 	@echo "all tests successful! :^D"
 
 .PHONY: test_parser
-test_parser: $(OUT_DIR)/parser
+test_parser: parser
 	@test/test_parser
 
 .PHONY: test_type_checker
@@ -44,11 +44,11 @@ test_codegen:
 	@runghc -Wall -i$(SOURCEDIR) test/test_codegen.hs
 
 .PHONY: test_integration
-test_integration: $(OUT_DIR)/soucc
+test_integration: soucc
 	@test/integration_test
 
 .PHONY: test_expr_parser
-test_expr_parser: $(OUT_DIR)/parser $(OUT_DIR)/expr
+test_expr_parser: parser expr
 	@test/test_expr_parser
 
 .PHONY: deps
