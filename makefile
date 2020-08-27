@@ -5,6 +5,18 @@ HI_DIR := $(CACHE_DIR)/hi_files
 OBJ_DIR := $(CACHE_DIR)/obj_files
 FLAGS := -Wall -dynamic -j -hidir $(HI_DIR) -odir $(OBJ_DIR) -i$(SOURCEDIR)  -Wno-unused-imports -Wall-missed-specialisations
 
+SRCDIR := src
+
+# SRCS := $(wildcard $(SRCDIR)/*.hs $(SRCDIR)/*/*.hs)
+SRCS := $(wildcard $(SRCDIR)/*.hs $(SRCDIR)/*/*.hs $(SRCDIR)/*/*/*.hs)
+OBJS := $(patsubst $(SRCDIR)/%.hs,$(OBJ_DIR)/%.o,$(SRCS))
+HIS := $(patsubst $(SRCDIR)/%.hs,$(HI_DIR)/%.hi,$(SRCS))
+
+testy:
+	@echo $(SRCS)
+	@echo $(OBJS)
+	@echo $(HIS)
+
 .PHONY: soucc expr parser all default
 
 default: all test
@@ -12,16 +24,16 @@ default: all test
 all: $(OUT_DIR)/soucc $(OUT_DIR)/expr $(OUT_DIR)/parser
 
 soucc: $(OUT_DIR)/soucc
-$(OUT_DIR)/soucc: src/Main.hs | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
-	@ghc $(FLAGS) -o $(OUT_DIR)/soucc $<
+$(OUT_DIR)/soucc: src/Main.hs $(SRCS) | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
+	ghc $(FLAGS) -o $@ $<
 
 expr: $(OUT_DIR)/expr
 $(OUT_DIR)/expr: src/Main_Expr.hs $(OUT_DIR)/soucc | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
-	@ghc $(FLAGS) -o $(OUT_DIR)/expr -main-is Main_Expr $<
+	ghc $(FLAGS) -o $@ -main-is Main_Expr $<
 
 parser: $(OUT_DIR)/parser
 $(OUT_DIR)/parser: src/Main_Parser.hs $(OUT_DIR)/soucc | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
-	@ghc $(FLAGS) -o $(OUT_DIR)/parser -main-is Main_Parser $<
+	ghc $(FLAGS) -o $@ -main-is Main_Parser $<
 
 $(OUT_DIR) $(CACHE_DIR) $(HI_DIR) $(OBJ_DIR):
 	mkdir -p $@
