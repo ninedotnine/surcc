@@ -25,6 +25,7 @@ tests = [
     (conster, conster_checked, "conster"),
     (int, int_checked, "int"),
     (borked, borked_checked, "borked")
+--     (borked_import, borked_import_checked, "borked_import")
     ]
 
 main :: IO ()
@@ -172,3 +173,11 @@ borked_subber_const_ass = program_header [
 
 borked_subber_const_ass_checked :: Either TypeError CheckedProgram
 borked_subber_const_ass_checked = Left (TypeError "Int" "Char")
+
+borked_import :: Program
+borked_import = Program Nothing [Import "x"] [
+    Top_Level_Const_Defn (Identifier "x") (Just "Int") (Leaf (LitInt 42))]
+
+
+borked_import_checked :: Either TypeError CheckedProgram
+borked_import_checked = Left (TypeError "Int" "Module")
