@@ -11,8 +11,8 @@ default: all test
 
 all: soucc expr parser
 
-soucc: src/Main.hs | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
-	@ghc $(FLAGS) -o $(OUT_DIR)/soucc $<
+soucc: src/Main_Soucc.hs | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
+	@ghc $(FLAGS) -o $(OUT_DIR)/soucc -main-is Main_Soucc $<
 
 expr: soucc | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
 	@ghc $(FLAGS) -o $(OUT_DIR)/expr -main-is Main_Expr src/Main_Expr.hs
