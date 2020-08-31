@@ -14,11 +14,11 @@ all: soucc expr parser
 soucc: src/Main_Soucc.hs | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
 	@ghc $(FLAGS) -o $(OUT_DIR)/soucc -main-is Main_Soucc $<
 
-expr: soucc | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
-	@ghc $(FLAGS) -o $(OUT_DIR)/expr -main-is Main_Expr src/Main_Expr.hs
+expr: src/Main_Expr.hs soucc | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
+	@ghc $(FLAGS) -o $(OUT_DIR)/expr -main-is Main_Expr $<
 
-parser: soucc expr | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
-	@ghc $(FLAGS) -o $(OUT_DIR)/parser -main-is Main_Parser src/Main_Parser.hs
+parser: src/Main_Parser.hs soucc expr | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
+	@ghc $(FLAGS) -o $(OUT_DIR)/parser -main-is Main_Parser $<
 
 $(OUT_DIR) $(CACHE_DIR) $(HI_DIR) $(OBJ_DIR):
 	mkdir -p $@
