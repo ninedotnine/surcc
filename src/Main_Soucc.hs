@@ -1,4 +1,4 @@
-module Main where
+module Main_Soucc where
 
 import Common
 import CodeGen.CodeGen
