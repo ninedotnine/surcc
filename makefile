@@ -36,9 +36,9 @@ test_parser: parser
 	@test/test_parser
 
 .PHONY: test_codegen test_type_checker
-test_codegen test_type_checker: all | $(OUT_DIR)
-	@ghc $(FLAGS) -o $(OUT_DIR)/$@ test/$@.hs
-	$(OUT_DIR)/$@
+test_codegen test_type_checker: all | $(CACHE_DIR)
+	@ghc $(FLAGS) -o $(CACHE_DIR)/$@ test/$@.hs
+	$(CACHE_DIR)/$@
 
 .PHONY: test_integration
 test_integration: soucc
