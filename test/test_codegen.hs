@@ -3,7 +3,6 @@
 
 import CodeGen.CodeGen
 import Common
-import Parser.ExprParser (ASTree(..), Term(..))
 
 import System.Directory (createDirectoryIfMissing)
 import System.Process (callProcess)

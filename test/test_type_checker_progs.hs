@@ -6,7 +6,6 @@
 
 import TypeChecker.TypeChecker
 import Common
-import Parser.ExprParser (ASTree(..), Term(..))
 
 import System.Exit (exitFailure)
 import Data.String (IsString(..))

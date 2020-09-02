@@ -63,7 +63,7 @@ infer_term context term = case term of
     LitChar _   -> (TypeName "Char")
     LitBool _   -> (TypeName "Bool")
     LitString _ -> (TypeName "String")
-    Var _ (Just t) -> (TypeName t)
+    Var _ (Just t) -> t
     Var s Nothing -> case lookup context (Identifier s) of
         Nothing -> TypeName "FIXME OhNOOO"
         Just t -> t

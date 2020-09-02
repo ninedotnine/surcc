@@ -18,56 +18,10 @@ module Parser.Expr.ExprTypes (
 
 import qualified Text.Parsec as Parsec
 import Data.Word (Word8)
-
-data ASTree = Branch Operator ASTree ASTree
-            | Twig PrefixOperator ASTree
-            | Leaf Term
-         deriving (Show, Eq)
+-- import Common (TypeName)
+import Common
 
 newtype Precedence = Precedence Word8 deriving (Eq, Ord)
-
-data Term = LitInt Integer
-          | LitChar Char
-          | LitBool Bool
-          | LitString String
-          | Var String (Maybe String)
-    deriving (Eq, Show)
-
-data Operator = Plus
-              | Minus
-              | Splat
-              | Divide
-              | FloorDiv
-              | Modulo
-              | Hihat
-              | Equals
-              | NotEquals
-              | RegexMatch
-              | GreaterThan
-              | LesserThan
-              | And
-              | Or
-              | Xor
-              | In
-              | Tuple
-              | Iff
-              | FromMaybe
-              | Prepend
-              | Append
-              | Combine
-              | Index
-              | Lookup
-              | Apply
-              | FlipApply
-              | Map
-              | FlipMap
-              | Applicative
-              | FlipApplicative
-              | SequenceRight
-              | SequenceLeft
-              | BindRight
-              | BindLeft
-            deriving Eq
 
 data TermToken = TermTok Term
                | TightPreOp PrefixOperator
@@ -86,42 +40,6 @@ data StackOp = StackLParen
              | StackTightPreOp PrefixOperator
              | StackSpacedPreOp PrefixOperator
              deriving (Show, Eq)
-
-instance Show Operator where
-    show Plus           = "+"
-    show Minus          = "-"
-    show Splat          = "*"
-    show Divide         = "/"
-    show FloorDiv       = "//"
-    show Modulo         = "%"
-    show Hihat          = "^"
-    show Equals         = "=="
-    show Combine        = "<>"
-    show NotEquals      = "=/="
-    show RegexMatch     = "=~"
-    show GreaterThan    = ">"
-    show LesserThan     = "<"
-    show And            = "&&" -- FIXME
-    show Or             = "||" -- FIXME
-    show Xor            = "><"
-    show In             = ">|#|<"
-    show Tuple          = ","
-    show Iff            = "?"
-    show FromMaybe      = "??"
-    show Prepend        = ">>"
-    show Append         = "<<"
-    show Index          = "#"
-    show Lookup         = "##"
-    show Apply          = "~&"
-    show FlipApply      = "&"
-    show Map            = "<~&>"
-    show FlipMap        = "<&>"
-    show Applicative    = "<~*>"
-    show FlipApplicative = "<*>"
-    show SequenceRight  = "*>"
-    show SequenceLeft   = "<*"
-    show BindRight      = ">>="
-    show BindLeft       = "=<<"
 
 get_prec :: Operator -> Precedence
 get_prec Apply          = Precedence 10
@@ -158,22 +76,6 @@ get_prec Index          = Precedence 180
 get_prec Lookup         = Precedence 190
 get_prec In             = Precedence 200
 get_prec Combine        = Precedence 210
-
-data PrefixOperator = Deref
-                    | GetAddr
-                    | Negate
-                    | ToString
-                    | Pure
-                    | Join
-                    deriving Eq
-
-instance Show PrefixOperator where
-    show Deref    = "!"
-    show GetAddr  = "@"
-    show Negate   = "~"
-    show ToString = "$"
-    show Pure     = "^*^"
-    show Join     = ">*<"
 
 -- the oper stack is a temporary storage place for opers
 -- the tree stack holds the result, the output, as well as being used for

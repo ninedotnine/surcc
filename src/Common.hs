@@ -2,6 +2,10 @@ module Common (
     Stmt(..),
     Param(..),
     Identifier(..),
+    Term(..),
+    ASTree(..),
+    Operator(..),
+    PrefixOperator(..),
     TypeName(..),
     TypeError(..),
     Stmts(..),
@@ -24,8 +28,6 @@ import Text.Parsec (Parsec)
 -- import qualified Data.Map.Strict as Map (Map, singleton, member, insert)
 import qualified Data.Map.Strict as Map (Map, empty)
 import Data.List.NonEmpty ( NonEmpty(..) )
-
-import Parser.ExprParser
 
 
 {-
@@ -92,3 +94,103 @@ data Stmt = Stmt_While ASTree Stmts
           | Stmt_Var_Assign Identifier ASTree
           | Stmt_Return (Maybe ASTree)
           deriving (Show, Eq)
+
+data ASTree = Branch Operator ASTree ASTree
+            | Twig PrefixOperator ASTree
+            | Leaf Term
+         deriving (Show, Eq)
+
+data Term = LitInt Integer
+          | LitChar Char
+          | LitBool Bool
+          | LitString String
+          | Var String (Maybe TypeName)
+    deriving (Eq, Show)
+
+data Operator = Plus
+              | Minus
+              | Splat
+              | Divide
+              | FloorDiv
+              | Modulo
+              | Hihat
+              | Equals
+              | NotEquals
+              | RegexMatch
+              | GreaterThan
+              | LesserThan
+              | And
+              | Or
+              | Xor
+              | In
+              | Tuple
+              | Iff
+              | FromMaybe
+              | Prepend
+              | Append
+              | Combine
+              | Index
+              | Lookup
+              | Apply
+              | FlipApply
+              | Map
+              | FlipMap
+              | Applicative
+              | FlipApplicative
+              | SequenceRight
+              | SequenceLeft
+              | BindRight
+              | BindLeft
+            deriving Eq
+
+data PrefixOperator = Deref
+                    | GetAddr
+                    | Negate
+                    | ToString
+                    | Pure
+                    | Join
+                    deriving Eq
+
+instance Show Operator where
+    show Plus           = "+"
+    show Minus          = "-"
+    show Splat          = "*"
+    show Divide         = "/"
+    show FloorDiv       = "//"
+    show Modulo         = "%"
+    show Hihat          = "^"
+    show Equals         = "=="
+    show Combine        = "<>"
+    show NotEquals      = "=/="
+    show RegexMatch     = "=~"
+    show GreaterThan    = ">"
+    show LesserThan     = "<"
+    show And            = "&&" -- FIXME
+    show Or             = "||" -- FIXME
+    show Xor            = "><"
+    show In             = ">|#|<"
+    show Tuple          = ","
+    show Iff            = "?"
+    show FromMaybe      = "??"
+    show Prepend        = ">>"
+    show Append         = "<<"
+    show Index          = "#"
+    show Lookup         = "##"
+    show Apply          = "~&"
+    show FlipApply      = "&"
+    show Map            = "<~&>"
+    show FlipMap        = "<&>"
+    show Applicative    = "<~*>"
+    show FlipApplicative = "<*>"
+    show SequenceRight  = "*>"
+    show SequenceLeft   = "<*"
+    show BindRight      = ">>="
+    show BindLeft       = "=<<"
+
+instance Show PrefixOperator where
+    show Deref    = "!"
+    show GetAddr  = "@"
+    show Negate   = "~"
+    show ToString = "$"
+    show Pure     = "^*^"
+    show Join     = ">*<"
