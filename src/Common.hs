@@ -97,6 +97,7 @@ data Stmt = Stmt_While ASTree Stmts
 
 data ASTree = Branch Operator ASTree ASTree
             | Twig PrefixOperator ASTree
+            | Signed ASTree TypeName
             | Leaf Term
          deriving (Show, Eq)
 

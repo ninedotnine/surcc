@@ -33,6 +33,8 @@ import Parser.Expr.RegardingSpaces
 import Parser.Expr.Terms
 import Parser.Expr.Opers
 
+import Common
+
 -- parse_term and parse_oper are alternated until one fails and finish_expr succeeds
 parse_term :: ShuntingYardParser ASTree
 parse_term = do
@@ -100,6 +102,7 @@ finish_expr = do
 pretty_show_expression :: ASTree -> String
 pretty_show_expression (Branch oper left right) = "(" ++ show oper ++ " "  ++ pretty_show_expression left ++ " " ++ pretty_show_expression right ++ ")"
 pretty_show_expression (Twig oper tree) = concat ["(", show oper, " ", pretty_show_expression tree, ")"]
+pretty_show_expression (Signed tree (TypeName tree_t)) = pretty_show_expression tree ++ ": " ++ tree_t
 pretty_show_expression (Leaf val) = show val
 
 parse_expression :: String -> Either Parsec.ParseError ASTree
@@ -130,6 +133,7 @@ evaluate_astree (Leaf t) = case t of
     LitBool b -> if b then 1 else 0
     LitString s -> fromIntegral (length s)
     Var _ _ -> 42 -- all identifiers are bound to this, sure
+evaluate_astree (Signed e _) = evaluate_astree e
 evaluate_astree (Twig op tree) = operate (evaluate_astree tree)
     where operate = case op of
             Deref -> (\n -> product [1..n]) -- factorial, just for testing
