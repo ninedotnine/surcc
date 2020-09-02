@@ -68,7 +68,9 @@ newtype Stmts = Stmts [Stmt] deriving (Show, Eq)
 
 newtype TypeName = TypeName String deriving (Show, Eq)
 
-data TypeError = TypeError TypeName TypeName deriving (Show, Eq)
+data TypeError = TypeError TypeName TypeName
+--                | NotFound TypeName
+    deriving (Show, Eq)
 
 data Param = Param [Identifier] (Maybe TypeName) deriving (Show, Eq)
 
