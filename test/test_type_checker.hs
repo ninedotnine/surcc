@@ -32,6 +32,14 @@ globals = Global [
     Bound (Identifier "b") (TypeName "Bool")
     ]
 
+scoped :: Context
+scoped = Scoped [
+    Bound (Identifier "x") (TypeName "Int"),
+    Bound (Identifier "s") (TypeName "String"),
+    Bound (Identifier "c") (TypeName "Char"),
+    Bound (Identifier "b") (TypeName "Bool")
+    ] empty_ctx
+
 tests :: [Test]
 tests = [
     (empty_ctx, Leaf (LitInt 3), "Integer", match, "int"),
@@ -46,7 +54,16 @@ tests = [
     (globals, Signed (Leaf (Var "s")) "String", "String",  match, "stringvar2"),
     (globals, Signed (Leaf (Var "c")) "Char",  "Char",     match, "charvar2"),
     (globals, Signed (Leaf (Var "b")) "Bool",  "Bool",     match, "boolvar2"),
-    (globals, Signed (Signed (Signed (Signed (Signed (Leaf (LitInt 42)) (TypeName "Integer")) (TypeName "Integer")) (TypeName "Integer")) (TypeName "Integer")) (TypeName "Integer"), "Integer", match, "long int")
+    (globals, Signed (Signed (Signed (Signed (Signed (Leaf (LitInt 42)) (TypeName "Integer")) (TypeName "Integer")) (TypeName "Integer")) (TypeName "Integer")) (TypeName "Integer"), "Integer", match, "long int"),
+    (scoped, Leaf (Var "x"), "Int", match, "scoped intvar"),
+    (scoped, Leaf (Var "s"), "String", match, "scoped stringvar"),
+    (scoped, Leaf (Var "c"), "Char", match, "scoped charvar"),
+    (scoped, Leaf (Var "b"), "Bool", match, "scoped boolvar"),
+    (scoped, Signed (Leaf (Var "x")) "Int",   "Int",      match, "scoped intvar2"),
+    (scoped, Signed (Leaf (Var "s")) "String", "String",  match, "scoped stringvar2"),
+    (scoped, Signed (Leaf (Var "c")) "Char",  "Char",     match, "scoped charvar2"),
+    (scoped, Signed (Leaf (Var "b")) "Bool",  "Bool",     match, "scoped boolvar2"),
+    (scoped, Signed (Signed (Signed (Signed (Signed (Leaf (LitInt 42)) (TypeName "Integer")) (TypeName "Integer")) (TypeName "Integer")) (TypeName "Integer")) (TypeName "Integer"), "Integer", match, "scoped long int")
     ]
 
 borked_tests :: [Test]
@@ -61,7 +78,14 @@ borked_tests = [
     (globals, Leaf (Var "b"), "Char", mismatch "Char" "Bool", "boolvar"),
     (globals, Signed (Leaf (Var "x")) "Bool", "Bool",   mismatch "Bool" "Int", "invalid lit"),
     (globals, Signed (Leaf (Var "x")) "Bool", "Int",    mismatch "Bool" "Int", "invalid lit 2"),
-    (globals, Signed (Signed (Signed (Signed (Signed (Leaf (LitInt 42)) (TypeName "Integer")) (TypeName "Integer")) (TypeName "Bool")) (TypeName "Integer")) (TypeName "Integer"), "Integer", mismatch "Bool" "Integer", "long int")
+    (globals, Signed (Signed (Signed (Signed (Signed (Leaf (LitInt 42)) (TypeName "Integer")) (TypeName "Integer")) (TypeName "Bool")) (TypeName "Integer")) (TypeName "Integer"), "Integer", mismatch "Bool" "Integer", "long int"),
+    (scoped, Leaf (Var "x"), "Char", mismatch "Char" "Int", "scoped intvar"),
+    (scoped, Leaf (Var "s"), "Bool", mismatch "Bool" "String", "scoped stringvar"),
+    (scoped, Leaf (Var "c"), "String", mismatch "String" "Char", "scoped charvar"),
+    (scoped, Leaf (Var "b"), "Char", mismatch "Char" "Bool", "scoped boolvar"),
+    (scoped, Signed (Leaf (Var "x")) "Bool", "Bool",   mismatch "Bool" "Int", "scoped invalid lit"),
+    (scoped, Signed (Leaf (Var "x")) "Bool", "Int",    mismatch "Bool" "Int", "scoped invalid lit 2"),
+    (scoped, Signed (Signed (Signed (Signed (Signed (Leaf (LitInt 42)) (TypeName "Integer")) (TypeName "Integer")) (TypeName "Bool")) (TypeName "Integer")) (TypeName "Integer"), "Integer", mismatch "Bool" "Integer", "scoped long int")
     ]
 
 
