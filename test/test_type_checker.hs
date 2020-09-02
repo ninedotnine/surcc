@@ -21,23 +21,26 @@ type Test = (Context, ASTree, TypeName, Expected, String)
 match :: Expected
 match = Result Nothing
 
-tests :: [Test]
-tests = [
-    (Global [], Leaf (LitInt 3), "Integer", match, "int"),
-    (Global [], Leaf (LitChar 'a'), "Char", match, "char"),
-    (Global [], Leaf (LitString "what"), "String", match, "string"),
-    (Global [], Leaf (LitBool True), "Bool", match, "bool")
-    ]
-
 mismatch :: TypeName -> TypeName -> Expected
 mismatch x y = Result $ Just $ TypeError x y
 
+empty_ctx :: Context
+empty_ctx = Global []
+
+tests :: [Test]
+tests = [
+    (empty_ctx, Leaf (LitInt 3), "Integer", match, "int"),
+    (empty_ctx, Leaf (LitChar 'a'), "Char", match, "char"),
+    (empty_ctx, Leaf (LitString "what"), "String", match, "string"),
+    (empty_ctx, Leaf (LitBool True), "Bool", match, "bool")
+    ]
+
 borked_tests :: [Test]
 borked_tests = [
-    (Global [], Leaf (LitInt 3), "Char", mismatch "Char" "Integer", "int"),
-    (Global [], Leaf (LitChar 'a'), "Int", mismatch "Int" "Char", "char"),
-    (Global [], Leaf (LitString "what"), "Char", mismatch "Char" "String", "string"),
-    (Global [], Leaf (LitBool True), "Char", mismatch "Char" "Bool", "bool")
+    (empty_ctx, Leaf (LitInt 3), "Char", mismatch "Char" "Integer", "int"),
+    (empty_ctx, Leaf (LitChar 'a'), "Int", mismatch "Int" "Char", "char"),
+    (empty_ctx, Leaf (LitString "what"), "Char", mismatch "Char" "String", "string"),
+    (empty_ctx, Leaf (LitBool True), "Char", mismatch "Char" "Bool", "bool")
     ]
 
 
