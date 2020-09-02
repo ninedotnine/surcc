@@ -39,6 +39,7 @@ data StackOp = StackLParen
              | StackOp Operator
              | StackTightPreOp PrefixOperator
              | StackSpacedPreOp PrefixOperator
+             | StackSig TypeName
              deriving (Show, Eq)
 
 get_prec :: Operator -> Precedence

@@ -48,8 +48,10 @@ parse_term = do
                 Just () -> oper_stack_push StackLParenFollowedBySpace
             parse_term
         TermTok t -> do
-            tree_stack_push (Leaf t)
-            optional_sig
+            m_sig <- optional_sig
+            case m_sig of
+                Nothing -> tree_stack_push (Leaf t)
+                Just sig -> tree_stack_push (Signed (Leaf t) sig)
             parse_oper <|> finish_expr
         TightPreOp op -> do
             oper_stack_push (StackTightPreOp op)
@@ -66,7 +68,7 @@ parse_oper = do
             if_tightly_spaced find_left_space
             look_for StackLParen
             Oper_Stack stack_ops <- get_op_stack
-            optional_sig
+            parse_sig
             case stack_ops of
                 (StackSpace:ops) -> oper_stack_set ops *> set_spacing_tight True
                 _ -> return ()
@@ -75,7 +77,7 @@ parse_oper = do
             if_tightly_spaced find_left_space
             look_for StackLParenFollowedBySpace
             Oper_Stack stack_ops <- get_op_stack
-            optional_sig
+            parse_sig
             case stack_ops of
                 (StackSpace:ops) -> oper_stack_set ops *> set_spacing_tight True
                 _ -> return ()
@@ -85,8 +87,16 @@ parse_oper = do
             oper_stack_push (StackOp op)
             parse_term
 
+parse_sig :: ShuntingYardParser ()
+parse_sig = do
+    m_sig <- optional_sig
+    case m_sig of
+       Just sig -> oper_stack_push (StackSig sig)
+       Nothing -> return ()
+
 finish_expr :: ShuntingYardParser ASTree
 finish_expr = do
+    parse_sig
     ignore_spaces
     Parsec.optional Parsec.newline <?> ""
     Parsec.eof <?> ""
@@ -112,14 +122,15 @@ parse_expression input = Parsec.runParser parse_term start_state "input" (trim_s
         trim_spaces = dropWhile isSpace <&> dropWhileEnd isSpace
 
 
-optional_sig :: ShuntingYardParser ()
-optional_sig = Parsec.optional type_sig where
-    type_sig :: ShuntingYardParser String
+optional_sig :: ShuntingYardParser (Maybe TypeName)
+optional_sig = Parsec.optionMaybe type_sig where
+    type_sig :: ShuntingYardParser TypeName
     type_sig = do
         Parsec.char ':' *> ignore_spaces
         first <- Parsec.upper
         rest <- Parsec.many (Parsec.lower <|> Parsec.upper <|> Parsec.digit)
-        return (first:rest)
+        return (TypeName (first:rest))
+
 
 parse_print_expression :: String -> IO ()
 parse_print_expression input = case parse_expression input of

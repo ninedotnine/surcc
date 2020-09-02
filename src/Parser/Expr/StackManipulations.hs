@@ -18,6 +18,8 @@ import qualified Text.Parsec as Parsec
 import Parser.Expr.ExprTypes
 import Parser.Expr.RegardingSpaces
 
+import Common (TypeName)
+
 -- functions to get the current state
 get_op_stack :: ShuntingYardParser Oper_Stack
 get_op_stack = do
@@ -65,6 +67,12 @@ make_twig op tokes = do
     oper_stack_set tokes
 
 
+make_sig :: TypeName -> [StackOp] -> ShuntingYardParser ()
+make_sig sig tokes = do
+    tree <- tree_stack_pop
+    tree_stack_push (Signed tree sig)
+    oper_stack_set tokes
+
 -- functions that make sure the tree is in the right order
 apply_higher_prec_ops :: Precedence -> ShuntingYardParser ()
 apply_higher_prec_ops current = do
@@ -84,6 +92,9 @@ apply_higher_prec_ops current = do
                 _ -> do
                     make_branch op toks
                     apply_higher_prec_ops current
+            StackSig sig -> do
+                    make_sig sig toks
+                    apply_higher_prec_ops current
 
 
 look_for :: StackOp -> ShuntingYardParser ()
@@ -102,6 +113,9 @@ look_for thing = do
                 look_for thing
             StackOp op -> do
                 make_branch op toks
+                look_for thing
+            StackSig sig -> do
+                make_sig sig toks
                 look_for thing
             StackLParen -> Parsec.parserFail "incorrectly spaced parentheses"
             StackLParenFollowedBySpace -> Parsec.parserFail "incorrectly spaced parentheses"
@@ -126,5 +140,7 @@ clean_stack = do
         (StackOp op:tokes) -> do
             make_branch op tokes
             clean_stack
+        (StackSig sig : tokes) -> do
+            make_sig sig tokes
+            clean_stack
         _ -> Parsec.parserFail "incorrect whitespace or parens?"
-

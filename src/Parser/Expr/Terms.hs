@@ -14,11 +14,12 @@ parse_term_token :: ShuntingYardParser TermToken
 parse_term_token = parse_term_tok <|> parse_left_paren <|> parse_prefix_op
 
 parse_term_tok :: ShuntingYardParser TermToken
-parse_term_tok = do
-    val <- TermTok <$> (parse_num <|> parse_char <|> parse_string <|> parse_bool <|> parse_var)
-    Parsec.optional type_sig
-    return val
-
+parse_term_tok = TermTok <$> (
+        parse_num
+    <|> parse_char
+    <|> parse_string
+    <|> parse_bool
+    <|> parse_var)
 
 parse_prefix_op :: ShuntingYardParser TermToken
 parse_prefix_op = do
@@ -56,10 +57,3 @@ parse_left_paren :: ShuntingYardParser TermToken
 parse_left_paren = do
     Parsec.lookAhead (Parsec.try (ignore_spaces *> Parsec.char '(' *> return ()))
     ignore_spaces *> Parsec.char '(' *> return LParen
-
-type_sig :: ShuntingYardParser String
-type_sig = do
-    Parsec.char ':' *> ignore_spaces
-    first <- Parsec.upper
-    rest <- Parsec.many (Parsec.lower <|> Parsec.upper <|> Parsec.digit)
-    return (first:rest)

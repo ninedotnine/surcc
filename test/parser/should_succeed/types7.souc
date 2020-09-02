@@ -9,3 +9,5 @@ main(stdout: OutputStream): IO = do
 	sm <- "str": String
 	bm <- False: Bool
 end
+
+x = ( (( (42: Integer): Integer ): Integer): Integer ): Integer
