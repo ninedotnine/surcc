@@ -54,8 +54,12 @@ walk_top_level_statements defns = map unroll defns where
 --                     | MainDefn (Maybe Param) (Maybe TypeName) Stmts
 --                     deriving (Show, Eq)
 
-infer :: Context -> ASTree -> Maybe TypeName
-infer = undefined
+infer :: Context -> ASTree -> TypeName
+infer ctx tree = case tree of
+    Branch op left right -> t where (Arg _, Arg _, Ret t) = infer_infix_op op left right
+    Twig op expr -> t where (Arg _, Ret t) = infer_prefix_op op expr
+    Signed expr _ -> infer ctx expr
+    Leaf term -> infer_term ctx term
 
 infer_term :: Context -> Term -> TypeName
 infer_term context term = case term of
@@ -63,8 +67,7 @@ infer_term context term = case term of
     LitChar _   -> (TypeName "Char")
     LitBool _   -> (TypeName "Bool")
     LitString _ -> (TypeName "String")
-    Var _ (Just t) -> t
-    Var v Nothing -> case lookup context v of
+    Var v -> case lookup context v of
         Nothing -> TypeName "FIXME OhNOOO"
         Just t -> t
 
@@ -84,17 +87,8 @@ check_astree ctx (Branch op left right) t = (check_astree ctx left l_t <|> check
 check_astree ctx (Twig op expr) t = (check_astree ctx expr arg_t <|> check_equals t expr_t) where
     (Arg arg_t, Ret expr_t) = infer_prefix_op op expr
 
-check_astree ctx (Leaf term) t = check_term ctx term <|> if term_t == t then Nothing else Just (TypeError t term_t) where
+check_astree ctx (Leaf term) t = if term_t == t then Nothing else Just (TypeError t term_t) where
     term_t = infer_term ctx term
 
--- covers mistyped expressions such as (42 : String)
-check_term :: Context -> Term -> Maybe TypeError
-check_term ctx term = case term of
-    Var v (Just t) -> case lookup ctx v of
-        Nothing -> Nothing
-        Just n_t -> check_equals t n_t
---     LitInt Integer ->
---     LitChar Char ->
---     LitBool Bool ->
---     LitString String
-    _ -> Nothing
+check_astree ctx (Signed expr sig) t = check_astree ctx expr expr_t <|> check_equals sig expr_t <|> check_equals t expr_t where
+    expr_t = infer ctx expr

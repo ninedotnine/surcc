@@ -38,14 +38,14 @@ tests = [
     (empty_ctx, Leaf (LitChar 'a'), "Char", match, "char"),
     (empty_ctx, Leaf (LitString "what"), "String", match, "string"),
     (empty_ctx, Leaf (LitBool True), "Bool", match, "bool"),
-    (globals, Leaf (Var "x" Nothing), "Int", match, "intvar"),
-    (globals, Leaf (Var "s" Nothing), "String", match, "stringvar"),
-    (globals, Leaf (Var "c" Nothing), "Char", match, "charvar"),
-    (globals, Leaf (Var "b" Nothing), "Bool", match, "boolvar"),
-    (globals, Leaf (Var "x" (Just "Int")), "Int", match, "intvar2"),
-    (globals, Leaf (Var "s" (Just "String")), "String", match, "stringvar2"),
-    (globals, Leaf (Var "c" (Just "Char")), "Char", match, "charvar2"),
-    (globals, Leaf (Var "b" (Just "Bool")), "Bool", match, "boolvar2")
+    (globals, Leaf (Var "x"), "Int", match, "intvar"),
+    (globals, Leaf (Var "s"), "String", match, "stringvar"),
+    (globals, Leaf (Var "c"), "Char", match, "charvar"),
+    (globals, Leaf (Var "b"), "Bool", match, "boolvar"),
+    (globals, Signed (Leaf (Var "x")) "Int",   "Int",      match, "intvar2"),
+    (globals, Signed (Leaf (Var "s")) "String", "String",  match, "stringvar2"),
+    (globals, Signed (Leaf (Var "c")) "Char",  "Char",     match, "charvar2"),
+    (globals, Signed (Leaf (Var "b")) "Bool",  "Bool",     match, "boolvar2")
     ]
 
 borked_tests :: [Test]
@@ -54,12 +54,12 @@ borked_tests = [
     (empty_ctx, Leaf (LitChar 'a'), "Int", mismatch "Int" "Char", "char"),
     (empty_ctx, Leaf (LitString "what"), "Char", mismatch "Char" "String", "string"),
     (empty_ctx, Leaf (LitBool True), "Char", mismatch "Char" "Bool", "bool"),
-    (globals, Leaf (Var "x" Nothing), "Char", mismatch "Char" "Int", "intvar"),
-    (globals, Leaf (Var "s" Nothing), "Bool", mismatch "Bool" "String", "stringvar"),
-    (globals, Leaf (Var "c" Nothing), "String", mismatch "String" "Char", "charvar"),
-    (globals, Leaf (Var "b" Nothing), "Char", mismatch "Char" "Bool", "boolvar"),
-    (globals, Leaf (Var "x" (Just "Bool")), "Bool", mismatch "Bool" "Int", "invalid lit"),
-    (globals, Leaf (Var "x" (Just "Bool")), "Int", mismatch "Bool" "Int", "invalid lit 2")
+    (globals, Leaf (Var "x"), "Char", mismatch "Char" "Int", "intvar"),
+    (globals, Leaf (Var "s"), "Bool", mismatch "Bool" "String", "stringvar"),
+    (globals, Leaf (Var "c"), "String", mismatch "String" "Char", "charvar"),
+    (globals, Leaf (Var "b"), "Char", mismatch "Char" "Bool", "boolvar"),
+    (globals, Signed (Leaf (Var "x")) "Bool", "Bool",   mismatch "Bool" "Int", "invalid lit"),
+    (globals, Signed (Leaf (Var "x")) "Bool", "Int",    mismatch "Bool" "Int", "invalid lit 2")
     ]
 
 

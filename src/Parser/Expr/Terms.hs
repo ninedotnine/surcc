@@ -44,7 +44,7 @@ parse_var :: ShuntingYardParser Term
 parse_var = do
     first <- Parsec.lower <|> Parsec.char '_'
     rest <- Parsec.many (Parsec.lower <|> Parsec.char '_' <|> Parsec.digit)
-    return $ Var (Identifier (first:rest)) Nothing
+    return $ Var (Identifier (first:rest))
 
 parse_char :: ShuntingYardParser Term
 parse_char = LitChar <$> ((Parsec.char '\'') *> Parsec.anyChar <* (Parsec.char '\''))
