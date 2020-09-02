@@ -20,3 +20,6 @@ currently:
 [ ] shuntingyard uses `Parsec.string "<>"` which will explode if a < is read first
 [ ] do bindings after program tree is built, not in the parser
 [ ] remove postfix opers i think.
+[ ] give NewType a smart constructor that prevents type names with lowercase first letter
+[ ] make TypeError parameters always be in the right order with newtypes
+    e. g. TypeError (Expect t) (Got t)
