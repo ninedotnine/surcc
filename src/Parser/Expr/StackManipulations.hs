@@ -144,4 +144,6 @@ clean_stack = do
             StackSig sig  -> do
                 make_sig sig tokes
                 clean_stack
-            _ -> Parsec.parserFail "incorrect whitespace or parens?"
+            StackLParen -> Parsec.parserFail "incorrect whitespace or parens?"
+            StackLParenFollowedBySpace -> Parsec.parserFail "incorrect whitespace or parens?"
+            StackSpace -> Parsec.parserFail "incorrect whitespace?"
