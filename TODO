@@ -23,3 +23,4 @@ currently:
 [ ] give NewType a smart constructor that prevents type names with lowercase first letter
 [ ] make TypeError parameters always be in the right order with newtypes
     e. g. TypeError (Expect t) (Got t)
+[ ] fix the data structure (or use smart constructors) for the Contexts. shadowing should be impossible.
