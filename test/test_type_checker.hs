@@ -10,8 +10,6 @@ import Common
 import System.Exit (exitFailure)
 import Data.String (IsString(..))
 
--- import System.IO
-
 
 newtype Expected = Result (Maybe TypeError)
 
