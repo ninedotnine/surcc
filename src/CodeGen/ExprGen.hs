@@ -12,8 +12,8 @@ import Parser.ExprParser (
 import Common
 
 generate_expr :: ASTree -> String
-generate_expr (Leaf t) = generate_term t
-generate_expr (Twig op t) = generate_prefix_expr op ++ generate_expr t
+generate_expr (Leaf e) = generate_term e
+generate_expr (Twig op e) = generate_prefix_expr op ++ generate_expr e
 generate_expr (Branch op x y) = generate_expr x ++ generate_oper op ++ generate_expr y
 
 generate_term :: Term -> String
