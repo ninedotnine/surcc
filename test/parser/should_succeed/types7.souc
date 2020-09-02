@@ -1,0 +1,11 @@
+i = 9: Int
+c = 'a': Char
+s = "str": String
+b = True: Bool
+
+main(stdout: OutputStream): IO = do
+	im = 0: Int
+	cm = 'c': Char
+	sm <- "str": String
+	bm <- False: Bool
+end
