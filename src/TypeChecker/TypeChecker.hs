@@ -84,5 +84,17 @@ check_astree ctx (Branch op left right) t = (check_astree ctx left l_t <|> check
 check_astree ctx (Twig op expr) t = (check_astree ctx expr arg_t <|> check_equals t expr_t) where
     (Arg arg_t, Ret expr_t) = infer_prefix_op op expr
 
-check_astree ctx (Leaf term) t = if term_t == t then Nothing else Just (TypeError t term_t) where
+check_astree ctx (Leaf term) t = check_term ctx term <|> if term_t == t then Nothing else Just (TypeError t term_t) where
     term_t = infer_term ctx term
+
+-- covers mistyped expressions such as (42 : String)
+check_term :: Context -> Term -> Maybe TypeError
+check_term ctx term = case term of
+    Var n (Just t) -> case lookup ctx (Identifier n) of
+        Nothing -> Nothing
+        Just n_t -> check_equals t n_t
+--     LitInt Integer ->
+--     LitChar Char ->
+--     LitBool Bool ->
+--     LitString String
+    _ -> Nothing

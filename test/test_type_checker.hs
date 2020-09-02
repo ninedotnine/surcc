@@ -43,7 +43,11 @@ tests = [
     (globals, Leaf (Var "x" Nothing), "Int", match, "intvar"),
     (globals, Leaf (Var "s" Nothing), "String", match, "stringvar"),
     (globals, Leaf (Var "c" Nothing), "Char", match, "charvar"),
-    (globals, Leaf (Var "b" Nothing), "Bool", match, "boolvar")
+    (globals, Leaf (Var "b" Nothing), "Bool", match, "boolvar"),
+    (globals, Leaf (Var "x" (Just "Int")), "Int", match, "intvar2"),
+    (globals, Leaf (Var "s" (Just "String")), "String", match, "stringvar2"),
+    (globals, Leaf (Var "c" (Just "Char")), "Char", match, "charvar2"),
+    (globals, Leaf (Var "b" (Just "Bool")), "Bool", match, "boolvar2")
     ]
 
 borked_tests :: [Test]
@@ -55,7 +59,9 @@ borked_tests = [
     (globals, Leaf (Var "x" Nothing), "Char", mismatch "Char" "Int", "intvar"),
     (globals, Leaf (Var "s" Nothing), "Bool", mismatch "Bool" "String", "stringvar"),
     (globals, Leaf (Var "c" Nothing), "String", mismatch "String" "Char", "charvar"),
-    (globals, Leaf (Var "b" Nothing), "Char", mismatch "Char" "Bool", "charvar")
+    (globals, Leaf (Var "b" Nothing), "Char", mismatch "Char" "Bool", "boolvar"),
+    (globals, Leaf (Var "x" (Just "Bool")), "Bool", mismatch "Bool" "Int", "invalid lit"),
+    (globals, Leaf (Var "x" (Just "Bool")), "Int", mismatch "Bool" "Int", "invalid lit 2")
     ]
 
 
