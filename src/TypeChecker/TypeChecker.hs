@@ -74,12 +74,6 @@ infer_term context term = case term of
 check_equals :: TypeName -> TypeName -> Maybe TypeError
 check_equals t0 t1 = if t0 == t1 then Nothing else Just (TypeError t0 t1)
 
-check_prefix :: Context -> PrefixOperator -> ASTree -> TypeName ->  Maybe TypeError
-check_prefix = undefined -- FIXME do i need this
-
-check_infix :: Context -> Operator -> ASTree -> ASTree -> TypeName ->  Maybe TypeError
-check_infix = undefined -- FIXME do i need this
-
 check_astree :: Context -> ASTree -> TypeName -> Maybe TypeError
 check_astree ctx (Branch op left right) t = (check_astree ctx left l_t <|> check_astree ctx right r_t <|> check_equals t expr_t) where
     (Arg l_t, Arg r_t, Ret expr_t) = infer_infix_op op left right
