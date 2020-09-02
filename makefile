@@ -35,8 +35,8 @@ test: test_parser test_type_checker test_codegen test_expr_parser test_integrati
 test_parser: parser
 	@test/test_parser
 
-.PHONY: test_codegen test_type_checker
-test_codegen test_type_checker: all | $(CACHE_DIR)
+.PHONY: test_codegen test_type_checker test_type_checker_progs
+test_codegen test_type_checker test_type_checker_progs: all | $(CACHE_DIR)
 	@ghc $(FLAGS) -o $(CACHE_DIR)/$@ test/$@.hs
 	@$(CACHE_DIR)/$@
 
