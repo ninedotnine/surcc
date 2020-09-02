@@ -104,7 +104,7 @@ data Term = LitInt Integer
           | LitChar Char
           | LitBool Bool
           | LitString String
-          | Var String (Maybe TypeName)
+          | Var Identifier (Maybe TypeName)
     deriving (Eq, Show)
 
 data Operator = Plus

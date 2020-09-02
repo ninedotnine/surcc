@@ -76,6 +76,9 @@ main = do
 instance IsString TypeName where
     fromString = TypeName
 
+instance IsString Identifier where
+    fromString = Identifier
+
 
 render :: Maybe TypeError -> String
 render Nothing = "match"

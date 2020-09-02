@@ -64,7 +64,7 @@ infer_term context term = case term of
     LitBool _   -> (TypeName "Bool")
     LitString _ -> (TypeName "String")
     Var _ (Just t) -> t
-    Var s Nothing -> case lookup context (Identifier s) of
+    Var v Nothing -> case lookup context v of
         Nothing -> TypeName "FIXME OhNOOO"
         Just t -> t
 
@@ -90,7 +90,7 @@ check_astree ctx (Leaf term) t = check_term ctx term <|> if term_t == t then Not
 -- covers mistyped expressions such as (42 : String)
 check_term :: Context -> Term -> Maybe TypeError
 check_term ctx term = case term of
-    Var n (Just t) -> case lookup ctx (Identifier n) of
+    Var v (Just t) -> case lookup ctx v of
         Nothing -> Nothing
         Just n_t -> check_equals t n_t
 --     LitInt Integer ->

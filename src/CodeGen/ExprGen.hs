@@ -9,6 +9,8 @@ import Parser.ExprParser (
     PrefixOperator(..)
     )
 
+import Common
+
 generate_expr :: ASTree -> String
 generate_expr (Leaf t) = generate_term t
 generate_expr (Twig op t) = generate_prefix_expr op ++ generate_expr t
@@ -19,7 +21,7 @@ generate_term (LitInt l) = show l
 generate_term (LitChar c) = "\'" ++ c : "\'"
 generate_term (LitBool b) = if b then "true" else "false"
 generate_term (LitString s) = show s
-generate_term (Var v _) = v
+generate_term (Var (Identifier i) _) = i
 
 generate_oper :: Operator -> String
 generate_oper Plus              = "+"

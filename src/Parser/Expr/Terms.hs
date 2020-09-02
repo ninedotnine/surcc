@@ -5,6 +5,7 @@ module Parser.Expr.Terms (
 
 import qualified Text.Parsec as Parsec
 import Text.Parsec ((<|>), (<?>))
+import Common
 
 import Parser.Expr.ExprTypes
 import Parser.Expr.RegardingSpaces
@@ -43,7 +44,7 @@ parse_var :: ShuntingYardParser Term
 parse_var = do
     first <- Parsec.lower <|> Parsec.char '_'
     rest <- Parsec.many (Parsec.lower <|> Parsec.char '_' <|> Parsec.digit)
-    return $ Var (first:rest) Nothing
+    return $ Var (Identifier (first:rest)) Nothing
 
 parse_char :: ShuntingYardParser Term
 parse_char = LitChar <$> ((Parsec.char '\'') *> Parsec.anyChar <* (Parsec.char '\''))
