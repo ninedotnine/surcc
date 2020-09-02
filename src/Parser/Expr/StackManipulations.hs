@@ -131,16 +131,17 @@ clean_stack = do
     Oper_Stack op_stack <- get_op_stack
     case op_stack of
         [] -> return ()
-        StackTightPreOp op : tokes -> do
-            make_twig op tokes
-            clean_stack
-        StackSpacedPreOp op : tokes -> do
-            make_twig op tokes
-            clean_stack
-        (StackOp op:tokes) -> do
-            make_branch op tokes
-            clean_stack
-        (StackSig sig : tokes) -> do
-            make_sig sig tokes
-            clean_stack
-        _ -> Parsec.parserFail "incorrect whitespace or parens?"
+        (tok:tokes) -> case tok of
+            StackTightPreOp op -> do
+                make_twig op tokes
+                clean_stack
+            StackSpacedPreOp op -> do
+                make_twig op tokes
+                clean_stack
+            StackOp op -> do
+                make_branch op tokes
+                clean_stack
+            StackSig sig  -> do
+                make_sig sig tokes
+                clean_stack
+            _ -> Parsec.parserFail "incorrect whitespace or parens?"
