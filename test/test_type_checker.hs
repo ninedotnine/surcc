@@ -45,7 +45,8 @@ tests = [
     (globals, Signed (Leaf (Var "x")) "Int",   "Int",      match, "intvar2"),
     (globals, Signed (Leaf (Var "s")) "String", "String",  match, "stringvar2"),
     (globals, Signed (Leaf (Var "c")) "Char",  "Char",     match, "charvar2"),
-    (globals, Signed (Leaf (Var "b")) "Bool",  "Bool",     match, "boolvar2")
+    (globals, Signed (Leaf (Var "b")) "Bool",  "Bool",     match, "boolvar2"),
+    (globals, Signed (Signed (Signed (Signed (Signed (Leaf (LitInt 42)) (TypeName "Integer")) (TypeName "Integer")) (TypeName "Integer")) (TypeName "Integer")) (TypeName "Integer"), "Integer", match, "long int")
     ]
 
 borked_tests :: [Test]
@@ -59,7 +60,8 @@ borked_tests = [
     (globals, Leaf (Var "c"), "String", mismatch "String" "Char", "charvar"),
     (globals, Leaf (Var "b"), "Char", mismatch "Char" "Bool", "boolvar"),
     (globals, Signed (Leaf (Var "x")) "Bool", "Bool",   mismatch "Bool" "Int", "invalid lit"),
-    (globals, Signed (Leaf (Var "x")) "Bool", "Int",    mismatch "Bool" "Int", "invalid lit 2")
+    (globals, Signed (Leaf (Var "x")) "Bool", "Int",    mismatch "Bool" "Int", "invalid lit 2"),
+    (globals, Signed (Signed (Signed (Signed (Signed (Leaf (LitInt 42)) (TypeName "Integer")) (TypeName "Integer")) (TypeName "Bool")) (TypeName "Integer")) (TypeName "Integer"), "Integer", mismatch "Bool" "Integer", "long int")
     ]
 
 
