@@ -26,7 +26,7 @@ empty_ctx = Global []
 
 globals :: Context
 globals = Global [
-    Bound (Identifier "x") (TypeName "Int"),
+    Bound (Identifier "x") (TypeName "Integer"),
     Bound (Identifier "s") (TypeName "String"),
     Bound (Identifier "c") (TypeName "Char"),
     Bound (Identifier "b") (TypeName "Bool")
@@ -34,7 +34,7 @@ globals = Global [
 
 scoped :: Context
 scoped = Scoped [
-    Bound (Identifier "x") (TypeName "Int"),
+    Bound (Identifier "x") (TypeName "Integer"),
     Bound (Identifier "s") (TypeName "String"),
     Bound (Identifier "c") (TypeName "Char"),
     Bound (Identifier "b") (TypeName "Bool")
@@ -47,21 +47,22 @@ tests = [
     (empty_ctx, Leaf (LitString "what"), "String", match, "string"),
     (empty_ctx, Leaf (LitBool True), "Bool", match, "bool"),
     (empty_ctx, Branch Plus (Leaf (LitInt 1)) (Leaf (LitInt 2)), "Integer", match, "plus"),
-    (globals, Leaf (Var "x"), "Int", match, "intvar"),
+    (globals, Leaf (Var "x"), "Integer", match, "intvar"),
     (globals, Leaf (Var "s"), "String", match, "stringvar"),
     (globals, Leaf (Var "c"), "Char", match, "charvar"),
     (globals, Leaf (Var "b"), "Bool", match, "boolvar"),
-    (globals, Signed (Leaf (Var "x")) "Int",   "Int",      match, "intvar2"),
+    (globals, Signed (Leaf (Var "x")) "Integer",   "Integer",      match, "intvar2"),
     (globals, Signed (Leaf (Var "s")) "String", "String",  match, "stringvar2"),
     (globals, Signed (Leaf (Var "c")) "Char",  "Char",     match, "charvar2"),
     (globals, Signed (Leaf (Var "b")) "Bool",  "Bool",     match, "boolvar2"),
     (globals, Signed (Twig Negate (Leaf (Var "b"))) "Bool",  "Bool",     match, "negate"),
+    (globals, Branch Plus (Leaf (Var "x")) (Leaf (Var "x")), "Integer", match, "plus2"),
     (globals, Signed (Signed (Signed (Signed (Signed (Leaf (LitInt 42)) (TypeName "Integer")) (TypeName "Integer")) (TypeName "Integer")) (TypeName "Integer")) (TypeName "Integer"), "Integer", match, "long int"),
-    (scoped, Leaf (Var "x"), "Int", match, "scoped intvar"),
+    (scoped, Leaf (Var "x"), "Integer", match, "scoped intvar"),
     (scoped, Leaf (Var "s"), "String", match, "scoped stringvar"),
     (scoped, Leaf (Var "c"), "Char", match, "scoped charvar"),
     (scoped, Leaf (Var "b"), "Bool", match, "scoped boolvar"),
-    (scoped, Signed (Leaf (Var "x")) "Int",   "Int",      match, "scoped intvar2"),
+    (scoped, Signed (Leaf (Var "x")) "Integer",   "Integer",      match, "scoped intvar2"),
     (scoped, Signed (Leaf (Var "s")) "String", "String",  match, "scoped stringvar2"),
     (scoped, Signed (Leaf (Var "c")) "Char",  "Char",     match, "scoped charvar2"),
     (scoped, Signed (Leaf (Var "b")) "Bool",  "Bool",     match, "scoped boolvar2"),
@@ -72,27 +73,28 @@ tests = [
 borked_tests :: [Test]
 borked_tests = [
     (empty_ctx, Leaf (LitInt 3), "Char", mismatch "Char" "Integer", "int"),
-    (empty_ctx, Leaf (LitChar 'a'), "Int", mismatch "Int" "Char", "char"),
+    (empty_ctx, Leaf (LitChar 'a'), "Integer", mismatch "Integer" "Char", "char"),
     (empty_ctx, Leaf (LitString "what"), "Char", mismatch "Char" "String", "string"),
     (empty_ctx, Leaf (LitBool True), "Char", mismatch "Char" "Bool", "bool"),
-    (globals, Leaf (Var "x"), "Char", mismatch "Char" "Int", "intvar"),
+    (globals, Leaf (Var "x"), "Char", mismatch "Char" "Integer", "intvar"),
     (globals, Leaf (Var "s"), "Bool", mismatch "Bool" "String", "stringvar"),
     (globals, Leaf (Var "c"), "String", mismatch "String" "Char", "charvar"),
     (globals, Leaf (Var "b"), "Char", mismatch "Char" "Bool", "boolvar"),
-    (globals, Signed (Leaf (Var "x")) "Bool", "Bool",   mismatch "Bool" "Int", "invalid lit"),
-    (globals, Signed (Leaf (Var "x")) "Bool", "Int",    mismatch "Bool" "Int", "invalid lit 2"),
+    (globals, Signed (Leaf (Var "x")) "Bool", "Bool",   mismatch "Bool" "Integer", "invalid lit"),
+    (globals, Signed (Leaf (Var "x")) "Bool", "Integer",    mismatch "Bool" "Integer", "invalid lit 2"),
     (globals, Signed (Signed (Signed (Signed (Signed (Leaf (LitInt 42)) (TypeName "Integer")) (TypeName "Integer")) (TypeName "Bool")) (TypeName "Integer")) (TypeName "Integer"), "Integer", mismatch "Bool" "Integer", "long int"),
-    (scoped, Leaf (Var "x"), "Char", mismatch "Char" "Int", "scoped intvar"),
+    (scoped, Leaf (Var "x"), "Char", mismatch "Char" "Integer", "scoped intvar"),
     (scoped, Leaf (Var "s"), "Bool", mismatch "Bool" "String", "scoped stringvar"),
     (scoped, Leaf (Var "c"), "String", mismatch "String" "Char", "scoped charvar"),
     (scoped, Leaf (Var "b"), "Char", mismatch "Char" "Bool", "scoped boolvar"),
-    (scoped, Signed (Leaf (Var "x")) "Bool", "Bool",   mismatch "Bool" "Int", "scoped invalid lit"),
-    (scoped, Signed (Leaf (Var "x")) "Bool", "Int",    mismatch "Bool" "Int", "scoped invalid lit 2"),
-    (scoped, Signed (Leaf (Var "x")) "Bool", "Int",    mismatch "Bool" "Int", "scoped invalid lit 2"),
+    (scoped, Signed (Leaf (Var "x")) "Bool", "Bool",   mismatch "Bool" "Integer", "scoped invalid lit"),
+    (scoped, Signed (Leaf (Var "x")) "Bool", "Integer",    mismatch "Bool" "Integer", "scoped invalid lit 2"),
+    (scoped, Signed (Leaf (Var "x")) "Bool", "Integer",    mismatch "Bool" "Integer", "scoped invalid lit 2"),
     (empty_ctx, Twig Negate (Leaf (LitChar 'a')), "Bork", mismatch "Bool" "Char", "negate"),
     (empty_ctx, Twig Negate (Leaf (LitChar 'a')), "Bork", mismatch "Bool" "Char", "negate2"),
     (empty_ctx, Branch Plus (Leaf (LitChar 'a')) (Leaf (LitInt 2)), "Bork", mismatch "Integer" "Char", "plus1"),
     (empty_ctx, Branch Plus (Leaf (LitInt 2)) (Leaf (LitChar 'a')), "Bork", mismatch "Integer" "Char", "plus2"),
+    (empty_ctx, Branch Plus (Leaf (LitInt 2)) (Leaf (Var "x")), "Bork", mismatch "Integer" "Char", "plus2"),
     (scoped, Signed (Signed (Signed (Signed (Signed (Leaf (LitInt 42)) (TypeName "Integer")) (TypeName "Integer")) (TypeName "Bool")) (TypeName "Integer")) (TypeName "Integer"), "Integer", mismatch "Bool" "Integer", "scoped long int")
     ]
 
