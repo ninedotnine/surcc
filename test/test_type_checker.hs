@@ -54,6 +54,7 @@ tests = [
     (globals, Signed (Leaf (Var "s")) "String", "String",  match, "stringvar2"),
     (globals, Signed (Leaf (Var "c")) "Char",  "Char",     match, "charvar2"),
     (globals, Signed (Leaf (Var "b")) "Bool",  "Bool",     match, "boolvar2"),
+    (globals, Signed (Twig Negate (Leaf (Var "b"))) "Bool",  "Bool",     match, "negate"),
     (globals, Signed (Signed (Signed (Signed (Signed (Leaf (LitInt 42)) (TypeName "Integer")) (TypeName "Integer")) (TypeName "Integer")) (TypeName "Integer")) (TypeName "Integer"), "Integer", match, "long int"),
     (scoped, Leaf (Var "x"), "Int", match, "scoped intvar"),
     (scoped, Leaf (Var "s"), "String", match, "scoped stringvar"),
@@ -63,6 +64,7 @@ tests = [
     (scoped, Signed (Leaf (Var "s")) "String", "String",  match, "scoped stringvar2"),
     (scoped, Signed (Leaf (Var "c")) "Char",  "Char",     match, "scoped charvar2"),
     (scoped, Signed (Leaf (Var "b")) "Bool",  "Bool",     match, "scoped boolvar2"),
+    (scoped, Twig Negate (Leaf (Var "b")),  "Bool",     match, "scoped negate"),
     (scoped, Signed (Signed (Signed (Signed (Signed (Leaf (LitInt 42)) (TypeName "Integer")) (TypeName "Integer")) (TypeName "Integer")) (TypeName "Integer")) (TypeName "Integer"), "Integer", match, "scoped long int")
     ]
 
@@ -85,6 +87,9 @@ borked_tests = [
     (scoped, Leaf (Var "b"), "Char", mismatch "Char" "Bool", "scoped boolvar"),
     (scoped, Signed (Leaf (Var "x")) "Bool", "Bool",   mismatch "Bool" "Int", "scoped invalid lit"),
     (scoped, Signed (Leaf (Var "x")) "Bool", "Int",    mismatch "Bool" "Int", "scoped invalid lit 2"),
+    (scoped, Signed (Leaf (Var "x")) "Bool", "Int",    mismatch "Bool" "Int", "scoped invalid lit 2"),
+    (empty_ctx, Twig Negate (Leaf (LitChar 'a')), "Char", mismatch "Bool" "Char", "negate"),
+    (empty_ctx, Twig Negate (Leaf (LitChar 'a')), "Bool", mismatch "Bool" "Char", "negate2"),
     (scoped, Signed (Signed (Signed (Signed (Signed (Leaf (LitInt 42)) (TypeName "Integer")) (TypeName "Integer")) (TypeName "Bool")) (TypeName "Integer")) (TypeName "Integer"), "Integer", mismatch "Bool" "Integer", "scoped long int")
     ]
 
