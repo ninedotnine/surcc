@@ -1,12 +1,15 @@
+{-# OPTIONS_GHC -Wall #-}
 module Main_Expr where
 
-import Control.Monad (forever, unless)
+import Control.Monad (unless)
+import Control.Monad.Trans (liftIO)
 import Data.Char (isSpace)
 import System.Environment (getArgs)
 import System.Exit (exitFailure, exitSuccess)
-import System.IO (hFlush, stdout)
+import System.Console.Haskeline (runInputT, defaultSettings, getInputLine)
 
 import Parser.ExprParser
+
 
 main :: IO ()
 main = do
@@ -17,11 +20,15 @@ main = do
         _     -> parse_all args
 
 repl :: IO ()
-repl = forever $ do
-    putStr "> "
-    hFlush stdout
-    input <- getLine
-    unless (all isSpace input) (parse_eval_print_expression input)
+repl = runInputT defaultSettings loop where
+    loop = do
+        m_input <- getInputLine "expr> "
+        case m_input of
+            Nothing -> return ()
+            Just input -> liftIO (pepe input) >> loop
+
+pepe :: String -> IO ()
+pepe line = unless (all isSpace line) (parse_eval_print_expression line)
 
 parse_stdin :: IO ()
 parse_stdin = do
