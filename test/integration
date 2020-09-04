@@ -2,7 +2,7 @@
 
 set -o errexit -o nounset
 
-dir="test/integration"
+dir="test/integration.d"
 
 trap 'rm -r "$tempdir"' EXIT
 tempdir=$(mktemp -d "/tmp/souc_temp_XXXX")

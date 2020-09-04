@@ -29,26 +29,20 @@ clean:
 	rm -fr $(OUT_DIR) $(CACHE_DIR)
 
 .PHONY: test
-test: test_parser test/type_checker test/typechecker_progs test/codegen test_expr_parser test_integration
+test: test/parser test/type_checker test/typechecker_progs test/codegen test/expr_parser test/integration
 	@echo "all tests successful! :^D"
 
-.PHONY: test_parser
-test_parser: parser
-	@test/test_parser
+.PHONY: test/parser test/expr_parser test/integration
+test/expr_parser: parser expr
+test/parser: parser
+test/integration test/expr_parser test/parser: soucc
+	@ $@
 
 .PHONY: test/codegen test/type_checker test/typechecker_progs
 test/codegen test/type_checker test/typechecker_progs: all | $(TEST_DIR)
 	@$(RM) $(CACHE_DIR)/hi_files/Main.hi  	# ugh hack to fix ghc
 	@ghc $(FLAGS) -o $(CACHE_DIR)/$@ $@.hs
 	@$(CACHE_DIR)/$@
-
-.PHONY: test_integration
-test_integration: soucc
-	@test/integration_test
-
-.PHONY: test_expr_parser
-test_expr_parser: parser expr
-	@test/test_expr_parser
 
 .PHONY: deps
 deps: | $(CACHE_DIR)

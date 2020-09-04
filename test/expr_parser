@@ -1,6 +1,6 @@
 #!/usr/bin/dash
 
-expr_parser_dir="test/expr_parser"
+expr_parser_dir="test/expr_parser.d"
 should_succeed_dir="${expr_parser_dir}/should_succeed"
 should_fail_dir="${expr_parser_dir}/should_fail"
 
