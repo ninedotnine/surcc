@@ -46,21 +46,16 @@ walk_top_level_statements defns = map unroll defns where
     unroll :: Top_Level_Defn -> Bound
     unroll defn = case defn of
         Top_Level_Const_Defn ident (Just t) _ -> Bound ident t
+        Top_Level_Const_Defn ident Nothing  _ -> Bound ident "UnknownConst"
         FuncDefn ident _ (Just t) _ -> Bound ident ("a -> " <> t)
-        FuncDefn ident _ Nothing _ -> Bound ident "a -> b"
+        FuncDefn ident _ Nothing  _ -> Bound ident "a -> b"
         ShortFuncDefn ident _ (Just t) _ -> Bound ident ("Fn a " <> t)
-        ShortFuncDefn ident _ Nothing _ -> Bound ident ("Fn a b")
+        ShortFuncDefn ident _ Nothing  _ -> Bound ident ("Fn a b")
         SubDefn ident _ (Just t) _ -> Bound ident ("What -> " <> t)
-        SubDefn ident _ Nothing _ -> Bound ident ("What -> IO")
-        _ -> Bound "placeholder_id" "PlaceholderType"
---
---
--- data Top_Level_Defn = Top_Level_Const_Defn Identifier (Maybe TypeName) ASTree
---                     | FuncDefn Identifier Param (Maybe TypeName) Stmts
---                     | ShortFuncDefn Identifier Param (Maybe TypeName) ASTree
---                     | SubDefn Identifier (Maybe Param) (Maybe TypeName) Stmts
---                     | MainDefn (Maybe Param) (Maybe TypeName) Stmts
---                     deriving (Show, Eq)
+        SubDefn ident _ Nothing  _ -> Bound ident ("What -> IO")
+        MainDefn _ (Just t) _ -> Bound "main" ("Args -> " <> t)
+        MainDefn _ Nothing  _ -> Bound "main" ("Args -> IO")
+
 
 infer :: Context -> ASTree -> TypeName
 infer ctx tree = case tree of
