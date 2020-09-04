@@ -1,3 +1,6 @@
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE OverloadedStrings #-}
+
 module Common (
     Stmt(..),
     Param(..),
@@ -28,6 +31,7 @@ import Text.Parsec (Parsec)
 -- import qualified Data.Map.Strict as Map (Map, singleton, member, insert)
 import qualified Data.Map.Strict as Map (Map, empty)
 import Data.List.NonEmpty ( NonEmpty(..) )
+import Data.String (IsString)
 
 
 {-
@@ -49,7 +53,7 @@ empty_state = (0, Map.empty :| [])
 type SouCParser a = Parsec String ParserState a
 
 newtype Identifier = Identifier String
-                   deriving (Eq, Read, Show, Ord)
+                   deriving (Eq, Read, Show, Ord, IsString, Semigroup)
 
 -- instance Show Identifier where
 --     show (Identifier x) = show x
@@ -68,7 +72,7 @@ newtype Import = Import String deriving (Read, Show)
 
 newtype Stmts = Stmts [Stmt] deriving (Show, Eq)
 
-newtype TypeName = TypeName String deriving (Show, Eq)
+newtype TypeName = TypeName String deriving (Show, Eq, IsString, Semigroup)
 
 data TypeError = TypeError TypeName TypeName
 --                | NotFound TypeName

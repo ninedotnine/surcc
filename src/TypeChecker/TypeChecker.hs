@@ -1,4 +1,6 @@
 {-# OPTIONS_GHC -Wno-unused-top-binds #-}
+{-# LANGUAGE OverloadedStrings #-}
+
 module TypeChecker.TypeChecker (
     type_check,
     check_astree -- for tests
@@ -44,7 +46,13 @@ walk_top_level_statements defns = map unroll defns where
     unroll :: Top_Level_Defn -> Bound
     unroll defn = case defn of
         Top_Level_Const_Defn ident (Just t) _ -> Bound ident t
-        _ -> Bound (Identifier "placeholder_id") (TypeName "PlaceholderType")
+        FuncDefn ident _ (Just t) _ -> Bound ident ("a -> " <> t)
+        FuncDefn ident _ Nothing _ -> Bound ident "a -> b"
+        ShortFuncDefn ident _ (Just t) _ -> Bound ident ("Fn a " <> t)
+        ShortFuncDefn ident _ Nothing _ -> Bound ident ("Fn a b")
+        SubDefn ident _ (Just t) _ -> Bound ident ("What -> " <> t)
+        SubDefn ident _ Nothing _ -> Bound ident ("What -> IO")
+        _ -> Bound "placeholder_id" "PlaceholderType"
 --
 --
 -- data Top_Level_Defn = Top_Level_Const_Defn Identifier (Maybe TypeName) ASTree

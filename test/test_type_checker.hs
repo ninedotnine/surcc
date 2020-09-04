@@ -8,8 +8,6 @@ import TypeChecker.Context
 import Common
 
 import System.Exit (exitFailure)
-import Data.String (IsString(..))
-
 
 newtype Expected = Result (Maybe TypeError)
 
@@ -106,14 +104,6 @@ main = do
     putStrLn "=== testing type-checker invalid inputs"
     mapM_ test borked_tests
     putStrLn "all type-checker tests passed :^)"
-
-
-
-instance IsString TypeName where
-    fromString = TypeName
-
-instance IsString Identifier where
-    fromString = Identifier
 
 
 render :: Maybe TypeError -> String
