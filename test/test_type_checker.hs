@@ -46,6 +46,7 @@ tests = [
     (empty_ctx, Leaf (LitChar 'a'), "Char", match, "char"),
     (empty_ctx, Leaf (LitString "what"), "String", match, "string"),
     (empty_ctx, Leaf (LitBool True), "Bool", match, "bool"),
+    (empty_ctx, Branch Plus (Leaf (LitInt 1)) (Leaf (LitInt 2)), "Integer", match, "plus"),
     (globals, Leaf (Var "x"), "Int", match, "intvar"),
     (globals, Leaf (Var "s"), "String", match, "stringvar"),
     (globals, Leaf (Var "c"), "Char", match, "charvar"),
@@ -90,6 +91,8 @@ borked_tests = [
     (scoped, Signed (Leaf (Var "x")) "Bool", "Int",    mismatch "Bool" "Int", "scoped invalid lit 2"),
     (empty_ctx, Twig Negate (Leaf (LitChar 'a')), "Char", mismatch "Bool" "Char", "negate"),
     (empty_ctx, Twig Negate (Leaf (LitChar 'a')), "Bool", mismatch "Bool" "Char", "negate2"),
+    (empty_ctx, Branch Plus (Leaf (LitChar 'a')) (Leaf (LitInt 2)), "Bork", mismatch "Integer" "Char", "plus1"),
+    (empty_ctx, Branch Plus (Leaf (LitInt 2)) (Leaf (LitChar 'a')), "Bork", mismatch "Integer" "Char", "plus2"),
     (scoped, Signed (Signed (Signed (Signed (Signed (Leaf (LitInt 42)) (TypeName "Integer")) (TypeName "Integer")) (TypeName "Bool")) (TypeName "Integer")) (TypeName "Integer"), "Integer", mismatch "Bool" "Integer", "scoped long int")
     ]
 
