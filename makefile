@@ -28,14 +28,14 @@ clean:
 	rm -fr $(OUT_DIR) $(CACHE_DIR)
 
 .PHONY: test
-test: test_parser test_type_checker test_codegen test_expr_parser test_integration
+test: test_parser test_type_checker test_type_checker_progs test_codegen test_expr_parser test_integration
 	@echo "all tests successful! :^D"
 
 .PHONY: test_parser
 test_parser: parser
 	@test/test_parser
 
-.PHONY: test_codegen test_type_checker test_type_checker_progs
+.PHONY: test_codegen test_type_checker_progs test_type_checker
 test_codegen test_type_checker test_type_checker_progs: all | $(CACHE_DIR)
 	@ghc $(FLAGS) -o $(CACHE_DIR)/$@ test/$@.hs
 	@$(CACHE_DIR)/$@

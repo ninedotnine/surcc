@@ -8,7 +8,6 @@ import TypeChecker.TypeChecker
 import Common
 
 import System.Exit (exitFailure)
-import Data.String (IsString(..))
 
 -- import System.IO
 
@@ -38,9 +37,6 @@ instance Eq ModuleName where
 
 instance Eq Import where
     Import s0 == Import s1 = s0 == s1
-
-instance IsString TypeName where
-    fromString = TypeName
 
 test :: Test -> IO ()
 test (prog, expected, name) = do
@@ -101,13 +97,13 @@ fn3 :: Program
 fn3 = program_header [
     Top_Level_Const_Defn (Identifier "n") (Just "Int") (Leaf (LitInt 42)),
     FuncDefn (Identifier "f") (Param  [Identifier "x"] (Just "Int")) notype (Stmts [
-        Stmt_Return (Just (Leaf (Var "n" Nothing)))])]
+        Stmt_Return (Just (Leaf (Var "n")))])]
 
 fn3_checked :: Either TypeError CheckedProgram
 fn3_checked = Right $ checked_program_header [
     Top_Level_Const_Defn (Identifier "n") (Just "Int") (Leaf (LitInt 42)),
     FuncDefn (Identifier "f") (Param  [Identifier "x"] (Just "Int")) notype (Stmts [
-        Stmt_Return (Just (Leaf (Var "n" Nothing)))])]
+        Stmt_Return (Just (Leaf (Var "n")))])]
 
 
 borked :: Program
@@ -136,7 +132,7 @@ borked_fn2_checked = Left $ TypeError "Int" "Char"
 borked_fn3 :: Program
 borked_fn3 = program_header [
     FuncDefn (Identifier "f") (Param  [Identifier "x"] (Just "Int")) (Just "Char") (Stmts [
-        Stmt_Return (Just (Leaf (Var "x" Nothing)))])]
+        Stmt_Return (Just (Leaf (Var "x")))])]
 
 borked_fn3_checked :: Either TypeError CheckedProgram
 borked_fn3_checked = Left $ TypeError "Char" "Int"
@@ -145,7 +141,7 @@ borked_fn4 :: Program
 borked_fn4 = program_header [
     Top_Level_Const_Defn (Identifier "n") (Just "Int") (Leaf (LitInt 42)),
     FuncDefn (Identifier "f") (Param  [Identifier "x"] notype) (Just "Char") (Stmts [
-        Stmt_Return (Just (Leaf (Var "n" Nothing)))])]
+        Stmt_Return (Just (Leaf (Var "n")))])]
 
 borked_fn4_checked :: Either TypeError CheckedProgram
 borked_fn4_checked = Left $ TypeError "Char" "Int"
@@ -154,7 +150,7 @@ subber_const_ass :: Program
 subber_const_ass = program_header [
     Top_Level_Const_Defn (Identifier "n") (Just "Int") (Leaf (LitInt 42)),
     SubDefn (Identifier "subby") Nothing notype (Stmts [
-        Stmt_Const_Assign (Identifier "i") (Leaf (Var "n" Nothing))])]
+        Stmt_Const_Assign (Identifier "i") (Leaf (Var "n"))])]
 
 subber_const_ass_checked :: Either TypeError CheckedProgram
 subber_const_ass_checked = Left (TypeError "Int" "Char")
@@ -163,7 +159,7 @@ borked_subber_const_ass :: Program
 borked_subber_const_ass = program_header [
     Top_Level_Const_Defn (Identifier "n") (Just "Int") (Leaf (LitInt 42)),
     SubDefn (Identifier "subby") Nothing notype (Stmts [
-        Stmt_Const_Assign (Identifier "x") (Leaf (Var "x" Nothing))])]
+        Stmt_Const_Assign (Identifier "x") (Leaf (Var "x"))])]
 
 borked_subber_const_ass_checked :: Either TypeError CheckedProgram
 borked_subber_const_ass_checked = Left (TypeError "Int" "Char")
