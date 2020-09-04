@@ -89,8 +89,8 @@ borked_tests = [
     (scoped, Signed (Leaf (Var "x")) "Bool", "Bool",   mismatch "Bool" "Int", "scoped invalid lit"),
     (scoped, Signed (Leaf (Var "x")) "Bool", "Int",    mismatch "Bool" "Int", "scoped invalid lit 2"),
     (scoped, Signed (Leaf (Var "x")) "Bool", "Int",    mismatch "Bool" "Int", "scoped invalid lit 2"),
-    (empty_ctx, Twig Negate (Leaf (LitChar 'a')), "Char", mismatch "Bool" "Char", "negate"),
-    (empty_ctx, Twig Negate (Leaf (LitChar 'a')), "Bool", mismatch "Bool" "Char", "negate2"),
+    (empty_ctx, Twig Negate (Leaf (LitChar 'a')), "Bork", mismatch "Bool" "Char", "negate"),
+    (empty_ctx, Twig Negate (Leaf (LitChar 'a')), "Bork", mismatch "Bool" "Char", "negate2"),
     (empty_ctx, Branch Plus (Leaf (LitChar 'a')) (Leaf (LitInt 2)), "Bork", mismatch "Integer" "Char", "plus1"),
     (empty_ctx, Branch Plus (Leaf (LitInt 2)) (Leaf (LitChar 'a')), "Bork", mismatch "Integer" "Char", "plus2"),
     (scoped, Signed (Signed (Signed (Signed (Signed (Leaf (LitInt 42)) (TypeName "Integer")) (TypeName "Integer")) (TypeName "Bool")) (TypeName "Integer")) (TypeName "Integer"), "Integer", mismatch "Bool" "Integer", "scoped long int")
