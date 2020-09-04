@@ -40,16 +40,16 @@ infer_prefix_op op _ = case op of
     Deref -> error "FIXME"
     GetAddr -> error "FIXME"
     Negate -> (in_t "Bool", ret_t "Bool")
-    ToString -> (in_t "Int", ret_t "String")
+    ToString -> (in_t "Integer", ret_t "String")
     Pure -> error "FIXME"
     Join -> error "FIXME"
 
 
 infer_infix_op :: Operator -> ASTree -> ASTree -> (InputType, InputType, ReturnType)
 infer_infix_op op _ _ = case op of
-    Plus  -> (in_t "Int", in_t "Int", ret_t "Int")
-    Minus -> (in_t "Int", in_t "Int", ret_t "Int")
-    Splat -> (in_t "Int", in_t "Int", ret_t "Int")
+    Plus  -> (in_t "Integer", in_t "Integer", ret_t "Integer")
+    Minus -> (in_t "Integer", in_t "Integer", ret_t "Integer")
+    Splat -> (in_t "Integer", in_t "Integer", ret_t "Integer")
     And -> (in_t "Bool", in_t "Bool", ret_t "Bool")
     Or  -> (in_t "Bool", in_t "Bool", ret_t "Bool")
     _ -> error "FIXME"
