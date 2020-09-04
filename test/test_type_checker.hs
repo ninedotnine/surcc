@@ -76,6 +76,10 @@ borked_tests = [
     (empty_ctx, Leaf (LitChar 'a'), "Integer", mismatch "Integer" "Char", "char"),
     (empty_ctx, Leaf (LitString "what"), "Char", mismatch "Char" "String", "string"),
     (empty_ctx, Leaf (LitBool True), "Char", mismatch "Char" "Bool", "bool"),
+    (empty_ctx, Twig Negate (Leaf (LitChar 'a')), "Bork", mismatch "Bool" "Char", "negate"),
+    (empty_ctx, Twig Negate (Leaf (LitChar 'a')), "Bork", mismatch "Bool" "Char", "negate2"),
+    (empty_ctx, Branch Plus (Leaf (LitChar 'a')) (Leaf (LitInt 2)), "Bork", mismatch "Integer" "Char", "plus1"),
+    (empty_ctx, Branch Plus (Leaf (LitInt 2)) (Leaf (LitChar 'a')), "Bork", mismatch "Integer" "Char", "plus2"),
     (globals, Leaf (Var "x"), "Char", mismatch "Char" "Integer", "intvar"),
     (globals, Leaf (Var "s"), "Bool", mismatch "Bool" "String", "stringvar"),
     (globals, Leaf (Var "c"), "String", mismatch "String" "Char", "charvar"),
@@ -90,11 +94,7 @@ borked_tests = [
     (scoped, Signed (Leaf (Var "x")) "Bool", "Bool",   mismatch "Bool" "Integer", "scoped invalid lit"),
     (scoped, Signed (Leaf (Var "x")) "Bool", "Integer",    mismatch "Bool" "Integer", "scoped invalid lit 2"),
     (scoped, Signed (Leaf (Var "x")) "Bool", "Integer",    mismatch "Bool" "Integer", "scoped invalid lit 2"),
-    (empty_ctx, Twig Negate (Leaf (LitChar 'a')), "Bork", mismatch "Bool" "Char", "negate"),
-    (empty_ctx, Twig Negate (Leaf (LitChar 'a')), "Bork", mismatch "Bool" "Char", "negate2"),
-    (empty_ctx, Branch Plus (Leaf (LitChar 'a')) (Leaf (LitInt 2)), "Bork", mismatch "Integer" "Char", "plus1"),
-    (empty_ctx, Branch Plus (Leaf (LitInt 2)) (Leaf (LitChar 'a')), "Bork", mismatch "Integer" "Char", "plus2"),
-    (empty_ctx, Branch Plus (Leaf (LitInt 2)) (Leaf (Var "x")), "Bork", mismatch "Integer" "Char", "plus2"),
+    (scoped, Branch Plus (Leaf (LitInt 2)) (Leaf (Var "s")), "Bork", mismatch "Integer" "String", "plus3"),
     (scoped, Signed (Signed (Signed (Signed (Signed (Leaf (LitInt 42)) (TypeName "Integer")) (TypeName "Integer")) (TypeName "Bool")) (TypeName "Integer")) (TypeName "Integer"), "Integer", mismatch "Bool" "Integer", "scoped long int")
     ]
 
