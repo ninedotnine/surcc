@@ -24,7 +24,7 @@ type Checker a = Either TypeError a
 type_check :: Program -> Either TypeError CheckedProgram
 type_check (Program name imports defns) = do
 --     debug prog
-    traceM ("top lvl conts: " ++ show (get_top_level_const_defns_from_prog defns))
+    traceM ("top lvl conts: " ++ show (get_top_level_const_defns defns))
     global_bounds <- get_top_level_const_bounds_or_fails_end defns
     traceM ("defns: " ++ show defns)
     traceM ("global_bounds: " ++ show global_bounds)
@@ -35,11 +35,11 @@ type_check (Program name imports defns) = do
 
 type_check_internal :: Program -> Either TypeError CheckedProgram
 type_check_internal (Program name imports defns) = do
-    globals <- get_globals (Program name imports defns)
+    globals <- get_globals imports defns
     Right $ CheckedProgram name imports defns
 
-get_globals :: Program -> Either TypeError Context
-get_globals (Program _ imports defns) = do
+get_globals :: [Import] -> [Top_Level_Defn] -> Either TypeError Context
+get_globals imports defns = do
     imps <- get_imports imports
     consts <- get_top_level_const_bounds_or_fails_end defns
     return $ Global $ imps ++ consts
@@ -65,22 +65,24 @@ check_any_failed list = let (ls, rs) = partitionEithers list in case ls of
 get_top_level_const_bounds_or_fails_end :: [Top_Level_Defn] -> Either TypeError [Bound]
 get_top_level_const_bounds_or_fails_end defns = let
     tldefs =  get_top_level_const_bounds_or_fails defns
-    in check_any_failed tldefs
+    in traceM (show tldefs) >> check_any_failed tldefs
 
 get_top_level_const_bounds_or_fails :: [Top_Level_Defn] -> [Either TypeError Bound]
 get_top_level_const_bounds_or_fails defns = let
-    tldefs = get_top_level_const_defns_from_prog defns
+    tldefs = get_top_level_const_defns defns
     in map check_top_level_const_defns tldefs
 
-get_top_level_const_defns_from_prog :: [Top_Level_Defn] -> [Top_Level_Defn]
-get_top_level_const_defns_from_prog defns = get_top_level_const_defns defns
 
 empty_context :: Context
 empty_context = Global []
 
 check_top_level_const_defns :: Top_Level_Defn -> Either TypeError Bound
 check_top_level_const_defns stmt = case stmt of
-    Top_Level_Const_Defn i Nothing expr -> Right (Bound i (infer empty_context expr))
+    Top_Level_Const_Defn i Nothing expr ->
+        case check_astree empty_context expr inferred of
+            Nothing -> Right (Bound i inferred)
+            Just err -> Left err
+            where inferred = infer empty_context expr
     Top_Level_Const_Defn i (Just t) expr -> if t == inferred
         then Right (Bound i t)
         else Left (TypeError t inferred)
