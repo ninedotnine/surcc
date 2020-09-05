@@ -41,6 +41,27 @@ get_imports imports = map make_import_bound (map from_import imports)
         from_import (Import s) = s
         make_import_bound s = Bound (Identifier s) (TypeName "Module")
 
+get_top_level_const_defns_from_prog :: Program -> [Top_Level_Defn]
+get_top_level_const_defns_from_prog (Program _ _ defns) = get_top_level_const_defns defns
+
+empty_context :: Context
+empty_context = Global []
+
+check_top_level_const_defns :: Top_Level_Defn -> Either TypeError Bound
+check_top_level_const_defns stmt = case stmt of
+    Top_Level_Const_Defn i Nothing expr -> Right (Bound i (infer empty_context expr))
+    Top_Level_Const_Defn i (Just t) expr -> if t == inferred
+        then Right (Bound i t)
+        else Left (TypeError t inferred)
+            where inferred = infer empty_context expr
+    _ -> error "FIXME haskell's type system can stop this"
+
+get_top_level_const_defns :: [Top_Level_Defn] -> [Top_Level_Defn]
+get_top_level_const_defns = filter is_top_level_const_defn where
+    is_top_level_const_defn :: Top_Level_Defn -> Bool
+    is_top_level_const_defn (Top_Level_Const_Defn _ _ _) = True
+    is_top_level_const_defn _ = False
+
 walk_top_level_statements :: [Top_Level_Defn] -> [Bound]
 walk_top_level_statements defns = map unroll defns where
     unroll :: Top_Level_Defn -> Bound
