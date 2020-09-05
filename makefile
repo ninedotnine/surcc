@@ -13,16 +13,16 @@ default: all test
 all: soucc expr parser typechecker
 
 soucc: src/Main_Soucc.hs | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
-	@ghc $(FLAGS) -o $(OUT_DIR)/soucc -main-is Main_Soucc $<
+	@ghc $(FLAGS) -o $(OUT_DIR)/$@ -main-is Main_Soucc $<
 
 expr: src/Main_Expr.hs soucc | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
-	@ghc $(FLAGS) -o $(OUT_DIR)/expr -main-is Main_Expr $<
+	@ghc $(FLAGS) -o $(OUT_DIR)/$@ -main-is Main_Expr $<
 
 parser: src/Main_Parser.hs soucc expr | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
-	@ghc $(FLAGS) -o $(OUT_DIR)/parser -main-is Main_Parser $<
+	@ghc $(FLAGS) -o $(OUT_DIR)/$@ -main-is Main_Parser $<
 
 typechecker: src/Main_TypeChecker.hs soucc expr parser | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
-	@ghc $(FLAGS) -o $(OUT_DIR)/typechecker -main-is Main_TypeChecker $<
+	@ghc $(FLAGS) -o $(OUT_DIR)/$@ -main-is Main_TypeChecker $<
 
 
 $(OUT_DIR) $(CACHE_DIR) $(TEST_DIR) $(HI_DIR) $(OBJ_DIR):
