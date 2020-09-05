@@ -66,29 +66,30 @@ check_any_failed list = let (ls, rs) = partitionEithers list in case ls of
 get_top_level_const_bounds_or_fails_end :: [Top_Level_Defn] -> Either TypeError [Bound]
 get_top_level_const_bounds_or_fails_end defns = let
     tldefs =  get_top_level_const_bounds_or_fails defns
-    in traceM (show tldefs) >> check_any_failed tldefs
+    in check_any_failed tldefs
 
 get_top_level_const_bounds_or_fails :: [Top_Level_Defn] -> [Either TypeError Bound]
-get_top_level_const_bounds_or_fails defns = let
-    tldefs = get_top_level_const_defns defns
-    in map check_top_level_const_defns tldefs
+get_top_level_const_bounds_or_fails list = case list of
+    [] -> []
+    ((Top_Level_Const_Defn i m_t expr):rest) ->
+        (check_top_level_const_defns i m_t expr) : get_top_level_const_bounds_or_fails rest
+    (_:rest) -> get_top_level_const_bounds_or_fails rest
 
 
-check_top_level_const_defns :: Top_Level_Defn -> Either TypeError Bound
-check_top_level_const_defns stmt = case stmt of
-    Top_Level_Const_Defn i Nothing expr ->
+check_top_level_const_defns :: Identifier -> (Maybe TypeName) -> ASTree -> Either TypeError Bound
+check_top_level_const_defns i m_t expr = case m_t of
+    Nothing ->
         case check_astree empty_context expr inferred of
             Nothing -> Right (Bound i inferred)
             Just err -> Left err
             where inferred = infer empty_context expr
-    Top_Level_Const_Defn i (Just t) expr ->
+    Just t ->
         case check_astree empty_context expr t of
             Just err -> Left err
             Nothing -> if t == inferred
                 then Right (Bound i t)
                 else Left (TypeError t inferred)
                 where inferred = infer empty_context expr
-    _ -> error "FIXME haskell's type system can stop this"
 
 get_top_level_const_defns :: [Top_Level_Defn] -> [Top_Level_Defn]
 get_top_level_const_defns = filter is_top_level_const_defn where
