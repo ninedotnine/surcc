@@ -74,9 +74,6 @@ get_top_level_const_bounds_or_fails defns = let
     in map check_top_level_const_defns tldefs
 
 
-empty_context :: Context
-empty_context = Global []
-
 check_top_level_const_defns :: Top_Level_Defn -> Either TypeError Bound
 check_top_level_const_defns stmt = case stmt of
     Top_Level_Const_Defn i Nothing expr ->

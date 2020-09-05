@@ -1,7 +1,8 @@
 module TypeChecker.Context (
     Context(..),
     Bound(..),
-    lookup
+    lookup,
+    empty_context,
 ) where
 
 import Prelude hiding (lookup)
@@ -32,4 +33,5 @@ lookup_b [] _ = Nothing
 this_one :: Bound -> Identifier -> Maybe TypeName
 this_one (Bound i t) ident = if i == ident then Just t else Nothing
 
-
+empty_context :: Context
+empty_context = Global []
