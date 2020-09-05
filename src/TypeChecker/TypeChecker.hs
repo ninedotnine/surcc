@@ -6,6 +6,7 @@ module TypeChecker.TypeChecker (
     ) where
 
 import Control.Applicative
+import Data.Either
 
 import Prelude hiding (lookup)
 import Common
@@ -21,9 +22,16 @@ type Checker a = Either TypeError a
 
 -- FIXME this should fail sometimes lol
 type_check :: Program -> Either TypeError CheckedProgram
-type_check prog = debug prog >> type_check_internal prog
-    where debug p = traceM $
-            "BOUND!! " ++ show (get_globals p)
+type_check prog = do
+--     debug prog
+    traceM ("top lvl conts: " ++ show (get_top_level_const_defns_from_prog prog))
+    global_bounds <- get_top_level_const_bounds_or_fails_end prog
+    traceM ("prog: " ++ show prog)
+    traceM ("global_bounds: " ++ show global_bounds)
+    type_check_internal prog
+--     where debug p = traceM $
+-- --             "BOUND!! " ++ show (get_globals p) ++ "\n tree was: " ++ show prog
+--             "BOUND!! " ++ show (get_globals p) ++ "\n tree was: " ++ show prog
 
 type_check_internal :: Program -> Either TypeError CheckedProgram
 type_check_internal (Program name imports defns) = do
@@ -40,6 +48,23 @@ get_imports imports = map make_import_bound (map from_import imports)
         from_import :: Import -> String
         from_import (Import s) = s
         make_import_bound s = Bound (Identifier s) (TypeName "Module")
+
+
+check_any_failed :: [Either TypeError Bound] -> Either TypeError [Bound]
+check_any_failed list = let (ls, rs) = partitionEithers list in case ls of
+    [] -> Right rs
+    (x:_) -> Left x
+
+
+get_top_level_const_bounds_or_fails_end :: Program -> Either TypeError [Bound]
+get_top_level_const_bounds_or_fails_end prog = let
+    tldefs =  get_top_level_const_bounds_or_fails prog
+    in check_any_failed tldefs
+
+get_top_level_const_bounds_or_fails :: Program -> [Either TypeError Bound]
+get_top_level_const_bounds_or_fails prog = let
+    tldefs = get_top_level_const_defns_from_prog prog
+    in map check_top_level_const_defns tldefs
 
 get_top_level_const_defns_from_prog :: Program -> [Top_Level_Defn]
 get_top_level_const_defns_from_prog (Program _ _ defns) = get_top_level_const_defns defns
