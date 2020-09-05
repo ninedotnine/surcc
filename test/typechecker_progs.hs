@@ -38,13 +38,23 @@ instance Eq ModuleName where
 instance Eq Import where
     Import s0 == Import s1 = s0 == s1
 
+
+render :: Either TypeError CheckedProgram -> String
+render (Right p) = show p
+render (Left (TypeError (TypeName x) (TypeName y))) = "mismatch: " <> x <> " / " <> y
+
 test :: Test -> IO ()
 test (prog, expected, name) = do
     putStr name >> putStr "... "
 --     print prog
-    if expected == type_check prog
+    let actual = type_check prog
+    if expected == actual
         then putStrLn "OK."
-        else putStrLn "FAILED! bad result" >> exitFailure
+        else print_err expected actual >> exitFailure
+
+print_err :: Either TypeError CheckedProgram -> Either TypeError CheckedProgram -> IO ()
+print_err expected actual = putStrLn failmsg where
+    failmsg = "FAILED! \n expected:\n   " <> render expected <> "\n but got:\n   " <> render actual
 
 program_header :: [Top_Level_Defn] -> Program
 program_header = Program Nothing [] -- no name, no imports
@@ -67,11 +77,11 @@ conster_checked = Right $ checked_program_header [
 
 int :: Program
 int =  program_header [
-    Top_Level_Const_Defn (Identifier "n") (Just "Int") (Leaf (LitInt 42))]
+    Top_Level_Const_Defn (Identifier "n") (Just "Integer") (Leaf (LitInt 42))]
 
 int_checked :: Either TypeError CheckedProgram
 int_checked = Right $ checked_program_header [
-    Top_Level_Const_Defn (Identifier "n") (Just "Int") (Leaf (LitInt 42))]
+    Top_Level_Const_Defn (Identifier "n") (Just "Integer") (Leaf (LitInt 42))]
 
 fn :: Program
 fn = program_header [
