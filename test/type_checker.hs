@@ -2,8 +2,8 @@
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-import TypeChecker.TypeChecker
 import TypeChecker.Context
+import TypeChecker.Expressions
 import Common
 
 import System.Exit (exitFailure)
