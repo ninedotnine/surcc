@@ -30,7 +30,7 @@ borked_tests :: [Test]
 borked_tests = [
     ([], [Top_Level_Const_Defn "c" (Just "Integer") (Leaf (LitChar 'a'))], Left (TypeError "Integer" "Char"), "bad char 0"),
     ([], [Top_Level_Const_Defn "b" Nothing (Signed (Leaf (LitChar 'a')) "Bool")], Left (TypeError "Bool" "Char"), "bad char 1"),
-    ([], [Top_Level_Const_Defn "b" (Just "Char") (Signed (Leaf (LitChar 'a')) "Bool")], Left (TypeError "Integer" "Char"), "bad char 2")
+    ([], [Top_Level_Const_Defn "b" (Just "Char") (Signed (Leaf (LitChar 'a')) "Bool")], Left (TypeError "Bool" "Char"), "bad char 2")
     ]
 
 

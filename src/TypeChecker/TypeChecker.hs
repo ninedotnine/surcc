@@ -84,10 +84,13 @@ check_top_level_const_defns stmt = case stmt of
             Nothing -> Right (Bound i inferred)
             Just err -> Left err
             where inferred = infer empty_context expr
-    Top_Level_Const_Defn i (Just t) expr -> if t == inferred
-        then Right (Bound i t)
-        else Left (TypeError t inferred)
-            where inferred = infer empty_context expr
+    Top_Level_Const_Defn i (Just t) expr ->
+        case check_astree empty_context expr t of
+            Just err -> Left err
+            Nothing -> if t == inferred
+                then Right (Bound i t)
+                else Left (TypeError t inferred)
+                where inferred = infer empty_context expr
     _ -> error "FIXME haskell's type system can stop this"
 
 get_top_level_const_defns :: [Top_Level_Defn] -> [Top_Level_Defn]
