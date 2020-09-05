@@ -22,28 +22,34 @@ type Checker a = Either TypeError a
 
 -- FIXME this should fail sometimes lol
 type_check :: Program -> Either TypeError CheckedProgram
-type_check prog = do
+type_check (Program name imports defns) = do
 --     debug prog
-    traceM ("top lvl conts: " ++ show (get_top_level_const_defns_from_prog prog))
-    global_bounds <- get_top_level_const_bounds_or_fails_end prog
-    traceM ("prog: " ++ show prog)
+    traceM ("top lvl conts: " ++ show (get_top_level_const_defns_from_prog defns))
+    global_bounds <- get_top_level_const_bounds_or_fails_end defns
+    traceM ("defns: " ++ show defns)
     traceM ("global_bounds: " ++ show global_bounds)
-    type_check_internal prog
+    type_check_internal (Program name imports defns)
 --     where debug p = traceM $
 -- --             "BOUND!! " ++ show (get_globals p) ++ "\n tree was: " ++ show prog
 --             "BOUND!! " ++ show (get_globals p) ++ "\n tree was: " ++ show prog
 
 type_check_internal :: Program -> Either TypeError CheckedProgram
 type_check_internal (Program name imports defns) = do
+    globals <- get_globals (Program name imports defns)
     Right $ CheckedProgram name imports defns
 
-get_globals :: Program -> Context
-get_globals (Program _ imports defns) = Global $
-    get_imports imports ++ walk_top_level_statements defns
+get_globals :: Program -> Either TypeError Context
+get_globals (Program _ imports defns) = do
+    imps <- get_imports imports
+    consts <- get_top_level_const_bounds_or_fails_end defns
+    return $ Global $ imps ++ consts
+--     walk_top_level_statements defns
 
 
-get_imports :: Imports -> [Bound]
-get_imports imports = map make_import_bound (map from_import imports)
+-- getting imports can fail if (e. g.) a file cannot be found.
+-- don't worry about it for now.
+get_imports :: Imports -> Either TypeError [Bound]
+get_imports imports = Right $ map make_import_bound (map from_import imports)
     where
         from_import :: Import -> String
         from_import (Import s) = s
@@ -56,18 +62,18 @@ check_any_failed list = let (ls, rs) = partitionEithers list in case ls of
     (x:_) -> Left x
 
 
-get_top_level_const_bounds_or_fails_end :: Program -> Either TypeError [Bound]
-get_top_level_const_bounds_or_fails_end prog = let
-    tldefs =  get_top_level_const_bounds_or_fails prog
+get_top_level_const_bounds_or_fails_end :: [Top_Level_Defn] -> Either TypeError [Bound]
+get_top_level_const_bounds_or_fails_end defns = let
+    tldefs =  get_top_level_const_bounds_or_fails defns
     in check_any_failed tldefs
 
-get_top_level_const_bounds_or_fails :: Program -> [Either TypeError Bound]
-get_top_level_const_bounds_or_fails prog = let
-    tldefs = get_top_level_const_defns_from_prog prog
+get_top_level_const_bounds_or_fails :: [Top_Level_Defn] -> [Either TypeError Bound]
+get_top_level_const_bounds_or_fails defns = let
+    tldefs = get_top_level_const_defns_from_prog defns
     in map check_top_level_const_defns tldefs
 
-get_top_level_const_defns_from_prog :: Program -> [Top_Level_Defn]
-get_top_level_const_defns_from_prog (Program _ _ defns) = get_top_level_const_defns defns
+get_top_level_const_defns_from_prog :: [Top_Level_Defn] -> [Top_Level_Defn]
+get_top_level_const_defns_from_prog defns = get_top_level_const_defns defns
 
 empty_context :: Context
 empty_context = Global []

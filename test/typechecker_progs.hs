@@ -118,65 +118,65 @@ fn3_checked = Right $ checked_program_header [
 
 borked :: Program
 borked = program_header [
-    Top_Level_Const_Defn (Identifier "n") (Just "Int") (Leaf (LitChar 'a'))]
+    Top_Level_Const_Defn (Identifier "n") (Just "Integer") (Leaf (LitChar 'a'))]
 
 borked_checked :: Either TypeError CheckedProgram
-borked_checked = Left (TypeError "Int" "Char")
+borked_checked = Left (TypeError "Integer" "Char")
 
 borked_fn :: Program
 borked_fn = program_header [
-    FuncDefn (Identifier "f") (Param  [Identifier "x"] notype) (Just "Int") (Stmts [
+    FuncDefn (Identifier "f") (Param  [Identifier "x"] notype) (Just "Integer") (Stmts [
         Stmt_Return (Just (Leaf (LitChar 'a')))])]
 
 borked_fn_checked :: Either TypeError CheckedProgram
-borked_fn_checked = Left $ TypeError "Int" "Char"
+borked_fn_checked = Left $ TypeError "Integer" "Char"
 
 borked_fn2 :: Program
 borked_fn2 = program_header [
-    FuncDefn (Identifier "f") (Param  [Identifier "x"] (Just "Int")) (Just "Int") (Stmts [
+    FuncDefn (Identifier "f") (Param  [Identifier "x"] (Just "Integer")) (Just "Integer") (Stmts [
         Stmt_Return (Just (Leaf (LitChar 'a')))])]
 
 borked_fn2_checked :: Either TypeError CheckedProgram
-borked_fn2_checked = Left $ TypeError "Int" "Char"
+borked_fn2_checked = Left $ TypeError "Integer" "Char"
 
 borked_fn3 :: Program
 borked_fn3 = program_header [
-    FuncDefn (Identifier "f") (Param  [Identifier "x"] (Just "Int")) (Just "Char") (Stmts [
+    FuncDefn (Identifier "f") (Param  [Identifier "x"] (Just "Integer")) (Just "Char") (Stmts [
         Stmt_Return (Just (Leaf (Var "x")))])]
 
 borked_fn3_checked :: Either TypeError CheckedProgram
-borked_fn3_checked = Left $ TypeError "Char" "Int"
+borked_fn3_checked = Left $ TypeError "Char" "Integer"
 
 borked_fn4 :: Program
 borked_fn4 = program_header [
-    Top_Level_Const_Defn (Identifier "n") (Just "Int") (Leaf (LitInt 42)),
+    Top_Level_Const_Defn (Identifier "n") (Just "Integer") (Leaf (LitInt 42)),
     FuncDefn (Identifier "f") (Param  [Identifier "x"] notype) (Just "Char") (Stmts [
         Stmt_Return (Just (Leaf (Var "n")))])]
 
 borked_fn4_checked :: Either TypeError CheckedProgram
-borked_fn4_checked = Left $ TypeError "Char" "Int"
+borked_fn4_checked = Left $ TypeError "Char" "Integer"
 
 subber_const_ass :: Program
 subber_const_ass = program_header [
-    Top_Level_Const_Defn (Identifier "n") (Just "Int") (Leaf (LitInt 42)),
+    Top_Level_Const_Defn (Identifier "n") (Just "Integer") (Leaf (LitInt 42)),
     SubDefn (Identifier "subby") Nothing notype (Stmts [
         Stmt_Const_Assign (Identifier "i") (Leaf (Var "n"))])]
 
 subber_const_ass_checked :: Either TypeError CheckedProgram
-subber_const_ass_checked = Left (TypeError "Int" "Char")
+subber_const_ass_checked = Left (TypeError "Integer" "Char")
 
 borked_subber_const_ass :: Program
 borked_subber_const_ass = program_header [
-    Top_Level_Const_Defn (Identifier "n") (Just "Int") (Leaf (LitInt 42)),
+    Top_Level_Const_Defn (Identifier "n") (Just "Integer") (Leaf (LitInt 42)),
     SubDefn (Identifier "subby") Nothing notype (Stmts [
         Stmt_Const_Assign (Identifier "x") (Leaf (Var "x"))])]
 
 borked_subber_const_ass_checked :: Either TypeError CheckedProgram
-borked_subber_const_ass_checked = Left (TypeError "Int" "Char")
+borked_subber_const_ass_checked = Left (TypeError "Integer" "Char")
 
 borked_import :: Program
 borked_import = Program Nothing [Import "x"] [
-    Top_Level_Const_Defn (Identifier "x") (Just "Int") (Leaf (LitInt 42))]
+    Top_Level_Const_Defn (Identifier "x") (Just "Integer") (Leaf (LitInt 42))]
 
 
 borked_import_checked :: Either TypeError CheckedProgram
