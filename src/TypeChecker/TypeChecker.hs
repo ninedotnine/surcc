@@ -3,6 +3,7 @@
 
 module TypeChecker.TypeChecker (
     type_check,
+    get_globals, -- for tests
     ) where
 
 import Control.Applicative
