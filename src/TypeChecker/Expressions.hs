@@ -28,6 +28,25 @@ infer_term context term = case term of
         Nothing -> TypeName "FIXME OhNOOO"
         Just t -> t
 
+infer_prefix_op :: PrefixOperator -> ASTree -> (InputType, ReturnType)
+infer_prefix_op op _ = case op of
+    Deref -> error "FIXME"
+    GetAddr -> error "FIXME"
+    Negate -> (in_t "Bool", ret_t "Bool")
+    ToString -> (in_t "Integer", ret_t "String")
+    Pure -> error "FIXME"
+    Join -> error "FIXME"
+
+
+infer_infix_op :: Operator -> ASTree -> ASTree -> (InputType, InputType, ReturnType)
+infer_infix_op op _ _ = case op of
+    Plus  -> (in_t "Integer", in_t "Integer", ret_t "Integer")
+    Minus -> (in_t "Integer", in_t "Integer", ret_t "Integer")
+    Splat -> (in_t "Integer", in_t "Integer", ret_t "Integer")
+    And -> (in_t "Bool", in_t "Bool", ret_t "Bool")
+    Or  -> (in_t "Bool", in_t "Bool", ret_t "Bool")
+    _ -> error "FIXME"
+
 check_equals :: TypeName -> TypeName -> Maybe TypeError
 check_equals t0 t1 = if t0 == t1 then Nothing else Just (TypeError t0 t1)
 
