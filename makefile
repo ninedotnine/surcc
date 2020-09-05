@@ -6,11 +6,11 @@ HI_DIR := $(CACHE_DIR)/hi_files
 OBJ_DIR := $(CACHE_DIR)/obj_files
 FLAGS := -Wall -dynamic -j -hidir $(HI_DIR) -odir $(OBJ_DIR) -i$(SOURCEDIR)  -Wno-unused-imports -Wall-missed-specialisations
 
-.PHONY: soucc expr parser all default
+.PHONY: soucc expr parser typechecker all default
 
 default: all test
 
-all: soucc expr parser
+all: soucc expr parser typechecker
 
 soucc: src/Main_Soucc.hs | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
 	@ghc $(FLAGS) -o $(OUT_DIR)/soucc -main-is Main_Soucc $<
@@ -20,6 +20,10 @@ expr: src/Main_Expr.hs soucc | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
 
 parser: src/Main_Parser.hs soucc expr | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
 	@ghc $(FLAGS) -o $(OUT_DIR)/parser -main-is Main_Parser $<
+
+typechecker: src/Main_TypeChecker.hs soucc expr parser | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
+	@ghc $(FLAGS) -o $(OUT_DIR)/typechecker -main-is Main_TypeChecker $<
+
 
 $(OUT_DIR) $(CACHE_DIR) $(TEST_DIR) $(HI_DIR) $(OBJ_DIR):
 	mkdir -p $@
