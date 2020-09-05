@@ -11,12 +11,9 @@ import Parser.Expr.ExprTypes
 import TypeChecker.Context
 import TypeChecker.Operators
 
-third :: (InputType, InputType, ReturnType) -> TypeName
-third (_, _, ReturnType z) = z
-
 infer :: Context -> ASTree -> Either TypeError TypeName
 infer ctx tree = case tree of
-    Branch op left right -> third <$> infer_infix_op op left right
+    Branch op left right -> ret <$> infer_infix_op op left right
     Twig op expr -> ret <$> infer_prefix_op op expr
     Signed expr t -> do
         inferred <- infer ctx expr
@@ -47,13 +44,13 @@ infer_prefix_op op _ = case op of
     Join -> not_implemented
 
 
-infer_infix_op :: Operator -> ASTree -> ASTree -> Either TypeError (InputType, InputType, ReturnType)
+infer_infix_op :: Operator -> ASTree -> ASTree -> Either TypeError ((InputType, InputType), ReturnType)
 infer_infix_op op _ _ = case op of
-    Plus  -> Right (in_t "Integer", in_t "Integer", ret_t "Integer")
-    Minus -> Right (in_t "Integer", in_t "Integer", ret_t "Integer")
-    Splat -> Right (in_t "Integer", in_t "Integer", ret_t "Integer")
-    And -> Right (in_t "Bool", in_t "Bool", ret_t "Bool")
-    Or  -> Right (in_t "Bool", in_t "Bool", ret_t "Bool")
+    Plus  -> Right ((in_t "Integer", in_t "Integer"), ret_t "Integer")
+    Minus -> Right ((in_t "Integer", in_t "Integer"), ret_t "Integer")
+    Splat -> Right ((in_t "Integer", in_t "Integer"), ret_t "Integer")
+    And -> Right ((in_t "Bool", in_t "Bool"), ret_t "Bool")
+    Or  -> Right ((in_t "Bool", in_t "Bool"), ret_t "Bool")
     _ -> not_implemented
 
 check_equals :: TypeName -> TypeName -> Either TypeError ()
@@ -63,7 +60,7 @@ check_astree :: Context -> ASTree -> TypeName -> Either TypeError ()
 check_astree ctx tree t = case tree of
     Branch op left right -> case infer_infix_op op left right of
         Left err -> Left err
-        Right (InputType l_t, InputType r_t, ReturnType expr_t) -> do
+        Right ((InputType l_t, InputType r_t), ReturnType expr_t) -> do
             check_astree ctx left l_t
             check_astree ctx right r_t
             check_equals t expr_t
