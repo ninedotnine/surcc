@@ -3,10 +3,11 @@
 module TypeChecker.Operators (
     in_t,
     ret_t,
-    InputType,
-    ReturnType,
+    InputType(..),
+    ReturnType(..),
     pattern Arg,
     pattern Ret,
+    ret,
     ) where
 
 import Prelude hiding (lookup)
@@ -25,6 +26,9 @@ in_t = InputType . TypeName
 ret_t :: String -> ReturnType
 ret_t = ReturnType . TypeName
 
+ret :: (a, ReturnType) -> TypeName
+ret (_, ReturnType x) = x
+
 -- pattern Arg :: String -> InputType
 -- pattern Arg x <- InputType (TypeName x)
 pattern Arg :: TypeName -> InputType
@@ -32,4 +36,3 @@ pattern Arg x <- InputType x
 
 pattern Ret :: TypeName -> ReturnType
 pattern Ret x <- ReturnType x
-

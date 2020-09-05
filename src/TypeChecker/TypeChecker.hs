@@ -79,17 +79,17 @@ get_top_level_const_bounds_or_fails list = case list of
 check_top_level_const_defns :: Identifier -> (Maybe TypeName) -> ASTree -> Either TypeError Bound
 check_top_level_const_defns i m_t expr = case m_t of
     Nothing ->
-        case check_astree empty_context expr inferred of
-            Nothing -> Right (Bound i inferred)
-            Just err -> Left err
+        case inferred of
+            Right t -> Right (Bound i t)
+            Left err -> Left err
             where inferred = infer empty_context expr
     Just t ->
-        case check_astree empty_context expr t of
-            Just err -> Left err
-            Nothing -> if t == inferred
+        case inferred of
+            Left err -> Left err
+            Right inferred_t -> if t == inferred_t
                 then Right (Bound i t)
-                else Left (TypeError t inferred)
-                where inferred = infer empty_context expr
+                else Left (TypeError t inferred_t)
+            where inferred = infer empty_context expr
 
 get_top_level_const_defns :: [Top_Level_Defn] -> [Top_Level_Defn]
 get_top_level_const_defns = filter is_top_level_const_defn where

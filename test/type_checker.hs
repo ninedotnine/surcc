@@ -8,15 +8,15 @@ import Common
 
 import System.Exit (exitFailure)
 
-newtype Expected = Result (Maybe TypeError)
+newtype Expected = Result (Either TypeError ())
 
 type Test = (Context, ASTree, TypeName, Expected, String)
 
 match :: Expected
-match = Result Nothing
+match = Result (Right ())
 
 mismatch :: TypeName -> TypeName -> Expected
-mismatch x y = Result $ Just $ TypeError x y
+mismatch x y = Result $ Left $ TypeError x y
 
 empty_ctx :: Context
 empty_ctx = Global []
@@ -105,11 +105,11 @@ main = do
     putStrLn "all type-checker tests passed :^)"
 
 
-render :: Maybe TypeError -> String
-render Nothing = "match"
-render (Just (TypeError (TypeName x) (TypeName y))) = "mismatch: " <> x <> " / " <> y
+render :: Either TypeError () -> String
+render (Right ()) = "match"
+render (Left (TypeError (TypeName x) (TypeName y))) = "mismatch: " <> x <> " / " <> y
 
-print_err :: Maybe TypeError -> Maybe TypeError -> IO ()
+print_err :: Either TypeError () -> Either TypeError () -> IO ()
 print_err expected actual = putStrLn failmsg where
     failmsg = "FAILED! \n  expected " <> render expected <> " but got: " <> render actual
 
