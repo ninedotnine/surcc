@@ -36,8 +36,10 @@ type_check (Program name imports defns) = do
 
 type_check_internal :: Program -> Either TypeError CheckedProgram
 type_check_internal (Program name imports defns) = do
-    globals <- get_globals imports defns
-    Right $ CheckedProgram name imports defns
+    let globals = get_globals imports defns
+    case globals of
+        Left err -> Left err
+        Right _ -> Right $ CheckedProgram name imports defns
 
 get_globals :: [Import] -> [Top_Level_Defn] -> Either TypeError Context
 get_globals imports defns = do
