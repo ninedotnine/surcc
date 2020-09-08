@@ -33,14 +33,17 @@ clean:
 	rm -fr $(OUT_DIR) $(CACHE_DIR)
 
 .PHONY: test
-test: test/parser test/type_checker test/typechecker_progs test/codegen test/expr_parser test/integration test/typechecker_globals
+test: test/parser test/type_checker test/typechecker_progs test/codegen test/expr_parser test/integration test/typechecker_globals test/typechecker
 	@echo "all tests successful! :^D"
 
-.PHONY: test/parser test/expr_parser test/integration
+.PHONY: test/parser test/expr_parser test/integration test/typechecker
 test/expr_parser: parser expr
 test/parser: parser
 test/integration test/expr_parser test/parser: soucc
 	@ $@
+
+test/typechecker: typechecker
+	bin/typechecker --test
 
 .PHONY: test/codegen test/type_checker test/typechecker_progs test/typechecker_globals
 test/codegen test/type_checker test/typechecker_progs test/typechecker_globals: all | $(TEST_DIR)

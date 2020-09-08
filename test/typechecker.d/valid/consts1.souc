@@ -1,0 +1,6 @@
+import valid
+
+i = 42:      Integer
+b = True:    Bool
+c = 'a':     Char
+s = "hello": String
