@@ -11,7 +11,9 @@ import Common
 import Parser.Expr.ExprTypes
 
 data Bound = Bound Identifier TypeName
-    deriving Show
+
+instance Show Bound where
+    show (Bound (Identifier i) (TypeName t)) = "Bound " ++ i ++ ": " ++ t
 
 data Context = Global [Bound]
              | Scoped [Bound] Context
