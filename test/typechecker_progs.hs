@@ -41,7 +41,7 @@ instance Eq Import where
 
 render :: Either TypeError CheckedProgram -> String
 render (Right p) = show p
-render (Left (TypeError (TypeName x) (TypeName y))) = "mismatch: " <> x <> " / " <> y
+render (Left (TypeMismatch (TypeName x) (TypeName y))) = "mismatch: " <> x <> " / " <> y
 render (Left (MultipleDeclarations (Identifier i))) = "multiple declarations: " <> i
 render (Left (Undeclared (Identifier i))) = "undeclared identifier " <> i
 
@@ -123,7 +123,7 @@ borked = program_header [
     Top_Level_Const_Defn (Identifier "n") (Just "Integer") (Leaf (LitChar 'a'))]
 
 borked_checked :: Either TypeError CheckedProgram
-borked_checked = Left (TypeError "Integer" "Char")
+borked_checked = Left (TypeMismatch "Integer" "Char")
 
 borked_fn :: Program
 borked_fn = program_header [
@@ -131,7 +131,7 @@ borked_fn = program_header [
         Stmt_Return (Just (Leaf (LitChar 'a')))])]
 
 borked_fn_checked :: Either TypeError CheckedProgram
-borked_fn_checked = Left $ TypeError "Integer" "Char"
+borked_fn_checked = Left $ TypeMismatch "Integer" "Char"
 
 borked_fn2 :: Program
 borked_fn2 = program_header [
@@ -139,7 +139,7 @@ borked_fn2 = program_header [
         Stmt_Return (Just (Leaf (LitChar 'a')))])]
 
 borked_fn2_checked :: Either TypeError CheckedProgram
-borked_fn2_checked = Left $ TypeError "Integer" "Char"
+borked_fn2_checked = Left $ TypeMismatch "Integer" "Char"
 
 borked_fn3 :: Program
 borked_fn3 = program_header [
@@ -147,7 +147,7 @@ borked_fn3 = program_header [
         Stmt_Return (Just (Leaf (Var "x")))])]
 
 borked_fn3_checked :: Either TypeError CheckedProgram
-borked_fn3_checked = Left $ TypeError "Char" "Integer"
+borked_fn3_checked = Left $ TypeMismatch "Char" "Integer"
 
 borked_fn4 :: Program
 borked_fn4 = program_header [
@@ -156,7 +156,7 @@ borked_fn4 = program_header [
         Stmt_Return (Just (Leaf (Var "n")))])]
 
 borked_fn4_checked :: Either TypeError CheckedProgram
-borked_fn4_checked = Left $ TypeError "Char" "Integer"
+borked_fn4_checked = Left $ TypeMismatch "Char" "Integer"
 
 subber_const_ass :: Program
 subber_const_ass = program_header [
@@ -165,7 +165,7 @@ subber_const_ass = program_header [
         Stmt_Const_Assign (Identifier "i") (Leaf (Var "n"))])]
 
 subber_const_ass_checked :: Either TypeError CheckedProgram
-subber_const_ass_checked = Left (TypeError "Integer" "Char")
+subber_const_ass_checked = Left (TypeMismatch "Integer" "Char")
 
 borked_subber_const_ass :: Program
 borked_subber_const_ass = program_header [
@@ -174,7 +174,7 @@ borked_subber_const_ass = program_header [
         Stmt_Const_Assign (Identifier "x") (Leaf (Var "x"))])]
 
 borked_subber_const_ass_checked :: Either TypeError CheckedProgram
-borked_subber_const_ass_checked = Left (TypeError "Integer" "Char")
+borked_subber_const_ass_checked = Left (TypeMismatch "Integer" "Char")
 
 borked_import :: Program
 borked_import = Program Nothing [Import "x"] [

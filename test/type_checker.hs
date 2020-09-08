@@ -16,7 +16,7 @@ match :: Expected
 match = Result (Right ())
 
 mismatch :: TypeName -> TypeName -> Expected
-mismatch x y = Result $ Left $ TypeError x y
+mismatch x y = Result $ Left $ TypeMismatch x y
 
 empty_ctx :: Context
 empty_ctx = Global []
@@ -107,7 +107,7 @@ main = do
 
 render :: Either TypeError () -> String
 render (Right ()) = "match"
-render (Left (TypeError (TypeName x) (TypeName y))) = "mismatch: " <> x <> " / " <> y
+render (Left (TypeMismatch (TypeName x) (TypeName y))) = "mismatch: " <> x <> " / " <> y
 render (Left (MultipleDeclarations (Identifier i))) = "multiple declarations: " <> i
 render (Left (Undeclared (Identifier i))) = "undeclared identifier " <> i
 

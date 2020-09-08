@@ -32,7 +32,7 @@ infer_term context term = case term of
         Just t -> Right t
 
 not_implemented :: Either TypeError a
-not_implemented = Left $ TypeError (TypeName "NOT YET") (TypeName "IMPLEMENTED")
+not_implemented = Left $ TypeMismatch (TypeName "NOT YET") (TypeName "IMPLEMENTED")
 
 infer_prefix_op :: PrefixOperator -> ASTree -> Either TypeError (InputType, ReturnType)
 infer_prefix_op op _ = case op of
@@ -54,7 +54,7 @@ infer_infix_op op _ _ = case op of
     _ -> not_implemented
 
 check_equals :: TypeName -> TypeName -> Either TypeError ()
-check_equals t0 t1 = if t0 == t1 then Right () else Left (TypeError t0 t1)
+check_equals t0 t1 = if t0 == t1 then Right () else Left (TypeMismatch t0 t1)
 
 check_astree :: Context -> ASTree -> TypeName -> Either TypeError ()
 check_astree ctx tree t = case tree of
