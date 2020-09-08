@@ -71,12 +71,14 @@ main_defn = do
 
 top_level_const :: SouCParser Top_Level_Defn
 top_level_const = do
-    name <- try (identifier <* optional_sig <* spaces <* char '=')
+    name <- try (identifier <* lookAhead (char ':' <|> char ' '))
+    m_sig <- optional_sig
+    _ <- spaces <* char '='
     Raw_Expr val <- spaces *> raw_expr
     case parse_expression val of
         Right expr -> do
             add_to_bindings name expr
-            return $ Top_Level_Const_Defn name Nothing expr
+            return $ Top_Level_Const_Defn name m_sig expr
         Left err -> parserFail $ "invalid expression:\n" ++ show err
 
 top_level_proc :: SouCParser Top_Level_Defn

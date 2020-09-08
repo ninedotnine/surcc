@@ -33,7 +33,7 @@ stmt_block = do
 
 stmt_const_assign :: Identifier -> SouCParser Stmt
 stmt_const_assign name = do
-    _ <- try (optional_sig *> spaces <* char '=')
+    _ <- try (optional_sig <* spaces <* char '=')
     Raw_Expr val <- spaces *> raw_expr
     case parse_expression val of
         Right expr -> do
@@ -43,7 +43,7 @@ stmt_const_assign name = do
 
 stmt_var_assign :: Identifier -> SouCParser Stmt
 stmt_var_assign name = do
-    _ <- try (optional_sig *> spaces <* string "<-")
+    _ <- try (optional_sig <* spaces <* string "<-")
     Raw_Expr val <- spaces *> raw_expr
     case parse_expression val of
         Right expr -> return $ Stmt_Var_Assign name expr
@@ -116,7 +116,3 @@ stmt_return = do
             Right expr -> return (Stmt_Return (Just expr))
             Left err -> parserFail $ "failed expression:\n" ++ show err
 
-
-optional_sig :: SouCParser ()
-optional_sig = optional type_sig where
-    type_sig = string ":" <> keep_spaces <> fmap pure upper <> many (lower <|> upper <|> digit)

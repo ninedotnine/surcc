@@ -147,9 +147,13 @@ pattern = do
     sig <- optionMaybe type_signature
     return (Param name sig)
 
+
+optional_sig :: SouCParser (Maybe TypeName)
+optional_sig = optionMaybe type_signature
+
 type_signature :: SouCParser TypeName
 type_signature = do
-    char ':' *> skipMany space
+    char ':' *> spaces
     first <- upper
     rest <- many (lower <|> upper <|> digit)
     return (TypeName (first:rest))
