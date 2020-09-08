@@ -36,7 +36,7 @@ borked_tests = [
 
 main :: IO ()
 main = do
-    putStrLn "=== testing get_globals valid inputs"
+    putStrLn "=== testing add_globals valid inputs"
     mapM_ test tests
     putStrLn "=== testing get-globals invalid inputs"
     mapM_ test borked_tests
@@ -46,6 +46,8 @@ main = do
 render :: Either TypeError Context -> String
 render (Right ctx) = show ctx
 render (Left (TypeError (TypeName x) (TypeName y))) = "mismatch: " <> x <> " / " <> y
+render (Left (MultipleDeclarations (Identifier i))) = "multiple declarations for " <> i
+render (Left (Undeclared (Identifier i))) = "undeclared identifier " <> i
 
 print_err :: Either TypeError Context -> Either TypeError Context -> IO ()
 print_err expected actual = putStrLn failmsg where
@@ -53,8 +55,11 @@ print_err expected actual = putStrLn failmsg where
 
 test :: Test -> IO ()
 test (imps, stmts, expected, name) = do
-    putStr name >> putStr "... "
-    let actual = get_globals imps stmts
-    if expected == actual
-        then putStrLn "OK."
-        else print_err expected actual >> exitFailure
+    case add_imports imps of
+        Left err -> putStr $ "FAILED (to add imports!?): " <> show err
+        Right imports_ctx -> do
+            putStr name >> putStr "... "
+            let actual = add_globals imports_ctx stmts
+            if expected == actual
+                then putStrLn "OK."
+                else print_err expected actual >> exitFailure

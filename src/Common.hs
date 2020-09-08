@@ -75,7 +75,8 @@ newtype Stmts = Stmts [Stmt] deriving (Show, Eq)
 newtype TypeName = TypeName String deriving (Show, Eq, IsString, Semigroup)
 
 data TypeError = TypeError TypeName TypeName
---                | NotFound TypeName
+               | MultipleDeclarations Identifier
+               | Undeclared Identifier
     deriving (Show, Eq)
 
 data Param = Param [Identifier] (Maybe TypeName) deriving (Show, Eq)

@@ -1,4 +1,5 @@
 import valid
 
 i: Integer = 42
+i1: Integer = i + 1
 ii: Integer = i + i

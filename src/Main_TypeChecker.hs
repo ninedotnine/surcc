@@ -72,7 +72,6 @@ process_invalid_dir :: FilePath -> IO ()
 process_invalid_dir dir = do
     cwd <- getCurrentDirectory
     ls <- listDirectory dir
-    print ls
     setCurrentDirectory dir
     traverse_ process_invalid_file ls
     setCurrentDirectory cwd

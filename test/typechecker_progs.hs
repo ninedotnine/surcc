@@ -18,8 +18,8 @@ tests :: [Test]
 tests = [
     (conster, conster_checked, "conster"),
     (int, int_checked, "int"),
-    (borked, borked_checked, "borked")
---     (borked_import, borked_import_checked, "borked_import")
+    (borked, borked_checked, "borked"),
+    (borked_import, borked_import_checked, "borked_import")
     ]
 
 main :: IO ()
@@ -42,6 +42,8 @@ instance Eq Import where
 render :: Either TypeError CheckedProgram -> String
 render (Right p) = show p
 render (Left (TypeError (TypeName x) (TypeName y))) = "mismatch: " <> x <> " / " <> y
+render (Left (MultipleDeclarations (Identifier i))) = "multiple declarations: " <> i
+render (Left (Undeclared (Identifier i))) = "undeclared identifier " <> i
 
 test :: Test -> IO ()
 test (prog, expected, name) = do
@@ -180,4 +182,4 @@ borked_import = Program Nothing [Import "x"] [
 
 
 borked_import_checked :: Either TypeError CheckedProgram
-borked_import_checked = Left (TypeError "Int" "Module")
+borked_import_checked = Left (MultipleDeclarations "x")

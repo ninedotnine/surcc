@@ -1,13 +1,15 @@
-{-# OPTIONS_GHC -Wno-unused-top-binds #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module TypeChecker.TypeChecker (
     type_check,
-    get_globals, -- for tests
+    add_globals, -- for tests
+    add_imports, -- for tests
     ) where
 
 import Control.Applicative
+import Control.Monad.State
 import Data.Either
+import Data.Maybe (catMaybes)
 
 import Prelude hiding (lookup)
 import Common
@@ -18,93 +20,84 @@ import TypeChecker.Expressions
 
 import Debug.Trace
 
-type Checker a = Either TypeError a
-
-
--- FIXME this should fail sometimes lol
 type_check :: Program -> Either TypeError CheckedProgram
 type_check (Program name imports defns) = do
---     debug prog
-    traceM ("top lvl conts: " ++ show (get_top_level_const_defns defns))
-    global_bounds <- get_top_level_const_bounds_or_fails_end defns
-    traceM ("defns: " ++ show defns)
-    traceM ("global_bounds: " ++ show global_bounds)
-    type_check_internal (Program name imports defns)
---     where debug p = traceM $
--- --             "BOUND!! " ++ show (get_globals p) ++ "\n tree was: " ++ show prog
---             "BOUND!! " ++ show (get_globals p) ++ "\n tree was: " ++ show prog
-
-type_check_internal :: Program -> Either TypeError CheckedProgram
-type_check_internal (Program name imports defns) = do
-    let globals = get_globals imports defns
-    case globals of
+    imports_ctx <- add_imports imports
+    case add_globals imports_ctx defns of
         Left err -> Left err
         Right _ -> Right $ CheckedProgram name imports defns
-
-get_globals :: [Import] -> [Top_Level_Defn] -> Either TypeError Context
-get_globals imports defns = do
-    imps <- get_imports imports
-    consts <- get_top_level_const_bounds_or_fails_end defns
-    return $ Global $ imps ++ consts
---     walk_top_level_statements defns
 
 
 -- getting imports can fail if (e. g.) a file cannot be found.
 -- don't worry about it for now.
-get_imports :: Imports -> Either TypeError [Bound]
-get_imports imports = Right $ map make_import_bound (map from_import imports)
+add_imports :: Imports -> Either TypeError Context
+add_imports imports = Right $ Global $ map make_import_bound (map from_import imports)
     where
         from_import :: Import -> String
         from_import (Import s) = s
         make_import_bound s = Bound (Identifier s) (TypeName "Module")
 
 
-check_any_failed :: [Either TypeError Bound] -> Either TypeError [Bound]
-check_any_failed list = let (ls, rs) = partitionEithers list in case ls of
-    [] -> Right rs
-    (x:_) -> Left x
+add_globals :: Context -> [Top_Level_Defn] -> Either TypeError Context
+add_globals imports_ctx defns = do
+    case runState (run_globals defns) imports_ctx of
+        (Nothing, ctx) -> Right ctx
+        (Just e, _) -> Left e
+
+run_globals :: [Top_Level_Defn] -> State Context (Maybe TypeError)
+run_globals defns = do
+    let (consts, short_fns, long_fns, routines) = split_top_level_stuff defns
+    list <- mapM check_top_level_const_defns_state consts
+    return (check_any_failed_state list)
+
+check_top_level_const_defns_state :: TopLevelConstType -> State Context (Maybe TypeError)
+check_top_level_const_defns_state (TopLevelConstType i m_t expr) = do
+    ctx <- get
+    case m_t of
+        Nothing -> case infer ctx expr of
+            Right t -> insert (Bound i t)
+            Left err -> return (Just err)
+        Just t -> case check_astree ctx expr t of
+            Right () -> insert (Bound i t)
+            Left err -> return (Just err)
 
 
-get_top_level_const_bounds_or_fails_end :: [Top_Level_Defn] -> Either TypeError [Bound]
-get_top_level_const_bounds_or_fails_end defns = let
-    tldefs =  get_top_level_const_bounds_or_fails defns
-    in check_any_failed tldefs
-
-get_top_level_const_bounds_or_fails :: [Top_Level_Defn] -> [Either TypeError Bound]
-get_top_level_const_bounds_or_fails list = case list of
-    [] -> []
-    ((Top_Level_Const_Defn i m_t expr):rest) ->
-        (check_top_level_const_defns i m_t expr) : get_top_level_const_bounds_or_fails rest
-    (_:rest) -> get_top_level_const_bounds_or_fails rest
+check_any_failed_state :: [Maybe TypeError] -> Maybe TypeError
+check_any_failed_state list = let ls = catMaybes list in case ls of
+    [] -> Nothing
+    (x:_) -> Just x
 
 
-check_top_level_const_defns :: Identifier -> (Maybe TypeName) -> ASTree -> Either TypeError Bound
-check_top_level_const_defns i m_t expr = case m_t of
-    Nothing -> case infer empty_context expr of
-        Right t -> Right (Bound i t)
-        Left err -> Left err
-    Just t -> case check_astree empty_context expr t of
-        Right () -> Right (Bound i t)
-        Left err -> Left err
+insert :: Bound -> State Context (Maybe TypeError)
+insert bound = do
+    ctx <- get
+    case (add_bind ctx bound) of
+        Left err -> return (Just err)
+        Right new_ctx -> put new_ctx >> return Nothing
 
-get_top_level_const_defns :: [Top_Level_Defn] -> [Top_Level_Defn]
-get_top_level_const_defns = filter is_top_level_const_defn where
-    is_top_level_const_defn :: Top_Level_Defn -> Bool
-    is_top_level_const_defn (Top_Level_Const_Defn _ _ _) = True
-    is_top_level_const_defn _ = False
 
-walk_top_level_statements :: [Top_Level_Defn] -> [Bound]
-walk_top_level_statements defns = map unroll defns where
-    unroll :: Top_Level_Defn -> Bound
-    unroll defn = case defn of
-        Top_Level_Const_Defn ident (Just t) _ -> Bound ident t
-        Top_Level_Const_Defn ident Nothing  _ -> Bound ident "UnknownConst"
-        FuncDefn ident _ (Just t) _ -> Bound ident ("a -> " <> t)
-        FuncDefn ident _ Nothing  _ -> Bound ident "a -> b"
-        ShortFuncDefn ident _ (Just t) _ -> Bound ident ("Fn a " <> t)
-        ShortFuncDefn ident _ Nothing  _ -> Bound ident ("Fn a b")
-        SubDefn ident _ (Just t) _ -> Bound ident ("What -> " <> t)
-        SubDefn ident _ Nothing  _ -> Bound ident ("What -> IO")
-        MainDefn _ (Just t) _ -> Bound "main" ("Args -> " <> t)
-        MainDefn _ Nothing  _ -> Bound "main" ("Args -> IO")
+type BrokenUpList = ([TopLevelConstType], [TopLevelShortFnType], [TopLevelLongFnType], [TopLevelProcType])
 
+split_top_level_stuff :: [Top_Level_Defn] -> BrokenUpList
+split_top_level_stuff defns = reverse_all (split_top_level_stuff_rec ([], [], [], []) defns)
+    where
+        reverse_all (ws, xs, ys, zs) = (reverse ws, reverse xs, reverse ys, reverse zs)
+
+split_top_level_stuff_rec :: BrokenUpList -> [Top_Level_Defn] -> BrokenUpList
+split_top_level_stuff_rec lists [] = lists
+split_top_level_stuff_rec (ws, xs, ys, zs) (d:defns) = case d of
+    Top_Level_Const_Defn i m_t expr -> split_top_level_stuff_rec (TopLevelConstType i m_t expr:ws, xs, ys, zs) defns
+    ShortFuncDefn i p m_t expr ->      split_top_level_stuff_rec (ws, TopLevelShortFnType i p m_t expr:xs, ys, zs) defns
+    FuncDefn i p m_t stmts ->          split_top_level_stuff_rec (ws, xs, TopLevelLongFnType i p m_t stmts:ys, zs) defns
+    SubDefn i m_p m_t stmts ->         split_top_level_stuff_rec (ws, xs, ys, TopLevelProcType i m_p m_t stmts:zs) defns
+    MainDefn m_p m_t stmts ->          split_top_level_stuff_rec (ws, xs, ys, TopLevelProcType "main" m_p m_t stmts:zs) defns
+
+
+data TopLevelConstType = TopLevelConstType Identifier (Maybe TypeName) ASTree
+    deriving (Show, Eq)
+data TopLevelShortFnType = TopLevelShortFnType Identifier Param (Maybe TypeName) ASTree
+    deriving (Show, Eq)
+data TopLevelLongFnType = TopLevelLongFnType Identifier Param (Maybe TypeName) Stmts
+    deriving (Show, Eq)
+data TopLevelProcType = TopLevelProcType Identifier (Maybe Param) (Maybe TypeName) Stmts
+    deriving (Show, Eq)

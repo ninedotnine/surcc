@@ -28,7 +28,7 @@ infer_term context term = case term of
     LitBool _   -> Right (TypeName "Bool")
     LitString _ -> Right (TypeName "String")
     Var v -> case lookup context v of
-        Nothing -> Left (TypeError (TypeName "FIXME OhNOOO") (TypeName  "Not found!!!"))
+        Nothing -> Left (Undeclared v)
         Just t -> Right t
 
 not_implemented :: Either TypeError a

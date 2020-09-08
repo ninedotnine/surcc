@@ -108,6 +108,8 @@ main = do
 render :: Either TypeError () -> String
 render (Right ()) = "match"
 render (Left (TypeError (TypeName x) (TypeName y))) = "mismatch: " <> x <> " / " <> y
+render (Left (MultipleDeclarations (Identifier i))) = "multiple declarations: " <> i
+render (Left (Undeclared (Identifier i))) = "undeclared identifier " <> i
 
 print_err :: Either TypeError () -> Either TypeError () -> IO ()
 print_err expected actual = putStrLn failmsg where

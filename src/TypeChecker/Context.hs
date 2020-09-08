@@ -2,6 +2,7 @@ module TypeChecker.Context (
     Context(..),
     Bound(..),
     lookup,
+    add_bind,
     empty_context,
 ) where
 
@@ -34,6 +35,13 @@ lookup_b [] _ = Nothing
 
 this_one :: Bound -> Identifier -> Maybe TypeName
 this_one (Bound i t) ident = if i == ident then Just t else Nothing
+
+add_bind :: Context -> Bound -> Either TypeError Context
+add_bind ctx (Bound i t) = case lookup ctx i of
+    Just _ -> Left (MultipleDeclarations i)
+    Nothing -> Right $ case ctx of
+        Global binds -> Global (Bound i t : binds)
+        Scoped binds rest -> Scoped (Bound i t : binds) rest
 
 empty_context :: Context
 empty_context = Global []
