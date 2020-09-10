@@ -51,9 +51,7 @@ test filename input handle_parsed = do
     putStr filename
     putStr "... "
     case runSouCParser filename input of
-        Left err -> do
-            putStrLn (show err)
-            exitFailure
+        Left err -> putStrLn (show err) >> exitFailure
         Right parsed -> handle_parsed parsed
 
 run_default_test_suite :: IO ()
