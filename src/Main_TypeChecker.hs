@@ -16,7 +16,7 @@ main = do
         then do
             contents <- getContents
             putStrLn "no file name provided, reading from stdin."
-            test "stdin" contents handle_prog_ok
+            test "stdin" contents output_results
         else if
             head args == "--test"
             then run_default_test_suite
@@ -30,23 +30,23 @@ process_arg :: String -> IO ()
 process_arg arg = do
     is_dir <- doesDirectoryExist arg
     if is_dir
-        then process_dir arg
-        else process_file arg
+        then process_dir output_results arg
+        else process_file output_results arg
 
-process_dir :: FilePath -> IO ()
-process_dir dir = do
+process_dir :: Handler -> FilePath -> IO ()
+process_dir handler dir = do
     cwd <- getCurrentDirectory
     ls <- listDirectory dir
     setCurrentDirectory dir
-    traverse_ process_file ls
+    traverse_ (process_file handler) ls
     setCurrentDirectory cwd
 
-process_file :: FilePath -> IO ()
-process_file name = do
+process_file :: Handler -> FilePath -> IO ()
+process_file handler name = do
     contents <- readFile name
-    test name contents handle_prog_ok
+    test name contents handler
 
-test :: FilePath -> String -> (Program -> IO ()) -> IO ()
+test :: FilePath -> String -> Handler -> IO ()
 test filename input handle_parsed = do
     putStr filename
     putStr "... "
@@ -56,30 +56,26 @@ test filename input handle_parsed = do
             exitFailure
         Right parsed -> handle_parsed parsed
 
-handle_prog_ok :: Program -> IO ()
+run_default_test_suite :: IO ()
+run_default_test_suite = do
+    putStrLn "=== checking valid inputs ==="
+    process_dir handle_prog_ok "test/typechecker.d/valid/"
+    putStrLn "=== checking invalid inputs ==="
+    process_dir handle_prog_bad "test/typechecker.d/invalid/"
+
+type Handler = Program -> IO ()
+
+output_results :: Handler
+output_results prog = case type_check prog of
+    Left typecheck_error -> print typecheck_error >> exitFailure
+    Right ok -> putStrLn "OK." >> print ok
+
+handle_prog_ok :: Handler
 handle_prog_ok prog = case type_check prog of
     Left typecheck_error -> print typecheck_error >> exitFailure
     Right _ -> putStrLn "OK."
 
-run_default_test_suite :: IO ()
-run_default_test_suite = do
-    putStrLn "=== checking valid inputs ==="
-    process_dir "test/typechecker.d/valid/"
-    putStrLn "=== checking invalid inputs ==="
-    process_invalid_dir "test/typechecker.d/invalid/"
-
-process_invalid_dir :: FilePath -> IO ()
-process_invalid_dir dir = do
-    cwd <- getCurrentDirectory
-    ls <- listDirectory dir
-    setCurrentDirectory dir
-    traverse_ process_invalid_file ls
-    setCurrentDirectory cwd
-
-process_invalid_file :: FilePath -> IO ()
-process_invalid_file name = do
-    contents <- readFile name
-    test name contents handle_prog_bad where
-        handle_prog_bad prog = case type_check prog of
-            Left _ -> putStrLn "OK."
-            Right _ -> putStrLn "ERROR: should have failed type-check" >> exitFailure
+handle_prog_bad :: Handler
+handle_prog_bad prog = case type_check prog of
+    Left _ -> putStrLn "OK."
+    Right _ -> putStrLn "ERROR: should have failed type-check" >> exitFailure
