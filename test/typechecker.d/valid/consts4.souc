@@ -1,1 +1,1 @@
-f(x): Integer = x
+f(x: Integer): Integer = x
