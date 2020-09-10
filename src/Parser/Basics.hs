@@ -143,7 +143,8 @@ module_path = do
 -- for pattern matching
 pattern :: SouCParser Param
 pattern = do
-    name <- identifier `sepBy1` oneOf ","
+--     name <- identifier `sepBy1` oneOf "," -- for multiple identifiers, maybe not needed
+    name <- identifier
     sig <- optionMaybe type_signature
     return (Param name sig)
 

@@ -87,34 +87,34 @@ int_checked = Right $ checked_program_header [
 
 fn :: Program
 fn = program_header [
-    FuncDefn (Identifier "f") (Param  [Identifier "x"] (Just "Int")) notype (Stmts [
+    FuncDefn (Identifier "f") (Param  (Identifier "x") (Just "Int")) notype (Stmts [
         Stmt_Return (Just (Leaf (LitInt 42)))])]
 
 fn_checked :: Either TypeError CheckedProgram
 fn_checked = Right $ checked_program_header [
-    FuncDefn (Identifier "f") (Param  [Identifier "x"] (Just "Int")) notype (Stmts [
+    FuncDefn (Identifier "f") (Param  (Identifier "x") (Just "Int")) notype (Stmts [
         Stmt_Return (Just (Leaf (LitInt 42)))])]
 
 fn2 :: Program
 fn2 = program_header [
-    FuncDefn (Identifier "f") (Param  [Identifier "x"] (Just "Int")) (Just "Int") (Stmts [
+    FuncDefn (Identifier "f") (Param  (Identifier "x") (Just "Int")) (Just "Int") (Stmts [
         Stmt_Return (Just (Leaf (LitInt 42)))])]
 
 fn_checked2 :: Either TypeError CheckedProgram
 fn_checked2 = Right $ checked_program_header [
-    FuncDefn (Identifier "f") (Param  [Identifier "x"] (Just "Int")) (Just "Int") (Stmts [
+    FuncDefn (Identifier "f") (Param  (Identifier "x") (Just "Int")) (Just "Int") (Stmts [
         Stmt_Return (Just (Leaf (LitInt 42)))])]
 
 fn3 :: Program
 fn3 = program_header [
     Top_Level_Const_Defn (Identifier "n") (Just "Int") (Leaf (LitInt 42)),
-    FuncDefn (Identifier "f") (Param  [Identifier "x"] (Just "Int")) notype (Stmts [
+    FuncDefn (Identifier "f") (Param  (Identifier "x") (Just "Int")) notype (Stmts [
         Stmt_Return (Just (Leaf (Var "n")))])]
 
 fn3_checked :: Either TypeError CheckedProgram
 fn3_checked = Right $ checked_program_header [
     Top_Level_Const_Defn (Identifier "n") (Just "Int") (Leaf (LitInt 42)),
-    FuncDefn (Identifier "f") (Param  [Identifier "x"] (Just "Int")) notype (Stmts [
+    FuncDefn (Identifier "f") (Param  (Identifier "x") (Just "Int")) notype (Stmts [
         Stmt_Return (Just (Leaf (Var "n")))])]
 
 
@@ -127,7 +127,7 @@ borked_checked = Left (TypeMismatch "Integer" "Char")
 
 borked_fn :: Program
 borked_fn = program_header [
-    FuncDefn (Identifier "f") (Param  [Identifier "x"] notype) (Just "Integer") (Stmts [
+    FuncDefn (Identifier "f") (Param  (Identifier "x") notype) (Just "Integer") (Stmts [
         Stmt_Return (Just (Leaf (LitChar 'a')))])]
 
 borked_fn_checked :: Either TypeError CheckedProgram
@@ -135,7 +135,7 @@ borked_fn_checked = Left $ TypeMismatch "Integer" "Char"
 
 borked_fn2 :: Program
 borked_fn2 = program_header [
-    FuncDefn (Identifier "f") (Param  [Identifier "x"] (Just "Integer")) (Just "Integer") (Stmts [
+    FuncDefn (Identifier "f") (Param  (Identifier "x") (Just "Integer")) (Just "Integer") (Stmts [
         Stmt_Return (Just (Leaf (LitChar 'a')))])]
 
 borked_fn2_checked :: Either TypeError CheckedProgram
@@ -143,7 +143,7 @@ borked_fn2_checked = Left $ TypeMismatch "Integer" "Char"
 
 borked_fn3 :: Program
 borked_fn3 = program_header [
-    FuncDefn (Identifier "f") (Param  [Identifier "x"] (Just "Integer")) (Just "Char") (Stmts [
+    FuncDefn (Identifier "f") (Param  (Identifier "x") (Just "Integer")) (Just "Char") (Stmts [
         Stmt_Return (Just (Leaf (Var "x")))])]
 
 borked_fn3_checked :: Either TypeError CheckedProgram
@@ -152,7 +152,7 @@ borked_fn3_checked = Left $ TypeMismatch "Char" "Integer"
 borked_fn4 :: Program
 borked_fn4 = program_header [
     Top_Level_Const_Defn (Identifier "n") (Just "Integer") (Leaf (LitInt 42)),
-    FuncDefn (Identifier "f") (Param  [Identifier "x"] notype) (Just "Char") (Stmts [
+    FuncDefn (Identifier "f") (Param  (Identifier "x") notype) (Just "Char") (Stmts [
         Stmt_Return (Just (Leaf (Var "n")))])]
 
 borked_fn4_checked :: Either TypeError CheckedProgram

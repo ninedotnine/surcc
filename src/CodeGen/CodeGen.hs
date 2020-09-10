@@ -27,9 +27,7 @@ instance Generatable Identifier where
     gen (Identifier v) = v
 
 instance Generatable Param where
-    gen (Param [] _) = ""
-    gen (Param [param] _) = "int " ++ gen param -- FIXME
-    gen _ = "FIXME LOL"
+    gen (Param param _) = "int " ++ gen param -- FIXME
 
 instance Generatable Top_Level_Defn where
     gen (Top_Level_Const_Defn name _ expr) =

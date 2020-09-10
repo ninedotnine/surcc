@@ -79,7 +79,7 @@ data TypeError = TypeMismatch TypeName TypeName
                | Undeclared Identifier
     deriving (Show, Eq)
 
-data Param = Param [Identifier] (Maybe TypeName) deriving (Show, Eq)
+data Param = Param Identifier (Maybe TypeName) deriving (Show, Eq)
 
 
 data Top_Level_Defn = Top_Level_Const_Defn Identifier (Maybe TypeName) ASTree
