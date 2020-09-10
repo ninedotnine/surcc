@@ -47,11 +47,15 @@ add_globals imports_ctx defns = do
 run_globals :: [Top_Level_Defn] -> State Context (Maybe TypeError)
 run_globals defns = do
     let (consts, short_fns, long_fns, routines) = split_top_level_stuff defns
-    list <- mapM check_top_level_const_defns_state consts
-    return (check_any_failed_state list)
+    consts_list <- mapM add_top_level_consts consts
+    case check_any_failed consts_list of
+        Just err -> return (Just err)
+        Nothing -> do
+            short_fns_list <- mapM add_top_level_short_fns short_fns
+            return (check_any_failed short_fns_list)
 
-check_top_level_const_defns_state :: TopLevelConstType -> State Context (Maybe TypeError)
-check_top_level_const_defns_state (TopLevelConstType i m_t expr) = do
+add_top_level_consts :: TopLevelConstType -> State Context (Maybe TypeError)
+add_top_level_consts (TopLevelConstType i m_t expr) = do
     ctx <- get
     case m_t of
         Nothing -> case infer ctx expr of
@@ -61,9 +65,24 @@ check_top_level_const_defns_state (TopLevelConstType i m_t expr) = do
             Right () -> insert (Bound i t)
             Left err -> return (Just err)
 
+add_top_level_short_fns :: TopLevelShortFnType -> State Context (Maybe TypeError)
+add_top_level_short_fns (TopLevelShortFnType i p m_t expr) = do
+    ctx <- get
+    case p of
+        Param param Nothing -> error "FIXME type inference"
+        Param param (Just p_t) -> case add_bind ctx (Bound param p_t) of
+            Left err -> return (Just err)
+            Right p_ctx -> case m_t of
+                Nothing -> case infer p_ctx expr of
+                    Right t -> insert (Bound i t)
+                    Left err -> return (Just err)
+                Just t -> case check_astree p_ctx expr t of
+                    Right () -> insert (Bound i t)
+                    Left err -> return (Just err)
 
-check_any_failed_state :: [Maybe TypeError] -> Maybe TypeError
-check_any_failed_state list = let ls = catMaybes list in case ls of
+
+check_any_failed :: [Maybe TypeError] -> Maybe TypeError
+check_any_failed list = let ls = catMaybes list in case ls of
     [] -> Nothing
     (x:_) -> Just x
 
