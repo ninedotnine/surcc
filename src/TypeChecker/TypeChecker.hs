@@ -35,7 +35,7 @@ add_imports imports = Right $ Global $ map make_import_bound (map from_import im
     where
         from_import :: Import -> String
         from_import (Import s) = s
-        make_import_bound s = Bound (Identifier s) (TypeName "Module")
+        make_import_bound s = Bound (Identifier s) (SoucType "Module")
 
 
 add_globals :: Context -> [Top_Level_Defn] -> Either TypeError Context
@@ -61,23 +61,23 @@ add_top_level_consts (TopLevelConstType i m_t expr) = do
         Nothing -> case infer ctx expr of
             Right t -> insert (Bound i t)
             Left err -> return (Just err)
-        Just t -> case check_astree ctx expr t of
-            Right () -> insert (Bound i t)
+        Just t -> case check_astree ctx expr (SoucType t) of
+            Right () -> insert (Bound i (SoucType t))
             Left err -> return (Just err)
 
 add_top_level_short_fns :: TopLevelShortFnType -> State Context (Maybe TypeError)
 add_top_level_short_fns (TopLevelShortFnType i p m_t expr) = do
     ctx <- get
     case p of
-        Param param Nothing -> error "FIXME type inference"
-        Param param (Just p_t) -> case add_bind ctx (Bound param p_t) of
+        Param _ Nothing -> error "FIXME type inference"
+        Param param (Just p_t) -> case add_bind ctx (Bound param (SoucType p_t)) of
             Left err -> return (Just err)
             Right p_ctx -> case m_t of
                 Nothing -> case infer p_ctx expr of
-                    Right t -> insert (Bound i t)
+                    Right t -> insert (Bound i (SoucFn (SoucType p_t) t))
                     Left err -> return (Just err)
-                Just t -> case check_astree p_ctx expr t of
-                    Right () -> insert (Bound i t)
+                Just t -> case check_astree p_ctx expr (SoucType t) of
+                    Right () -> insert (Bound i (SoucFn (SoucType p_t) (SoucType t)))
                     Left err -> return (Just err)
 
 
@@ -89,10 +89,12 @@ check_any_failed list = let ls = catMaybes list in case ls of
 
 insert :: Bound -> State Context (Maybe TypeError)
 insert bound = do
+    traceM $ "inserting: " ++ show bound
     ctx <- get
     case (add_bind ctx bound) of
         Left err -> return (Just err)
-        Right new_ctx -> put new_ctx >> return Nothing
+--         Right new_ctx -> put new_ctx >> return Nothing
+        Right new_ctx -> put new_ctx >> (traceM $ "ctx now: " ++ show new_ctx) >> return Nothing
 
 
 type BrokenUpList = ([TopLevelConstType], [TopLevelShortFnType], [TopLevelLongFnType], [TopLevelProcType])

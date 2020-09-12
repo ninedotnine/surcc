@@ -16,25 +16,25 @@ match :: Expected
 match = Result (Right ())
 
 mismatch :: TypeName -> TypeName -> Expected
-mismatch x y = Result $ Left $ TypeMismatch x y
+mismatch x y = Result $ Left $ TypeMismatch (SoucType x) (SoucType y)
 
 empty_ctx :: Context
 empty_ctx = Global []
 
 globals :: Context
 globals = Global [
-    Bound (Identifier "x") (TypeName "Integer"),
-    Bound (Identifier "s") (TypeName "String"),
-    Bound (Identifier "c") (TypeName "Char"),
-    Bound (Identifier "b") (TypeName "Bool")
+    Bound (Identifier "x") (SoucType "Integer"),
+    Bound (Identifier "s") (SoucType "String"),
+    Bound (Identifier "c") (SoucType "Char"),
+    Bound (Identifier "b") (SoucType "Bool")
     ]
 
 scoped :: Context
 scoped = Scoped [
-    Bound (Identifier "x") (TypeName "Integer"),
-    Bound (Identifier "s") (TypeName "String"),
-    Bound (Identifier "c") (TypeName "Char"),
-    Bound (Identifier "b") (TypeName "Bool")
+    Bound (Identifier "x") (SoucType "Integer"),
+    Bound (Identifier "s") (SoucType "String"),
+    Bound (Identifier "c") (SoucType "Char"),
+    Bound (Identifier "b") (SoucType "Bool")
     ] empty_ctx
 
 tests :: [Test]
@@ -107,9 +107,10 @@ main = do
 
 render :: Either TypeError () -> String
 render (Right ()) = "match"
-render (Left (TypeMismatch (TypeName x) (TypeName y))) = "mismatch: " <> x <> " / " <> y
+render (Left (TypeMismatch (SoucType (TypeName x)) (SoucType (TypeName y)))) = "mismatch: " <> x <> " / " <> y
 render (Left (MultipleDeclarations (Identifier i))) = "multiple declarations: " <> i
 render (Left (Undeclared (Identifier i))) = "undeclared identifier " <> i
+render _ = error "FIXME more complex types"
 
 print_err :: Either TypeError () -> Either TypeError () -> IO ()
 print_err expected actual = putStrLn failmsg where
@@ -118,7 +119,7 @@ print_err expected actual = putStrLn failmsg where
 test :: Test -> IO ()
 test (ctx, expr, expr_t, Result expected, name) = do
     putStr name >> putStr "... "
-    let actual = check_astree ctx expr expr_t
+    let actual = check_astree ctx expr (SoucType expr_t)
     if expected == actual
         then putStrLn "OK."
         else print_err expected actual >> exitFailure

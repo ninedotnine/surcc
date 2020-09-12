@@ -22,15 +22,15 @@ type Test = ([Import], [Top_Level_Defn], Either TypeError Context, String)
 
 tests :: [Test]
 tests = [
-    ([], [Top_Level_Const_Defn "i" (Just "Integer") (Leaf (LitInt 4))], Right (Global [Bound "i" "Integer"]), "int"),
-    ([Import "salad", Import "tofu"], [], Right (Global [Bound "salad" "Module", Bound "tofu" "Module"]), "imports")
+    ([], [Top_Level_Const_Defn "i" (Just "Integer") (Leaf (LitInt 4))], Right (Global [Bound "i" (SoucType "Integer")]), "int"),
+    ([Import "salad", Import "tofu"], [], Right (Global [Bound "salad" (SoucType "Module"), Bound "tofu" (SoucType "Module")]), "imports")
     ]
 
 borked_tests :: [Test]
 borked_tests = [
-    ([], [Top_Level_Const_Defn "c" (Just "Integer") (Leaf (LitChar 'a'))], Left (TypeMismatch "Integer" "Char"), "bad char 0"),
-    ([], [Top_Level_Const_Defn "b" Nothing (Signed (Leaf (LitChar 'a')) "Bool")], Left (TypeMismatch "Bool" "Char"), "bad char 1"),
-    ([], [Top_Level_Const_Defn "b" (Just "Char") (Signed (Leaf (LitChar 'a')) "Bool")], Left (TypeMismatch "Bool" "Char"), "bad char 2")
+    ([], [Top_Level_Const_Defn "c" (Just "Integer") (Leaf (LitChar 'a'))], Left (mismatch "Integer" "Char"), "bad char 0"),
+    ([], [Top_Level_Const_Defn "b" Nothing (Signed (Leaf (LitChar 'a')) "Bool")], Left (mismatch "Bool" "Char"), "bad char 1"),
+    ([], [Top_Level_Const_Defn "b" (Just "Char") (Signed (Leaf (LitChar 'a')) "Bool")], Left (mismatch "Bool" "Char"), "bad char 2")
     ]
 
 
@@ -45,9 +45,13 @@ main = do
 
 render :: Either TypeError Context -> String
 render (Right ctx) = show ctx
-render (Left (TypeMismatch (TypeName x) (TypeName y))) = "mismatch: " <> x <> " / " <> y
+render (Left (TypeMismatch (SoucType (TypeName x)) (SoucType (TypeName y)))) = "mismatch: " <> x <> " / " <> y
 render (Left (MultipleDeclarations (Identifier i))) = "multiple declarations for " <> i
 render (Left (Undeclared (Identifier i))) = "undeclared identifier " <> i
+render _ = error "FIXME more complex types"
+
+mismatch :: TypeName -> TypeName -> TypeError
+mismatch x y = TypeMismatch (SoucType x) (SoucType y)
 
 print_err :: Either TypeError Context -> Either TypeError Context -> IO ()
 print_err expected actual = putStrLn failmsg where

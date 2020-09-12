@@ -1,3 +1,6 @@
+{-# LANGUAGE PatternSynonyms #-}
+{-# LANGUAGE OverloadedStrings #-}
+
 module TypeChecker.Expressions (
     infer,
     check_astree
@@ -11,28 +14,28 @@ import Parser.Expr.ExprTypes
 import TypeChecker.Context
 import TypeChecker.Operators
 
-infer :: Context -> ASTree -> Either TypeError TypeName
+infer :: Context -> ASTree -> Either TypeError SoucType
 infer ctx tree = case tree of
     Branch op left right -> ret <$> infer_infix_op op left right
     Twig op expr -> ret <$> infer_prefix_op op expr
     Signed expr t -> do
         inferred <- infer ctx expr
-        check_equals t inferred
+        check_equals (SoucType t) inferred
         Right inferred
     Leaf term -> infer_term ctx term
 
-infer_term :: Context -> Term -> Either TypeError TypeName
+infer_term :: Context -> Term -> Either TypeError SoucType
 infer_term context term = case term of
-    LitInt _    -> Right (TypeName "Integer")
-    LitChar _   -> Right (TypeName "Char")
-    LitBool _   -> Right (TypeName "Bool")
-    LitString _ -> Right (TypeName "String")
+    LitInt _    -> Right (SoucType "Integer")
+    LitChar _   -> Right (SoucType "Char")
+    LitBool _   -> Right (SoucType "Bool")
+    LitString _ -> Right (SoucType "String")
     Var v -> case lookup context v of
         Nothing -> Left (Undeclared v)
         Just t -> Right t
 
 not_implemented :: Either TypeError a
-not_implemented = Left $ TypeMismatch (TypeName "NOT YET") (TypeName "IMPLEMENTED")
+not_implemented = Left $ TypeMismatch (SoucType "NOT YET") (SoucType "IMPLEMENTED")
 
 infer_prefix_op :: PrefixOperator -> ASTree -> Either TypeError (InputType, ReturnType)
 infer_prefix_op op _ = case op of
@@ -51,12 +54,14 @@ infer_infix_op op _ _ = case op of
     Splat -> Right ((in_t "Integer", in_t "Integer"), ret_t "Integer")
     And -> Right ((in_t "Bool", in_t "Bool"), ret_t "Bool")
     Or  -> Right ((in_t "Bool", in_t "Bool"), ret_t "Bool")
+    Apply     -> Right (((InputType (SoucFn (SoucType "Integer") (SoucType "Integer"))), in_t "Integer"), ret_t "Integer")
+    FlipApply -> Right (((in_t "Integer", InputType (SoucFn (SoucType "Integer") (SoucType "Integer")))), ret_t "Integer")
     _ -> not_implemented
 
-check_equals :: TypeName -> TypeName -> Either TypeError ()
+check_equals :: SoucType -> SoucType -> Either TypeError ()
 check_equals t0 t1 = if t0 == t1 then Right () else Left (TypeMismatch t0 t1)
 
-check_astree :: Context -> ASTree -> TypeName -> Either TypeError ()
+check_astree :: Context -> ASTree -> SoucType -> Either TypeError ()
 check_astree ctx tree t = case tree of
     Branch op left right -> case infer_infix_op op left right of
         Left err -> Left err
@@ -78,5 +83,5 @@ check_astree ctx tree t = case tree of
     Signed expr sig -> do
         expr_t <- infer ctx expr
         check_astree ctx expr expr_t
-        check_equals sig expr_t
+        check_equals (SoucType sig) expr_t
         check_equals t expr_t

@@ -10,6 +10,7 @@ module Common (
     Operator(..),
     PrefixOperator(..),
     TypeName(..),
+    SoucType(..),
     TypeError(..),
     Stmts(..),
     CheckedProgram(..),
@@ -74,7 +75,16 @@ newtype Stmts = Stmts [Stmt] deriving (Show, Eq)
 
 newtype TypeName = TypeName String deriving (Show, Eq, IsString, Semigroup)
 
-data TypeError = TypeMismatch TypeName TypeName
+data SoucType = SoucType TypeName
+              | SoucFn SoucType SoucType
+              | SoucPair SoucType SoucType
+              | SoucMaybe SoucType
+              | SoucEither SoucType SoucType
+              | SoucList SoucType
+--               | SoucTypeConstructor [SoucType]
+              deriving (Show, Eq)
+
+data TypeError = TypeMismatch SoucType SoucType
                | MultipleDeclarations Identifier
                | Undeclared Identifier
     deriving (Show, Eq)
