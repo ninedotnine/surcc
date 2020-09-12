@@ -96,7 +96,7 @@ add_top_level_long_fns (TopLevelLongFnType i p m_t stmts) = do
                 Nothing -> case infer_stmts p_ctx stmts of
                     Right t -> insert (Bound i (SoucFn (SoucType p_t) t))
                     Left err -> return (Just err)
-                Just t -> case check_stmts p_ctx stmts (SoucType t) of
+                Just t -> case check_stmts p_ctx stmts (Just (SoucType t)) of
                     Right () -> insert (Bound i (SoucFn (SoucType p_t) (SoucType t)))
                     Left err -> return (Just err)
 
