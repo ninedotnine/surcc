@@ -73,7 +73,7 @@ newtype Import = Import String deriving (Read, Show)
 
 newtype Stmts = Stmts [Stmt] deriving (Show, Eq)
 
-newtype TypeName = TypeName String deriving (Show, Eq, IsString, Semigroup)
+newtype TypeName = TypeName String deriving (Eq, IsString, Semigroup)
 
 data SoucType = SoucType TypeName
               | SoucFn SoucType SoucType
@@ -82,7 +82,7 @@ data SoucType = SoucType TypeName
               | SoucEither SoucType SoucType
               | SoucList SoucType
 --               | SoucTypeConstructor [SoucType]
-              deriving (Show, Eq)
+              deriving (Eq)
 
 data TypeError = TypeMismatch SoucType SoucType
                | MultipleDeclarations Identifier
@@ -210,3 +210,14 @@ instance Show PrefixOperator where
     show ToString = "$"
     show Pure     = "^*^"
     show Join     = ">*<"
+
+instance Show TypeName where
+    show (TypeName str) = str
+
+instance Show SoucType where
+    show (SoucType t) = show t
+    show (SoucFn t0 t1) = show t0 <> " -> " <> show t1
+    show (SoucPair t0 t1) = show t0 <> " & " <> show t1
+    show (SoucMaybe t) = '?' : show t
+    show (SoucEither t0 t1) = show t0 <> " | " <> show t1
+    show (SoucList t) = '[': show t <> "]"
