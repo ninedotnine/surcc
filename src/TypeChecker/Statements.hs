@@ -37,12 +37,17 @@ check_stmt ctx stmt m_ret = case stmt of
     Stmt_Postfix_Oper name oper -> undefined
     Stmt_Const_Assign name expr -> undefined
     Stmt_Var_Assign name m_t expr -> check_stmt_ass ctx name (SoucType <$> m_t) expr
-    Stmt_Return (Just expr) -> case m_ret of
+    Stmt_Return m_expr -> check_stmt_return ctx m_expr m_ret
+
+
+check_stmt_return :: Context -> Maybe ASTree -> Maybe SoucType -> Either TypeError ()
+check_stmt_return ctx m_expr m_ret = case m_expr of
+    Just expr -> case m_ret of
+        Just t -> check_astree ctx expr t
         Nothing -> case infer ctx expr of
             Left err -> Left err
             Right t -> Left (TypeMismatch (SoucType "IO") t)
-        Just t -> check_astree ctx expr t
-    Stmt_Return Nothing -> case m_ret of
+    Nothing -> case m_ret of
         Just t -> Left (TypeMismatch t (SoucType "IO"))
         Nothing -> Right ()
 
