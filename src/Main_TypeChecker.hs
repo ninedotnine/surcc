@@ -1,6 +1,7 @@
 module Main_TypeChecker where
 
 import Data.Foldable (traverse_)
+import Data.List (sort)
 import System.Directory
 import System.Environment (getArgs)
 import System.Exit (exitFailure, exitSuccess)
@@ -17,8 +18,7 @@ main = do
             contents <- getContents
             putStrLn "no file name provided, reading from stdin."
             test "stdin" contents output_results
-        else if
-            head args == "--test"
+        else if head args == "--test"
             then run_default_test_suite
             else process_args args
 
@@ -36,7 +36,7 @@ process_arg arg = do
 process_dir :: Handler -> FilePath -> IO ()
 process_dir handler dir = do
     cwd <- getCurrentDirectory
-    ls <- listDirectory dir
+    ls <- sort <$> listDirectory dir
     setCurrentDirectory dir
     traverse_ (process_file handler) ls
     setCurrentDirectory cwd
