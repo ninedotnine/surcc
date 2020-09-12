@@ -17,6 +17,7 @@ import Parser.Expr.ExprTypes
 import TypeChecker.Context
 import TypeChecker.Operators
 import TypeChecker.Expressions
+import TypeChecker.Statements
 
 import Debug.Trace
 
@@ -52,7 +53,11 @@ run_globals defns = do
         Just err -> return (Just err)
         Nothing -> do
             short_fns_list <- mapM add_top_level_short_fns short_fns
-            return (check_any_failed short_fns_list)
+            case check_any_failed short_fns_list of
+                Just err -> return (Just err)
+                Nothing -> do
+                    long_fns_list <- mapM add_top_level_long_fns long_fns
+                    return (check_any_failed long_fns_list)
 
 add_top_level_consts :: TopLevelConstType -> State Context (Maybe TypeError)
 add_top_level_consts (TopLevelConstType i m_t expr) = do

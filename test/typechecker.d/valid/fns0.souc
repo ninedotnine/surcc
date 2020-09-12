@@ -1,0 +1,18 @@
+n = 5
+
+; silly, but the types are ok.
+
+f(x: Integer): Integer = do
+	if True
+		return 3
+	else
+		return 4
+	until False
+		return n
+
+g(x: Integer): Integer = do
+	while False
+		return n+1
+	unless True
+		return n*3
+	return 4

@@ -1,0 +1,6 @@
+n = 5
+
+f(x: Integer): Integer = do
+	if True
+		return n
+	return 'a'
