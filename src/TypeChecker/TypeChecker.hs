@@ -80,9 +80,24 @@ add_top_level_short_fns (TopLevelShortFnType i p m_t expr) = do
                     Right () -> insert (Bound i (SoucFn (SoucType p_t) (SoucType t)))
                     Left err -> return (Just err)
 
+add_top_level_long_fns :: TopLevelLongFnType -> State Context (Maybe TypeError)
+add_top_level_long_fns (TopLevelLongFnType i p m_t stmts) = do
+    ctx <- get
+    case p of
+        Param _ Nothing -> error "FIXME type inference"
+        Param param (Just p_t) -> case add_bind ctx (Bound param (SoucType p_t)) of
+            Left err -> return (Just err)
+            Right p_ctx -> case m_t of
+                Nothing -> case infer_stmts p_ctx stmts of
+                    Right t -> insert (Bound i (SoucFn (SoucType p_t) t))
+                    Left err -> return (Just err)
+                Just t -> case check_stmts p_ctx stmts (SoucType t) of
+                    Right () -> insert (Bound i (SoucFn (SoucType p_t) (SoucType t)))
+                    Left err -> return (Just err)
+
 
 check_any_failed :: [Maybe TypeError] -> Maybe TypeError
-check_any_failed list = let ls = catMaybes list in case ls of
+check_any_failed list = case catMaybes list of
     [] -> Nothing
     (x:_) -> Just x
 
