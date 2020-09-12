@@ -36,7 +36,7 @@ check_stmt ctx stmt m_ret = case stmt of
     Stmt_Sub_Call name m_arg -> undefined
     Stmt_Postfix_Oper name oper -> undefined
     Stmt_Const_Assign name expr -> undefined
-    Stmt_Var_Assign name expr -> undefined
+    Stmt_Var_Assign name m_t expr -> undefined
     Stmt_Return (Just expr) -> case m_ret of
         Nothing -> case infer ctx expr of
             Left err -> Left err
@@ -73,6 +73,6 @@ infer_stmt ctx stmt = case stmt of
     Stmt_Sub_Call name m_arg -> undefined
     Stmt_Postfix_Oper name oper -> undefined
     Stmt_Const_Assign name expr -> undefined
-    Stmt_Var_Assign name expr -> undefined
+    Stmt_Var_Assign name m_t expr -> undefined
     Stmt_Return m_expr -> undefined
 

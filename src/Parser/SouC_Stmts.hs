@@ -43,10 +43,10 @@ stmt_const_assign name = do
 
 stmt_var_assign :: Identifier -> SouCParser Stmt
 stmt_var_assign name = do
-    _ <- try (optional_sig <* spaces <* string "<-")
+    m_sig <- try (optional_sig <* spaces <* string "<-")
     Raw_Expr val <- spaces *> raw_expr
     case parse_expression val of
-        Right expr -> return $ Stmt_Var_Assign name expr
+        Right expr -> return $ Stmt_Var_Assign name m_sig expr
         Left err -> parserFail $ "invalid expression:\n" ++ show err
 
 stmt_sub_call :: Identifier -> SouCParser Stmt

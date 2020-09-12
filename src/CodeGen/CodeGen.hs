@@ -64,7 +64,7 @@ instance Generatable Stmt where
             expr = case m_expr of
                 Nothing -> ""
                 Just e -> gen e
-    gen (Stmt_Var_Assign name expr) =
+    gen (Stmt_Var_Assign name _ expr) =
         "int " ++ gen name ++ " = " ++ gen expr ++ "; "
     gen (Stmt_Const_Assign name expr) =
         "const int " ++ gen name ++ " = " ++ gen expr ++ "; "
