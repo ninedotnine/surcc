@@ -24,8 +24,8 @@ first_left list = case lefts list of
     [] -> Right ()
     (l:_) -> Left l
 
-
-bool = SoucType (TypeName "Bool")
+soucbool :: SoucType
+soucbool = SoucType (TypeName "Bool")
 
 check_stmt :: Context -> Stmt -> Maybe SoucType -> Either TypeError ()
 check_stmt ctx stmt m_ret = case stmt of
@@ -41,24 +41,23 @@ check_stmt ctx stmt m_ret = case stmt of
         Nothing -> case infer ctx expr of
             Left err -> Left err
             Right t -> Left (TypeMismatch (SoucType "IO") t)
-        Just ret -> check_astree ctx expr ret
+        Just t -> check_astree ctx expr t
     Stmt_Return Nothing -> case m_ret of
-        Just ret -> Left (TypeMismatch ret (SoucType "IO"))
+        Just t -> Left (TypeMismatch t (SoucType "IO"))
         Nothing -> Right ()
 
 check_stmt_while :: Context -> ASTree -> Stmts -> Maybe SoucType -> Either TypeError ()
-check_stmt_while ctx expr body ret = case check_astree ctx expr bool of
-    Left err -> Left err
-    Right () -> check_stmts ctx body ret
+check_stmt_while ctx expr body m_ret = do
+    check_astree ctx expr soucbool
+    check_stmts ctx body m_ret
 
 check_stmt_if :: Context -> ASTree -> Stmts -> (Maybe Stmts) -> (Maybe SoucType) -> Either TypeError ()
-check_stmt_if ctx expr body m_else ret = case check_astree ctx expr bool of
-    Left err -> Left err
-    Right () -> case check_stmts ctx body ret of
-        Left err -> Left err
-        Right () -> case m_else of
-            Nothing -> return ()
-            Just else_body -> check_stmts ctx else_body ret
+check_stmt_if ctx expr body m_else m_ret = do
+    check_astree ctx expr soucbool
+    check_stmts ctx body m_ret
+    case m_else of
+        Nothing -> Right ()
+        Just else_body -> check_stmts ctx else_body m_ret
 
 -- FIXME needs to add the identifier to the context (if it is not there)
 -- all this stuff will need to use the state monad, i guess
