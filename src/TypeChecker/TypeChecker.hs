@@ -41,7 +41,7 @@ add_imports imports = Right $ Global $ map make_import_bound (map from_import im
 add_globals :: Context -> [Top_Level_Defn] -> Either TypeError Context
 add_globals imports_ctx defns = do
     case runState (run_globals defns) imports_ctx of
-        (Nothing, ctx) -> Right ctx
+        (Nothing, ctx) -> (traceM $ "ultimate ctx: " ++ show ctx) >> Right ctx
         (Just e, _) -> Left e
 
 run_globals :: [Top_Level_Defn] -> State Context (Maybe TypeError)
@@ -93,8 +93,7 @@ insert bound = do
     ctx <- get
     case (add_bind ctx bound) of
         Left err -> return (Just err)
---         Right new_ctx -> put new_ctx >> return Nothing
-        Right new_ctx -> put new_ctx >> (traceM $ "ctx now: " ++ show new_ctx) >> return Nothing
+        Right new_ctx -> put new_ctx >> return Nothing
 
 
 type BrokenUpList = ([TopLevelConstType], [TopLevelShortFnType], [TopLevelLongFnType], [TopLevelProcType])
