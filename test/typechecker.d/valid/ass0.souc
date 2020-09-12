@@ -1,0 +1,8 @@
+n = 5
+
+; silly, but the types are ok.
+
+f(x: Integer): Integer = do
+	i <- 4
+	i: Integer <- x
+	return x

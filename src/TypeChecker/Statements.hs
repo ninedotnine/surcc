@@ -36,7 +36,7 @@ check_stmt ctx stmt m_ret = case stmt of
     Stmt_Sub_Call name m_arg -> undefined
     Stmt_Postfix_Oper name oper -> undefined
     Stmt_Const_Assign name expr -> undefined
-    Stmt_Var_Assign name m_t expr -> undefined
+    Stmt_Var_Assign name m_t expr -> check_stmt_ass ctx name (SoucType <$> m_t) expr
     Stmt_Return (Just expr) -> case m_ret of
         Nothing -> case infer ctx expr of
             Left err -> Left err
@@ -60,6 +60,12 @@ check_stmt_if ctx expr body m_else ret = case check_astree ctx expr bool of
             Nothing -> return ()
             Just else_body -> check_stmts ctx else_body ret
 
+-- FIXME needs to add the identifier to the context (if it is not there)
+-- all this stuff will need to use the state monad, i guess
+check_stmt_ass :: Context -> Identifier -> (Maybe SoucType) -> ASTree -> Either TypeError ()
+check_stmt_ass ctx name m_t expr = case m_t of
+    Nothing -> infer ctx expr >> return ()
+    Just t -> check_astree ctx expr t
 
 infer_stmts :: Context -> Stmts -> Either TypeError SoucType
 infer_stmts ctx (Stmts stmts) = undefined
