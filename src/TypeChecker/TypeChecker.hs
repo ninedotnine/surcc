@@ -9,7 +9,6 @@ module TypeChecker.TypeChecker (
 import Control.Applicative
 import Control.Monad.State
 import Data.Either
-import Data.Maybe (catMaybes)
 
 import Prelude hiding (lookup)
 import Common
@@ -42,78 +41,78 @@ add_imports imports = Right $ Global $ map make_import_bound (map from_import im
 add_globals :: Context -> [Top_Level_Defn] -> Either TypeError Context
 add_globals imports_ctx defns = do
     case runState (run_globals defns) imports_ctx of
-        (Nothing, ctx) -> (traceM $ "ultimate ctx: " ++ show ctx) >> Right ctx
-        (Just e, _) -> Left e
+        (Right (), ctx) -> (traceM $ "ultimate ctx: " ++ show ctx) >> Right ctx
+        (Left e, _) -> Left e
 
-run_globals :: [Top_Level_Defn] -> State Context (Maybe TypeError)
+run_globals :: [Top_Level_Defn] -> State Context (Either TypeError ())
 run_globals defns = do
     let (consts, short_fns, long_fns, routines) = split_top_level_stuff defns
     consts_list <- mapM add_top_level_consts consts
     case check_any_failed consts_list of
-        Just err -> return (Just err)
-        Nothing -> do
+        Left err -> return (Left err)
+        Right () -> do
             short_fns_list <- mapM add_top_level_short_fns short_fns
             case check_any_failed short_fns_list of
-                Just err -> return (Just err)
-                Nothing -> do
+                Left err -> return (Left err)
+                Right () -> do
                     long_fns_list <- mapM add_top_level_long_fns long_fns
                     return (check_any_failed long_fns_list)
 
-add_top_level_consts :: TopLevelConstType -> State Context (Maybe TypeError)
+add_top_level_consts :: TopLevelConstType -> State Context (Either TypeError ())
 add_top_level_consts (TopLevelConstType i m_t expr) = do
     ctx <- get
     case m_t of
         Nothing -> case infer ctx expr of
             Right t -> insert (Bound i t)
-            Left err -> return (Just err)
+            Left err -> return (Left err)
         Just t -> case check_astree ctx expr t of
             Right () -> insert (Bound i t)
-            Left err -> return (Just err)
+            Left err -> return (Left err)
 
-add_top_level_short_fns :: TopLevelShortFnType -> State Context (Maybe TypeError)
+add_top_level_short_fns :: TopLevelShortFnType -> State Context (Either TypeError ())
 add_top_level_short_fns (TopLevelShortFnType i p m_t expr) = do
     ctx <- get
     case p of
         Param _ Nothing -> error "FIXME type inference"
         Param param (Just p_t) -> case add_bind ctx (Bound param (SoucType p_t)) of
-            Left err -> return (Just err)
+            Left err -> return (Left err)
             Right p_ctx -> case m_t of
                 Nothing -> case infer p_ctx expr of
                     Right t -> insert (Bound i (SoucFn (SoucType p_t) t))
-                    Left err -> return (Just err)
+                    Left err -> return (Left err)
                 Just t -> case check_astree p_ctx expr t of
                     Right () -> insert (Bound i (SoucFn (SoucType p_t) t))
-                    Left err -> return (Just err)
+                    Left err -> return (Left err)
 
-add_top_level_long_fns :: TopLevelLongFnType -> State Context (Maybe TypeError)
+add_top_level_long_fns :: TopLevelLongFnType -> State Context (Either TypeError ())
 add_top_level_long_fns (TopLevelLongFnType i p m_t stmts) = do
     ctx <- get
     case p of
         Param _ Nothing -> error "FIXME type inference"
         Param param (Just p_t) -> case add_bind ctx (Bound param (SoucType p_t)) of
-            Left err -> return (Just err)
+            Left err -> return (Left err)
             Right p_ctx -> case m_t of
                 Nothing -> case infer_stmts p_ctx stmts of
                     Right t -> insert (Bound i (SoucFn (SoucType p_t) t))
-                    Left err -> return (Just err)
+                    Left err -> return (Left err)
                 Just t -> case check_stmts p_ctx stmts (Just t) of
                     Right () -> insert (Bound i (SoucFn (SoucType p_t) t))
-                    Left err -> return (Just err)
+                    Left err -> return (Left err)
 
 
-check_any_failed :: [Maybe TypeError] -> Maybe TypeError
-check_any_failed list = case catMaybes list of
-    [] -> Nothing
-    (x:_) -> Just x
+check_any_failed :: [Either TypeError ()] -> Either TypeError ()
+check_any_failed list = case lefts list of
+    [] -> Right ()
+    (x:_) -> Left x
 
 
-insert :: Bound -> State Context (Maybe TypeError)
+insert :: Bound -> State Context (Either TypeError ())
 insert bound = do
     traceM $ "inserting: " ++ show bound
     ctx <- get
     case (add_bind ctx bound) of
-        Left err -> return (Just err)
-        Right new_ctx -> put new_ctx >> return Nothing
+        Left err -> return (Left err)
+        Right new_ctx -> put new_ctx >> return (Right ())
 
 
 type BrokenUpList = ([TopLevelConstType], [TopLevelShortFnType], [TopLevelLongFnType], [TopLevelProcType])
