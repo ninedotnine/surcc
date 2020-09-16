@@ -44,7 +44,10 @@ add_globals imports_ctx defns = do
         (Right (), ctx) -> (traceM $ "ultimate ctx: " ++ show ctx) >> Right ctx
         (Left e, _) -> Left e
 
-run_globals :: [Top_Level_Defn] -> State Context (Either TypeError ())
+
+type Checker a = State Context (Either TypeError a)
+
+run_globals :: [Top_Level_Defn] -> Checker ()
 run_globals defns = do
     let (consts, short_fns, long_fns, routines) = split_top_level_stuff defns
     consts_list <- mapM add_top_level_consts consts
@@ -58,7 +61,7 @@ run_globals defns = do
                     long_fns_list <- mapM add_top_level_long_fns long_fns
                     return (check_any_failed long_fns_list)
 
-add_top_level_consts :: TopLevelConstType -> State Context (Either TypeError ())
+add_top_level_consts :: TopLevelConstType -> Checker ()
 add_top_level_consts (TopLevelConstType i m_t expr) = do
     ctx <- get
     case m_t of
@@ -69,7 +72,7 @@ add_top_level_consts (TopLevelConstType i m_t expr) = do
             Right () -> insert (Bound i t)
             Left err -> return (Left err)
 
-add_top_level_short_fns :: TopLevelShortFnType -> State Context (Either TypeError ())
+add_top_level_short_fns :: TopLevelShortFnType -> Checker ()
 add_top_level_short_fns (TopLevelShortFnType i p m_t expr) = do
     ctx <- get
     case p of
@@ -84,7 +87,7 @@ add_top_level_short_fns (TopLevelShortFnType i p m_t expr) = do
                     Right () -> insert (Bound i (SoucFn (SoucType p_t) t))
                     Left err -> return (Left err)
 
-add_top_level_long_fns :: TopLevelLongFnType -> State Context (Either TypeError ())
+add_top_level_long_fns :: TopLevelLongFnType -> Checker ()
 add_top_level_long_fns (TopLevelLongFnType i p m_t stmts) = do
     ctx <- get
     case p of
@@ -100,13 +103,15 @@ add_top_level_long_fns (TopLevelLongFnType i p m_t stmts) = do
                     Left err -> return (Left err)
 
 
-check_any_failed :: [Either TypeError ()] -> Either TypeError ()
+-- check_any_failed :: [Either TypeError ()] -> State Context (Either TypeError ())
+check_any_failed :: [Either TypeError ()] -> (Either TypeError ())
 check_any_failed list = case lefts list of
     [] -> Right ()
+--     (x:_) -> return $  throwError x
     (x:_) -> Left x
 
 
-insert :: Bound -> State Context (Either TypeError ())
+insert :: Bound -> Checker ()
 insert bound = do
     traceM $ "inserting: " ++ show bound
     ctx <- get
