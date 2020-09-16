@@ -85,4 +85,3 @@ infer_stmt ctx stmt = case stmt of
     Stmt_Const_Assign name expr -> undefined
     Stmt_Var_Assign name m_t expr -> undefined
     Stmt_Return m_expr -> undefined
-

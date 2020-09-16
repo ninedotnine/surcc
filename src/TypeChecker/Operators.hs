@@ -29,6 +29,8 @@ ret_t = ReturnType . SoucType . TypeName
 ret :: (a, ReturnType) -> SoucType
 ret (_, ReturnType x) = x
 
+-- FIXME these patterns might be unused.
+
 -- pattern Arg :: String -> InputType
 -- pattern Arg x <- InputType (SoucType x)
 pattern Arg :: SoucType -> InputType
