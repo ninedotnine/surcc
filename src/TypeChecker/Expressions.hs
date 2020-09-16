@@ -63,18 +63,17 @@ check_equals t0 t1 = if t0 == t1 then Right () else Left (TypeMismatch t0 t1)
 
 check_astree :: Context -> ASTree -> SoucType -> Either TypeError ()
 check_astree ctx tree t = case tree of
-    Branch op left right -> case infer_infix_op op left right of
-        Left err -> Left err
-        Right ((InputType l_t, InputType r_t), ReturnType expr_t) -> do
-            check_astree ctx left l_t
-            check_astree ctx right r_t
-            check_equals t expr_t
+    Branch op left right -> do
+        ((InputType l_t, InputType r_t), ReturnType expr_t) <- infer_infix_op op left right
+        check_astree ctx left l_t
+        check_astree ctx right r_t
+        check_equals t expr_t
 
-    Twig op expr -> case infer_prefix_op op expr of
-        Left err -> Left err
-        Right (InputType arg_t, ReturnType expr_t) -> do
-            check_astree ctx expr arg_t
-            check_equals t expr_t
+
+    Twig op expr -> do
+        (InputType arg_t, ReturnType expr_t) <- infer_prefix_op op expr
+        check_astree ctx expr arg_t
+        check_equals t expr_t
 
     Leaf term -> do
         term_t <- infer_term ctx term
