@@ -54,11 +54,11 @@ run_globals defns = do
     case check_any_failed consts_list of
         Left err -> return (Left err)
         Right () -> do
-            short_fns_list <- mapM add_top_level_short_fns short_fns
+            short_fns_list <- mapM (in_scope add_top_level_short_fns) short_fns
             case check_any_failed short_fns_list of
                 Left err -> return (Left err)
                 Right () -> do
-                    long_fns_list <- mapM add_top_level_long_fns long_fns
+                    long_fns_list <- mapM (in_scope add_top_level_long_fns) long_fns
                     return (check_any_failed long_fns_list)
 
 add_top_level_consts :: TopLevelConstType -> Checker ()
@@ -72,7 +72,29 @@ add_top_level_consts (TopLevelConstType i m_t expr) = do
             Right () -> insert (Bound i t)
             Left err -> return (Left err)
 
-add_top_level_short_fns :: TopLevelShortFnType -> Checker ()
+in_scope :: (a -> Checker Bound) -> a -> Checker ()
+in_scope act x = do
+    ctx <- get
+    new_scope
+    result <- act x
+    case result of
+        Left err -> return (Left err)
+        Right bound -> exit_scope >> case add_bind ctx bound of
+            Left err -> return (Left err)
+            Right new_ctx -> put new_ctx >> return (Right ())
+
+new_scope :: State Context ()
+new_scope = get >>= put . Scoped []
+
+exit_scope :: Checker ()
+exit_scope = do
+    ctx <- get
+    case ctx of
+        Scoped _ inner -> put inner >> return (Right ())
+        Global _ -> return (Left (Undeclared "should be unreachable"))
+
+
+add_top_level_short_fns :: TopLevelShortFnType -> Checker Bound
 add_top_level_short_fns (TopLevelShortFnType i p m_t expr) = do
     ctx <- get
     case p of
@@ -81,13 +103,13 @@ add_top_level_short_fns (TopLevelShortFnType i p m_t expr) = do
             Left err -> return (Left err)
             Right p_ctx -> case m_t of
                 Nothing -> case infer p_ctx expr of
-                    Right t -> insert (Bound i (SoucFn (SoucType p_t) t))
+                    Right t -> return $ Right (Bound i (SoucFn (SoucType p_t) t))
                     Left err -> return (Left err)
                 Just t -> case check_astree p_ctx expr t of
-                    Right () -> insert (Bound i (SoucFn (SoucType p_t) t))
+                    Right () -> return $ Right (Bound i (SoucFn (SoucType p_t) t))
                     Left err -> return (Left err)
 
-add_top_level_long_fns :: TopLevelLongFnType -> Checker ()
+add_top_level_long_fns :: TopLevelLongFnType -> Checker Bound
 add_top_level_long_fns (TopLevelLongFnType i p m_t stmts) = do
     ctx <- get
     case p of
@@ -96,10 +118,10 @@ add_top_level_long_fns (TopLevelLongFnType i p m_t stmts) = do
             Left err -> return (Left err)
             Right p_ctx -> case m_t of
                 Nothing -> case infer_stmts p_ctx stmts of
-                    Right t -> insert (Bound i (SoucFn (SoucType p_t) t))
+                    Right t -> return $ Right (Bound i (SoucFn (SoucType p_t) t))
                     Left err -> return (Left err)
                 Just t -> case check_stmts p_ctx stmts (Just t) of
-                    Right () -> insert (Bound i (SoucFn (SoucType p_t) t))
+                    Right () -> return $ Right (Bound i (SoucFn (SoucType p_t) t))
                     Left err -> return (Left err)
 
 

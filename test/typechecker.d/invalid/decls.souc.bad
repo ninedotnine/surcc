@@ -1,5 +1,5 @@
 f(x: Integer): Integer = do
 	i: Integer <- 5
-    return i
+	return i
 
 m = i
