@@ -1,7 +1,5 @@
 n = 5
 
-; silly, but the types are ok.
-
 f(x: Integer): Integer = do
 	b: Char <- True
 	if b
