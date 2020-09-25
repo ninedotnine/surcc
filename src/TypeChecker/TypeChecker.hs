@@ -52,14 +52,14 @@ run_globals defns = do
     let (consts, short_fns, long_fns, routines) = split_top_level_stuff defns
     consts_list <- mapM add_top_level_consts consts
     case check_any_failed consts_list of
-        Left err -> return (Left err)
+        Left err -> pure (Left err)
         Right () -> do
             short_fns_list <- mapM (in_scope add_top_level_short_fns) short_fns
             case check_any_failed short_fns_list of
-                Left err -> return (Left err)
+                Left err -> pure (Left err)
                 Right () -> do
                     long_fns_list <- mapM (in_scope add_top_level_long_fns) long_fns
-                    return (check_any_failed long_fns_list)
+                    pure (check_any_failed long_fns_list)
 
 add_top_level_consts :: TopLevelConstType -> Checker ()
 add_top_level_consts (TopLevelConstType i m_t expr) = do
@@ -67,10 +67,10 @@ add_top_level_consts (TopLevelConstType i m_t expr) = do
     case m_t of
         Nothing -> case infer ctx expr of
             Right t -> insert (Bound i t)
-            Left err -> return (Left err)
+            Left err -> pure (Left err)
         Just t -> case check_astree ctx expr t of
             Right () -> insert (Bound i t)
-            Left err -> return (Left err)
+            Left err -> pure (Left err)
 
 in_scope :: (a -> Checker Bound) -> a -> Checker ()
 in_scope act x = do
@@ -78,10 +78,10 @@ in_scope act x = do
     new_scope
     result <- act x
     case result of
-        Left err -> return (Left err)
+        Left err -> pure (Left err)
         Right bound -> exit_scope >> case add_bind ctx bound of
-            Left err -> return (Left err)
-            Right new_ctx -> put new_ctx >> return (Right ())
+            Left err -> pure (Left err)
+            Right new_ctx -> put new_ctx >> pure (Right ())
 
 new_scope :: State Context ()
 new_scope = get >>= put . Scoped []
@@ -90,8 +90,8 @@ exit_scope :: Checker ()
 exit_scope = do
     ctx <- get
     case ctx of
-        Scoped _ inner -> put inner >> return (Right ())
-        Global _ -> return (Left (Undeclared "should be unreachable"))
+        Scoped _ inner -> put inner >> pure (Right ())
+        Global _ -> pure (Left (Undeclared "should be unreachable"))
 
 
 add_top_level_short_fns :: TopLevelShortFnType -> Checker Bound
@@ -100,14 +100,14 @@ add_top_level_short_fns (TopLevelShortFnType i p m_t expr) = do
     case p of
         Param _ Nothing -> error "FIXME type inference"
         Param param (Just p_t) -> case add_bind ctx (Bound param (SoucType p_t)) of
-            Left err -> return (Left err)
+            Left err -> pure (Left err)
             Right p_ctx -> case m_t of
                 Nothing -> case infer p_ctx expr of
-                    Right t -> return $ Right (Bound i (SoucFn (SoucType p_t) t))
-                    Left err -> return (Left err)
+                    Right t -> pure $ Right (Bound i (SoucFn (SoucType p_t) t))
+                    Left err -> pure (Left err)
                 Just t -> case check_astree p_ctx expr t of
-                    Right () -> return $ Right (Bound i (SoucFn (SoucType p_t) t))
-                    Left err -> return (Left err)
+                    Right () -> pure $ Right (Bound i (SoucFn (SoucType p_t) t))
+                    Left err -> pure (Left err)
 
 add_top_level_long_fns :: TopLevelLongFnType -> Checker Bound
 add_top_level_long_fns (TopLevelLongFnType i p m_t stmts) = do
@@ -115,21 +115,21 @@ add_top_level_long_fns (TopLevelLongFnType i p m_t stmts) = do
     case p of
         Param _ Nothing -> error "FIXME type inference"
         Param param (Just p_t) -> case add_bind ctx (Bound param (SoucType p_t)) of
-            Left err -> return (Left err)
+            Left err -> pure (Left err)
             Right p_ctx -> case m_t of
                 Nothing -> case infer_stmts p_ctx stmts of
-                    Right t -> return $ Right (Bound i (SoucFn (SoucType p_t) t))
-                    Left err -> return (Left err)
+                    Right t -> pure $ Right (Bound i (SoucFn (SoucType p_t) t))
+                    Left err -> pure (Left err)
                 Just t -> case check_stmts p_ctx stmts (Just t) of
-                    Right () -> return $ Right (Bound i (SoucFn (SoucType p_t) t))
-                    Left err -> return (Left err)
+                    Right () -> pure $ Right (Bound i (SoucFn (SoucType p_t) t))
+                    Left err -> pure (Left err)
 
 
 -- check_any_failed :: [Either TypeError ()] -> State Context (Either TypeError ())
 check_any_failed :: [Either TypeError ()] -> (Either TypeError ())
 check_any_failed list = case lefts list of
     [] -> Right ()
---     (x:_) -> return $  throwError x
+--     (x:_) -> pure $  throwError x
     (x:_) -> Left x
 
 
@@ -138,8 +138,8 @@ insert bound = do
     traceM $ "inserting: " ++ show bound
     ctx <- get
     case (add_bind ctx bound) of
-        Left err -> return (Left err)
-        Right new_ctx -> put new_ctx >> return (Right ())
+        Left err -> pure (Left err)
+        Right new_ctx -> put new_ctx >> pure (Right ())
 
 
 type BrokenUpList = ([TopLevelConstType], [TopLevelShortFnType], [TopLevelLongFnType], [TopLevelProcType])

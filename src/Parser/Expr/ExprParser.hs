@@ -71,7 +71,7 @@ parse_oper = do
             parse_sig
             case stack_ops of
                 (StackSpace:ops) -> oper_stack_set ops *> set_spacing_tight True
-                _ -> return ()
+                _ -> pure ()
             parse_oper <|> finish_expr
         RParenAfterSpace -> do
             if_tightly_spaced find_left_space
@@ -80,7 +80,7 @@ parse_oper = do
             parse_sig
             case stack_ops of
                 (StackSpace:ops) -> oper_stack_set ops *> set_spacing_tight True
-                _ -> return ()
+                _ -> pure ()
             parse_oper <|> finish_expr
         Oper op -> do
             apply_higher_prec_ops (get_prec op)
@@ -92,7 +92,7 @@ parse_sig = do
     m_sig <- optional_sig
     case m_sig of
        Just sig -> oper_stack_push (StackSig sig)
-       Nothing -> return ()
+       Nothing -> pure ()
 
 finish_expr :: ShuntingYardParser ASTree
 finish_expr = do
@@ -104,7 +104,7 @@ finish_expr = do
     Tree_Stack tree <- get_tree_stack
     case tree of
         [] -> Parsec.parserFail "bad expression"
-        (result:[]) -> return result
+        (result:[]) -> pure result
         _ -> Parsec.parserFail "invalid expression, something is wrong here."
 
 
@@ -129,7 +129,7 @@ optional_sig = Parsec.optionMaybe type_sig where
         Parsec.char ':' *> ignore_spaces
         first <- Parsec.upper
         rest <- Parsec.many (Parsec.lower <|> Parsec.upper <|> Parsec.digit)
-        return (TypeName (first:rest))
+        pure (TypeName (first:rest))
 
 
 parse_print_expression :: String -> IO ()

@@ -26,13 +26,13 @@ parse_prefix_op = do
     oper <- parse_oper_symbol
     spacing <- Parsec.optionMaybe respect_spaces
     case spacing of
-        Nothing -> return (TightPreOp oper)
-        Just () -> return (SpacedPreOp oper)
+        Nothing -> pure (TightPreOp oper)
+        Just () -> pure (SpacedPreOp oper)
     where parse_oper_symbol = (
-            Parsec.char '!' *> return Deref   <|>
-            Parsec.char '@' *> return GetAddr <|>
-            Parsec.char '~' *> return Negate  <|>
-            Parsec.char '$' *> return ToString
+            Parsec.char '!' *> pure Deref   <|>
+            Parsec.char '@' *> pure GetAddr <|>
+            Parsec.char '~' *> pure Negate  <|>
+            Parsec.char '$' *> pure ToString
             ) <?> "prefix operator"
 
 parse_num :: ShuntingYardParser Term
@@ -45,7 +45,7 @@ parse_var :: ShuntingYardParser Term
 parse_var = do
     first <- Parsec.lower <|> Parsec.char '_'
     rest <- Parsec.many (Parsec.lower <|> Parsec.char '_' <|> Parsec.digit)
-    return $ Var (Identifier (first:rest))
+    pure $ Var (Identifier (first:rest))
 
 parse_char :: ShuntingYardParser Term
 parse_char = LitChar <$> ((Parsec.char '\'') *> Parsec.anyChar <* (Parsec.char '\''))
@@ -55,5 +55,5 @@ parse_string = LitString <$> ((Parsec.char '\"') *> Parsec.many (Parsec.noneOf "
 
 parse_left_paren :: ShuntingYardParser TermToken
 parse_left_paren = do
-    Parsec.lookAhead (Parsec.try (ignore_spaces *> Parsec.char '(' *> return ()))
-    ignore_spaces *> Parsec.char '(' *> return LParen
+    Parsec.lookAhead (Parsec.try (ignore_spaces *> Parsec.char '(' *> pure ()))
+    ignore_spaces *> Parsec.char '(' *> pure LParen

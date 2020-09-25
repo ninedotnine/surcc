@@ -15,7 +15,7 @@ parseFromFile file = do
     program  <- readFile file
     case parse undefined  "sup?" program of
         Left e  -> print e >> fail "parse error"
-        Right r -> return r
+        Right r -> pure r
 
        -}
 
@@ -24,10 +24,10 @@ getFileData = getArgs >>= \args -> if length args < 1
     then do
         contents <- getContents
         putStrLn "no file name provided, reading from stdin."
-        return ("stdin", contents)
+        pure ("stdin", contents)
     else let name = head args in do
         contents <- readFile name
-        return (name, contents)
+        pure (name, contents)
 
 outputResult :: FilePath -> Program -> IO ()
 outputResult filename (Program name imps body) = do
@@ -36,7 +36,7 @@ outputResult filename (Program name imps body) = do
     putStrLn "------------------ pretty printing ------------------"
     case name of
         Just str -> print $ "importing module: " ++ show str
-        Nothing -> return ()
+        Nothing -> pure ()
     mapM_ print imps
     mapM_ prettyPrint body
     print_file_contents filename
@@ -93,7 +93,7 @@ main = do
             putStrLn "-------------------- failed parse output:--------------------"
             putStrLn (show err)
             print_file_contents filename
-            exitFailure >> return ()
+            exitFailure >> pure ()
         Right prog -> do
             outputResult filename prog
-            exitSuccess >> return ()
+            exitSuccess >> pure ()

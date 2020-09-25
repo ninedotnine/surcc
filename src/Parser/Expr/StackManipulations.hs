@@ -24,12 +24,12 @@ import Common (TypeName)
 get_op_stack :: ShuntingYardParser Oper_Stack
 get_op_stack = do
     (stack, _, _) <- Parsec.getState
-    return stack
+    pure stack
 
 get_tree_stack :: ShuntingYardParser Tree_Stack
 get_tree_stack = do
     (_, stack, _) <- Parsec.getState
-    return stack
+    pure stack
 
 -- functions to change or set the current state
 oper_stack_push :: StackOp -> ShuntingYardParser ()
@@ -49,7 +49,7 @@ tree_stack_pop = do
     case vals of
         Tree_Stack (v:vs) -> do
             Parsec.setState (opers, Tree_Stack vs, b)
-            return v
+            pure v
         Tree_Stack _ -> Parsec.unexpected "?? did i expect a term?"
 
 -- functions that build the ASTree
@@ -78,17 +78,17 @@ apply_higher_prec_ops :: Precedence -> ShuntingYardParser ()
 apply_higher_prec_ops current = do
     Oper_Stack op_stack <- get_op_stack
     case op_stack of
-        [] -> return ()
+        [] -> pure ()
         (tok:toks) -> case tok of
-            StackSpace -> return ()
-            StackLParen -> return ()
-            StackLParenFollowedBySpace -> return ()
+            StackSpace -> pure ()
+            StackLParen -> pure ()
+            StackLParenFollowedBySpace -> pure ()
             StackTightPreOp _ -> error "i believe this should be unreachable."
             StackSpacedPreOp op -> do
                 make_twig op toks
                 apply_higher_prec_ops current
             StackOp op -> case (get_prec op `compare` current) of
-                LT -> return ()
+                LT -> pure ()
                 _ -> do
                     make_branch op toks
                     apply_higher_prec_ops current
@@ -130,7 +130,7 @@ clean_stack = do
     if_tightly_spaced find_left_space
     Oper_Stack op_stack <- get_op_stack
     case op_stack of
-        [] -> return ()
+        [] -> pure ()
         (tok:tokes) -> case tok of
             StackTightPreOp op -> do
                 make_twig op tokes

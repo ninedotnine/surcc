@@ -68,7 +68,7 @@ check_stmt_if ctx expr body m_else m_ret = do
 -- all this stuff will need to use the state monad, i guess
 check_stmt_ass :: Context -> Identifier -> (Maybe SoucType) -> ASTree -> Either TypeError ()
 check_stmt_ass ctx name m_t expr = case m_t of
-    Nothing -> infer ctx expr >> return ()
+    Nothing -> infer ctx expr >> pure ()
     Just t -> check_astree ctx expr t
 
 infer_stmts :: Context -> Stmts -> Either TypeError SoucType

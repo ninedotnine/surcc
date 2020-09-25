@@ -16,7 +16,7 @@ parse_oper_token =
     <?> "infix operator"
 
 check_for_oper :: ShuntingYardParser ()
-check_for_oper = Parsec.lookAhead (Parsec.try (ignore_spaces *> Parsec.oneOf valid_op_chars)) *> return ()
+check_for_oper = Parsec.lookAhead (Parsec.try (ignore_spaces *> Parsec.oneOf valid_op_chars)) *> pure ()
 
 valid_op_chars :: String
 valid_op_chars = "+-*/%^<>=&"
@@ -25,12 +25,12 @@ apply_tight_prefix_opers :: ShuntingYardParser ()
 apply_tight_prefix_opers = do
     Oper_Stack op_stack <- get_op_stack
     case op_stack of
-        [] -> return ()
+        [] -> pure ()
         (tok:toks) -> case tok of
             StackTightPreOp op -> do
                 make_twig op toks
                 apply_tight_prefix_opers
-            _ -> return ()
+            _ -> pure ()
 
 
 parse_infix_oper :: ShuntingYardParser OperToken
@@ -45,7 +45,7 @@ parse_infix_oper = do
     oper <- parse_oper_symbol
     if_loosely_spaced (respect_spaces <?> ("space after `" ++ show oper ++ "`"))
     if_tightly_spaced $ no_spaces ("whitespace after `" ++ show oper ++ "`")
-    return (Oper oper)
+    pure (Oper oper)
     where
         str :: String -> ShuntingYardParser String
         char :: Char -> ShuntingYardParser Char
@@ -53,41 +53,41 @@ parse_infix_oper = do
         char c = Parsec.char c <* Parsec.notFollowedBy (Parsec.oneOf valid_op_chars)
 
         parse_oper_symbol = (
-            char '+' *> return Plus   <|>
-            char '-' *> return Minus  <|>
-            char '*' *> return Splat  <|>
-            char '/' *> return Divide <|>
-            str "//" *> return FloorDiv <|>
-            char '%' *> return Modulo <|>
-            char '^' *> return Hihat  <|>
-            char '&' *> return FlipApply  <|>
-            str "==" *> return Equals <|>
-            str "=/=" *> return NotEquals <|>
-            str "=~" *> return RegexMatch <|>
-            str "<>" *> return Combine <|>
-            char '>' *> return GreaterThan <|>
-            char '<' *> return LesserThan <|>
-            str "AND" *> return And <|> -- FIXME
-            str "OR" *> return Or <|> -- FIXME
-            str "><" *> return Xor <|>
-            str "IN" *> return In <|> -- FIXME
-            char ',' *> return Tuple <|>
-            char '?' *> return Iff <|>
-            str "??" *> return FromMaybe <|>
-            str ">>" *> return Prepend <|>
-            str "<<" *> return Append <|>
-            char '#' *> return Index <|>
-            str "##" *> return Lookup <|>
-            str "~&" *> return Apply <|>
-            char '&' *> return FlipApply <|>
-            str "<~&>" *> return Map <|>
-            str "<&>" *> return FlipMap <|>
-            str "<~*>" *> return Applicative <|>
-            str "<*>" *> return FlipApplicative <|>
-            str "*>" *> return SequenceRight <|>
-            str "<*" *> return SequenceLeft <|>
-            str ">>=" *> return BindRight <|>
-            str "=<<" *> return BindLeft
+            char '+' *> pure Plus   <|>
+            char '-' *> pure Minus  <|>
+            char '*' *> pure Splat  <|>
+            char '/' *> pure Divide <|>
+            str "//" *> pure FloorDiv <|>
+            char '%' *> pure Modulo <|>
+            char '^' *> pure Hihat  <|>
+            char '&' *> pure FlipApply  <|>
+            str "==" *> pure Equals <|>
+            str "=/=" *> pure NotEquals <|>
+            str "=~" *> pure RegexMatch <|>
+            str "<>" *> pure Combine <|>
+            char '>' *> pure GreaterThan <|>
+            char '<' *> pure LesserThan <|>
+            str "AND" *> pure And <|> -- FIXME
+            str "OR" *> pure Or <|> -- FIXME
+            str "><" *> pure Xor <|>
+            str "IN" *> pure In <|> -- FIXME
+            char ',' *> pure Tuple <|>
+            char '?' *> pure Iff <|>
+            str "??" *> pure FromMaybe <|>
+            str ">>" *> pure Prepend <|>
+            str "<<" *> pure Append <|>
+            char '#' *> pure Index <|>
+            str "##" *> pure Lookup <|>
+            str "~&" *> pure Apply <|>
+            char '&' *> pure FlipApply <|>
+            str "<~&>" *> pure Map <|>
+            str "<&>" *> pure FlipMap <|>
+            str "<~*>" *> pure Applicative <|>
+            str "<*>" *> pure FlipApplicative <|>
+            str "*>" *> pure SequenceRight <|>
+            str "<*" *> pure SequenceLeft <|>
+            str ">>=" *> pure BindRight <|>
+            str "=<<" *> pure BindLeft
             ) <?> "infix operator"
 
 
@@ -95,6 +95,6 @@ parse_right_paren :: ShuntingYardParser OperToken
 parse_right_paren = do
     spacing <- Parsec.optionMaybe respect_spaces
     _ <- Parsec.char ')'
-    return $ case spacing of
+    pure $ case spacing of
         Nothing -> RParen
         Just () -> RParenAfterSpace

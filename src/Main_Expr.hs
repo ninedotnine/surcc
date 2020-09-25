@@ -24,7 +24,7 @@ repl = runInputT defaultSettings loop where
     loop = do
         m_input <- getInputLine "expr> "
         case m_input of
-            Nothing -> return ()
+            Nothing -> pure ()
             Just input -> liftIO (pepe input) >> loop
 
 pepe :: String -> IO ()

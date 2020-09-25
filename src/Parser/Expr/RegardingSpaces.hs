@@ -20,7 +20,7 @@ import Parser.Expr.ExprTypes
 get_tightness :: ShuntingYardParser Tightness
 get_tightness = do
     (_, _, tightness) <- Parsec.getState
-    return tightness
+    pure tightness
 
 
 set_spacing_tight :: Bool -> ShuntingYardParser ()
@@ -36,7 +36,7 @@ silent_space :: ShuntingYardParser Char
 silent_space = Parsec.char ' ' <?> ""
 
 no_spaces :: String -> ShuntingYardParser ()
-no_spaces failmsg = Parsec.try ((Parsec.try silent_space *> Parsec.unexpected failmsg) <|> return ())
+no_spaces failmsg = Parsec.try ((Parsec.try silent_space *> Parsec.unexpected failmsg) <|> pure ())
 
 if_loosely_spaced :: ShuntingYardParser () -> ShuntingYardParser ()
 if_loosely_spaced action = do

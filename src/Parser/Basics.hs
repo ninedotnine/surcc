@@ -57,16 +57,16 @@ reserved_word =
             "when", "with", "write", "yield", "zen"]
 
 space :: SouCParser ()
-space = char ' ' *> return () <?> ""
+space = char ' ' *> pure () <?> ""
 
 spaces :: SouCParser ()
-spaces = many1 space *> return ()
+spaces = many1 space *> pure ()
 
 space_or_tab :: SouCParser ()
-space_or_tab = space <|> tab *> return ()
+space_or_tab = space <|> tab *> pure ()
 
 newline :: SouCParser ()
-newline = char '\n' *> return () <?> "newline"
+newline = char '\n' *> pure () <?> "newline"
 
 keep_spaces :: SouCParser String
 keep_spaces = many (char ' ')
@@ -75,13 +75,13 @@ endline :: SouCParser ()
 endline = skipMany space *> (line_comment <|> block_comment <|> newline) <?> "end-of-line"
 
 line_comment :: SouCParser ()
-line_comment = try (skipMany space_or_tab *> char ';') *> manyTill anyChar newline *> return () <?> ""
+line_comment = try (skipMany space_or_tab *> char ';') *> manyTill anyChar newline *> pure () <?> ""
 
 block_comment :: SouCParser ()
 block_comment = try (string "{;" *> notFollowedBy (char '>')) *> block_comment_depth 1 *> endline <?> ""
     where
         nest n = string "{;" *> block_comment_depth n
-        end = string ";}" *> return ()
+        end = string ";}" *> pure ()
         block_comment_depth :: Integer -> SouCParser ()
         block_comment_depth 1 = skipManyTill anyChar ((nest 2) <|> end)
         block_comment_depth n = skipManyTill anyChar ((nest (n+1)) <|> end *> block_comment_depth (n-1))
@@ -100,7 +100,7 @@ pragma :: SouCParser ()
 pragma = string "{^;" *> space *> endBy1 (many1 alphaNum) space *> (string ";^}") *> endline <?> "pragma"
 
 skipManyTill :: SouCParser a -> SouCParser b -> SouCParser ()
-skipManyTill p1 p2 = manyTill p1 p2 *> return ()
+skipManyTill p1 p2 = manyTill p1 p2 *> pure ()
 
 -- Text.Parsec.string does this silly thing where it might fail while advancing the stream.
 string :: String -> SouCParser String
@@ -116,7 +116,7 @@ upper_name :: SouCParser String
 upper_name = do
     first <- upper
     rest <- many identifier_char
-    return $ first:rest
+    pure $ first:rest
 
 identifier :: SouCParser Identifier
 identifier = Identifier <$> raw_identifier
@@ -126,14 +126,14 @@ raw_identifier = do
     notFollowedBy reserved_word
     first <- lower <|> char '_'
     rest <- many identifier_char
-    return (first:rest)
+    pure (first:rest)
 
 module_path :: SouCParser String
 module_path = do
     leading_slash <- option "" slash
     dir <- many $ lookAhead (try (name <> slash)) *> (name <> slash)
     path <- raw_identifier
-    return (leading_slash ++ concat dir ++ path)
+    pure (leading_slash ++ concat dir ++ path)
         where
             dot = string "."
             dotdot = string ".."
@@ -146,7 +146,7 @@ pattern = do
 --     name <- identifier `sepBy1` oneOf "," -- for multiple identifiers, maybe not needed
     name <- identifier
     sig <- optionMaybe type_signature
-    return (Param name sig)
+    pure (Param name sig)
 
 
 optional_sig :: SouCParser (Maybe TypeName)
@@ -157,7 +157,7 @@ type_signature = do
     char ':' *> spaces
     first <- upper
     rest <- many (lower <|> upper <|> digit)
-    return (TypeName (first:rest))
+    pure (TypeName (first:rest))
 
 increase_indent_level :: SouCParser ()
 increase_indent_level = modifyState (\(x,m) -> (x+1,m))
@@ -169,7 +169,7 @@ indent_depth :: SouCParser ()
 indent_depth = do
     optional meaningless_fluff
     (level, _) <- getState
-    count level tab *> return () <?> "indent"
+    count level tab *> pure () <?> "indent"
 
 add_to_bindings :: Identifier -> ASTree -> SouCParser ()
 add_to_bindings key val = do
@@ -182,7 +182,7 @@ parens :: SouCParser a -> SouCParser a
 parens = between (char '(') (char ')')
 
 optional_do :: SouCParser ()
-optional_do = skipMany space *> optional (reserved "do") *> return ()
+optional_do = skipMany space *> optional (reserved "do") *> pure ()
 
 optional_end_name :: Identifier -> SouCParser ()
 optional_end_name (Identifier name) = do
@@ -195,7 +195,7 @@ optional_end stmt_type = do
     name <- optionMaybe (try (spaces *> string word))
     -- FIXME also allow type annotation here
     lookAhead endline
-    return (show keyword ++ " " ++ word ++ " " ++ show name)
+    pure (show keyword ++ " " ++ word ++ " " ++ show name)
         where word = case stmt_type of
                 Stmt_While_End -> "while"
                 Stmt_If_End -> "if"

@@ -21,33 +21,33 @@ runSouCParser name input =
 
 souCParser :: SouCParser Program
 souCParser = do
-    name <- module_name <|> return Nothing
+    name <- module_name <|> pure Nothing
     _ <- many (pragma) *> skipMany endline -- FIXME do something with pragmas
     imps <- imports
     code <- parseDefs
     eof
-    return $ Program name imps code -- FIXME return something useful
+    pure $ Program name imps code -- FIXME pure something useful
 
 module_name :: SouCParser (Maybe ModuleName)
 module_name = do
     name <- string "module" *> space *> raw_identifier <* endline <* (many pragma) <* endline
-    return $ Just (ModuleName(name))
+    pure $ Just (ModuleName(name))
 
 imports :: SouCParser Imports
 imports = do
     imps <- many souc_import
     -- FIXME a blank line is required before any code
-    return imps
+    pure imps
 
 souc_import :: SouCParser Import
 souc_import = do
     name <- string "import" *> spaces *> module_path <* skipMany1 endline
-    return $ Import(name)
+    pure $ Import(name)
 
 parseDefs :: SouCParser [Top_Level_Defn]
 parseDefs = do
     defns <- many (parse_def <* many1 endline)
-    return defns
+    pure defns
 
 parse_def :: SouCParser Top_Level_Defn
 parse_def = do
@@ -57,7 +57,7 @@ parse_def = do
             <|> top_level_proc
             <|> (pragma *> skipMany endline *> parse_def)
             <?> "top-level definition"
-    return defn
+    pure defn
 
 main_defn :: SouCParser Top_Level_Defn
 main_defn = do
@@ -67,7 +67,7 @@ main_defn = do
     _ <- spaces <* char '=' <* spaces <* string "do" <* endline
     stmts <- stmt_block
     optional_end_name (Identifier "main")
-    return $ MainDefn param sig stmts
+    pure $ MainDefn param sig stmts
 
 top_level_const :: SouCParser Top_Level_Defn
 top_level_const = do
@@ -78,13 +78,13 @@ top_level_const = do
     case parse_expression val of
         Right expr -> do
             add_to_bindings name expr
-            return $ Top_Level_Const_Defn name m_sig expr
+            pure $ Top_Level_Const_Defn name m_sig expr
         Left err -> parserFail $ "invalid expression:\n" ++ show err
 
 top_level_proc :: SouCParser Top_Level_Defn
 top_level_proc = do
     proc_name <- try (identifier <* char '(')
-    return =<< (try (top_level_func proc_name) <|> top_level_sub proc_name)
+    pure =<< (try (top_level_func proc_name) <|> top_level_sub proc_name)
 
 top_level_func :: Identifier -> SouCParser Top_Level_Defn
 top_level_func func_name = do
@@ -97,7 +97,7 @@ short_top_level_func :: Identifier -> Param -> Maybe TypeName -> SouCParser Top_
 short_top_level_func func_name param sig = do
     (Raw_Expr body) <- raw_expr
     case parse_expression body of
-        Right result -> return $ ShortFuncDefn func_name param sig result
+        Right result -> pure $ ShortFuncDefn func_name param sig result
 --         Left parse_err -> mergeError (fail "invalid expression") parse_err
         Left err -> fail $ "invalid expression\n" ++ show err
 
@@ -105,7 +105,7 @@ long_top_level_func :: Identifier -> Param -> Maybe TypeName -> SouCParser Top_L
 long_top_level_func func_name param sig = do
     stmts <- string "do" *> endline *> stmt_block
     optional_end_name func_name
-    return $ FuncDefn func_name param sig stmts
+    pure $ FuncDefn func_name param sig stmts
 
 top_level_sub :: Identifier -> SouCParser Top_Level_Defn
 top_level_sub sub_name = do
@@ -114,4 +114,4 @@ top_level_sub sub_name = do
     _ <- spaces <* char '=' <* spaces <* string "do" <* endline
     stmts <- stmt_block
     optional_end_name sub_name
-    return $ SubDefn sub_name param sig stmts
+    pure $ SubDefn sub_name param sig stmts
