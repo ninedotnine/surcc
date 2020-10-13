@@ -45,8 +45,6 @@ add_globals imports_ctx defns = do
         (Left e, _) -> Left e
 
 
-type Checker a = State Context (Either TypeError a)
-
 run_globals :: [Top_Level_Defn] -> Checker ()
 run_globals defns = do
     let (consts, short_fns, long_fns, routines) = split_top_level_stuff defns
@@ -120,9 +118,12 @@ add_top_level_long_fns (TopLevelLongFnType i p m_t stmts) = do
                 Nothing -> case infer_stmts p_ctx stmts of
                     Right t -> pure $ Right (Bound i (SoucFn (SoucType p_t) t))
                     Left err -> pure (Left err)
-                Just t -> case check_stmts p_ctx stmts (Just t) of
-                    Right () -> pure $ Right (Bound i (SoucFn (SoucType p_t) t))
-                    Left err -> pure (Left err)
+                Just t -> do
+                    put p_ctx
+                    res <- check_stmts stmts (Just t)
+                    case res of
+                        Right () -> pure $ Right (Bound i (SoucFn (SoucType p_t) t))
+                        Left err -> pure (Left err)
 
 
 -- check_any_failed :: [Either TypeError ()] -> State Context (Either TypeError ())
@@ -132,14 +133,6 @@ check_any_failed list = case lefts list of
 --     (x:_) -> pure $  throwError x
     (x:_) -> Left x
 
-
-insert :: Bound -> Checker ()
-insert bound = do
-    traceM $ "inserting: " ++ show bound
-    ctx <- get
-    case (add_bind ctx bound) of
-        Left err -> pure (Left err)
-        Right new_ctx -> put new_ctx >> pure (Right ())
 
 
 type BrokenUpList = ([TopLevelConstType], [TopLevelShortFnType], [TopLevelLongFnType], [TopLevelProcType])

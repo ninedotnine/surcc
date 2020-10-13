@@ -4,9 +4,12 @@ module TypeChecker.Context (
     lookup,
     add_bind,
     empty_context,
+    Checker,
+    insert,
 ) where
 
 import Prelude hiding (lookup)
+import Control.Monad.State
 
 import Common
 import Parser.Expr.ExprTypes
@@ -42,6 +45,15 @@ add_bind ctx (Bound i t) = case lookup ctx i of
     Nothing -> Right $ case ctx of
         Global binds -> Global (Bound i t : binds)
         Scoped binds rest -> Scoped (Bound i t : binds) rest
+
+type Checker a = State Context (Either TypeError a)
+
+insert :: Bound -> Checker ()
+insert bound = do
+    ctx <- get
+    case (add_bind ctx bound) of
+        Left err -> pure (Left err)
+        Right new_ctx -> put new_ctx >> pure (Right ())
 
 empty_context :: Context
 empty_context = Global []
