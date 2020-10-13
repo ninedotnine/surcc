@@ -72,14 +72,11 @@ add_top_level_consts (TopLevelConstType i m_t expr) = do
 
 in_scope :: (a -> Checker Bound) -> a -> Checker ()
 in_scope act x = do
-    ctx <- get
     new_scope
     result <- act x
     case result of
         Left err -> pure (Left err)
-        Right bound -> exit_scope >> case add_bind ctx bound of
-            Left err -> pure (Left err)
-            Right new_ctx -> put new_ctx >> pure (Right ())
+        Right bound -> exit_scope >> insert bound
 
 new_scope :: State Context ()
 new_scope = get >>= put . Scoped []
