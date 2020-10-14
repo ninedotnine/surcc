@@ -1,0 +1,9 @@
+; silly, but the types are ok.
+f(x: Integer): Integer = do
+	b = True
+	b2 = b
+	b3 <- b2
+	if b2
+		return x
+	else
+		return 3
