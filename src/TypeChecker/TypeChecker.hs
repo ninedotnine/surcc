@@ -57,7 +57,12 @@ run_globals defns = do
                 Left err -> pure (Left err)
                 Right () -> do
                     long_fns_list <- mapM (in_scope add_top_level_long_fns) long_fns
-                    pure (check_any_failed long_fns_list)
+                    case check_any_failed long_fns_list of
+                        Left err -> pure (Left err)
+                        Right () -> do
+                            routines_list <- mapM (in_scope add_top_level_routines) routines
+                            pure (check_any_failed routines_list)
+
 
 add_top_level_consts :: TopLevelConstType -> Checker ()
 add_top_level_consts (TopLevelConstType i m_t expr) = do
@@ -104,6 +109,14 @@ add_top_level_short_fns (TopLevelShortFnType i p m_t expr) = do
                     Right () -> pure $ Right (Bound i (SoucFn (SoucType p_t) t))
                     Left err -> pure (Left err)
 
+check_and_bind :: Stmts -> Maybe SoucType -> Bound -> Checker Bound
+check_and_bind stmts t bind = do
+    res <- check_stmts stmts t
+    case res of
+        Right () -> pure (Right bind)
+        Left err -> pure (Left err)
+
+
 add_top_level_long_fns :: TopLevelLongFnType -> Checker Bound
 add_top_level_long_fns (TopLevelLongFnType i p m_t stmts) = do
     ctx <- get
@@ -117,10 +130,37 @@ add_top_level_long_fns (TopLevelLongFnType i p m_t stmts) = do
                     Left err -> pure (Left err)
                 Just t -> do
                     put p_ctx
-                    res <- check_stmts stmts (Just t)
-                    case res of
-                        Right () -> pure $ Right (Bound i (SoucFn (SoucType p_t) t))
+                    check_and_bind stmts (Just t) (Bound i (SoucFn (SoucType p_t) t))
+
+add_top_level_routines :: TopLevelProcType -> Checker Bound
+add_top_level_routines (TopLevelProcType i m_p m_t stmts) = case m_t of
+    Nothing -> ok_sub
+    Just (SoucType "IO") -> ok_sub
+    Just wrong -> error (show wrong)
+    where
+        ok_sub = do
+            ctx <- get
+            case i of
+                "main" -> add_main_routine m_p stmts
+                _ -> case m_p of
+                    Nothing -> do
+                        check_and_bind stmts Nothing (Bound i (SoucRoutn Nothing))
+                    Just (Param _ Nothing) -> error "FIXME type inference"
+                    Just (Param param (Just p_t)) -> case add_bind ctx (BindMayExist False) (Bound param (SoucType p_t)) of
                         Left err -> pure (Left err)
+                        Right p_ctx -> do
+                            put p_ctx
+                            check_and_bind stmts Nothing (Bound i (SoucRoutn (Just (SoucType p_t))))
+
+add_main_routine :: Maybe Param -> Stmts -> Checker Bound
+add_main_routine m_p stmts = case m_p of
+    Just (Param _ Nothing) -> error "FIXME infer param type"
+    Just (Param p (Just p_t)) -> do
+        res <- insert (BindMayExist False) (Bound p (SoucType p_t))
+        case res of
+            Left err -> pure (Left err)
+            Right () -> check_and_bind stmts Nothing (Bound "main" (SoucRoutn (Just (SoucType p_t))))
+    Nothing -> check_and_bind stmts Nothing (Bound "main" (SoucRoutn Nothing))
 
 
 -- check_any_failed :: [Either TypeError ()] -> State Context (Either TypeError ())
