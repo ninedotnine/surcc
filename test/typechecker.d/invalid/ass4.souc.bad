@@ -1,0 +1,6 @@
+n = 5
+
+f(x: Integer): Integer = do
+	b: Bool = True
+	i = b
+	return i

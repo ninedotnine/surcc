@@ -1,0 +1,9 @@
+n = 5
+
+f(x: Integer): Integer = do
+	b1 = 4
+	b2 = b1
+	if b2
+		return x
+	else
+		return n
