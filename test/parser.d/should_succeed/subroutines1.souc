@@ -1,0 +1,5 @@
+main() = do
+	write_n 4
+
+write_n(n) = do
+	print n
