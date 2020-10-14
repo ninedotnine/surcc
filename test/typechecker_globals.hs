@@ -13,7 +13,8 @@ instance Eq Bound where
     Bound i0 t0 == Bound i1 t1 = i0 == i1 && t0 == t1
 
 instance Eq Context where
-    Global b0 == Global b1 = b0 == b1
+    Builtins b0 == Builtins b1 = b0 == b1
+    Global b0 r0 == Global b1 r1 = b0 == b1 && r0 == r1
     Scoped b0 r0 == Scoped b1 r1 = b0 == b1 && r0 == r1
     _ == _ = False
 
@@ -22,8 +23,8 @@ type Test = ([Import], [Top_Level_Defn], Either TypeError Context, String)
 
 tests :: [Test]
 tests = [
-    ([], [Top_Level_Const_Defn "i" (Just "Integer") (Leaf (LitInt 4))], Right (Global [Bound "i" (SoucType "Integer")]), "int"),
-    ([Import "salad", Import "tofu"], [], Right (Global [Bound "salad" (SoucType "Module"), Bound "tofu" (SoucType "Module")]), "imports")
+    ([], [Top_Level_Const_Defn "i" (Just "Integer") (Leaf (LitInt 4))], Right (Global [Bound "i" (SoucType "Integer")] builtins_ctx), "int"),
+    ([Import "salad", Import "tofu"], [], Right (Global [Bound "salad" (SoucType "Module"), Bound "tofu" (SoucType "Module")] builtins_ctx), "imports")
     ]
 
 borked_tests :: [Test]

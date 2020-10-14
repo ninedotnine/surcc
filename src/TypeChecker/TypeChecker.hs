@@ -31,7 +31,7 @@ type_check (Program name imports defns) = do
 -- getting imports can fail if (e. g.) a file cannot be found.
 -- don't worry about it for now.
 add_imports :: Imports -> Either TypeError Context
-add_imports imports = Right $ Global $ map make_import_bound (map from_import imports)
+add_imports imports = Right $ Global (map make_import_bound (map from_import imports)) builtins_ctx
     where
         from_import :: Import -> String
         from_import (Import s) = s
@@ -91,8 +91,8 @@ exit_scope = do
     ctx <- get
     case ctx of
         Scoped _ inner -> put inner >> pure (Right ())
-        Global _ -> pure (Left (Undeclared "should be unreachable"))
-
+        Global _ _ -> pure (Left (Undeclared "should be unreachable"))
+        Builtins _ -> pure (Left (Undeclared "should be unreachable"))
 
 add_top_level_short_fns :: TopLevelShortFnType -> Checker Bound
 add_top_level_short_fns (TopLevelShortFnType i p m_t expr) = do

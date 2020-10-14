@@ -1,10 +1,12 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module TypeChecker.Context (
     Context(..),
     Bound(..),
     lookup,
     add_bind,
     BindMayExist(..),
-    empty_context,
+    builtins_ctx,
     Checker,
     insert,
 ) where
@@ -22,7 +24,8 @@ newtype BindMayExist = BindMayExist Bool
 instance Show Bound where
     show (Bound (Identifier i) t) = "Bound " ++ i ++ ": " ++ show t
 
-data Context = Global [Bound]
+data Context = Builtins [Bound]
+             | Global [Bound] Context
              | Scoped [Bound] Context
     deriving Show
 
@@ -30,7 +33,10 @@ lookup :: Context -> Identifier -> Maybe SoucType
 lookup (Scoped bounds ctx) ident = case lookup_b bounds ident of
     Nothing -> lookup ctx ident
     just_type -> just_type
-lookup (Global bounds) ident = lookup_b bounds ident
+lookup (Global bounds ctx) ident = case lookup_b bounds ident of
+    Nothing -> lookup ctx ident
+    just_type -> just_type
+lookup (Builtins bounds) ident = lookup_b bounds ident
 
 
 lookup_b :: [Bound] -> Identifier -> Maybe SoucType
@@ -51,7 +57,8 @@ add_bind ctx (BindMayExist modifiable) (Bound i t) = case lookup ctx i of
         else
             Left (MultipleDeclarations i)
     Nothing -> Right $ case ctx of
-        Global binds -> Global (Bound i t : binds)
+        Builtins _ -> error "don't add to built-ins!"
+        Global binds rest -> Global (Bound i t : binds) rest
         Scoped binds rest -> Scoped (Bound i t : binds) rest
 
 type Checker a = State Context (Either TypeError a)
@@ -63,5 +70,5 @@ insert modifiable bound = do
         Left err -> pure (Left err)
         Right new_ctx -> put new_ctx >> pure (Right ())
 
-empty_context :: Context
-empty_context = Global []
+builtins_ctx :: Context
+builtins_ctx = Builtins [Bound "puts" (SoucRoutn (Just (SoucType "String")))]

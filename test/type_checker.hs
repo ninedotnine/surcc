@@ -19,7 +19,7 @@ mismatch :: TypeName -> TypeName -> Expected
 mismatch x y = Result $ Left $ TypeMismatch (SoucType x) (SoucType y)
 
 empty_ctx :: Context
-empty_ctx = Global []
+empty_ctx = Builtins []
 
 globals :: Context
 globals = Global [
@@ -27,7 +27,7 @@ globals = Global [
     Bound (Identifier "s") (SoucType "String"),
     Bound (Identifier "c") (SoucType "Char"),
     Bound (Identifier "b") (SoucType "Bool")
-    ]
+    ] empty_ctx
 
 scoped :: Context
 scoped = Scoped [
