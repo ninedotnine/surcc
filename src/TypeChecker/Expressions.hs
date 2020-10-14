@@ -54,6 +54,8 @@ infer_infix_op op _ _ = case op of
     Splat -> Right ((in_t "Integer", in_t "Integer"), ret_t "Integer")
     And -> Right ((in_t "Bool", in_t "Bool"), ret_t "Bool")
     Or  -> Right ((in_t "Bool", in_t "Bool"), ret_t "Bool")
+    Equals -> Right ((in_t "Integer", in_t "Integer"), ret_t "Bool") -- FIXME (should be general)
+    LesserThan -> Right ((in_t "Integer", in_t "Integer"), ret_t "Bool") -- FIXME (should be general)
     Apply     -> Right (((InputType (SoucFn (SoucType "Integer") (SoucType "Integer"))), in_t "Integer"), ret_t "Integer")
     FlipApply -> Right (((in_t "Integer", InputType (SoucFn (SoucType "Integer") (SoucType "Integer")))), ret_t "Integer")
     _ -> not_implemented
