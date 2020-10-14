@@ -34,7 +34,7 @@ check_stmt stmt m_ret = do
         Stmt_Postfix_Oper name oper -> pure (Right ()) -- FIXME
         Stmt_Const_Assign name m_t expr -> check_stmt_ass name (SoucType <$> m_t) (BindMayExist False) expr
         Stmt_Var_Assign name m_t expr -> check_stmt_ass name (SoucType <$> m_t) (BindMayExist True) expr
-        Stmt_Return m_expr -> check_stmt_return2 m_expr m_ret
+        Stmt_Return m_expr -> check_stmt_return m_expr m_ret
 
 first_left :: [Either TypeError ()] -> Either TypeError ()
 first_left list = case lefts list of
@@ -44,19 +44,8 @@ first_left list = case lefts list of
 soucbool :: SoucType
 soucbool = SoucType (TypeName "Bool")
 
-check_stmt_return :: Context -> Maybe ASTree -> Maybe SoucType -> Either TypeError ()
-check_stmt_return ctx m_expr m_ret = case m_expr of
-    Just expr -> case m_ret of
-        Just t -> check_astree ctx expr t
-        Nothing -> case infer ctx expr of
-            Left err -> Left err
-            Right t -> Left (TypeMismatch (SoucType "IO") t)
-    Nothing -> case m_ret of
-        Just t -> Left (TypeMismatch t (SoucType "IO"))
-        Nothing -> Right ()
-
-check_stmt_return2 :: Maybe ASTree -> Maybe SoucType -> Checker ()
-check_stmt_return2 m_expr m_ret = do
+check_stmt_return :: Maybe ASTree -> Maybe SoucType -> Checker ()
+check_stmt_return m_expr m_ret = do
     ctx <- get
     case m_expr of
         Just expr -> case m_ret of
