@@ -72,10 +72,10 @@ prettyPrint (Top_Level_Const_Defn name (Just type_name) val) = do
 prettyPrint (Top_Level_Const_Defn name Nothing val) = do
     putStrLn $ "const " ++ show name ++ " = " ++ show val
 prettyPrint (MainDefn param (Just (TypeName t)) (Stmts stmts)) = do
-    putStrLn $ "fn main with args? " ++ show param ++ " returns (IO?): " ++ t ++ " = "
+    putStrLn $ "main with args? " ++ show param ++ " returns (IO?): " ++ t ++ " = "
     putStrLn $ unlines (map ((' ':) . prettifyStmt) stmts)
 prettyPrint (MainDefn param Nothing (Stmts stmts)) = do
-    putStrLn $ "fn main with args? " ++ show param ++ " = "
+    putStrLn $ "main with args? " ++ show param ++ " = "
     putStrLn $ unlines (map ((' ':) . prettifyStmt) stmts)
 
 prettifyStmt :: Stmt -> String
