@@ -7,6 +7,7 @@ module TypeChecker.Statements (
 
 import Control.Monad.State
 import Data.Either (lefts)
+import Prelude hiding (lookup)
 
 import Common
 import Parser.Expr.ExprTypes
@@ -30,7 +31,7 @@ check_stmt stmt m_ret = do
         Stmt_Until expr body -> check_stmt_while expr body m_ret
         Stmt_If     expr body m_else -> check_stmt_if expr body m_else m_ret
         Stmt_Unless expr body m_else -> check_stmt_if expr body m_else m_ret
-        Stmt_Sub_Call name m_arg -> pure (Right ()) -- FIXME
+        Stmt_Sub_Call name m_arg -> check_stmt_call name m_arg
         Stmt_Postfix_Oper name oper -> pure (Right ()) -- FIXME
         Stmt_Const_Assign name m_t expr -> check_stmt_ass name (SoucType <$> m_t) (BindMayExist False) expr
         Stmt_Var_Assign name m_t expr -> check_stmt_ass name (SoucType <$> m_t) (BindMayExist True) expr
@@ -90,6 +91,19 @@ check_stmt_ass name m_t may_exist expr = do
         Just t -> case check_astree ctx expr t of
             Left err -> pure (Left err)
             Right () -> insert may_exist (Bound name t)
+
+check_stmt_call :: Identifier -> Maybe ASTree -> Checker ()
+check_stmt_call name m_expr = do
+    ctx <- get
+    case (lookup ctx name , m_expr) of
+        -- FIXME subroutines should be in the context as SoucRoutns
+        (Just (SoucType "IO"), Nothing) -> pure (Right ())
+        (Just (SoucRoutn (Just t)), Just expr) -> case check_astree ctx expr t of
+            Left err -> pure (Left err)
+            Right () -> pure (Right ())
+        (Just (SoucRoutn Nothing), Nothing) -> pure (Right ())
+        (Just t, _) -> pure $ Left $ TypeMismatch (SoucType "IO") t
+        (Nothing, _) -> pure $ Left $ Undeclared name
 
 infer_stmts :: Context -> Stmts -> Either TypeError SoucType
 infer_stmts ctx (Stmts stmts) = undefined
