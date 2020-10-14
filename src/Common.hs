@@ -105,7 +105,7 @@ data Stmt = Stmt_While ASTree Stmts
           | Stmt_Unless ASTree Stmts (Maybe Stmts)
           | Stmt_Sub_Call Identifier (Maybe ASTree)
           | Stmt_Postfix_Oper Identifier String
-          | Stmt_Const_Assign Identifier ASTree
+          | Stmt_Const_Assign Identifier (Maybe TypeName) ASTree
           | Stmt_Var_Assign Identifier (Maybe TypeName) ASTree
           | Stmt_Return (Maybe ASTree)
           deriving (Show, Eq)

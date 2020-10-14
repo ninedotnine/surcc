@@ -165,7 +165,7 @@ subber_const_ass :: Program
 subber_const_ass = program_header [
     Top_Level_Const_Defn (Identifier "n") (Just "Integer") (Leaf (LitInt 42)),
     SubDefn (Identifier "subby") Nothing notype (Stmts [
-        Stmt_Const_Assign (Identifier "i") (Leaf (Var "n"))])]
+        Stmt_Const_Assign (Identifier "i") notype (Leaf (Var "n"))])]
 
 subber_const_ass_checked :: Either TypeError CheckedProgram
 subber_const_ass_checked = Left (mismatch "Integer" "Char")
@@ -174,7 +174,7 @@ borked_subber_const_ass :: Program
 borked_subber_const_ass = program_header [
     Top_Level_Const_Defn (Identifier "n") (Just "Integer") (Leaf (LitInt 42)),
     SubDefn (Identifier "subby") Nothing notype (Stmts [
-        Stmt_Const_Assign (Identifier "x") (Leaf (Var "x"))])]
+        Stmt_Const_Assign (Identifier "x") notype (Leaf (Var "x"))])]
 
 borked_subber_const_ass_checked :: Either TypeError CheckedProgram
 borked_subber_const_ass_checked = Left (mismatch "Integer"  "Char")

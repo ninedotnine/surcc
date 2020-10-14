@@ -66,7 +66,7 @@ instance Generatable Stmt where
                 Just e -> gen e
     gen (Stmt_Var_Assign name _ expr) =
         "int " ++ gen name ++ " = " ++ gen expr ++ "; "
-    gen (Stmt_Const_Assign name expr) =
+    gen (Stmt_Const_Assign name _ expr) =
         "const int " ++ gen name ++ " = " ++ gen expr ++ "; "
     gen (Stmt_Postfix_Oper name oper) = gen name ++ oper ++ "; "
     gen (Stmt_While expr stmts) =

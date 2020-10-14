@@ -86,7 +86,7 @@ subber_const_ass :: CheckedProgram
 subber_const_ass = CheckedProgram Nothing [] [
     MainDefn Nothing Nothing (Stmts []),
     SubDefn (Identifier "subby") Nothing Nothing (Stmts [
-        Stmt_Const_Assign (Identifier "x") (Leaf (LitInt 42))])]
+        Stmt_Const_Assign (Identifier "x") Nothing (Leaf (LitInt 42))])]
 
 subber_postfix_oper :: CheckedProgram
 subber_postfix_oper = CheckedProgram Nothing [] [

@@ -33,12 +33,12 @@ stmt_block = do
 
 stmt_const_assign :: Identifier -> SouCParser Stmt
 stmt_const_assign name = do
-    _ <- try (optional_sig <* spaces <* char '=')
+    sig <- try (optional_sig <* spaces <* char '=')
     Raw_Expr val <- spaces *> raw_expr
     case parse_expression val of
         Right expr -> do
             add_to_bindings name expr
-            pure $ Stmt_Const_Assign name expr
+            pure $ Stmt_Const_Assign name sig expr
         Left err -> parserFail $ "invalid expression:\n" ++ show err
 
 stmt_var_assign :: Identifier -> SouCParser Stmt
