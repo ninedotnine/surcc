@@ -88,7 +88,12 @@ data SoucType = SoucType TypeName
 data TypeError = TypeMismatch SoucType SoucType
                | MultipleDeclarations Identifier
                | Undeclared Identifier
-    deriving (Show, Eq)
+    deriving (Eq)
+
+instance Show TypeError where
+    show (TypeMismatch t0 t1) = "mismatch: expected " <> show t0 <> " but got " <> show t1
+    show (MultipleDeclarations name) = "multiple declarations of " <> show name
+    show (Undeclared name) = "undeclared " <> show name
 
 data Param = Param Identifier (Maybe TypeName) deriving (Show, Eq)
 
