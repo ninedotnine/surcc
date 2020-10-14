@@ -64,10 +64,10 @@ add_top_level_consts (TopLevelConstType i m_t expr) = do
     ctx <- get
     case m_t of
         Nothing -> case infer ctx expr of
-            Right t -> insert (Bound i t)
+            Right t -> insert (BindMayExist False) (Bound i t)
             Left err -> pure (Left err)
         Just t -> case check_astree ctx expr t of
-            Right () -> insert (Bound i t)
+            Right () -> insert (BindMayExist False)(Bound i t)
             Left err -> pure (Left err)
 
 in_scope :: (a -> Checker Bound) -> a -> Checker ()
@@ -76,7 +76,7 @@ in_scope act x = do
     result <- act x
     case result of
         Left err -> pure (Left err)
-        Right bound -> exit_scope >> insert bound
+        Right bound -> exit_scope >> insert (BindMayExist False) bound
 
 new_scope :: State Context ()
 new_scope = get >>= put . Scoped []
@@ -94,7 +94,7 @@ add_top_level_short_fns (TopLevelShortFnType i p m_t expr) = do
     ctx <- get
     case p of
         Param _ Nothing -> error "FIXME type inference"
-        Param param (Just p_t) -> case add_bind ctx (Bound param (SoucType p_t)) of
+        Param param (Just p_t) -> case add_bind ctx (BindMayExist False) (Bound param (SoucType p_t)) of
             Left err -> pure (Left err)
             Right p_ctx -> case m_t of
                 Nothing -> case infer p_ctx expr of
@@ -109,7 +109,7 @@ add_top_level_long_fns (TopLevelLongFnType i p m_t stmts) = do
     ctx <- get
     case p of
         Param _ Nothing -> error "FIXME type inference"
-        Param param (Just p_t) -> case add_bind ctx (Bound param (SoucType p_t)) of
+        Param param (Just p_t) -> case add_bind ctx (BindMayExist False) (Bound param (SoucType p_t)) of
             Left err -> pure (Left err)
             Right p_ctx -> case m_t of
                 Nothing -> case infer_stmts p_ctx stmts of

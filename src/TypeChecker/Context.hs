@@ -3,6 +3,7 @@ module TypeChecker.Context (
     Bound(..),
     lookup,
     add_bind,
+    BindMayExist(..),
     empty_context,
     Checker,
     insert,
@@ -15,6 +16,8 @@ import Common
 import Parser.Expr.ExprTypes
 
 data Bound = Bound Identifier SoucType
+
+newtype BindMayExist = BindMayExist Bool
 
 instance Show Bound where
     show (Bound (Identifier i) t) = "Bound " ++ i ++ ": " ++ show t
@@ -39,19 +42,24 @@ lookup_b [] _ = Nothing
 this_one :: Bound -> Identifier -> Maybe SoucType
 this_one (Bound i t) ident = if i == ident then Just t else Nothing
 
-add_bind :: Context -> Bound -> Either TypeError Context
-add_bind ctx (Bound i t) = case lookup ctx i of
-    Just _ -> Left (MultipleDeclarations i)
+add_bind :: Context -> BindMayExist -> Bound -> Either TypeError Context
+add_bind ctx (BindMayExist modifiable) (Bound i t) = case lookup ctx i of
+    Just existing_type -> if modifiable
+        then if t == existing_type
+            then Right ctx
+            else Left (TypeMismatch existing_type t)
+        else
+            Left (MultipleDeclarations i)
     Nothing -> Right $ case ctx of
         Global binds -> Global (Bound i t : binds)
         Scoped binds rest -> Scoped (Bound i t : binds) rest
 
 type Checker a = State Context (Either TypeError a)
 
-insert :: Bound -> Checker ()
-insert bound = do
+insert :: BindMayExist -> Bound -> Checker ()
+insert modifiable bound = do
     ctx <- get
-    case (add_bind ctx bound) of
+    case (add_bind ctx modifiable bound) of
         Left err -> pure (Left err)
         Right new_ctx -> put new_ctx >> pure (Right ())
 
