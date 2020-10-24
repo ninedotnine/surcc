@@ -1,0 +1,5 @@
+main(): IO = do
+	write_n 4
+
+write_n(n: Integer): IO = do
+	print n

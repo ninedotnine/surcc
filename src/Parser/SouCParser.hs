@@ -88,7 +88,7 @@ top_level_proc = do
 
 top_level_func :: Identifier -> SouCParser Top_Level_Defn
 top_level_func func_name = do
-    param <- pattern <* char ')'
+    param <- pattern <* char ')' <* notFollowedBy (char ':' *> spaces *> string "IO")
     sig <- optionMaybe type_signature
     _ <- spaces <* char '=' <* spaces
     long_top_level_func func_name param sig <|> short_top_level_func func_name param sig
