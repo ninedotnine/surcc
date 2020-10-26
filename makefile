@@ -1,3 +1,4 @@
+SHELL = /bin/sh
 SOURCEDIR := src/
 OUT_DIR := bin
 CACHE_DIR := cache
