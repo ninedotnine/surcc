@@ -1,0 +1,11 @@
+; FIXME this is being parsed as a long-style function ;_;
+subr(b: Bool): IO = do
+	n <- 2
+	if b
+		n <- 1
+	else
+		n <- 0
+	end
+
+main(): IO = do
+	subr True

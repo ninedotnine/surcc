@@ -1,0 +1,5 @@
+subr(b: Bool): IO = do
+	puts ""
+
+main(): IO = do
+	subr 4
