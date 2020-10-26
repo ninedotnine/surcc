@@ -9,16 +9,6 @@ import System.Exit (exitFailure, exitSuccess)
 
 import Parser.SouCParser
 
-{-
-parseFromFile :: String -> IO Stmt
-parseFromFile file = do
-    program  <- readFile file
-    case parse undefined  "sup?" program of
-        Left e  -> print e >> fail "parse error"
-        Right r -> pure r
-
-       -}
-
 getFileData :: IO (FilePath, String)
 getFileData = getArgs >>= \args -> if length args < 1
     then do
