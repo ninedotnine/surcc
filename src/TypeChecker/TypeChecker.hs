@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module TypeChecker.TypeChecker (
     type_check,
     add_globals, -- for tests

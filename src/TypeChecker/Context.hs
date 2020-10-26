@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module TypeChecker.Context (
     Context(..),
     Bound(..),

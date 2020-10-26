@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module TypeChecker.Statements (
     check_stmts,
     infer_stmts,

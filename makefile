@@ -4,7 +4,12 @@ CACHE_DIR := cache
 TEST_DIR := $(CACHE_DIR)/test
 HI_DIR := $(CACHE_DIR)/hi_files
 OBJ_DIR := $(CACHE_DIR)/obj_files
-FLAGS := -Wall -dynamic -j -hidir $(HI_DIR) -odir $(OBJ_DIR) -i$(SOURCEDIR)  -Wno-unused-imports -Wall-missed-specialisations
+HSFLAGS := -dynamic -j
+GHC_EXTS := -XOverloadedStrings
+GHC_FLAGS := -hidir $(HI_DIR) -odir $(OBJ_DIR) -i$(SOURCEDIR)
+GHC_WARNS := -Wall -Wno-unused-imports -Wall-missed-specialisations
+FLAGS := $(HSFLAGS) $(GHC_EXTS) $(GHC_FLAGS) $(GHC_WARNS)
+
 
 .PHONY: soucc expr parser typechecker all default
 
