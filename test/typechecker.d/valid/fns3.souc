@@ -1,0 +1,3 @@
+f(x: Integer): Char = 'a'
+
+g(x: Integer): Char = x & f

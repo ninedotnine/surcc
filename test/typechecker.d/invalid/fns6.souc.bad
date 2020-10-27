@@ -1,0 +1,6 @@
+n: Integer = 5
+
+f(x: Integer): Integer = x + 1
+
+g(x: Integer): Integer = do
+	return x & n
