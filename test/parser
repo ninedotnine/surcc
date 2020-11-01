@@ -1,7 +1,7 @@
 #!/usr/bin/dash
 
-parse_succeed_dir="test/parser.d/should_succeed"
-parse_fail_dir="test/parser.d/should_fail"
+parse_succeed_dir="test/parser.d/valid"
+parse_fail_dir="test/parser.d/invalid"
 
 echo "=== testing parser... "
 
