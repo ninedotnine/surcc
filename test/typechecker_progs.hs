@@ -32,8 +32,8 @@ instance Eq CheckedProgram where
     CheckedProgram m0 i0 b0 == CheckedProgram m1 i1 b1 =
         m0 == m1 && i0 == i1 && b0 == b1
 
-instance Eq ModuleName where
-    ModuleName s0 == ModuleName s1 = s0 == s1
+instance Eq SoucModule where
+    SoucModule s0 _ == SoucModule s1 _ = s0 == s1
 
 instance Eq Import where
     Import s0 == Import s1 = s0 == s1

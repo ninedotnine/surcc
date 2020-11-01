@@ -21,17 +21,35 @@ runSouCParser name input =
 
 souCParser :: SouCParser Program
 souCParser = do
-    name <- optionMaybe module_name
+    name <- optionMaybe module_header
     _ <- many (pragma) *> skipMany endline -- FIXME do something with pragmas
     imps <- imports
     code <- parseDefs
     eof
     pure $ Program name imps code -- FIXME pure something useful
 
-module_name :: SouCParser ModuleName
-module_name = do
-    name <- string "module" *> space *> raw_identifier <* endline <* (many pragma) <* endline
-    pure $ ModuleName(name)
+module_header :: SouCParser SoucModule
+module_header = do
+    name <- string "module" *> space *> raw_identifier
+    decls <- optionMaybe export_decls
+    case decls of
+        Just exports ->
+            pure $ SoucModule name exports
+        Nothing -> do
+            endline <* many pragma <* endline
+            pure $ SoucModule name []
+
+export_decls :: SouCParser [ExportDecl]
+export_decls = do
+    try (space *> reserved "where") *> endline
+    many1 (tab *> export_decl)
+
+export_decl :: SouCParser ExportDecl
+export_decl = do
+    i <- identifier <* optional spaces
+    t <- type_signature <* endline
+    pure (ExportDecl i t)
+
 
 imports :: SouCParser Imports
 imports = do

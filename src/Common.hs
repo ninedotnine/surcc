@@ -17,7 +17,8 @@ module Common (
     Program(..),
     Top_Level_Defn(..),
 --     Endable_Stmts(..),
-    ModuleName(..),
+    ExportDecl(..),
+    SoucModule(..),
     Import(..),
     Imports,
 
@@ -59,13 +60,15 @@ newtype Identifier = Identifier String
 -- instance Show Identifier where
 --     show (Identifier x) = show x
 
-data Program = Program (Maybe ModuleName) Imports Body
+data Program = Program (Maybe SoucModule) Imports Body
     deriving Show
 
-data CheckedProgram = CheckedProgram (Maybe ModuleName) Imports Body
+data CheckedProgram = CheckedProgram (Maybe SoucModule) Imports Body
     deriving Show
 
-newtype ModuleName = ModuleName String deriving (Read, Show)
+data ExportDecl = ExportDecl Identifier TypeName deriving (Show)
+data SoucModule = SoucModule String [ExportDecl] deriving (Show)
+
 type Imports = [Import]
 type Body = [Top_Level_Defn]
 
