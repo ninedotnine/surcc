@@ -1,0 +1,9 @@
+module module0 where
+	two
+	six       : Integer
+
+two = 2
+six = 6
+
+main() = do
+	print "a module"

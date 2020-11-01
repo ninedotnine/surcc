@@ -1,0 +1,4 @@
+module module0 where
+
+main() = do
+	print "a module"
