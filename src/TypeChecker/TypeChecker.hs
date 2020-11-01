@@ -52,7 +52,7 @@ add_imports imports ctx = Right $ Global (map make_import_bound (map from_import
 add_globals :: Context -> [Top_Level_Defn] -> Either TypeError Context
 add_globals imports_ctx defns = do
     case runState (run_globals defns) imports_ctx of
-        (Right (), ctx) -> (traceM $ "ultimate ctx: " ++ show ctx) >> Right ctx
+        (Right (), ctx) -> Right ctx
         (Left e, _) -> Left e
 
 
