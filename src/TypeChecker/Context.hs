@@ -114,4 +114,4 @@ insert modifiable bound = do
         Right new_ctx -> put new_ctx >> pure (Right ())
 
 builtins_ctx :: Context
-builtins_ctx = Builtins [Bound "puts" (SoucRoutn (Just (SoucType "String")))]
+builtins_ctx = Builtins [Bound "puts" (SoucRoutn (SoucType "String"))]

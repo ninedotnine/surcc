@@ -81,7 +81,7 @@ newtype TypeName = TypeName String deriving (Eq, IsString, Semigroup)
 
 data SoucType = SoucType TypeName
               | SoucFn SoucType SoucType
-              | SoucRoutn (Maybe SoucType) -- param only, because return must be "IO"
+              | SoucRoutn SoucType -- param only, because return must be "IO"
               | SoucPair SoucType SoucType
               | SoucMaybe SoucType
               | SoucEither SoucType SoucType
@@ -234,8 +234,7 @@ instance Show TypeName where
 instance Show SoucType where
     show (SoucType t) = show t
     show (SoucFn t0 t1) = show t0 <> " -> " <> show t1
-    show (SoucRoutn (Just t0)) = show t0 <> " -> IO"
-    show (SoucRoutn Nothing) = "IO"
+    show (SoucRoutn t) = show t <> " -> IO"
     show (SoucPair t0 t1) = show t0 <> " & " <> show t1
     show (SoucMaybe t) = '?' : show t
     show (SoucEither t0 t1) = show t0 <> " | " <> show t1

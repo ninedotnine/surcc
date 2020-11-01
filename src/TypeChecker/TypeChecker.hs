@@ -92,7 +92,7 @@ in_scope act x = do
     result <- act x
     case result of
         Left err -> pure (Left err)
-        Right bound -> exit_scope >> insert (BindMayExist False) bound
+        Right bound -> exit_scope >> add_potential_export bound
 
 new_scope :: State Context ()
 new_scope = get >>= put . Scoped []
@@ -156,13 +156,13 @@ add_top_level_routines (TopLevelProcType i m_p m_t stmts) = case m_t of
                 "main" -> add_main_routine m_p stmts
                 _ -> case m_p of
                     Nothing -> do
-                        check_and_bind stmts Nothing (Bound i (SoucRoutn Nothing))
+                        check_and_bind stmts Nothing (Bound i (SoucType "IO"))
                     Just (Param _ Nothing) -> error "FIXME type inference"
                     Just (Param param (Just p_t)) -> case add_bind ctx (BindMayExist False) (Bound param (SoucType p_t)) of
                         Left err -> pure (Left err)
                         Right p_ctx -> do
                             put p_ctx
-                            check_and_bind stmts Nothing (Bound i (SoucRoutn (Just (SoucType p_t))))
+                            check_and_bind stmts Nothing (Bound i (SoucRoutn (SoucType p_t)))
 
 add_main_routine :: Maybe Param -> Stmts -> Checker Bound
 add_main_routine m_p stmts = case m_p of
@@ -171,8 +171,8 @@ add_main_routine m_p stmts = case m_p of
         res <- insert (BindMayExist False) (Bound p (SoucType p_t))
         case res of
             Left err -> pure (Left err)
-            Right () -> check_and_bind stmts Nothing (Bound "main" (SoucRoutn (Just (SoucType p_t))))
-    Nothing -> check_and_bind stmts Nothing (Bound "main" (SoucRoutn Nothing))
+            Right () -> check_and_bind stmts Nothing (Bound "main" (SoucRoutn (SoucType p_t)))
+    Nothing -> check_and_bind stmts Nothing (Bound "main" (SoucType "IO"))
 
 
 -- check_any_failed :: [Either TypeError ()] -> State Context (Either TypeError ())

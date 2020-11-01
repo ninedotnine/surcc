@@ -94,12 +94,10 @@ check_stmt_call :: Identifier -> Maybe ASTree -> Checker ()
 check_stmt_call name m_expr = do
     ctx <- get
     case (lookup ctx name , m_expr) of
-        -- FIXME subroutines should be in the context as SoucRoutns
         (Just (SoucType "IO"), Nothing) -> pure (Right ())
-        (Just (SoucRoutn (Just t)), Just expr) -> case check_astree ctx expr t of
+        (Just (SoucRoutn t), Just expr) -> case check_astree ctx expr t of
             Left err -> pure (Left err)
             Right () -> pure (Right ())
-        (Just (SoucRoutn Nothing), Nothing) -> pure (Right ())
         (Just t, _) -> pure $ Left $ TypeMismatch (SoucType "IO") t
         (Nothing, _) -> pure $ Left $ Undeclared name
 
