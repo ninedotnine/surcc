@@ -11,6 +11,7 @@ module Common (
     PrefixOperator(..),
     TypeName(..),
     SoucType(..),
+    Bound(..),
     TypeError(..),
     Stmts(..),
     CheckedProgram(..),
@@ -88,15 +89,22 @@ data SoucType = SoucType TypeName
 --               | SoucTypeConstructor [SoucType]
               deriving (Eq)
 
+data Bound = Bound Identifier SoucType deriving Eq
+
+instance Show Bound where
+    show (Bound (Identifier i) t) = "Bound " ++ i ++ ": " ++ show t
+
 data TypeError = TypeMismatch SoucType SoucType
                | MultipleDeclarations Identifier
                | Undeclared Identifier
+               | ExportedButNotDefined Bound
     deriving (Eq)
 
 instance Show TypeError where
     show (TypeMismatch t0 t1) = "mismatch: expected " <> show t0 <> " but got " <> show t1
     show (MultipleDeclarations name) = "multiple declarations of " <> show name
     show (Undeclared name) = "undeclared " <> show name
+    show (ExportedButNotDefined name) = "declared " <> show name <> " was not defined"
 
 data Param = Param Identifier (Maybe TypeName) deriving (Show, Eq)
 

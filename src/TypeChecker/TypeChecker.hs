@@ -16,20 +16,33 @@ import TypeChecker.Operators
 import TypeChecker.Expressions
 import TypeChecker.Statements
 
-import Debug.Trace
-
 type_check :: Program -> Either TypeError CheckedProgram
-type_check (Program name imports defns) = do
-    imports_ctx <- add_imports imports
+-- type_check (Program (SoucModule name exports) imports defns) = do
+type_check (Program module_info imports defns) = do
+    exports_ctx <- case module_info of
+        Just (SoucModule _ exports) ->  add_exports exports builtins_ctx
+        Nothing -> add_exports [] builtins_ctx
+    imports_ctx <- add_imports imports exports_ctx
     case add_globals imports_ctx defns of
         Left err -> Left err
-        Right _ -> Right $ CheckedProgram name imports defns
+        Right finished_ctx ->
+            let undefined_exports = exports_remaining finished_ctx in
+                if undefined_exports == []
+                    then Right $ CheckedProgram module_info imports defns
+                    else Left (ExportedButNotDefined (head undefined_exports))
 
+
+add_exports :: [ExportDecl] -> Context -> Either TypeError Context
+add_exports exports ctx = Right $ Exported (map make_bound exports) ctx
+    where
+        make_bound (ExportDecl i t) = Bound i (SoucType t)
 
 -- getting imports can fail if (e. g.) a file cannot be found.
 -- don't worry about it for now.
-add_imports :: Imports -> Either TypeError Context
-add_imports imports = Right $ Global (map make_import_bound (map from_import imports)) builtins_ctx
+-- should also fail if it tries to import something that was
+-- declared exported with a non-module type
+add_imports :: Imports -> Context -> Either TypeError Context
+add_imports imports ctx = Right $ Global (map make_import_bound (map from_import imports)) ctx
     where
         from_import :: Import -> String
         from_import (Import s) = s
@@ -67,10 +80,10 @@ add_top_level_consts (TopLevelConstType i m_t expr) = do
     ctx <- get
     case m_t of
         Nothing -> case infer ctx expr of
-            Right t -> insert (BindMayExist False) (Bound i t)
+            Right t -> add_potential_export (Bound i t)
             Left err -> pure (Left err)
         Just t -> case check_astree ctx expr t of
-            Right () -> insert (BindMayExist False)(Bound i t)
+            Right () -> add_potential_export (Bound i t)
             Left err -> pure (Left err)
 
 in_scope :: (a -> Checker Bound) -> a -> Checker ()
@@ -90,6 +103,7 @@ exit_scope = do
     case ctx of
         Scoped _ inner -> put inner >> pure (Right ())
         Global _ _ -> pure (Left (Undeclared "should be unreachable"))
+        Exported _ _ -> pure (Left (Undeclared "should be unreachable"))
         Builtins _ -> pure (Left (Undeclared "should be unreachable"))
 
 add_top_level_short_fns :: TopLevelShortFnType -> Checker Bound
