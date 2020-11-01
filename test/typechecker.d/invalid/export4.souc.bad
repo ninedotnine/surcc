@@ -1,0 +1,7 @@
+module export4 where
+	two: Integer
+	four: Integer
+
+two = 2
+
+; oh dear, four is undefined

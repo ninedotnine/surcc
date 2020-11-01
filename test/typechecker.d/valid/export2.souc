@@ -1,0 +1,10 @@
+module export1 where
+	two: Integer
+	four: String
+	six: Bool
+
+two = 2
+
+four = "4"
+
+six: Bool = True

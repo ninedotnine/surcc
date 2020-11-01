@@ -1,0 +1,4 @@
+module export3 where
+	two: Integer
+
+two = 3: String

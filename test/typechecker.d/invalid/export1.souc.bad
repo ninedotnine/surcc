@@ -1,0 +1,4 @@
+module export1 where
+	two: Integer
+
+two = "two"
