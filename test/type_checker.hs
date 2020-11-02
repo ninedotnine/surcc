@@ -10,7 +10,7 @@ import System.Exit (exitFailure)
 
 newtype Expected = Result (Either TypeError ())
 
-type Test = (Context, ASTree, TypeName, Expected, String)
+type Test = (LocalScope, ASTree, TypeName, Expected, String)
 
 match :: Expected
 match = Result (Right ())
@@ -18,19 +18,22 @@ match = Result (Right ())
 mismatch :: TypeName -> TypeName -> Expected
 mismatch x y = Result $ Left $ TypeMismatch (SoucType x) (SoucType y)
 
-empty_ctx :: Context
-empty_ctx = Builtins []
+no_exports_ctx :: Exported
+no_exports_ctx = Exported [] (Builtins [])
 
-globals :: Context
-globals = Global [
+empty_ctx :: LocalScope
+empty_ctx = GlobalScope [] (Exported [] (Builtins []))
+
+globals :: LocalScope
+globals = GlobalScope [
     Bound (Identifier "x") (SoucType "Integer"),
     Bound (Identifier "s") (SoucType "String"),
     Bound (Identifier "c") (SoucType "Char"),
     Bound (Identifier "b") (SoucType "Bool")
-    ] empty_ctx
+    ] no_exports_ctx
 
-scoped :: Context
-scoped = Scoped [
+scoped :: LocalScope
+scoped = InnerScope [
     Bound (Identifier "x") (SoucType "Integer"),
     Bound (Identifier "s") (SoucType "String"),
     Bound (Identifier "c") (SoucType "Char"),

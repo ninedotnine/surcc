@@ -13,7 +13,7 @@ import Parser.Expr.ExprTypes
 import TypeChecker.Context
 import TypeChecker.Operators
 
-infer :: Context -> ASTree -> Either TypeError SoucType
+infer :: LocalScope -> ASTree -> Either TypeError SoucType
 infer ctx tree = case tree of
     Branch op left right -> ret <$> infer_infix_op ctx op left right
     Twig op expr -> ret <$> infer_prefix_op op expr
@@ -23,7 +23,7 @@ infer ctx tree = case tree of
         Right inferred
     Leaf term -> infer_term ctx term
 
-infer_term :: Context -> Term -> Either TypeError SoucType
+infer_term :: LocalScope -> Term -> Either TypeError SoucType
 infer_term context term = case term of
     LitInt _    -> Right (SoucType "Integer")
     LitChar _   -> Right (SoucType "Char")
@@ -46,7 +46,7 @@ infer_prefix_op op _ = case op of
     Join -> not_implemented
 
 
-infer_infix_op :: Context -> Operator -> ASTree -> ASTree -> Either TypeError ((InputType, InputType), ReturnType)
+infer_infix_op :: LocalScope -> Operator -> ASTree -> ASTree -> Either TypeError ((InputType, InputType), ReturnType)
 infer_infix_op ctx op left right = case op of
     Plus  -> Right ((in_t "Integer", in_t "Integer"), ret_t "Integer")
     Minus -> Right ((in_t "Integer", in_t "Integer"), ret_t "Integer")
@@ -76,7 +76,7 @@ infer_infix_op ctx op left right = case op of
 check_equals :: SoucType -> SoucType -> Either TypeError ()
 check_equals t0 t1 = if t0 == t1 then Right () else Left (TypeMismatch t0 t1)
 
-check_astree :: Context -> ASTree -> SoucType -> Either TypeError ()
+check_astree :: LocalScope -> ASTree -> SoucType -> Either TypeError ()
 check_astree ctx tree t = case tree of
     Branch op left right -> do
         ((InputType l_t, InputType r_t), ReturnType expr_t) <- infer_infix_op ctx op left right

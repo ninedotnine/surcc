@@ -32,7 +32,7 @@ type_check (Program module_info imports defns) = do
                     else Left (ExportedButNotDefined (head undefined_exports))
 
 
-add_exports :: [ExportDecl] -> Context -> Either TypeError Context
+add_exports :: [ExportDecl] -> Builtins -> Either TypeError Exported
 add_exports exports ctx = Right $ Exported (map make_bound exports) ctx
     where
         make_bound (ExportDecl i t) = Bound i (SoucType t)
@@ -41,15 +41,15 @@ add_exports exports ctx = Right $ Exported (map make_bound exports) ctx
 -- don't worry about it for now.
 -- should also fail if it tries to import something that was
 -- declared exported with a non-module type
-add_imports :: Imports -> Context -> Either TypeError Context
-add_imports imports ctx = Right $ Global (map make_import_bound (map from_import imports)) ctx
+add_imports :: Imports -> Exported -> Either TypeError LocalScope
+add_imports imports ctx = Right $ GlobalScope (map make_import_bound (map from_import imports)) ctx
     where
         from_import :: Import -> String
         from_import (Import s) = s
         make_import_bound s = Bound (Identifier s) (SoucType "Module")
 
 
-add_globals :: Context -> [Top_Level_Defn] -> Either TypeError Context
+add_globals :: LocalScope -> [Top_Level_Defn] -> Either TypeError LocalScope
 add_globals imports_ctx defns = do
     case runState (run_globals defns) imports_ctx of
         (Right (), ctx) -> Right ctx
@@ -94,17 +94,16 @@ in_scope act x = do
         Left err -> pure (Left err)
         Right bound -> exit_scope >> add_potential_export bound
 
-new_scope :: State Context ()
-new_scope = get >>= put . Scoped []
+new_scope :: State LocalScope ()
+new_scope = get >>= put . InnerScope []
 
 exit_scope :: Checker ()
 exit_scope = do
     ctx <- get
     case ctx of
-        Scoped _ inner -> put inner >> pure (Right ())
-        Global _ _ -> pure (Left (Undeclared "should be unreachable"))
-        Exported _ _ -> pure (Left (Undeclared "should be unreachable"))
-        Builtins _ -> pure (Left (Undeclared "should be unreachable"))
+        InnerScope _ inner -> put inner >> pure (Right ())
+        OuterScope _ inner -> put inner >> pure (Right ())
+        GlobalScope _ _ -> pure (Left (Undeclared "should be unreachable"))
 
 add_top_level_short_fns :: TopLevelShortFnType -> Checker Bound
 add_top_level_short_fns (TopLevelShortFnType i p m_t expr) = do

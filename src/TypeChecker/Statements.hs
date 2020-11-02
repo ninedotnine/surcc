@@ -14,11 +14,13 @@ import TypeChecker.Context
 import TypeChecker.Operators
 import TypeChecker.Expressions
 
+import Debug.Trace
+
 check_stmts :: Stmts -> Maybe SoucType -> Checker ()
 check_stmts (Stmts stmts) m_t = first_left <$> results
     where
         check s = check_stmt s m_t
-        results :: State Context [Either TypeError ()]
+        results :: State LocalScope [Either TypeError ()]
         results = traverse check stmts
 
 check_stmt :: Stmt -> Maybe SoucType -> Checker ()
@@ -101,10 +103,10 @@ check_stmt_call name m_expr = do
         (Just t, _) -> pure $ Left $ TypeMismatch (SoucType "IO") t
         (Nothing, _) -> pure $ Left $ Undeclared name
 
-infer_stmts :: Context -> Stmts -> Either TypeError SoucType
+infer_stmts :: LocalScope -> Stmts -> Either TypeError SoucType
 infer_stmts ctx (Stmts stmts) = undefined
 
-infer_stmt :: Context -> Stmt -> Either TypeError SoucType
+infer_stmt :: LocalScope -> Stmt -> Either TypeError SoucType
 infer_stmt ctx stmt = case stmt of
     Stmt_While expr body -> undefined
     Stmt_Until expr body -> undefined

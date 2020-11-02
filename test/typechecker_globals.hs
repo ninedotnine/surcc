@@ -9,22 +9,28 @@ import Common
 
 import System.Exit (exitFailure)
 
-instance Eq Context where
+
+instance Eq Builtins where
     Builtins b0 == Builtins b1 = b0 == b1
+
+instance Eq Exported where
     Exported b0 r0 == Exported b1 r1 = b0 == b1 && r0 == r1
-    Global b0 r0 == Global b1 r1 = b0 == b1 && r0 == r1
-    Scoped b0 r0 == Scoped b1 r1 = b0 == b1 && r0 == r1
+
+instance Eq LocalScope where
+    GlobalScope b0 r0 == GlobalScope b1 r1 = b0 == b1 && r0 == r1
+    OuterScope b0 r0 == OuterScope b1 r1 = b0 == b1 && r0 == r1
+    InnerScope b0 r0 == InnerScope b1 r1 = b0 == b1 && r0 == r1
     _ == _ = False
 
-no_exports_ctx :: Context
+no_exports_ctx :: Exported
 no_exports_ctx = Exported [] builtins_ctx
 
-type Test = ([Import], [Top_Level_Defn], Either TypeError Context, String)
+type Test = ([Import], [Top_Level_Defn], Either TypeError LocalScope, String)
 
 tests :: [Test]
 tests = [
-    ([], [Top_Level_Const_Defn "i" (Just "Integer") (Leaf (LitInt 4))], Right (Global [Bound "i" (SoucType "Integer")] no_exports_ctx), "int"),
-    ([Import "salad", Import "tofu"], [], Right (Global [Bound "salad" (SoucType "Module"), Bound "tofu" (SoucType "Module")] no_exports_ctx), "imports")
+    ([], [Top_Level_Const_Defn "i" (Just "Integer") (Leaf (LitInt 4))], Right (GlobalScope [Bound "i" (SoucType "Integer")] no_exports_ctx), "int"),
+    ([Import "salad", Import "tofu"], [], Right (GlobalScope [Bound "salad" (SoucType "Module"), Bound "tofu" (SoucType "Module")] no_exports_ctx), "imports")
     ]
 
 borked_tests :: [Test]
@@ -44,7 +50,7 @@ main = do
     putStrLn "all type-checker tests passed :^)"
 
 
-render :: Either TypeError Context -> String
+render :: Either TypeError LocalScope -> String
 render (Right ctx) = show ctx
 render (Left (TypeMismatch (SoucType (TypeName x)) (SoucType (TypeName y)))) = "mismatch: " <> x <> " / " <> y
 render (Left (MultipleDeclarations (Identifier i))) = "multiple declarations for " <> i
@@ -54,7 +60,7 @@ render _ = error "FIXME more complex types"
 mismatch :: TypeName -> TypeName -> TypeError
 mismatch x y = TypeMismatch (SoucType x) (SoucType y)
 
-print_err :: Either TypeError Context -> Either TypeError Context -> IO ()
+print_err :: Either TypeError LocalScope -> Either TypeError LocalScope -> IO ()
 print_err expected actual = putStrLn failmsg where
     failmsg = "FAILED! \n  expected " <> render expected <> " but got: " <> render actual
 
