@@ -18,11 +18,11 @@ match = Result (Right ())
 mismatch :: TypeName -> TypeName -> Expected
 mismatch x y = Result $ Left $ TypeMismatch (SoucType x) (SoucType y)
 
-no_exports_ctx :: Exported
-no_exports_ctx = Exported [] (Builtins [])
+no_exports_ctx :: ExportList
+no_exports_ctx = ExportList [] (Builtins [])
 
 empty_ctx :: LocalScope
-empty_ctx = GlobalScope [] (Exported [] (Builtins []))
+empty_ctx = GlobalScope [] (ExportList [] (Builtins []))
 
 globals :: LocalScope
 globals = GlobalScope [

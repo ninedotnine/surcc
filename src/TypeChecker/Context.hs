@@ -1,7 +1,7 @@
 module TypeChecker.Context (
     ContextClass(..),
     Builtins(..),
-    Exported(..),
+    ExportList(..),
     LocalScope(..),
     Bound(..),
     lookup,
@@ -27,9 +27,9 @@ class ContextClass c where
     lookup :: c -> Identifier -> Maybe SoucType
 
 data Builtins = Builtins [Bound] deriving Show
-data Exported = Exported [Bound] Builtins deriving Show
--- data GlobalScope = GlobalScope [Bound] Exported deriving Show
-data LocalScope = GlobalScope [Bound] Exported
+data ExportList = ExportList [Bound] Builtins deriving Show
+-- data GlobalScope = GlobalScope [Bound] ExportList deriving Show
+data LocalScope = GlobalScope [Bound] ExportList
                 | OuterScope [Bound] LocalScope
                 | InnerScope [Bound] LocalScope
                 deriving Show
@@ -37,8 +37,8 @@ data LocalScope = GlobalScope [Bound] Exported
 instance ContextClass Builtins where
     lookup (Builtins bounds) ident = lookup_b bounds ident
 
-instance ContextClass Exported where
-    lookup (Exported bounds ctx) ident = case lookup_b bounds ident of
+instance ContextClass ExportList where
+    lookup (ExportList bounds ctx) ident = case lookup_b bounds ident of
         Nothing -> lookup ctx ident
         just_type -> just_type
 
@@ -100,12 +100,12 @@ remove_export_wrapper scope  b = case scope of
         Left err -> Left err
         Right ok_ctx -> Right (GlobalScope bounds ok_ctx)
 
-remove_export :: Exported -> Bound -> Either TypeError Exported
+remove_export :: ExportList -> Bound -> Either TypeError ExportList
 -- remove_export (GlobalScope bounds ctx) b = case remove_export ctx b of
 --     Left err -> Left err
 --     Right ok_ctx -> Right (GlobalScope bounds ok_ctx)
-remove_export (Exported bounds ctx) (Bound i t) = case lookup_b bounds i of
-    Just b_t | t == b_t -> Right (Exported (filter (\(Bound b_i _) -> b_i /= i) bounds) ctx)
+remove_export (ExportList bounds ctx) (Bound i t) = case lookup_b bounds i of
+    Just b_t | t == b_t -> Right (ExportList (filter (\(Bound b_i _) -> b_i /= i) bounds) ctx)
     Just b_t -> Left (TypeMismatch b_t t)
     Nothing -> Left (Undeclared i)
 
@@ -126,8 +126,8 @@ exports_remaining :: LocalScope -> [Bound]
 -- exports_remaining (Scoped _ ctx) = exports_remaining ctx
 exports_remaining (InnerScope _ ctx) = exports_remaining ctx
 exports_remaining (OuterScope _ ctx) = exports_remaining ctx
-exports_remaining (GlobalScope _ (Exported [] _)) = []
-exports_remaining (GlobalScope _ (Exported bs _)) = bs
+exports_remaining (GlobalScope _ (ExportList [] _)) = []
+exports_remaining (GlobalScope _ (ExportList bs _)) = bs
 -- exports_remaining (Builtins _) = error "should be unreachable"
 
 -- type Checker a = State Context (Either TypeError a)

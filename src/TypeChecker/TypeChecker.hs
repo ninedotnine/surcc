@@ -32,8 +32,8 @@ type_check (Program module_info imports defns) = do
                     else Left (ExportedButNotDefined (head undefined_exports))
 
 
-add_exports :: [ExportDecl] -> Builtins -> Either TypeError Exported
-add_exports exports ctx = Right $ Exported (map make_bound exports) ctx
+add_exports :: [ExportDecl] -> Builtins -> Either TypeError ExportList
+add_exports exports ctx = Right $ ExportList (map make_bound exports) ctx
     where
         make_bound (ExportDecl i t) = Bound i (SoucType t)
 
@@ -41,7 +41,7 @@ add_exports exports ctx = Right $ Exported (map make_bound exports) ctx
 -- don't worry about it for now.
 -- should also fail if it tries to import something that was
 -- declared exported with a non-module type
-add_imports :: Imports -> Exported -> Either TypeError LocalScope
+add_imports :: Imports -> ExportList -> Either TypeError LocalScope
 add_imports imports ctx = Right $ GlobalScope (map make_import_bound (map from_import imports)) ctx
     where
         from_import :: Import -> String

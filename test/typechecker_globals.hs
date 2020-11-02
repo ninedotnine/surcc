@@ -13,8 +13,8 @@ import System.Exit (exitFailure)
 instance Eq Builtins where
     Builtins b0 == Builtins b1 = b0 == b1
 
-instance Eq Exported where
-    Exported b0 r0 == Exported b1 r1 = b0 == b1 && r0 == r1
+instance Eq ExportList where
+    ExportList b0 r0 == ExportList b1 r1 = b0 == b1 && r0 == r1
 
 instance Eq LocalScope where
     GlobalScope b0 r0 == GlobalScope b1 r1 = b0 == b1 && r0 == r1
@@ -22,8 +22,8 @@ instance Eq LocalScope where
     InnerScope b0 r0 == InnerScope b1 r1 = b0 == b1 && r0 == r1
     _ == _ = False
 
-no_exports_ctx :: Exported
-no_exports_ctx = Exported [] builtins_ctx
+no_exports_ctx :: ExportList
+no_exports_ctx = ExportList [] builtins_ctx
 
 type Test = ([Import], [Top_Level_Defn], Either TypeError LocalScope, String)
 
