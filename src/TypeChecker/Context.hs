@@ -111,6 +111,19 @@ add_bind ctx (BindMayExist modifiable) i t = case lookup_mutable ctx i of
             InnerScope ((BoundLocal i t (if modifiable then Mut else Immut)) : binds) rest
 
 
+_add_bind :: LocalScope -> BindMayExist -> Bound -> Either TypeError LocalScope
+_add_bind ctx (BindMayExist modifiable) (Bound i t) = case lookup_mutable ctx i of
+    Just (existing_type, existing_mut) -> if modifiable && existing_mut == Mut
+        then if t == existing_type
+            then Right ctx
+            else Left (TypeMismatch existing_type t)
+        else
+            Left (MultipleDeclarations i)
+    Nothing -> Right $ case ctx of
+        GlobalScope binds rest -> GlobalScope (Bound i t : binds) rest
+        InnerScope binds rest ->
+            InnerScope ((BoundLocal i t (if modifiable then Mut else Immut)) : binds) rest
+
 define_export :: LocalScope -> Bound -> Either TypeError LocalScope
 define_export scope b = case scope of
     InnerScope _ _ -> error "should not define exports from inner scope"
@@ -159,14 +172,14 @@ insert_param i t = insert_local (BindMayExist False) (Bound i t)
 insert_global :: Bound -> Checker ()
 insert_global bound = do
     ctx <- get
-    case (add_bind ctx (BindMayExist False) bound) of
+    case (_add_bind ctx (BindMayExist False) bound) of
         Left err -> pure (Left err)
         Right new_ctx -> put new_ctx >> pure (Right ())
 
 insert_local :: BindMayExist -> Bound -> Checker ()
 insert_local modifiable bound = do
     ctx <- get
-    case (add_bind ctx modifiable bound) of
+    case (_add_bind ctx modifiable bound) of
         Left err -> pure (Left err)
         Right new_ctx -> put new_ctx >> pure (Right ())
 
