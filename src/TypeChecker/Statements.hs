@@ -1,3 +1,6 @@
+{-# OPTIONS_GHC -Wno-unused-matches  #-}
+
+
 module TypeChecker.Statements (
     check_stmts,
     infer_stmts,
