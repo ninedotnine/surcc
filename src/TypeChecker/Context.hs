@@ -4,7 +4,6 @@ module TypeChecker.Context (
     ExportList(..),
     LocalScope(..),
     Bound(..),
-    lookup,
     add_bind,
     BindMayExist(..),
     builtins_ctx,
