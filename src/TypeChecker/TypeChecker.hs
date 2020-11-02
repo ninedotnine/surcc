@@ -109,7 +109,7 @@ add_top_level_short_fns (TopLevelShortFnType i p m_t expr) = do
     ctx <- get
     case p of
         Param _ Nothing -> error "FIXME type inference"
-        Param param (Just p_t) -> case add_bind ctx (BindMayExist False) (Bound param (SoucType p_t)) of
+        Param param (Just p_t) -> case add_bind_2 ctx (BindMayExist False) param (SoucType p_t) of
             Left err -> pure (Left err)
             Right p_ctx -> case m_t of
                 Nothing -> case infer p_ctx expr of
@@ -132,15 +132,18 @@ add_top_level_long_fns (TopLevelLongFnType i p m_t stmts) = do
     case p of
         Param _ Nothing -> error "FIXME type inference"
         Param param (Just p_t) -> do
-            insert_param param (SoucType p_t)
-            p_ctx <- get
-            case m_t of
-                Nothing -> case infer_stmts p_ctx stmts of
-                    Right t -> pure $ Right (Bound i (SoucFn (SoucType p_t) t))
-                    Left err -> pure (Left err)
-                Just t -> do
-                    put p_ctx
-                    check_and_bind stmts (Just t) (Bound i (SoucFn (SoucType p_t) t))
+            res <- insert_param param (SoucType p_t)
+            case res of
+                Left err -> pure (Left err)
+                Right () -> do
+                    p_ctx <- get
+                    case m_t of
+                        Nothing -> case infer_stmts p_ctx stmts of
+                            Right t -> pure $ Right (Bound i (SoucFn (SoucType p_t) t))
+                            Left err -> pure (Left err)
+                        Just t -> do
+                            put p_ctx
+                            check_and_bind stmts (Just t) (Bound i (SoucFn (SoucType p_t) t))
 
 --         Param param (Just p_t) -> case add_bind ctx (BindMayExist False) (Bound param (SoucType p_t)) of
 --             Left err -> pure (Left err)
@@ -167,7 +170,7 @@ add_top_level_routines (TopLevelProcType i m_p m_t stmts) = case m_t of
                     Nothing -> do
                         check_and_bind stmts Nothing (Bound i (SoucType "IO"))
                     Just (Param _ Nothing) -> error "FIXME type inference"
-                    Just (Param param (Just p_t)) -> case add_bind ctx (BindMayExist False) (Bound param (SoucType p_t)) of
+                    Just (Param param (Just p_t)) -> case add_bind_2 ctx (BindMayExist False) param (SoucType p_t) of
                         Left err -> pure (Left err)
                         Right p_ctx -> do
                             put p_ctx

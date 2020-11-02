@@ -97,8 +97,8 @@ lookup_mutable (InnerScope bounds ctx) ident = case lookup_with_mut_2 bounds ide
                 this_one (BoundLocal i0 t m) i1 = if i0 == i1 then Just (t, m) else Nothing
 
 
-add_bind :: LocalScope -> BindMayExist -> Bound -> Either TypeError LocalScope
-add_bind ctx (BindMayExist modifiable) (Bound i t) = case lookup_mutable ctx i of
+add_bind :: LocalScope -> BindMayExist -> Identifier -> SoucType -> Either TypeError LocalScope
+add_bind ctx (BindMayExist modifiable) i t = case lookup_mutable ctx i of
     Just (existing_type, existing_mut) -> if modifiable && existing_mut == Mut
         then if t == existing_type
             then Right ctx
@@ -109,6 +109,7 @@ add_bind ctx (BindMayExist modifiable) (Bound i t) = case lookup_mutable ctx i o
         GlobalScope binds rest -> GlobalScope (Bound i t : binds) rest
         InnerScope binds rest ->
             InnerScope ((BoundLocal i t (if modifiable then Mut else Immut)) : binds) rest
+
 
 define_export :: LocalScope -> Bound -> Either TypeError LocalScope
 define_export scope b = case scope of
