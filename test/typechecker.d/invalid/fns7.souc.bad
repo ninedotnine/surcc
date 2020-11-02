@@ -1,0 +1,4 @@
+n: Integer = 5
+
+f(n: Integer): Integer = do
+	return n
