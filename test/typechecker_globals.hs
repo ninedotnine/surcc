@@ -18,7 +18,6 @@ instance Eq ExportList where
 
 instance Eq LocalScope where
     GlobalScope b0 r0 == GlobalScope b1 r1 = b0 == b1 && r0 == r1
-    OuterScope b0 r0 == OuterScope b1 r1 = b0 == b1 && r0 == r1
     InnerScope b0 r0 == InnerScope b1 r1 = b0 == b1 && r0 == r1
     _ == _ = False
 

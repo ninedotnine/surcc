@@ -28,7 +28,6 @@ class ContextClass c where
 data Builtins = Builtins [Bound] deriving Show
 data ExportList = ExportList [Bound] Builtins deriving Show
 data LocalScope = GlobalScope [Bound] ExportList
-                | OuterScope [Bound] LocalScope
                 | InnerScope [Bound] LocalScope
                 deriving Show
 
@@ -45,9 +44,6 @@ instance ContextClass LocalScope where
         Nothing -> lookup ctx ident
         just_type -> just_type
     lookup (InnerScope bounds ctx) ident = case lookup_b bounds ident of
-        Nothing -> lookup ctx ident
-        just_type -> just_type
-    lookup (OuterScope bounds ctx) ident = case lookup_b bounds ident of
         Nothing -> lookup ctx ident
         just_type -> just_type
 
@@ -71,13 +67,11 @@ add_bind ctx (BindMayExist modifiable) (Bound i t) = case lookup ctx i of
             Left (MultipleDeclarations i)
     Nothing -> Right $ case ctx of
         GlobalScope binds rest -> GlobalScope (Bound i t : binds) rest
-        OuterScope binds rest -> OuterScope (Bound i t : binds) rest
         InnerScope binds rest -> InnerScope (Bound i t : binds) rest
 
 define_export :: LocalScope -> Bound -> Either TypeError LocalScope
 define_export scope b = case scope of
     InnerScope _ _ -> error "should not define exports from inner scope"
-    OuterScope _ _ -> error "should not define exports from within scope"
     GlobalScope binds ctx -> case b of
         Bound i _ -> case lookup_b binds i of
             Nothing -> Right (GlobalScope (b : binds) ctx)
@@ -86,7 +80,6 @@ define_export scope b = case scope of
 remove_export_wrapper :: LocalScope -> Bound -> Either TypeError LocalScope
 remove_export_wrapper scope  b = case scope of
     InnerScope _ _ -> error "should not remove exports from inner scope"
-    OuterScope _ _ -> error "should not remove exports from within scope"
     GlobalScope bounds ctx -> case remove_export ctx b of
         Left err -> Left err
         Right ok_ctx -> Right (GlobalScope bounds ok_ctx)
@@ -110,7 +103,6 @@ add_potential_export bound = do
 
 exports_remaining :: LocalScope -> [Bound]
 exports_remaining (InnerScope _ ctx) = exports_remaining ctx
-exports_remaining (OuterScope _ ctx) = exports_remaining ctx
 exports_remaining (GlobalScope _ (ExportList [] _)) = []
 exports_remaining (GlobalScope _ (ExportList bs _)) = bs
 

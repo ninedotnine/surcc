@@ -102,7 +102,6 @@ exit_scope = do
     ctx <- get
     case ctx of
         InnerScope _ inner -> put inner >> pure (Right ())
-        OuterScope _ inner -> put inner >> pure (Right ())
         GlobalScope _ _ -> pure (Left (Undeclared "should be unreachable"))
 
 add_top_level_short_fns :: TopLevelShortFnType -> Checker Bound
