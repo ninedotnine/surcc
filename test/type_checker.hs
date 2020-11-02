@@ -34,10 +34,10 @@ globals = GlobalScope [
 
 scoped :: LocalScope
 scoped = InnerScope [
-    Bound (Identifier "x") (SoucType "Integer"),
-    Bound (Identifier "s") (SoucType "String"),
-    Bound (Identifier "c") (SoucType "Char"),
-    Bound (Identifier "b") (SoucType "Bool")
+    BoundLocal (Identifier "x") (SoucType "Integer") Immut,
+    BoundLocal (Identifier "s") (SoucType "String") Immut,
+    BoundLocal (Identifier "c") (SoucType "Char") Immut,
+    BoundLocal (Identifier "b") (SoucType "Bool") Immut
     ] empty_ctx
 
 tests :: [Test]

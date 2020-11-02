@@ -129,18 +129,29 @@ check_and_bind stmts t bind = do
 
 add_top_level_long_fns :: TopLevelLongFnType -> Checker Bound
 add_top_level_long_fns (TopLevelLongFnType i p m_t stmts) = do
-    ctx <- get
     case p of
         Param _ Nothing -> error "FIXME type inference"
-        Param param (Just p_t) -> case add_bind ctx (BindMayExist False) (Bound param (SoucType p_t)) of
-            Left err -> pure (Left err)
-            Right p_ctx -> case m_t of
+        Param param (Just p_t) -> do
+            insert_param param (SoucType p_t)
+            p_ctx <- get
+            case m_t of
                 Nothing -> case infer_stmts p_ctx stmts of
                     Right t -> pure $ Right (Bound i (SoucFn (SoucType p_t) t))
                     Left err -> pure (Left err)
                 Just t -> do
                     put p_ctx
                     check_and_bind stmts (Just t) (Bound i (SoucFn (SoucType p_t) t))
+
+--         Param param (Just p_t) -> case add_bind ctx (BindMayExist False) (Bound param (SoucType p_t)) of
+--             Left err -> pure (Left err)
+--             Right p_ctx -> case m_t of
+--                 Nothing -> case infer_stmts p_ctx stmts of
+--                     Right t -> pure $ Right (Bound i (SoucFn (SoucType p_t) t))
+--                     Left err -> pure (Left err)
+--                 Just t -> do
+--                     put p_ctx
+--                     check_and_bind stmts (Just t) (Bound i (SoucFn (SoucType p_t) t))
+--
 
 add_top_level_routines :: TopLevelProcType -> Checker Bound
 add_top_level_routines (TopLevelProcType i m_p m_t stmts) = case m_t of
