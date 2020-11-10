@@ -22,6 +22,9 @@ import Control.Monad.State
 import Common
 import Parser.Expr.ExprTypes
 
+import Control.Monad.Except
+import Control.Monad.Trans.Except
+
 -- FIXME rename this ReAssignable or something
 newtype BindMayExist = BindMayExist Bool
 
@@ -145,15 +148,16 @@ remove_export (ExportList bounds ctx) (Bound i t) = case lookup_b bounds i of
     Just b_t -> Left (TypeMismatch b_t t)
     Nothing -> Left (Undeclared i)
 
+
 add_potential_export :: Bound -> Checker ()
 add_potential_export bound = do
     ctx <- get
     case remove_export_wrapper ctx bound of
         Left (Undeclared _) -> insert (BindMayExist False) bound
-        Left err -> pure (Left err)
+        Left err -> throwE err
         Right removed_ctx -> case define_export removed_ctx bound of
-            Left err -> pure (Left err)
-            Right new_ctx -> put new_ctx >> pure (Right ())
+            Left err -> throwE err
+            Right new_ctx -> put new_ctx
 
 
 exports_remaining :: LocalScope -> [Bound]
@@ -161,7 +165,7 @@ exports_remaining (InnerScope _ ctx) = exports_remaining ctx
 exports_remaining (GlobalScope _ (ExportList [] _)) = []
 exports_remaining (GlobalScope _ (ExportList bs _)) = bs
 
-type Checker a = State LocalScope (Either TypeError a)
+type Checker a = ExceptT TypeError (State LocalScope) a
 
 insert :: BindMayExist -> Bound -> Checker ()
 insert = insert_local
@@ -173,15 +177,15 @@ insert_global :: Bound -> Checker ()
 insert_global bound = do
     ctx <- get
     case (_add_bind ctx (BindMayExist False) bound) of
-        Left err -> pure (Left err)
-        Right new_ctx -> put new_ctx >> pure (Right ())
+        Left err -> throwE err
+        Right new_ctx -> put new_ctx
 
 insert_local :: BindMayExist -> Bound -> Checker ()
 insert_local modifiable bound = do
     ctx <- get
     case (_add_bind ctx modifiable bound) of
-        Left err -> pure (Left err)
-        Right new_ctx -> put new_ctx >> pure (Right ())
+        Left err -> throwE err
+        Right new_ctx -> put new_ctx
 
 
 builtins_ctx :: Builtins

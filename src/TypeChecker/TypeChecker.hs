@@ -6,6 +6,9 @@ module TypeChecker.TypeChecker (
 
 import Control.Applicative
 import Control.Monad.State
+import Control.Monad.Except
+import Control.Monad.Trans
+import Control.Monad.Trans.Except
 import Data.Either
 
 import Prelude hiding (lookup)
@@ -51,7 +54,7 @@ add_imports imports ctx = Right $ GlobalScope (map make_import_bound (map from_i
 
 add_globals :: LocalScope -> [Top_Level_Defn] -> Either TypeError LocalScope
 add_globals imports_ctx defns = do
-    case runState (run_globals defns) imports_ctx of
+    case runState (runExceptT (run_globals defns)) imports_ctx of
         (Right (), ctx) -> Right ctx
         (Left e, _) -> Left e
 
@@ -59,20 +62,11 @@ add_globals imports_ctx defns = do
 run_globals :: [Top_Level_Defn] -> Checker ()
 run_globals defns = do
     let (consts, short_fns, long_fns, routines) = split_top_level_stuff defns
-    consts_list <- mapM add_top_level_consts consts
-    case check_any_failed consts_list of
-        Left err -> pure (Left err)
-        Right () -> do
-            short_fns_list <- mapM (in_scope add_top_level_short_fns) short_fns
-            case check_any_failed short_fns_list of
-                Left err -> pure (Left err)
-                Right () -> do
-                    long_fns_list <- mapM (in_scope add_top_level_long_fns) long_fns
-                    case check_any_failed long_fns_list of
-                        Left err -> pure (Left err)
-                        Right () -> do
-                            routines_list <- mapM (in_scope add_top_level_routines) routines
-                            pure (check_any_failed routines_list)
+    mapM_ add_top_level_consts consts
+    mapM_ (in_scope add_top_level_short_fns) short_fns
+    mapM_ (in_scope add_top_level_long_fns) long_fns
+    mapM_ (in_scope add_top_level_routines) routines
+    pure ()
 
 
 add_top_level_consts :: TopLevelConstType -> Checker ()
@@ -81,28 +75,26 @@ add_top_level_consts (TopLevelConstType i m_t expr) = do
     case m_t of
         Nothing -> case infer ctx expr of
             Right t -> add_potential_export (Bound i t)
-            Left err -> pure (Left err)
+            Left err -> throwE err
         Just t -> case check_astree ctx expr t of
             Right () -> add_potential_export (Bound i t)
-            Left err -> pure (Left err)
+            Left err -> throwE err
 
 in_scope :: (a -> Checker Bound) -> a -> Checker ()
 in_scope act x = do
     new_scope
-    result <- act x
-    case result of
-        Left err -> pure (Left err)
-        Right bound -> exit_scope >> add_potential_export bound
+    bound <- act x
+    exit_scope >> add_potential_export bound
 
-new_scope :: State LocalScope ()
+new_scope :: Checker ()
 new_scope = get >>= put . InnerScope []
 
 exit_scope :: Checker ()
 exit_scope = do
     ctx <- get
     case ctx of
-        InnerScope _ inner -> put inner >> pure (Right ())
-        GlobalScope _ _ -> pure (Left (Undeclared "should be unreachable"))
+        InnerScope _ inner -> put inner >> pure ()
+        GlobalScope _ _ -> throwE (Undeclared "should be unreachable")
 
 add_top_level_short_fns :: TopLevelShortFnType -> Checker Bound
 add_top_level_short_fns (TopLevelShortFnType i p m_t expr) = do
@@ -110,21 +102,19 @@ add_top_level_short_fns (TopLevelShortFnType i p m_t expr) = do
     case p of
         Param _ Nothing -> error "FIXME type inference"
         Param param (Just p_t) -> case add_bind ctx (BindMayExist False) param (SoucType p_t) of
-            Left err -> pure (Left err)
+            Left err -> throwE err
             Right p_ctx -> case m_t of
                 Nothing -> case infer p_ctx expr of
-                    Right t -> pure $ Right (Bound i (SoucFn (SoucType p_t) t))
-                    Left err -> pure (Left err)
+                    Right t -> pure (Bound i (SoucFn (SoucType p_t) t))
+                    Left err -> throwE err
                 Just t -> case check_astree p_ctx expr t of
-                    Right () -> pure $ Right (Bound i (SoucFn (SoucType p_t) t))
-                    Left err -> pure (Left err)
+                    Right () -> pure (Bound i (SoucFn (SoucType p_t) t))
+                    Left err -> throwE err
 
 check_and_bind :: Stmts -> Maybe SoucType -> Bound -> Checker Bound
 check_and_bind stmts t bind = do
-    res <- check_stmts stmts t
-    case res of
-        Right () -> pure (Right bind)
-        Left err -> pure (Left err)
+    check_stmts stmts t
+    pure bind
 
 
 add_top_level_long_fns :: TopLevelLongFnType -> Checker Bound
@@ -132,29 +122,15 @@ add_top_level_long_fns (TopLevelLongFnType i p m_t stmts) = do
     case p of
         Param _ Nothing -> error "FIXME type inference"
         Param param (Just p_t) -> do
-            res <- insert_param param (SoucType p_t)
-            case res of
-                Left err -> pure (Left err)
-                Right () -> do
-                    p_ctx <- get
-                    case m_t of
-                        Nothing -> case infer_stmts p_ctx stmts of
-                            Right t -> pure $ Right (Bound i (SoucFn (SoucType p_t) t))
-                            Left err -> pure (Left err)
-                        Just t -> do
-                            put p_ctx
-                            check_and_bind stmts (Just t) (Bound i (SoucFn (SoucType p_t) t))
-
---         Param param (Just p_t) -> case add_bind ctx (BindMayExist False) (Bound param (SoucType p_t)) of
---             Left err -> pure (Left err)
---             Right p_ctx -> case m_t of
---                 Nothing -> case infer_stmts p_ctx stmts of
---                     Right t -> pure $ Right (Bound i (SoucFn (SoucType p_t) t))
---                     Left err -> pure (Left err)
---                 Just t -> do
---                     put p_ctx
---                     check_and_bind stmts (Just t) (Bound i (SoucFn (SoucType p_t) t))
---
+            insert_param param (SoucType p_t)
+            p_ctx <- get
+            case m_t of
+                Nothing -> case infer_stmts p_ctx stmts of
+                    Right t -> pure (Bound i (SoucFn (SoucType p_t) t))
+                    Left err -> throwE err
+                Just t -> do
+                    put p_ctx
+                    check_and_bind stmts (Just t) (Bound i (SoucFn (SoucType p_t) t))
 
 add_top_level_routines :: TopLevelProcType -> Checker Bound
 add_top_level_routines (TopLevelProcType i m_p m_t stmts) = case m_t of
@@ -171,7 +147,7 @@ add_top_level_routines (TopLevelProcType i m_p m_t stmts) = case m_t of
                         check_and_bind stmts Nothing (Bound i (SoucType "IO"))
                     Just (Param _ Nothing) -> error "FIXME type inference"
                     Just (Param param (Just p_t)) -> case add_bind ctx (BindMayExist False) param (SoucType p_t) of
-                        Left err -> pure (Left err)
+                        Left err -> throwE err
                         Right p_ctx -> do
                             put p_ctx
                             check_and_bind stmts Nothing (Bound i (SoucRoutn (SoucType p_t)))
@@ -180,20 +156,9 @@ add_main_routine :: Maybe Param -> Stmts -> Checker Bound
 add_main_routine m_p stmts = case m_p of
     Just (Param _ Nothing) -> error "FIXME infer param type"
     Just (Param p (Just p_t)) -> do
-        res <- insert (BindMayExist False) (Bound p (SoucType p_t))
-        case res of
-            Left err -> pure (Left err)
-            Right () -> check_and_bind stmts Nothing (Bound "main" (SoucRoutn (SoucType p_t)))
+        insert (BindMayExist False) (Bound p (SoucType p_t))
+        check_and_bind stmts Nothing (Bound "main" (SoucRoutn (SoucType p_t)))
     Nothing -> check_and_bind stmts Nothing (Bound "main" (SoucType "IO"))
-
-
--- check_any_failed :: [Either TypeError ()] -> State Context (Either TypeError ())
-check_any_failed :: [Either TypeError ()] -> (Either TypeError ())
-check_any_failed list = case lefts list of
-    [] -> Right ()
---     (x:_) -> pure $  throwError x
-    (x:_) -> Left x
-
 
 
 type BrokenUpList = ([TopLevelConstType], [TopLevelShortFnType], [TopLevelLongFnType], [TopLevelProcType])
