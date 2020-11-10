@@ -67,16 +67,22 @@ run_globals defns = do
     pure ()
 
 
-add_top_level_consts :: TopLevelConstType -> Checker ()
-add_top_level_consts (TopLevelConstType i m_t expr) = do
+infer_if_needed :: Maybe SoucType -> ASTree -> Checker SoucType
+infer_if_needed m_t expr = do
     ctx <- get
     case m_t of
         Nothing -> case infer ctx expr of
-            Right t -> add_potential_export (Bound i t)
+            Right t -> pure t
             Left err -> throwE err
         Just t -> case check_astree ctx expr t of
-            Right () -> add_potential_export (Bound i t)
+            Right () -> pure t
             Left err -> throwE err
+
+add_top_level_consts :: TopLevelConstType -> Checker ()
+add_top_level_consts (TopLevelConstType i m_t expr) = do
+    t <- infer_if_needed m_t expr
+    add_potential_export (Bound i t)
+
 
 in_scope :: (a -> Checker Bound) -> a -> Checker ()
 in_scope act x = do
@@ -101,14 +107,8 @@ add_top_level_short_fns (TopLevelShortFnType i p m_t expr) = do
         Param _ Nothing -> error "FIXME type inference"
         Param param (Just p_t) -> do
             insert_param param (SoucType p_t)
-            p_ctx <- get
-            case m_t of
-                Nothing -> case infer p_ctx expr of
-                    Right t -> pure (Bound i (SoucFn (SoucType p_t) t))
-                    Left err -> throwE err
-                Just t -> case check_astree p_ctx expr t of
-                    Right () -> pure (Bound i (SoucFn (SoucType p_t) t))
-                    Left err -> throwE err
+            t <- infer_if_needed m_t expr
+            pure (Bound i (SoucFn (SoucType p_t) t))
 
 
 check_and_bind :: Stmts -> Maybe SoucType -> Bound -> Checker Bound
