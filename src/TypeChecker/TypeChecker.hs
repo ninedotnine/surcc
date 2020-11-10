@@ -26,13 +26,11 @@ type_check (Program module_info imports defns) = do
         Just (SoucModule _ exports) ->  add_exports exports builtins_ctx
         Nothing -> add_exports [] builtins_ctx
     imports_ctx <- add_imports imports exports_ctx
-    case add_globals imports_ctx defns of
-        Left err -> Left err
-        Right finished_ctx ->
-            let undefined_exports = exports_remaining finished_ctx in
-                if undefined_exports == []
-                    then Right $ CheckedProgram module_info imports defns
-                    else Left (ExportedButNotDefined (head undefined_exports))
+    finished_ctx <- add_globals imports_ctx defns
+    let undefined_exports = exports_remaining finished_ctx in
+        if undefined_exports == []
+            then Right $ CheckedProgram module_info imports defns
+            else Left (ExportedButNotDefined (head undefined_exports))
 
 
 add_exports :: [ExportDecl] -> Builtins -> Either TypeError ExportList
@@ -53,7 +51,7 @@ add_imports imports ctx = Right $ GlobalScope (map make_import_bound (map from_i
 
 
 add_globals :: LocalScope -> [Top_Level_Defn] -> Either TypeError LocalScope
-add_globals imports_ctx defns = do
+add_globals imports_ctx defns =
     case runState (runExceptT (run_globals defns)) imports_ctx of
         (Right (), ctx) -> Right ctx
         (Left e, _) -> Left e
