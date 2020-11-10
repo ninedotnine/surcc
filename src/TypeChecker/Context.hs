@@ -8,11 +8,10 @@ module TypeChecker.Context (
     add_bind,
     insert_global,
     insert_param,
+    insert_const,
     insert_mut,
-    BindMayExist(..),
     builtins_ctx,
     Checker,
-    insert,
     add_potential_export,
     exports_remaining,
 ) where
@@ -154,7 +153,7 @@ add_potential_export :: Bound -> Checker ()
 add_potential_export bound = do
     ctx <- get
     case remove_export_wrapper ctx bound of
-        Left (Undeclared _) -> insert (BindMayExist False) bound
+        Left (Undeclared _) -> insert_global bound
         Left err -> throwE err
         Right removed_ctx -> case define_export removed_ctx bound of
             Left err -> throwE err
@@ -167,9 +166,6 @@ exports_remaining (GlobalScope _ (ExportList [] _)) = []
 exports_remaining (GlobalScope _ (ExportList bs _)) = bs
 
 type Checker a = ExceptT TypeError (State LocalScope) a
-
-insert :: BindMayExist -> Bound -> Checker ()
-insert = insert_local
 
 insert_param :: Identifier -> SoucType -> Checker ()
 insert_param i t = insert_local (BindMayExist False) (Bound i t)
@@ -190,6 +186,9 @@ insert_local modifiable bound = do
 
 insert_mut :: Bound -> Checker ()
 insert_mut = insert_local (BindMayExist True)
+
+insert_const :: Bound -> Checker ()
+insert_const = insert_local (BindMayExist False)
 
 builtins_ctx :: Builtins
 builtins_ctx = Builtins [Bound "puts" (SoucRoutn (SoucType "String"))]
