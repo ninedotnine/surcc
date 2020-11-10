@@ -129,7 +129,6 @@ add_top_level_long_fns (TopLevelLongFnType i p m_t stmts) = do
                     Right t -> pure (Bound i (SoucFn (SoucType p_t) t))
                     Left err -> throwE err
                 Just t -> do
-                    put p_ctx
                     check_and_bind stmts (Just t) (Bound i (SoucFn (SoucType p_t) t))
 
 add_top_level_routines :: TopLevelProcType -> Checker Bound
