@@ -94,20 +94,22 @@ exit_scope = do
         InnerScope _ inner -> put inner >> pure ()
         GlobalScope _ _ -> throwE (Undeclared "should be unreachable")
 
+
 add_top_level_short_fns :: TopLevelShortFnType -> Checker Bound
 add_top_level_short_fns (TopLevelShortFnType i p m_t expr) = do
-    ctx <- get
     case p of
         Param _ Nothing -> error "FIXME type inference"
-        Param param (Just p_t) -> case add_bind ctx (BindMayExist False) param (SoucType p_t) of
-            Left err -> throwE err
-            Right p_ctx -> case m_t of
+        Param param (Just p_t) -> do
+            insert_param param (SoucType p_t)
+            p_ctx <- get
+            case m_t of
                 Nothing -> case infer p_ctx expr of
                     Right t -> pure (Bound i (SoucFn (SoucType p_t) t))
                     Left err -> throwE err
                 Just t -> case check_astree p_ctx expr t of
                     Right () -> pure (Bound i (SoucFn (SoucType p_t) t))
                     Left err -> throwE err
+
 
 check_and_bind :: Stmts -> Maybe SoucType -> Bound -> Checker Bound
 check_and_bind stmts t bind = do
