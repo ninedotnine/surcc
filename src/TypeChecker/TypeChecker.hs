@@ -138,19 +138,15 @@ add_top_level_routines (TopLevelProcType i m_p m_t stmts) = case m_t of
     Just (SoucType "IO") -> ok_sub
     Just wrong -> error (show wrong)
     where
-        ok_sub = do
-            ctx <- get
-            case i of
-                "main" -> add_main_routine m_p stmts
-                _ -> case m_p of
-                    Nothing -> do
-                        check_and_bind stmts Nothing (Bound i (SoucType "IO"))
-                    Just (Param _ Nothing) -> error "FIXME type inference"
-                    Just (Param param (Just p_t)) -> case add_bind ctx (BindMayExist False) param (SoucType p_t) of
-                        Left err -> throwE err
-                        Right p_ctx -> do
-                            put p_ctx
-                            check_and_bind stmts Nothing (Bound i (SoucRoutn (SoucType p_t)))
+        ok_sub = case i of
+            "main" -> add_main_routine m_p stmts
+            _ -> case m_p of
+                Nothing -> do
+                    check_and_bind stmts Nothing (Bound i (SoucType "IO"))
+                Just (Param _ Nothing) -> error "FIXME type inference"
+                Just (Param param (Just p_t)) -> do
+                    insert_param param (SoucType p_t)
+                    check_and_bind stmts Nothing (Bound i (SoucRoutn (SoucType p_t)))
 
 add_main_routine :: Maybe Param -> Stmts -> Checker Bound
 add_main_routine m_p stmts = case m_p of
