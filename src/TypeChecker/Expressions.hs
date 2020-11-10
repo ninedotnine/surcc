@@ -2,10 +2,13 @@
 
 module TypeChecker.Expressions (
     infer,
-    check_astree
+    check_astree,
+    infer_if_needed,
 ) where
 
 import Control.Applicative
+import Control.Monad.Trans.Except
+import Control.Monad.State
 
 import Prelude hiding (lookup)
 import Common
@@ -99,3 +102,15 @@ check_astree ctx tree t = case tree of
         check_astree ctx expr expr_t
         check_equals (SoucType sig) expr_t
         check_equals t expr_t
+
+
+infer_if_needed :: Maybe SoucType -> ASTree -> Checker SoucType
+infer_if_needed m_t expr = do
+    ctx <- get
+    case m_t of
+        Nothing -> case infer ctx expr of
+            Right t -> pure t
+            Left err -> throwE err
+        Just t -> case check_astree ctx expr t of
+            Right () -> pure t
+            Left err -> throwE err

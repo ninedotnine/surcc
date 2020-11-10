@@ -67,17 +67,6 @@ run_globals defns = do
     pure ()
 
 
-infer_if_needed :: Maybe SoucType -> ASTree -> Checker SoucType
-infer_if_needed m_t expr = do
-    ctx <- get
-    case m_t of
-        Nothing -> case infer ctx expr of
-            Right t -> pure t
-            Left err -> throwE err
-        Just t -> case check_astree ctx expr t of
-            Right () -> pure t
-            Left err -> throwE err
-
 add_top_level_consts :: TopLevelConstType -> Checker ()
 add_top_level_consts (TopLevelConstType i m_t expr) = do
     t <- infer_if_needed m_t expr
