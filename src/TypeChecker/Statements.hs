@@ -40,7 +40,7 @@ check_stmt stmt m_ret = do
         Stmt_Sub_Call name m_arg -> check_stmt_call name m_arg
         Stmt_Postfix_Oper name oper -> pure () -- FIXME
         Stmt_Const_Assign name m_t expr -> check_stmt_ass name (SoucType <$> m_t) (BindMayExist False) expr
-        Stmt_Var_Assign name m_t expr -> check_stmt_ass name (SoucType <$> m_t) (BindMayExist True) expr
+        Stmt_Var_Assign name m_t expr -> check_stmt_mut_ass name (SoucType <$> m_t) expr
         Stmt_Return m_expr -> check_stmt_return m_expr m_ret
 
 soucbool :: SoucType
@@ -90,6 +90,18 @@ check_stmt_ass name m_t may_exist expr = do
         Just t -> case check_astree ctx expr t of
             Left err -> throwE err
             Right () -> insert may_exist (Bound name t)
+
+check_stmt_mut_ass :: Identifier -> (Maybe SoucType) -> ASTree -> Checker ()
+check_stmt_mut_ass name m_t expr = do
+    ctx <- get
+    case m_t of
+        Nothing -> case infer ctx expr of
+            Left err -> throwE err
+            Right t -> insert_mut (Bound name t)
+        Just t -> case check_astree ctx expr t of
+            Left err -> throwE err
+            Right () -> insert_mut (Bound name t)
+
 
 check_stmt_call :: Identifier -> Maybe ASTree -> Checker ()
 check_stmt_call name m_expr = do

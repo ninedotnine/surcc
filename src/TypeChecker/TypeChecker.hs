@@ -151,7 +151,7 @@ add_main_routine :: Maybe Param -> Stmts -> Checker Bound
 add_main_routine m_p stmts = case m_p of
     Just (Param _ Nothing) -> error "FIXME infer param type"
     Just (Param p (Just p_t)) -> do
-        insert (BindMayExist False) (Bound p (SoucType p_t))
+        insert_global (Bound p (SoucType p_t))
         check_and_bind stmts Nothing (Bound "main" (SoucRoutn (SoucType p_t)))
     Nothing -> check_and_bind stmts Nothing (Bound "main" (SoucType "IO"))
 

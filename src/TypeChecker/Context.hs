@@ -8,6 +8,7 @@ module TypeChecker.Context (
     add_bind,
     insert_global,
     insert_param,
+    insert_mut,
     BindMayExist(..),
     builtins_ctx,
     Checker,
@@ -187,6 +188,8 @@ insert_local modifiable bound = do
         Left err -> throwE err
         Right new_ctx -> put new_ctx
 
+insert_mut :: Bound -> Checker ()
+insert_mut = insert_local (BindMayExist True)
 
 builtins_ctx :: Builtins
 builtins_ctx = Builtins [Bound "puts" (SoucRoutn (SoucType "String"))]
