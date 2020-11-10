@@ -1,0 +1,6 @@
+subr(): IO = do
+	n <- 2
+	return
+
+main(): IO = do
+	subr

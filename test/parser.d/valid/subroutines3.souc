@@ -1,0 +1,7 @@
+main(): IO = do
+	write_n 4
+	return
+
+write_n(n: Integer): IO = do
+	print n
+	return   ; spaces hehe
