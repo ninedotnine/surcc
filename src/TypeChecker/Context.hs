@@ -25,9 +25,6 @@ import Parser.Expr.ExprTypes
 import Control.Monad.Except
 import Control.Monad.Trans.Except
 
--- FIXME rename this ReAssignable or something
-newtype BindMayExist = BindMayExist Bool
-
 data BoundLocal = BoundLocal Identifier SoucType Mutability deriving Eq
 
 instance Show BoundLocal where
@@ -100,9 +97,9 @@ lookup_mutable (InnerScope bounds ctx) ident = case lookup_with_mut_2 bounds ide
                 this_one (BoundLocal i0 t m) i1 = if i0 == i1 then Just (t, m) else Nothing
 
 
-add_bind :: LocalScope -> BindMayExist -> Identifier -> SoucType -> Either TypeError LocalScope
-add_bind ctx (BindMayExist modifiable) i t = case lookup_mutable ctx i of
-    Just (existing_type, existing_mut) -> if modifiable && existing_mut == Mut
+add_bind :: LocalScope -> Mutability -> Identifier -> SoucType -> Either TypeError LocalScope
+add_bind ctx modifiable i t = case lookup_mutable ctx i of
+    Just (existing_type, existing_mut) -> if (modifiable, existing_mut) == (Mut, Mut)
         then if t == existing_type
             then Right ctx
             else Left (TypeMismatch existing_type t)
@@ -111,12 +108,12 @@ add_bind ctx (BindMayExist modifiable) i t = case lookup_mutable ctx i of
     Nothing -> Right $ case ctx of
         GlobalScope binds rest -> GlobalScope (Bound i t : binds) rest
         InnerScope binds rest ->
-            InnerScope ((BoundLocal i t (if modifiable then Mut else Immut)) : binds) rest
+            InnerScope ((BoundLocal i t modifiable) : binds) rest
 
 
-_add_bind :: LocalScope -> BindMayExist -> Bound -> Either TypeError LocalScope
-_add_bind ctx (BindMayExist modifiable) (Bound i t) = case lookup_mutable ctx i of
-    Just (existing_type, existing_mut) -> if modifiable && existing_mut == Mut
+_add_bind :: LocalScope -> Mutability -> Bound -> Either TypeError LocalScope
+_add_bind ctx modifiable (Bound i t) = case lookup_mutable ctx i of
+    Just (existing_type, existing_mut) -> if (modifiable, existing_mut) == (Mut, Mut)
         then if t == existing_type
             then Right ctx
             else Left (TypeMismatch existing_type t)
@@ -125,7 +122,7 @@ _add_bind ctx (BindMayExist modifiable) (Bound i t) = case lookup_mutable ctx i 
     Nothing -> Right $ case ctx of
         GlobalScope binds rest -> GlobalScope (Bound i t : binds) rest
         InnerScope binds rest ->
-            InnerScope ((BoundLocal i t (if modifiable then Mut else Immut)) : binds) rest
+            InnerScope ((BoundLocal i t modifiable) : binds) rest
 
 define_export :: LocalScope -> Bound -> Either TypeError LocalScope
 define_export scope b = case scope of
@@ -168,16 +165,16 @@ exports_remaining (GlobalScope _ (ExportList bs _)) = bs
 type Checker a = ExceptT TypeError (State LocalScope) a
 
 insert_param :: Identifier -> SoucType -> Checker ()
-insert_param i t = insert_local (BindMayExist False) (Bound i t)
+insert_param i t = insert_local Immut (Bound i t)
 
 insert_global :: Bound -> Checker ()
 insert_global bound = do
     ctx <- get
-    case (_add_bind ctx (BindMayExist False) bound) of
+    case (_add_bind ctx Immut bound) of
         Left err -> throwE err
         Right new_ctx -> put new_ctx
 
-insert_local :: BindMayExist -> Bound -> Checker ()
+insert_local :: Mutability -> Bound -> Checker ()
 insert_local modifiable bound = do
     ctx <- get
     case (_add_bind ctx modifiable bound) of
@@ -185,10 +182,10 @@ insert_local modifiable bound = do
         Right new_ctx -> put new_ctx
 
 insert_mut :: Bound -> Checker ()
-insert_mut = insert_local (BindMayExist True)
+insert_mut = insert_local Mut
 
 insert_const :: Bound -> Checker ()
-insert_const = insert_local (BindMayExist False)
+insert_const = insert_local Immut
 
 builtins_ctx :: Builtins
 builtins_ctx = Builtins [Bound "puts" (SoucRoutn (SoucType "String"))]
