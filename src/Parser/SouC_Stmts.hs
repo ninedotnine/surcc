@@ -109,7 +109,7 @@ stmt_unless = do
 
 stmt_return :: SouCParser Stmt
 stmt_return = do
-    result <- reserved "return" *> spaces *> optionMaybe raw_expr
+    result <- reserved "return" *> optionMaybe (try (spaces *> raw_expr))
     case result of
         Nothing -> pure (Stmt_Return Nothing)
         Just (Raw_Expr raw_exp) -> case parse_expression raw_exp of
