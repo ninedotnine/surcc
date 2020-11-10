@@ -82,25 +82,13 @@ check_stmt_if expr body m_else m_ret = do
 
 check_stmt_ass :: Identifier -> (Maybe SoucType) -> BindMayExist -> ASTree -> Checker ()
 check_stmt_ass name m_t may_exist expr = do
-    ctx <- get
-    case m_t of
-        Nothing -> case infer ctx expr of
-            Left err -> throwE err
-            Right t -> insert may_exist (Bound name t)
-        Just t -> case check_astree ctx expr t of
-            Left err -> throwE err
-            Right () -> insert may_exist (Bound name t)
+    t <- infer_if_needed m_t expr
+    insert may_exist (Bound name t)
 
 check_stmt_mut_ass :: Identifier -> (Maybe SoucType) -> ASTree -> Checker ()
 check_stmt_mut_ass name m_t expr = do
-    ctx <- get
-    case m_t of
-        Nothing -> case infer ctx expr of
-            Left err -> throwE err
-            Right t -> insert_mut (Bound name t)
-        Just t -> case check_astree ctx expr t of
-            Left err -> throwE err
-            Right () -> insert_mut (Bound name t)
+    t <- infer_if_needed m_t expr
+    insert_mut (Bound name t)
 
 
 check_stmt_call :: Identifier -> Maybe ASTree -> Checker ()
