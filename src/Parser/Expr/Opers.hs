@@ -19,7 +19,7 @@ check_for_oper :: ShuntingYardParser ()
 check_for_oper = Parsec.lookAhead (Parsec.try (ignore_spaces *> Parsec.oneOf valid_op_chars)) *> pure ()
 
 valid_op_chars :: String
-valid_op_chars = "+-*/%^<>=&~"
+valid_op_chars = "+-*/%^<>=&~,"
 
 apply_tight_prefix_opers :: ShuntingYardParser ()
 apply_tight_prefix_opers = do

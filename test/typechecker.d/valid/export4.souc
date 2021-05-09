@@ -1,0 +1,17 @@
+module export4 where
+	print_hi: IO
+	print_hi_2: IO
+; 	print_s: String -> IO
+
+print_hi(): IO = do
+	puts "explicit type"
+
+print_hi_2() = do
+	puts "implicit IO type, known from export list"
+
+printy(s: String): IO = do
+	puts s
+
+main(): IO = do
+	print_hi
+	printy "hola"

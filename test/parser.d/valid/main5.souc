@@ -1,0 +1,5 @@
+import whatever
+
+main(stdout: OutputStream): IO = do
+	x <- 5
+	print stdout , "whoa"

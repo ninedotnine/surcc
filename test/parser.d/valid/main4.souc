@@ -1,0 +1,6 @@
+import mymodule
+
+main() = do
+	print "hello world"
+	x <- 5
+	whatever x , x

@@ -173,4 +173,7 @@ insert_const :: Bound -> Checker ()
 insert_const = insert_local Immut
 
 builtins_ctx :: Builtins
-builtins_ctx = Builtins [Bound "puts" (SoucRoutn (SoucType "String"))]
+builtins_ctx = Builtins [
+    Bound "puts" (SoucRoutn (SoucType "String")),
+    Bound "writey" (SoucRoutn (SoucPair (SoucType "OutputStream") (SoucType "String")))
+    ]
