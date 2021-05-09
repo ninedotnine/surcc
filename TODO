@@ -25,3 +25,4 @@ currently:
     e. g. TypeError (Expect t) (Got t)
 [ ] fix the data structure (or use smart constructors) for the Contexts. shadowing should be impossible.
 [ ] top-level long procedures are assumed to be functions unless an IO signature is explicit
+[ ] module name needs to match filename
