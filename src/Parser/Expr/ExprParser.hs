@@ -124,12 +124,29 @@ parse_expression input = Parsec.runParser parse_term start_state "input" (trim_s
 
 optional_sig :: ShuntingYardParser (Maybe SoucType)
 optional_sig = Parsec.optionMaybe type_sig where
+
     type_sig :: ShuntingYardParser SoucType
     type_sig = do
         Parsec.char ':' *> ignore_spaces
+        type_broadly
+
+    type_broadly :: ShuntingYardParser SoucType
+    type_broadly = Parsec.try type_constructor <|> simple_type
+
+    type_constructor :: ShuntingYardParser SoucType
+    type_constructor = do
+        name <- type_name <* Parsec.char '('
+        args <- Parsec.sepBy1 type_broadly ignore_spaces <* Parsec.char ')'
+        pure (SoucTypeConstructor name args)
+
+    simple_type :: ShuntingYardParser SoucType
+    simple_type = SoucType <$> type_name
+
+    type_name :: ShuntingYardParser String
+    type_name = do
         first <- Parsec.upper
         rest <- Parsec.many (Parsec.lower <|> Parsec.upper <|> Parsec.digit)
-        pure (SoucType (first:rest))
+        pure (first:rest)
 
 
 parse_print_expression :: String -> IO ()

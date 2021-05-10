@@ -153,29 +153,25 @@ optional_sig :: SouCParser (Maybe SoucType)
 optional_sig = optionMaybe type_signature
 
 type_signature :: SouCParser SoucType
-type_signature = do
-    char ':' *> spaces
-    type_broadly
+type_signature = char ':' *> spaces *> type_broadly where
 
-type_broadly :: SouCParser SoucType
-type_broadly = try type_constructor <|> full_type
+    type_broadly :: SouCParser SoucType
+    type_broadly = try type_constructor <|> simple_type
 
-full_type :: SouCParser SoucType
-full_type = do
-    name <- type_name
-    pure (SoucType name)
+    type_constructor :: SouCParser SoucType
+    type_constructor = do
+        name <- type_name <* char '('
+        args <- sepBy1 type_broadly spaces <* char ')'
+        pure (SoucTypeConstructor name args)
 
-type_name :: SouCParser String
-type_name = do
-    first <- upper
-    rest <- many (lower <|> upper <|> digit)
-    pure (first:rest)
+    simple_type :: SouCParser SoucType
+    simple_type = SoucType <$> type_name
 
-type_constructor :: SouCParser SoucType
-type_constructor = do
-    name <- type_name <* char '('
-    params <- sepBy1 type_broadly spaces <* char ')'
-    pure (SoucTypeConstructor (SoucType name) params)
+    type_name :: SouCParser String
+    type_name = do
+        first <- upper
+        rest <- many (lower <|> upper <|> digit)
+        pure (first:rest)
 
 
 

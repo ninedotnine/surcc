@@ -83,7 +83,7 @@ data SoucType = SoucType String
               | SoucMaybe SoucType
               | SoucEither SoucType SoucType
               | SoucList SoucType
-              | SoucTypeConstructor SoucType [SoucType]
+              | SoucTypeConstructor String [SoucType]
               deriving (Eq)
 
 data Bound = Bound Identifier SoucType deriving Eq
@@ -233,4 +233,4 @@ instance Show SoucType where
     show (SoucMaybe t) = '?' : show t
     show (SoucEither t0 t1) = show t0 <> " | " <> show t1
     show (SoucList t) = '[': show t <> "]"
-    show (SoucTypeConstructor t ts) = show t <> "(" <> show ts <> ")"
+    show (SoucTypeConstructor t ts) = t <> "(" <> show ts <> ")"
