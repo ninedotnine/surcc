@@ -2,6 +2,7 @@ module CodeGen.CodeGen (generate) where
 
 import CodeGen.ExprGen (generate_expr)
 import CodeGen.Builtins
+import CodeGen.Runtime (runtime)
 import Common (
     Stmt(..),
     Param(..),
@@ -12,11 +13,11 @@ import Common (
     )
 import Parser.ExprParser
 
+import Data.Maybe (fromMaybe)
+
 generate :: CheckedProgram -> String
 -- generate (Program name imports body) =
-generate (CheckedProgram _ _ body) = includes ++ concat (map gen body)
-    where includes =
-            "#include <stdio.h>\n#include <stdbool.h>\n#include <stdlib.h>\n"
+generate (CheckedProgram _ _ body) = runtime ++ concat (map gen body)
 
 class Generatable a where
     gen :: a -> String
@@ -25,7 +26,7 @@ instance Generatable ASTree where
     gen = generate_expr
 
 instance Generatable Identifier where
-    gen (Identifier v) = v
+    gen (Identifier v) = fromMaybe ("_souc_user_" ++ v) (gen_builtin_identifier v)
 
 instance Generatable Param where
     gen (Param param _) = "int " ++ gen param -- FIXME

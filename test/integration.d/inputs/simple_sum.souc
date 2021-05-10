@@ -1,7 +1,6 @@
-; note that "puts" is not the name for this souc subroutine (probably)
-main() = do
+main(stdout: OutputStream) = do
 	if 3 + 3 == 6: Integer do
-		puts "6"
+		writey stdout , "6"
 	else
-		puts "not 6"
+		writey stdout , "not 6"
 	end if

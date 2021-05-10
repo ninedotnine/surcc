@@ -1,9 +1,8 @@
-; note that "puts" is not the name for this souc subroutine (probably)
-main() = do
+main(stdout: OutputStream) = do
 	i <- 0
 	while i < 4
 		i++ ; should be printed
 	end
 	while False
 		i++
-	puts "done"
+	writey stdout , "done"

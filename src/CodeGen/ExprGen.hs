@@ -15,10 +15,7 @@ generate_expr :: ASTree -> String
 generate_expr (Leaf e) = generate_term e
 generate_expr (Signed e _) = generate_expr e
 generate_expr (Twig op e) = generate_prefix_expr op ++ generate_expr e
-generate_expr (Branch op x y) = generate_oper op x y
-
-generate_oper :: Operator -> ASTree -> ASTree -> String
-generate_oper op x y = case op of
+generate_expr (Branch op x y) = case op of
     Plus              ->  gen_simple_op x "+" y
     Minus             ->  gen_simple_op x "-" y
     Splat             ->  gen_simple_op x "*" y
@@ -31,7 +28,6 @@ generate_oper op x y = case op of
     RegexMatch        ->  undefined
     GreaterThan       ->  gen_simple_op x ">" y
     LesserThan        ->  gen_simple_op x "<" y
-    Apply             ->  undefined -- this seems like a challenge to be handled elsewhere
     And               ->  gen_simple_op x "&&" y
     Or                ->  gen_simple_op x "||" y
     Xor               ->  undefined
@@ -45,7 +41,10 @@ generate_oper op x y = case op of
     Combine           ->  undefined
     Index             ->  undefined
     Lookup            ->  undefined
-    FlipApply         ->  undefined
+    Apply             ->  "_souc_user_" ++ generate_expr x ++ "("
+                          ++ generate_expr y ++ ") "
+    FlipApply         ->  "_souc_user_" ++ generate_expr y ++ "("
+                          ++ generate_expr x ++ ") "
     Map               ->  undefined
     FlipMap           ->  undefined
     Applicative       ->  undefined
@@ -63,7 +62,7 @@ generate_term (LitInt l) = show l
 generate_term (LitChar c) = "\'" ++ c : "\'"
 generate_term (LitBool b) = if b then "true" else "false"
 generate_term (LitString s) = show s
-generate_term (Var (Identifier i)) = i
+generate_term (Var (Identifier i)) = "_souc_" ++ i
 
 
 generate_prefix_expr :: PrefixOperator -> String

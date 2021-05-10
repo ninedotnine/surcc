@@ -1,2 +1,2 @@
-main() = do
-	puts "hello world"
+main(stdout: OutputStream) = do
+	writey stdout , "hello world"
