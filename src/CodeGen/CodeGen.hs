@@ -1,6 +1,7 @@
 module CodeGen.CodeGen (generate) where
 
 import CodeGen.ExprGen (generate_expr)
+import CodeGen.Builtins
 import Common (
     Stmt(..),
     Param(..),
@@ -60,10 +61,12 @@ instance Generatable Stmt where
             Nothing -> ""
             Just e -> gen e
     gen (Stmt_Sub_Call name m_expr) =
-        gen name ++ "(" ++ expr ++ "); " where
-            expr = case m_expr of
-                Nothing -> ""
-                Just e -> gen e
+        case gen_builtin_subroutine name m_expr of
+            Just generated -> generated
+            Nothing -> gen name ++ "(" ++ expr ++ "); " where
+                expr = case m_expr of
+                    Nothing -> ""
+                    Just e -> gen e
     gen (Stmt_Var_Assign name _ expr) =
         "int " ++ gen name ++ " = " ++ gen expr ++ "; "
     gen (Stmt_Const_Assign name _ expr) =

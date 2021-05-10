@@ -15,7 +15,47 @@ generate_expr :: ASTree -> String
 generate_expr (Leaf e) = generate_term e
 generate_expr (Signed e _) = generate_expr e
 generate_expr (Twig op e) = generate_prefix_expr op ++ generate_expr e
-generate_expr (Branch op x y) = generate_expr x ++ generate_oper op ++ generate_expr y
+generate_expr (Branch op x y) = generate_oper op x y
+
+generate_oper :: Operator -> ASTree -> ASTree -> String
+generate_oper op x y = case op of
+    Plus              ->  gen_simple_op x "+" y
+    Minus             ->  gen_simple_op x "-" y
+    Splat             ->  gen_simple_op x "*" y
+    Divide            ->  gen_simple_op x "/" y
+    FloorDiv          ->  undefined
+    Modulo            ->  gen_simple_op x "%" y
+    Hihat             ->  undefined -- FIXME C doesn't have ^
+    Equals            ->  gen_simple_op x "==" y
+    NotEquals         ->  gen_simple_op x "!=" y
+    RegexMatch        ->  undefined
+    GreaterThan       ->  gen_simple_op x ">" y
+    LesserThan        ->  gen_simple_op x "<" y
+    Apply             ->  undefined -- this seems like a challenge to be handled elsewhere
+    And               ->  gen_simple_op x "&&" y
+    Or                ->  gen_simple_op x "||" y
+    Xor               ->  undefined
+    In                ->  undefined
+    Tuple             ->  error "tupel"
+    Iff               ->  undefined
+    FromMaybe         ->  undefined
+    Prepend           ->  undefined
+    Append            ->  undefined
+    Combine           ->  undefined
+    Index             ->  undefined
+    Lookup            ->  undefined
+    FlipApply         ->  undefined
+    Map               ->  undefined
+    FlipMap           ->  undefined
+    Applicative       ->  undefined
+    FlipApplicative   ->  undefined
+    SequenceRight     ->  undefined
+    SequenceLeft      ->  undefined
+    BindRight         ->  undefined
+    BindLeft          ->  undefined
+
+gen_simple_op :: ASTree -> String -> ASTree -> String
+gen_simple_op x s y = generate_expr x <> s <> generate_expr y
 
 generate_term :: Term -> String
 generate_term (LitInt l) = show l
@@ -24,41 +64,6 @@ generate_term (LitBool b) = if b then "true" else "false"
 generate_term (LitString s) = show s
 generate_term (Var (Identifier i)) = i
 
-generate_oper :: Operator -> String
-generate_oper Plus              = "+"
-generate_oper Minus             = "-"
-generate_oper Splat             = "*"
-generate_oper Divide            = "/"
-generate_oper FloorDiv          = undefined
-generate_oper Modulo            = "%"
-generate_oper Hihat             = undefined -- FIXME C doesn't have ^
-generate_oper Equals            = "=="
-generate_oper NotEquals         = "!="
-generate_oper RegexMatch        = undefined
-generate_oper GreaterThan       = ">"
-generate_oper LesserThan        = "<"
-generate_oper Apply             = undefined -- this seems like a challenge to be handled elsewhere
-generate_oper And               = "&&"
-generate_oper Or                = "||"
-generate_oper Xor               = undefined
-generate_oper In                = undefined
-generate_oper Tuple             = undefined
-generate_oper Iff               = undefined
-generate_oper FromMaybe         = undefined
-generate_oper Prepend           = undefined
-generate_oper Append            = undefined
-generate_oper Combine           = undefined
-generate_oper Index             = undefined
-generate_oper Lookup            = undefined
-generate_oper FlipApply         = undefined
-generate_oper Map               = undefined
-generate_oper FlipMap           = undefined
-generate_oper Applicative       = undefined
-generate_oper FlipApplicative   = undefined
-generate_oper SequenceRight     = undefined
-generate_oper SequenceLeft      = undefined
-generate_oper BindRight         = undefined
-generate_oper BindLeft          = undefined
 
 generate_prefix_expr :: PrefixOperator -> String
 generate_prefix_expr GetAddr    = "&"
