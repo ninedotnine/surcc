@@ -18,7 +18,6 @@ module Parser.Expr.ExprTypes (
 
 import qualified Text.Parsec as Parsec
 import Data.Word (Word8)
--- import Common (TypeName)
 import Common
 
 newtype Precedence = Precedence Word8 deriving (Eq, Ord)
@@ -39,7 +38,7 @@ data StackOp = StackLParen
              | StackOp Operator
              | StackTightPreOp PrefixOperator
              | StackSpacedPreOp PrefixOperator
-             | StackSig TypeName
+             | StackSig SoucType
              deriving (Show, Eq)
 
 get_prec :: Operator -> Precedence

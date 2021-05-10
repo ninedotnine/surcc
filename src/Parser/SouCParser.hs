@@ -111,7 +111,7 @@ top_level_func func_name = do
     _ <- spaces <* char '=' <* spaces
     long_top_level_func func_name param sig <|> short_top_level_func func_name param sig
 
-short_top_level_func :: Identifier -> Param -> Maybe TypeName -> SouCParser Top_Level_Defn
+short_top_level_func :: Identifier -> Param -> Maybe SoucType -> SouCParser Top_Level_Defn
 short_top_level_func func_name param sig = do
     (Raw_Expr body) <- raw_expr
     case parse_expression body of
@@ -119,7 +119,7 @@ short_top_level_func func_name param sig = do
 --         Left parse_err -> mergeError (fail "invalid expression") parse_err
         Left err -> fail $ "invalid expression\n" ++ show err
 
-long_top_level_func :: Identifier -> Param -> Maybe TypeName -> SouCParser Top_Level_Defn
+long_top_level_func :: Identifier -> Param -> Maybe SoucType -> SouCParser Top_Level_Defn
 long_top_level_func func_name param sig = do
     stmts <- string "do" *> endline *> stmt_block
     optional_end_name func_name

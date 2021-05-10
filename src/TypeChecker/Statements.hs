@@ -39,8 +39,8 @@ check_stmt stmt m_ret = do
         Stmt_Unless expr body m_else -> check_stmt_if expr body m_else m_ret
         Stmt_Sub_Call name m_arg -> check_stmt_call name m_arg
         Stmt_Postfix_Oper name oper -> pure () -- FIXME
-        Stmt_Const_Assign name m_t expr -> check_stmt_ass name (SoucType <$> m_t) expr
-        Stmt_Var_Assign name m_t expr -> check_stmt_mut_ass name (SoucType <$> m_t) expr
+        Stmt_Const_Assign name m_t expr -> check_stmt_ass name m_t expr
+        Stmt_Var_Assign name m_t expr -> check_stmt_mut_ass name m_t expr
         Stmt_Return m_expr -> check_stmt_return m_expr m_ret
 
 soucbool :: SoucType

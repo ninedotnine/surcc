@@ -67,7 +67,7 @@ data Program = Program (Maybe SoucModule) Imports Body
 data CheckedProgram = CheckedProgram (Maybe SoucModule) Imports Body
     deriving Show
 
-data ExportDecl = ExportDecl Identifier TypeName deriving (Show)
+data ExportDecl = ExportDecl Identifier SoucType deriving (Show)
 data SoucModule = SoucModule String [ExportDecl] deriving (Show)
 
 type Imports = [Import]
@@ -86,7 +86,7 @@ data SoucType = SoucType TypeName
               | SoucMaybe SoucType
               | SoucEither SoucType SoucType
               | SoucList SoucType
---               | SoucTypeConstructor [SoucType]
+              | SoucTypeConstructor SoucType [SoucType]
               deriving (Eq)
 
 data Bound = Bound Identifier SoucType deriving Eq
@@ -106,14 +106,14 @@ instance Show TypeError where
     show (Undeclared name) = "undeclared " <> show name
     show (ExportedButNotDefined name) = "declared " <> show name <> " was not defined"
 
-data Param = Param Identifier (Maybe TypeName) deriving (Show, Eq)
+data Param = Param Identifier (Maybe SoucType) deriving (Show, Eq)
 
 
-data Top_Level_Defn = Top_Level_Const_Defn Identifier (Maybe TypeName) ASTree
-                    | FuncDefn Identifier Param (Maybe TypeName) Stmts
-                    | ShortFuncDefn Identifier Param (Maybe TypeName) ASTree
-                    | SubDefn Identifier (Maybe Param) (Maybe TypeName) Stmts
-                    | MainDefn (Maybe Param) (Maybe TypeName) Stmts
+data Top_Level_Defn = Top_Level_Const_Defn Identifier (Maybe SoucType) ASTree
+                    | FuncDefn Identifier Param (Maybe SoucType) Stmts
+                    | ShortFuncDefn Identifier Param (Maybe SoucType) ASTree
+                    | SubDefn Identifier (Maybe Param) (Maybe SoucType) Stmts
+                    | MainDefn (Maybe Param) (Maybe SoucType) Stmts
                     deriving (Show, Eq)
 
 data Stmt = Stmt_While ASTree Stmts
@@ -122,14 +122,14 @@ data Stmt = Stmt_While ASTree Stmts
           | Stmt_Unless ASTree Stmts (Maybe Stmts)
           | Stmt_Sub_Call Identifier (Maybe ASTree)
           | Stmt_Postfix_Oper Identifier String
-          | Stmt_Const_Assign Identifier (Maybe TypeName) ASTree
-          | Stmt_Var_Assign Identifier (Maybe TypeName) ASTree
+          | Stmt_Const_Assign Identifier (Maybe SoucType) ASTree
+          | Stmt_Var_Assign Identifier (Maybe SoucType) ASTree
           | Stmt_Return (Maybe ASTree)
           deriving (Show, Eq)
 
 data ASTree = Branch Operator ASTree ASTree
             | Twig PrefixOperator ASTree
-            | Signed ASTree TypeName
+            | Signed ASTree SoucType
             | Leaf Term
          deriving (Show, Eq)
 
@@ -239,3 +239,4 @@ instance Show SoucType where
     show (SoucMaybe t) = '?' : show t
     show (SoucEither t0 t1) = show t0 <> " | " <> show t1
     show (SoucList t) = '[': show t <> "]"
+    show (SoucTypeConstructor t ts) = show t <> "(" <> show ts <> ")"

@@ -36,7 +36,7 @@ type_check (Program module_info imports defns) = do
 add_exports :: [ExportDecl] -> Builtins -> Either TypeError ExportList
 add_exports exports ctx = Right $ ExportList (map make_bound exports) ctx
     where
-        make_bound (ExportDecl i t) = Bound i (SoucType t)
+        make_bound (ExportDecl i t) = Bound i t
 
 -- getting imports can fail if (e. g.) a file cannot be found.
 -- don't worry about it for now.
@@ -95,9 +95,9 @@ add_top_level_short_fns (TopLevelShortFnType i p m_t expr) = do
     case p of
         Param _ Nothing -> error "FIXME type inference"
         Param param (Just p_t) -> do
-            insert_param param (SoucType p_t)
+            insert_param param p_t
             t <- infer_if_needed m_t expr
-            pure (Bound i (SoucFn (SoucType p_t) t))
+            pure (Bound i (SoucFn p_t t))
 
 
 check_and_bind :: Stmts -> Maybe SoucType -> Bound -> Checker Bound
@@ -111,14 +111,14 @@ add_top_level_long_fns (TopLevelLongFnType i p m_t stmts) = do
     case p of
         Param _ Nothing -> error "FIXME type inference"
         Param param (Just p_t) -> do
-            insert_param param (SoucType p_t)
+            insert_param param p_t
             p_ctx <- get
             case m_t of
                 Nothing -> case infer_stmts p_ctx stmts of
-                    Right t -> pure (Bound i (SoucFn (SoucType p_t) t))
+                    Right t -> pure (Bound i (SoucFn p_t t))
                     Left err -> throwE err
                 Just t -> do
-                    check_and_bind stmts (Just t) (Bound i (SoucFn (SoucType p_t) t))
+                    check_and_bind stmts (Just t) (Bound i (SoucFn p_t t))
 
 add_top_level_routines :: TopLevelProcType -> Checker Bound
 add_top_level_routines (TopLevelProcType i m_p m_t stmts) = case m_t of
@@ -133,15 +133,15 @@ add_top_level_routines (TopLevelProcType i m_p m_t stmts) = case m_t of
                     check_and_bind stmts Nothing (Bound i (SoucType "IO"))
                 Just (Param _ Nothing) -> error "FIXME type inference"
                 Just (Param param (Just p_t)) -> do
-                    insert_param param (SoucType p_t)
-                    check_and_bind stmts Nothing (Bound i (SoucRoutn (SoucType p_t)))
+                    insert_param param p_t
+                    check_and_bind stmts Nothing (Bound i (SoucRoutn p_t))
 
 add_main_routine :: Maybe Param -> Stmts -> Checker Bound
 add_main_routine m_p stmts = case m_p of
     Just (Param _ Nothing) -> error "FIXME infer param type"
     Just (Param p (Just p_t)) -> do
-        insert_global (Bound p (SoucType p_t))
-        check_and_bind stmts Nothing (Bound "main" (SoucRoutn (SoucType p_t)))
+        insert_global (Bound p p_t)
+        check_and_bind stmts Nothing (Bound "main" (SoucRoutn p_t))
     Nothing -> check_and_bind stmts Nothing (Bound "main" (SoucType "IO"))
 
 
@@ -155,11 +155,11 @@ split_top_level_stuff defns = reverse_all (split_top_level_stuff_rec ([], [], []
 split_top_level_stuff_rec :: BrokenUpList -> [Top_Level_Defn] -> BrokenUpList
 split_top_level_stuff_rec lists [] = lists
 split_top_level_stuff_rec (ws, xs, ys, zs) (d:defns) = case d of
-    Top_Level_Const_Defn i m_t expr -> split_top_level_stuff_rec (TopLevelConstType i (SoucType <$> m_t) expr:ws, xs, ys, zs) defns
-    ShortFuncDefn i p m_t expr ->      split_top_level_stuff_rec (ws, TopLevelShortFnType i p (SoucType <$> m_t) expr:xs, ys, zs) defns
-    FuncDefn i p m_t stmts ->          split_top_level_stuff_rec (ws, xs, TopLevelLongFnType i p (SoucType <$> m_t) stmts:ys, zs) defns
-    SubDefn i m_p m_t stmts ->         split_top_level_stuff_rec (ws, xs, ys, TopLevelProcType i m_p (SoucType <$> m_t) stmts:zs) defns
-    MainDefn m_p m_t stmts ->          split_top_level_stuff_rec (ws, xs, ys, TopLevelProcType "main" m_p (SoucType <$> m_t) stmts:zs) defns
+    Top_Level_Const_Defn i m_t expr -> split_top_level_stuff_rec (TopLevelConstType i m_t expr:ws, xs, ys, zs) defns
+    ShortFuncDefn i p m_t expr ->      split_top_level_stuff_rec (ws, TopLevelShortFnType i p m_t expr:xs, ys, zs) defns
+    FuncDefn i p m_t stmts ->          split_top_level_stuff_rec (ws, xs, TopLevelLongFnType i p m_t stmts:ys, zs) defns
+    SubDefn i m_p m_t stmts ->         split_top_level_stuff_rec (ws, xs, ys, TopLevelProcType i m_p m_t stmts:zs) defns
+    MainDefn m_p m_t stmts ->          split_top_level_stuff_rec (ws, xs, ys, TopLevelProcType "main" m_p m_t stmts:zs) defns
 
 
 data TopLevelConstType = TopLevelConstType Identifier (Maybe SoucType) ASTree

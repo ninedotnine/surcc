@@ -18,7 +18,7 @@ import qualified Text.Parsec as Parsec
 import Parser.Expr.ExprTypes
 import Parser.Expr.RegardingSpaces
 
-import Common (TypeName)
+import Common (SoucType)
 
 -- functions to get the current state
 get_op_stack :: ShuntingYardParser Oper_Stack
@@ -67,7 +67,7 @@ make_twig op tokes = do
     oper_stack_set tokes
 
 
-make_sig :: TypeName -> [StackOp] -> ShuntingYardParser ()
+make_sig :: SoucType -> [StackOp] -> ShuntingYardParser ()
 make_sig sig tokes = do
     tree <- tree_stack_pop
     tree_stack_push (Signed tree sig)

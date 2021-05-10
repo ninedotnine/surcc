@@ -112,7 +112,7 @@ finish_expr = do
 pretty_show_expression :: ASTree -> String
 pretty_show_expression (Branch oper left right) = "(" ++ show oper ++ " "  ++ pretty_show_expression left ++ " " ++ pretty_show_expression right ++ ")"
 pretty_show_expression (Twig oper tree) = concat ["(", show oper, " ", pretty_show_expression tree, ")"]
-pretty_show_expression (Signed tree (TypeName tree_t)) = pretty_show_expression tree ++ ": " ++ tree_t
+pretty_show_expression (Signed tree tree_t) = pretty_show_expression tree ++ ": " ++ show tree_t
 pretty_show_expression (Leaf val) = show val
 
 parse_expression :: String -> Either Parsec.ParseError ASTree
@@ -122,14 +122,14 @@ parse_expression input = Parsec.runParser parse_term start_state "input" (trim_s
         trim_spaces = dropWhile isSpace <&> dropWhileEnd isSpace
 
 
-optional_sig :: ShuntingYardParser (Maybe TypeName)
+optional_sig :: ShuntingYardParser (Maybe SoucType)
 optional_sig = Parsec.optionMaybe type_sig where
-    type_sig :: ShuntingYardParser TypeName
+    type_sig :: ShuntingYardParser SoucType
     type_sig = do
         Parsec.char ':' *> ignore_spaces
         first <- Parsec.upper
         rest <- Parsec.many (Parsec.lower <|> Parsec.upper <|> Parsec.digit)
-        pure (TypeName (first:rest))
+        pure (SoucType (TypeName (first:rest)))
 
 
 parse_print_expression :: String -> IO ()

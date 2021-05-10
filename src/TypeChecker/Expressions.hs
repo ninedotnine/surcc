@@ -22,7 +22,7 @@ infer ctx tree = case tree of
     Twig op expr -> ret <$> infer_prefix_op op expr
     Signed expr t -> do
         inferred <- infer ctx expr
-        check_equals (SoucType t) inferred
+        check_equals t inferred
         Right inferred
     Leaf term -> infer_term ctx term
 
@@ -105,7 +105,7 @@ check_astree ctx tree t = case tree of
     Signed expr sig -> do
         expr_t <- infer ctx expr
         check_astree ctx expr expr_t
-        check_equals (SoucType sig) expr_t
+        check_equals sig expr_t
         check_equals t expr_t
 
 

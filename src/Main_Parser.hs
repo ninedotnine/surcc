@@ -39,30 +39,30 @@ print_file_contents filename = do
 
 
 prettyPrint :: Top_Level_Defn -> IO ()
-prettyPrint (SubDefn name param (Just (TypeName t)) (Stmts stmts)) = do
-    putStr $ "sub " ++ show name ++ " returns (should be IO): " ++ t ++ " takes "
+prettyPrint (SubDefn name param (Just t) (Stmts stmts)) = do
+    putStr $ "sub " ++ show name ++ " returns (should be IO): " ++ show t ++ " takes "
     putStrLn $ show param
     putStrLn (unlines (map prettifyStmt stmts))
 prettyPrint (SubDefn name param Nothing (Stmts stmts)) = do
     putStr $ "sub " ++ show name ++ " takes "
     putStrLn $ show param
     putStrLn (unlines (map prettifyStmt stmts))
-prettyPrint (FuncDefn name param (Just (TypeName t)) (Stmts stmts)) = do
-    putStrLn $ "fn " ++ show name ++ " takn " ++ show param ++ " returns: " ++ t ++ (
+prettyPrint (FuncDefn name param (Just t) (Stmts stmts)) = do
+    putStrLn $ "fn " ++ show name ++ " takn " ++ show param ++ " returns: " ++ show t ++ (
                 unlines $  (map ((' ':) . prettifyStmt) stmts))
 prettyPrint (FuncDefn name param Nothing (Stmts stmts)) = do
     putStrLn $ "fn " ++ show name ++ " takn " ++ show param ++ " " ++ (
                 unlines $  (map ((' ':) . prettifyStmt) stmts))
-prettyPrint (ShortFuncDefn name param (Just (TypeName t)) expr) = do
-    putStrLn $ "fn" ++ show name ++ " takn " ++ show param ++ " returns: " ++ t ++ " = " ++ show expr
+prettyPrint (ShortFuncDefn name param (Just t) expr) = do
+    putStrLn $ "fn" ++ show name ++ " takn " ++ show param ++ " returns: " ++ show t ++ " = " ++ show expr
 prettyPrint (ShortFuncDefn name param Nothing expr) = do
     putStrLn $ "fn" ++ show name ++ " takn " ++ show param ++ " = " ++ show expr
 prettyPrint (Top_Level_Const_Defn name (Just type_name) val) = do
     putStrLn $ "const " ++ show name ++ ": " ++ show type_name ++ " = " ++ show val
 prettyPrint (Top_Level_Const_Defn name Nothing val) = do
     putStrLn $ "const " ++ show name ++ " = " ++ show val
-prettyPrint (MainDefn param (Just (TypeName t)) (Stmts stmts)) = do
-    putStrLn $ "main with args? " ++ show param ++ " returns (IO?): " ++ t ++ " = "
+prettyPrint (MainDefn param (Just t) (Stmts stmts)) = do
+    putStrLn $ "main with args? " ++ show param ++ " returns (IO?): " ++ show t ++ " = "
     putStrLn $ unlines (map ((' ':) . prettifyStmt) stmts)
 prettyPrint (MainDefn param Nothing (Stmts stmts)) = do
     putStrLn $ "main with args? " ++ show param ++ " = "

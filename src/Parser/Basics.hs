@@ -149,15 +149,35 @@ pattern = do
     pure (Param name sig)
 
 
-optional_sig :: SouCParser (Maybe TypeName)
+optional_sig :: SouCParser (Maybe SoucType)
 optional_sig = optionMaybe type_signature
 
-type_signature :: SouCParser TypeName
+type_signature :: SouCParser SoucType
 type_signature = do
     char ':' *> spaces
+    type_broadly
+
+type_broadly :: SouCParser SoucType
+type_broadly = try type_constructor <|> full_type
+
+full_type :: SouCParser SoucType
+full_type = do
+    name <- type_name
+    pure (SoucType (TypeName name))
+
+type_name :: SouCParser String
+type_name = do
     first <- upper
     rest <- many (lower <|> upper <|> digit)
-    pure (TypeName (first:rest))
+    pure (first:rest)
+
+type_constructor :: SouCParser SoucType
+type_constructor = do
+    name <- type_name <* char '('
+    params <- sepBy1 type_broadly spaces <* char ')'
+    pure (SoucTypeConstructor (SoucType (TypeName name)) params)
+
+
 
 increase_indent_level :: SouCParser ()
 increase_indent_level = modifyState (\(x,m) -> (x+1,m))
