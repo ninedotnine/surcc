@@ -36,7 +36,8 @@ generate_oper op x y = case op of
     Or                ->  gen_simple_op x "||" y
     Xor               ->  undefined
     In                ->  undefined
-    Tuple             ->  error "tupel"
+    Tuple             ->  "_souc_tuple(" ++ generate_expr x ++ "," ++
+                            generate_expr y ++ ")"
     Iff               ->  undefined
     FromMaybe         ->  undefined
     Prepend           ->  undefined
