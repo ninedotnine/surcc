@@ -129,7 +129,7 @@ optional_sig = Parsec.optionMaybe type_sig where
         Parsec.char ':' *> ignore_spaces
         first <- Parsec.upper
         rest <- Parsec.many (Parsec.lower <|> Parsec.upper <|> Parsec.digit)
-        pure (SoucType (TypeName (first:rest)))
+        pure (SoucType (first:rest))
 
 
 parse_print_expression :: String -> IO ()

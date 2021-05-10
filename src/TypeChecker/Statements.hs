@@ -44,7 +44,7 @@ check_stmt stmt m_ret = do
         Stmt_Return m_expr -> check_stmt_return m_expr m_ret
 
 soucbool :: SoucType
-soucbool = SoucType (TypeName "Bool")
+soucbool = SoucType "Bool"
 
 check_stmt_return :: Maybe ASTree -> Maybe SoucType -> Checker ()
 check_stmt_return m_expr m_ret = do

@@ -163,7 +163,7 @@ type_broadly = try type_constructor <|> full_type
 full_type :: SouCParser SoucType
 full_type = do
     name <- type_name
-    pure (SoucType (TypeName name))
+    pure (SoucType name)
 
 type_name :: SouCParser String
 type_name = do
@@ -175,7 +175,7 @@ type_constructor :: SouCParser SoucType
 type_constructor = do
     name <- type_name <* char '('
     params <- sepBy1 type_broadly spaces <* char ')'
-    pure (SoucTypeConstructor (SoucType (TypeName name)) params)
+    pure (SoucTypeConstructor (SoucType name) params)
 
 
 

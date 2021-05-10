@@ -21,10 +21,10 @@ newtype InputType  = InputType SoucType
 newtype ReturnType = ReturnType SoucType
 
 in_t :: String -> InputType
-in_t = InputType . SoucType . TypeName
+in_t = InputType . SoucType
 
 ret_t :: String -> ReturnType
-ret_t = ReturnType . SoucType . TypeName
+ret_t = ReturnType . SoucType
 
 ret :: (a, ReturnType) -> SoucType
 ret (_, ReturnType x) = x

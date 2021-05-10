@@ -51,12 +51,12 @@ main = do
 
 render :: Either TypeError LocalScope -> String
 render (Right ctx) = show ctx
-render (Left (TypeMismatch (SoucType (TypeName x)) (SoucType (TypeName y)))) = "mismatch: " <> x <> " / " <> y
+render (Left (TypeMismatch (SoucType x) (SoucType y))) = "mismatch: " <> x <> " / " <> y
 render (Left (MultipleDeclarations (Identifier i))) = "multiple declarations for " <> i
 render (Left (Undeclared (Identifier i))) = "undeclared identifier " <> i
 render _ = error "FIXME more complex types"
 
-mismatch :: TypeName -> TypeName -> TypeError
+mismatch :: String -> String -> TypeError
 mismatch x y = TypeMismatch (SoucType x) (SoucType y)
 
 print_err :: Either TypeError LocalScope -> Either TypeError LocalScope -> IO ()

@@ -38,12 +38,12 @@ instance Eq SoucModule where
 instance Eq Import where
     Import s0 == Import s1 = s0 == s1
 
-mismatch :: TypeName -> TypeName -> TypeError
+mismatch :: String -> String -> TypeError
 mismatch x y = TypeMismatch (SoucType x) (SoucType y)
 
 render :: Either TypeError CheckedProgram -> String
 render (Right p) = show p
-render (Left (TypeMismatch (SoucType (TypeName x)) (SoucType (TypeName y)))) = "mismatch: " <> x <> " / " <> y
+render (Left (TypeMismatch (SoucType x) (SoucType y))) = "mismatch: " <> x <> " / " <> y
 render (Left (MultipleDeclarations (Identifier i))) = "multiple declarations: " <> i
 render (Left (Undeclared (Identifier i))) = "undeclared identifier " <> i
 render _ = error "FIXME more complex types"
