@@ -5,4 +5,4 @@ main(stdout: OutputStream) = do
 	end
 	while False
 		i++
-	writey stdout , "done"
+	write stdout , "done"

@@ -2,4 +2,4 @@ main(stdout: OutputStream) = do
 	i <- 0
 	while i < 4
 		i++ ; should be printed
-	writey stdout , "done"
+	write stdout , "done"

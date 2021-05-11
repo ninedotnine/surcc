@@ -54,7 +54,7 @@ reserved_word =
             "suchthat", "super", "superclass", "switch", "sync", "synchronous",
             "table", "take", "target", "test", "then", "this", "to", "typeof",
             "unlock", "undef", "use", "virtual", "void", "volatile", "wait",
-            "when", "with", "write", "yield", "zen"]
+            "when", "with", "yield", "zen"]
 
 space :: SouCParser ()
 space = char ' ' *> pure () <?> ""

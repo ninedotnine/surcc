@@ -78,7 +78,7 @@ newtype Stmts = Stmts [Stmt] deriving (Show, Eq)
 
 data SoucType = SoucType String
               | SoucFn SoucType SoucType
-              | SoucRoutn SoucType -- param only, because return must be "IO"
+              | SoucRoutn (Maybe SoucType) -- param only, because return must be "IO"
               | SoucPair SoucType SoucType
               | SoucMaybe SoucType
               | SoucEither SoucType SoucType

@@ -134,14 +134,14 @@ add_top_level_routines (TopLevelProcType i m_p m_t stmts) = case m_t of
                 Just (Param _ Nothing) -> error "FIXME type inference"
                 Just (Param param (Just p_t)) -> do
                     insert_param param p_t
-                    check_and_bind stmts Nothing (Bound i (SoucRoutn p_t))
+                    check_and_bind stmts Nothing (Bound i (SoucRoutn (Just p_t)))
 
 add_main_routine :: Maybe Param -> Stmts -> Checker Bound
 add_main_routine m_p stmts = case m_p of
     Just (Param _ Nothing) -> error "FIXME infer param type"
     Just (Param p (Just p_t)) -> do
         insert_global (Bound p p_t)
-        check_and_bind stmts Nothing (Bound "main" (SoucRoutn p_t))
+        check_and_bind stmts Nothing (Bound "main" (SoucRoutn (Just p_t)))
     Nothing -> check_and_bind stmts Nothing (Bound "main" (SoucType "IO"))
 
 

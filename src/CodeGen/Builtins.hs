@@ -32,7 +32,7 @@ gen_builtin_constant :: Identifier -> Maybe ASTree -> Maybe String
 gen_builtin_constant = undefined
 
 builtin_subroutines = [
-    BuiltinSubroutine "writey" "_souc_writey"
+    BuiltinSubroutine "write" "_souc_write"
     ,
     BuiltinSubroutine "abort" "abort"
     ]

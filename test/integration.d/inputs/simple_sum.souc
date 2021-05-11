@@ -1,6 +1,6 @@
 main(stdout: OutputStream) = do
 	if 3 + 3 == 6: Integer do
-		writey stdout , "6"
+		write stdout , "6"
 	else
-		writey stdout , "not 6"
+		write stdout , "not 6"
 	end if

@@ -1,2 +1,2 @@
 main(stdout: OutputStream) = do
-	writey stdout , "hello world"
+	write stdout , "hello world"

@@ -95,8 +95,11 @@ check_stmt_call :: Identifier -> Maybe ASTree -> Checker ()
 check_stmt_call name m_expr = do
     ctx <- get
     case (lookup ctx name , m_expr) of
+         -- FIXME this case is handled twice.
+         -- a val of SoucType "IO" should be a SoucRoutn
         (Just (SoucType "IO"), Nothing) -> pure ()
-        (Just (SoucRoutn t), Just expr) -> case check_astree ctx expr t of
+        (Just (SoucRoutn Nothing), Nothing) -> pure ()
+        (Just (SoucRoutn (Just param)), Just expr) -> case check_astree ctx expr param of
             Left err -> throwE err
             Right () -> pure ()
         (Just t, _) -> throwE $ TypeMismatch (SoucType "IO") t
