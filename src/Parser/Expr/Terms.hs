@@ -18,7 +18,6 @@ parse_term_tok = TermTok <$> (
         parse_num
     <|> parse_char
     <|> parse_string
-    <|> parse_bool
     <|> parse_constructor
     <|> parse_var)
 
@@ -38,9 +37,6 @@ parse_prefix_op = do
 
 parse_num :: ShuntingYardParser Term
 parse_num = LitInt <$> read <$> Parsec.many1 Parsec.digit
-
-parse_bool :: ShuntingYardParser Term
-parse_bool = LitBool <$> read <$> (Parsec.string "True" <|> Parsec.string "False")
 
 parse_constructor :: ShuntingYardParser Term
 parse_constructor = do
