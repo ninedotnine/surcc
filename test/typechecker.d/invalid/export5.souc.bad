@@ -1,0 +1,7 @@
+module export5 where
+	two: Integer
+	f: Fn(Integer Integer)
+
+two = 2
+
+f(x: Integer): Char = 'a'
