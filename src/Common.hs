@@ -1,5 +1,6 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE PatternSynonyms #-}
 
 module Common (
     Stmt(..),
@@ -10,6 +11,7 @@ module Common (
     Operator(..),
     PrefixOperator(..),
     SoucType(..),
+    pattern SoucFn,
     Bound(..),
     TypeError(..),
     Stmts(..),
@@ -77,7 +79,6 @@ newtype Import = Import String deriving (Read, Show)
 newtype Stmts = Stmts [Stmt] deriving (Show, Eq)
 
 data SoucType = SoucType String
-              | SoucFn SoucType SoucType
               | SoucRoutn (Maybe SoucType) -- param only, because return must be "IO"
               | SoucPair SoucType SoucType
               | SoucMaybe SoucType
@@ -85,6 +86,9 @@ data SoucType = SoucType String
               | SoucList SoucType
               | SoucTypeConstructor String [SoucType]
               deriving (Eq)
+
+pattern SoucFn :: SoucType -> SoucType -> SoucType
+pattern SoucFn t0 t1 = SoucTypeConstructor "Fn" [t0, t1]
 
 data Bound = Bound Identifier SoucType deriving Eq
 
@@ -227,7 +231,6 @@ instance Show PrefixOperator where
 
 instance Show SoucType where
     show (SoucType t) = show t
-    show (SoucFn t0 t1) = show t0 <> " -> " <> show t1
     show (SoucRoutn t) = show t <> " -> IO"
     show (SoucPair t0 t1) = show t0 <> " & " <> show t1
     show (SoucMaybe t) = '?' : show t
