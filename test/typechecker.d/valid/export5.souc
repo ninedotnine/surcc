@@ -1,0 +1,10 @@
+module export5 where
+	i: Integer
+	f: Fn(Integer Integer)
+
+i = 4
+
+f(x: Integer): Integer = x+i
+
+main(stdout: OutputStream): IO = do
+	write stdout , "neat"
