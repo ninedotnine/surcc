@@ -9,6 +9,7 @@ import Parser.ExprParser (
     PrefixOperator(..)
     )
 
+import CodeGen.Builtins (gen_builtin_data)
 import Common
 
 generate_expr :: ASTree -> String
@@ -63,7 +64,9 @@ generate_term (LitChar c) = "\'" ++ c : "\'"
 generate_term (LitBool b) = if b then "true" else "false"
 generate_term (LitString s) = show s
 generate_term (Var (Identifier i)) = "_souc_" ++ i
-generate_term (Constructor _) = "44" -- fixme lol
+generate_term (Constructor s) = case gen_builtin_data s of
+    Just output -> output
+    Nothing -> "45" -- fixme hehe
 
 
 generate_prefix_expr :: PrefixOperator -> String
