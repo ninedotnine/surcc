@@ -63,6 +63,7 @@ generate_term (LitChar c) = "\'" ++ c : "\'"
 generate_term (LitBool b) = if b then "true" else "false"
 generate_term (LitString s) = show s
 generate_term (Var (Identifier i)) = "_souc_" ++ i
+generate_term (Constructor _) = "44" -- fixme lol
 
 
 generate_prefix_expr :: PrefixOperator -> String

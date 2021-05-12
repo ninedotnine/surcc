@@ -12,6 +12,7 @@ module Common (
     PrefixOperator(..),
     SoucType(..),
     pattern SoucFn,
+    pattern SoucMaybe,
     Bound(..),
     TypeError(..),
     Stmts(..),
@@ -81,7 +82,6 @@ newtype Stmts = Stmts [Stmt] deriving (Show, Eq)
 data SoucType = SoucType String
               | SoucRoutn (Maybe SoucType) -- param only, because return must be "IO"
               | SoucPair SoucType SoucType
-              | SoucMaybe SoucType
               | SoucEither SoucType SoucType
               | SoucList SoucType
               | SoucTypeConstructor String [SoucType]
@@ -89,6 +89,9 @@ data SoucType = SoucType String
 
 pattern SoucFn :: SoucType -> SoucType -> SoucType
 pattern SoucFn t0 t1 = SoucTypeConstructor "Fn" [t0, t1]
+
+pattern SoucMaybe :: SoucType -> SoucType
+pattern SoucMaybe t = SoucTypeConstructor "Maybe" [t]
 
 data Bound = Bound Identifier SoucType deriving Eq
 
@@ -98,6 +101,7 @@ instance Show Bound where
 data TypeError = TypeMismatch SoucType SoucType
                | MultipleDeclarations Identifier
                | Undeclared Identifier
+               | UnknownData String
                | ExportedButNotDefined Bound
     deriving (Eq)
 
@@ -105,6 +109,7 @@ instance Show TypeError where
     show (TypeMismatch t0 t1) = "mismatch: expected " <> show t0 <> " but got " <> show t1
     show (MultipleDeclarations name) = "multiple declarations of " <> show name
     show (Undeclared name) = "undeclared " <> show name
+    show (UnknownData name) = "unknown data constructor: " <> show name
     show (ExportedButNotDefined name) = "declared " <> show name <> " was not defined"
 
 data Param = Param Identifier (Maybe SoucType) deriving (Show, Eq)
@@ -139,6 +144,7 @@ data Term = LitInt Integer
           | LitBool Bool
           | LitString String
           | Var Identifier
+          | Constructor String
     deriving (Eq, Show)
 
 data Operator = Plus
@@ -233,7 +239,6 @@ instance Show SoucType where
     show (SoucType t) = show t
     show (SoucRoutn t) = show t <> " -> IO"
     show (SoucPair t0 t1) = show t0 <> " & " <> show t1
-    show (SoucMaybe t) = '?' : show t
     show (SoucEither t0 t1) = show t0 <> " | " <> show t1
     show (SoucList t) = '[': show t <> "]"
     show (SoucTypeConstructor t ts) = t <> "(" <> show ts <> ")"

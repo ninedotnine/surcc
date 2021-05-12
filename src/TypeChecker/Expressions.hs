@@ -35,6 +35,14 @@ infer_term context term = case term of
     Var v -> case lookup context v of
         Nothing -> Left (Undeclared v)
         Just t -> Right t
+    Constructor s -> case s of
+        "True" -> Right (SoucType "Bool")
+        "False" -> Right (SoucType "Bool")
+        "None" -> Right (SoucMaybe (SoucType "Integer"))
+        "OK" -> Right (SoucMaybe (
+                    SoucFn (SoucType "Integer") (SoucType "Integer")))
+        _ -> Left (UnknownData s)
+
 
 not_implemented :: Either TypeError a
 not_implemented = Left $ TypeMismatch (SoucType "NOT YET") (SoucType "IMPLEMENTED")
