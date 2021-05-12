@@ -174,6 +174,7 @@ insert_const = insert_local Immut
 
 builtins_ctx :: Builtins
 builtins_ctx = Builtins [
+    Bound "puts" (SoucRoutn (Just (SoucType "String"))),
     Bound "abort" (SoucRoutn Nothing),
     Bound "write" (SoucRoutn (Just (SoucPair (SoucType "OutputStream") (SoucType "String"))))
     ]
