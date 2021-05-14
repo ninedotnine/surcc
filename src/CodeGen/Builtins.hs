@@ -9,6 +9,10 @@ module CodeGen.Builtins (
 import Common
 import Parser.ExprParser
 
+import qualified Data.HashMap.Strict as Map
+
+type Mapping = Map.HashMap Identifier (String, SoucType)
+
 data BuiltinFunction = BuiltinFunction Identifier String SoucType
 
 data BuiltinSubroutine = BuiltinSubroutine Identifier String SoucType
@@ -37,26 +41,30 @@ gen_builtin_data s = case s of
     "None" -> Just "_souc_none"
     _ -> Nothing
 
-builtin_subroutines = [
-    BuiltinSubroutine "puts" "_souc_puts" (SoucRoutn (Just (SoucType "String")))
+builtin_subroutines :: Mapping
+builtin_subroutines = Map.fromList [
+    ("puts", ("_souc_puts", (SoucRoutn (Just (SoucType "String")))))
     ,
-    BuiltinSubroutine "write" "_souc_write" (SoucRoutn (Just (SoucType "String")))
+    ("write", ("_souc_write", (SoucRoutn (Just (SoucType "String")))))
     ,
-    BuiltinSubroutine "abort" "abort" (SoucRoutn Nothing)
+    ("abort", ("abort", SoucRoutn Nothing))
     ]
 
-builtin_functions = [
-    BuiltinFunction "increment" "_souc_increment" (SoucFn (SoucType "Integer") (SoucType "Integer"))
+builtin_functions :: Mapping
+builtin_functions = Map.fromList [
+    ("increment", ("_souc_increment", SoucFn (SoucType "Integer") (SoucType "Integer")))
     ]
 
-builtin_constants = [
-    BuiltinConstant "pi" "3" (SoucType "Integer") -- biblical value
+builtin_constants :: Mapping
+builtin_constants = Map.fromList [
+    ("pi", ("3", SoucType "Integer")) -- biblical value
     ]
 
-builtin_data = [
-    BuiltinData "True" "-1" (SoucType "Bool")
+builtin_data :: Map.HashMap String (String, SoucType)
+builtin_data = Map.fromList [
+    ("True", ("-1", SoucType "Bool"))
     ,
-    BuiltinData "False" "0" (SoucType "Bool")
+    ("False", ("0", SoucType "Bool"))
     ,
-    BuiltinData "None" "_souc_none" (SoucMaybe (SoucType "Integer"))
+    ("None", ("_souc_none", SoucMaybe (SoucType "Integer")))
     ]

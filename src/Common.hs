@@ -37,6 +37,7 @@ import Text.Parsec (Parsec)
 import qualified Data.Map.Strict as Map (Map, empty)
 import Data.List.NonEmpty ( NonEmpty(..) )
 import Data.String (IsString)
+import Data.Hashable (Hashable)
 
 
 {-
@@ -58,7 +59,7 @@ empty_state = (0, Map.empty :| [])
 type SouCParser a = Parsec String ParserState a
 
 newtype Identifier = Identifier String
-                   deriving (Eq, Read, Show, Ord, IsString, Semigroup)
+                   deriving (Eq, Read, Show, Ord, IsString, Semigroup, Hashable)
 
 -- instance Show Identifier where
 --     show (Identifier x) = show x
