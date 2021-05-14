@@ -6,18 +6,14 @@ module CodeGen.Builtins (
     gen_builtin_data
 ) where
 
-import Common (
-    Stmt(..),
-    Param(..),
-    Identifier(..),
-    )
+import Common
 import Parser.ExprParser
 
-data BuiltinFunction = BuiltinFunction Identifier String
+data BuiltinFunction = BuiltinFunction Identifier String SoucType
 
-data BuiltinSubroutine = BuiltinSubroutine Identifier String
+data BuiltinSubroutine = BuiltinSubroutine Identifier String SoucType
 
-data BuiltinConstant = BuiltinConstant Identifier String
+data BuiltinConstant = BuiltinConstant Identifier String SoucType
 
 gen_builtin_identifier :: String -> Maybe String
 gen_builtin_identifier name = Just ("_souc_" ++ name)
@@ -40,16 +36,17 @@ gen_builtin_data s = case s of
     _ -> Nothing
 
 builtin_subroutines = [
-    BuiltinSubroutine "puts" "_souc_puts",
-    BuiltinSubroutine "write" "_souc_write"
+    BuiltinSubroutine "puts" "_souc_puts" (SoucRoutn (Just (SoucType "String")))
     ,
-    BuiltinSubroutine "abort" "abort"
+    BuiltinSubroutine "write" "_souc_write" (SoucRoutn (Just (SoucType "String")))
+    ,
+    BuiltinSubroutine "abort" "abort" (SoucRoutn Nothing)
     ]
 
 builtin_functions = [
-    BuiltinFunction "increment" "_souc_increment"
+    BuiltinFunction "increment" "_souc_increment" (SoucFn (SoucType "Integer") (SoucType "Integer"))
     ]
 
 builtin_constants = [
-    BuiltinConstant "pi" "3"  -- biblical value
+    BuiltinConstant "pi" "3" (SoucType "Integer") -- biblical value
     ]
