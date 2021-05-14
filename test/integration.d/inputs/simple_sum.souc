@@ -1,5 +1,5 @@
 main(stdout: OutputStream) = do
-	if 3 + 3 == 6: Integer do
+	if 3 + pi == 6: Integer do
 		write stdout , "6"
 	else
 		write stdout , "not 6"

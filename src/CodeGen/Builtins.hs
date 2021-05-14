@@ -32,14 +32,11 @@ gen_builtin_function :: Identifier -> ASTree -> Maybe String
 gen_builtin_function _ _ = Nothing
 
 gen_builtin_constant :: Identifier -> Maybe String
-gen_builtin_constant = undefined
+-- gen_builtin_constant i = fst <$> Map.lookup i builtin_constants
+gen_builtin_constant = error "fix pi haha"
 
 gen_builtin_data :: String -> Maybe String
-gen_builtin_data s = case s of
-    "True" -> Just "-1"
-    "False" -> Just "0"
-    "None" -> Just "_souc_none"
-    _ -> Nothing
+gen_builtin_data s = fst <$> Map.lookup s builtin_data
 
 builtin_subroutines :: Mapping
 builtin_subroutines = Map.fromList [
