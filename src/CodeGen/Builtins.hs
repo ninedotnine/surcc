@@ -15,6 +15,8 @@ data BuiltinSubroutine = BuiltinSubroutine Identifier String SoucType
 
 data BuiltinConstant = BuiltinConstant Identifier String SoucType
 
+data BuiltinData = BuiltinData Identifier String SoucType
+
 gen_builtin_identifier :: String -> Maybe String
 gen_builtin_identifier name = Just ("_souc_" ++ name)
 
@@ -49,4 +51,12 @@ builtin_functions = [
 
 builtin_constants = [
     BuiltinConstant "pi" "3" (SoucType "Integer") -- biblical value
+    ]
+
+builtin_data = [
+    BuiltinData "True" "-1" (SoucType "Bool")
+    ,
+    BuiltinData "False" "0" (SoucType "Bool")
+    ,
+    BuiltinData "None" "_souc_none" (SoucMaybe (SoucType "Integer"))
     ]
