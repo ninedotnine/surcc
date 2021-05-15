@@ -19,10 +19,10 @@ mismatch :: String -> String -> Expected
 mismatch x y = Result $ Left $ TypeMismatch (SoucType x) (SoucType y)
 
 no_exports_ctx :: ExportList
-no_exports_ctx = ExportList [] (Builtins [])
+no_exports_ctx = ExportList []
 
 empty_ctx :: LocalScope
-empty_ctx = GlobalScope [] (ExportList [] (Builtins []))
+empty_ctx = GlobalScope [] (ExportList [])
 
 globals :: LocalScope
 globals = GlobalScope [

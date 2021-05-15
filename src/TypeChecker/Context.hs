@@ -1,6 +1,6 @@
 module TypeChecker.Context (
     ContextClass(..),
-    Builtins(..),
+    BuiltinsCtx(..),
     ExportList(..),
     LocalScope(..),
     BoundLocal(..),
@@ -9,16 +9,18 @@ module TypeChecker.Context (
     insert_param,
     insert_const,
     insert_mut,
-    builtins_ctx,
     Checker,
     add_potential_export,
     exports_remaining,
+    builtins_ctx,
 ) where
 
 import Prelude hiding (lookup)
 import Control.Monad.State
 
 import Common
+import CodeGen.Builtins
+
 import Parser.Expr.ExprTypes
 
 import Control.Monad.Except
@@ -36,18 +38,18 @@ data Mutability = Mut | Immut deriving (Show, Eq)
 class ContextClass c where
     lookup :: c -> Identifier -> Maybe SoucType
 
-data Builtins = Builtins [Bound] deriving Show
-data ExportList = ExportList [Bound] Builtins deriving Show
+data ExportList = ExportList [Bound] deriving Show
 data LocalScope = GlobalScope [Bound] ExportList
                 | InnerScope [BoundLocal] LocalScope
                 deriving Show
 
-instance ContextClass Builtins where
-    lookup (Builtins bounds) ident = lookup_b bounds ident
+-- instance ContextClass BuiltinsCtx where
+-- --     lookup (Builtins bounds) ident = lookup_b bounds ident
+--     lookup (Builtins bounds) ident = typeof_builtin_identifier ident
 
 instance ContextClass ExportList where
-    lookup (ExportList bounds ctx) ident = case lookup_b bounds ident of
-        Nothing -> lookup ctx ident
+    lookup (ExportList bounds) ident = case lookup_b bounds ident of
+        Nothing -> typeof_builtin_identifier ident
         just_type -> just_type
 
 instance ContextClass LocalScope where
@@ -125,8 +127,8 @@ remove_export_wrapper scope  b = case scope of
         Right ok_ctx -> Right (GlobalScope bounds ok_ctx)
 
 remove_export :: ExportList -> Bound -> Either TypeError ExportList
-remove_export (ExportList bounds ctx) (Bound i t) = case lookup_b bounds i of
-    Just b_t | t == b_t -> Right (ExportList (filter (\(Bound b_i _) -> b_i /= i) bounds) ctx)
+remove_export (ExportList bounds) (Bound i t) = case lookup_b bounds i of
+    Just b_t | t == b_t -> Right (ExportList (filter (\(Bound b_i _) -> b_i /= i) bounds))
     Just b_t -> Left (TypeMismatch b_t t)
     Nothing -> Left (Undeclared i)
 
@@ -144,8 +146,8 @@ add_potential_export bound = do
 
 exports_remaining :: LocalScope -> [Bound]
 exports_remaining (InnerScope _ ctx) = exports_remaining ctx
-exports_remaining (GlobalScope _ (ExportList [] _)) = []
-exports_remaining (GlobalScope _ (ExportList bs _)) = bs
+exports_remaining (GlobalScope _ (ExportList [])) = []
+exports_remaining (GlobalScope _ (ExportList bs)) = bs
 
 type Checker a = ExceptT TypeError (State LocalScope) a
 
@@ -171,10 +173,3 @@ insert_mut = insert_local Mut
 
 insert_const :: Bound -> Checker ()
 insert_const = insert_local Immut
-
-builtins_ctx :: Builtins
-builtins_ctx = Builtins [
-    Bound "puts" (SoucRoutn (Just (SoucType "String"))),
-    Bound "abort" (SoucRoutn Nothing),
-    Bound "write" (SoucRoutn (Just (SoucPair (SoucType "OutputStream") (SoucType "String"))))
-    ]
