@@ -62,7 +62,7 @@ gen_simple_op x s y = generate_expr x <> s <> generate_expr y
 generate_term :: Term -> String
 generate_term (LitInt l) = show l
 generate_term (LitChar c) = "\'" ++ c : "\'"
-generate_term (LitString s) = show s
+generate_term (LitString s) = "(union _souc_obj) { ._souc_str = " ++ show s ++ "}"
 generate_term (Var i) = generate_identifier i
 generate_term (Constructor s) = case gen_builtin_data s of
     Just output -> output

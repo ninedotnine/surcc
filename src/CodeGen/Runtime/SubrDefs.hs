@@ -6,7 +6,7 @@ subrdefs :: String
 subrdefs = intercalate "\n" [write, abort]
 
 write :: String
-write = "void _souc_write(union _souc_obj val) { puts(val._souc_str); } "
+write = "void _souc_write(union _souc_obj pair) { puts(pair._souc_pair->second._souc_str); } "
 
 abort :: String
 abort = "void _souc_abort(void) { abort(); } "

@@ -47,11 +47,11 @@ instance Generatable Top_Level_Defn where
                 Nothing -> "void"
                 Just p -> gen p
     gen (MainDefn m_param _ stmts) =
-        "int main(void) { " ++ param ++ " ;\n " ++ body ++ "}\n" where
+        "int main(void) { " ++ param ++ body ++ "}\n" where
             body = gen stmts
             param = case m_param of
                 Nothing -> ""
-                Just p -> gen p
+                Just p -> gen p ++ ";"
 
 
 instance Generatable Stmts where
