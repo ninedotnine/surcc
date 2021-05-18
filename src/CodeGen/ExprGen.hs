@@ -44,10 +44,8 @@ generate_expr (Branch op x y) = case op of
     Combine           ->  undefined
     Index             ->  undefined
     Lookup            ->  undefined
-    Apply             ->  "_souc_user_" ++ generate_expr x ++ "("
-                          ++ generate_expr y ++ ") "
-    FlipApply         ->  "_souc_user_" ++ generate_expr y ++ "("
-                          ++ generate_expr x ++ ") "
+    Apply             ->  generate_expr x ++ "(" ++ generate_expr y ++ ") "
+    FlipApply         ->  generate_expr y ++ "(" ++ generate_expr x ++ ") "
     Map               ->  undefined
     FlipMap           ->  undefined
     Applicative       ->  undefined

@@ -30,9 +30,11 @@ data BuiltinData = BuiltinData Identifier String SoucType
 
 
 gen_builtin_identifier :: String -> Maybe String
-gen_builtin_identifier name = case Map.lookup name builtin_constants of
+gen_builtin_identifier name = case Map.lookup name builtins of
     Nothing -> Just ("_souc_" ++ name)
     just_something -> fst <$> just_something
+    where
+        builtins = builtin_subroutines <>  builtin_functions <> builtin_constants
 
 gen_builtin_subroutine :: Identifier -> Maybe ASTree -> Maybe String
 gen_builtin_subroutine _ _ = Nothing
