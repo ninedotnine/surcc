@@ -29,7 +29,7 @@ instance Generatable Identifier where
     gen = generate_identifier
 
 instance Generatable Param where
-    gen (Param param _) = "int " ++ gen param -- FIXME
+    gen (Param param _) = "union _souc_obj " ++ gen param
 
 instance Generatable Top_Level_Defn where
     gen (Top_Level_Const_Defn name _ expr) =
@@ -47,11 +47,12 @@ instance Generatable Top_Level_Defn where
                 Nothing -> "void"
                 Just p -> gen p
     gen (MainDefn m_param _ stmts) =
-        "int main (" ++ param ++ ") { " ++ body ++ "}\n" where
+        "int main(void) { " ++ param ++ " ;\n " ++ body ++ "}\n" where
             body = gen stmts
             param = case m_param of
-                Nothing -> "void"
+                Nothing -> ""
                 Just p -> gen p
+
 
 instance Generatable Stmts where
     gen (Stmts stmts) = concat $ map gen stmts
