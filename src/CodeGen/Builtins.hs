@@ -10,7 +10,6 @@ import Parser.ExprParser
 
 import qualified Data.HashMap.Strict as Map
 
--- type Mapping = Map.HashMap Identifier (String, SoucType)
 type Mapping = Map.HashMap String (String, SoucType)
 
 data BuiltinFunction = BuiltinFunction Identifier String SoucType
@@ -40,7 +39,6 @@ typeof_builtin_constant :: String -> Maybe SoucType
 typeof_builtin_constant i = snd <$> Map.lookup i builtin_data
 
 typeof_builtin_identifier :: Identifier -> Maybe SoucType
--- typeof_builtin_identifier i = snd <$> Map.lookup i builtin_constants
 typeof_builtin_identifier (Identifier i) = snd <$> Map.lookup i builtins where
     builtins = builtin_subroutines <> builtin_functions <> builtin_constants
 
@@ -59,9 +57,6 @@ builtins_ctx = Builtins [
     Bound "abort" (SoucRoutn Nothing),
     Bound "write" (SoucRoutn (Just (SoucPair (SoucType "OutputStream") (SoucType "String"))))
     ]
--- builtins_ctx = b
--- builtins_ctx = undefined
-
 
 
 builtin_subroutines :: Mapping
@@ -78,13 +73,12 @@ builtin_functions = Map.fromList [
     ("increment", ("_souc_increment", SoucFn (SoucType "Integer") (SoucType "Integer")))
     ]
 
--- builtin_constants :: Mapping
-builtin_constants :: Map.HashMap String (String , SoucType)
+builtin_constants :: Mapping
 builtin_constants = Map.fromList [
     ("pi", ("3", SoucType "Integer")) -- biblical value
     ]
 
-builtin_data :: Map.HashMap String (String, SoucType)
+builtin_data :: Mapping
 builtin_data = Map.fromList [
     ("True", ("-1", SoucType "Bool"))
     ,
