@@ -12,7 +12,6 @@ module TypeChecker.Context (
     Checker,
     add_potential_export,
     exports_remaining,
-    builtins_ctx,
 ) where
 
 import Prelude hiding (lookup)

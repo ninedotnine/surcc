@@ -5,11 +5,7 @@ module CodeGen.Builtins (
     gen_builtin_constant,
     gen_builtin_data,
     typeof_builtin_identifier,
-    typeof_builtin_subroutine,
-    typeof_builtin_function,
-    typeof_builtin_constant,
     BuiltinsCtx(..),
-    builtins_ctx
 ) where
 
 import Common
