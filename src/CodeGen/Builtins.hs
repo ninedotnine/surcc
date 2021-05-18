@@ -13,14 +13,7 @@ import qualified Data.HashMap.Strict as Map
 
 type Mapping = Map.HashMap String (String, SoucType)
 
-data BuiltinFunction = BuiltinFunction Identifier String SoucType
-
-data BuiltinSubroutine = BuiltinSubroutine Identifier String SoucType
-
-data BuiltinConstant = BuiltinConstant Identifier String SoucType
-
-data BuiltinData = BuiltinData Identifier String SoucType
-
+newtype BuiltinsCtx = Builtins [Bound] deriving Show
 
 gen_builtin_identifier :: Identifier -> Maybe String
 gen_builtin_identifier (Identifier i) = fst <$> Map.lookup i builtins where
@@ -36,17 +29,6 @@ gen_builtin_data s = fst <$> Map.lookup s builtin_data
 
 typeof_builtin_data :: String -> Maybe SoucType
 typeof_builtin_data i = snd <$> Map.lookup i builtin_data
-
-
-newtype BuiltinsCtx = Builtins [Bound] deriving Show
-
-builtins_ctx :: BuiltinsCtx
-builtins_ctx = Builtins [
-    Bound "puts" (SoucRoutn (Just (SoucType "String"))),
-    Bound "abort" (SoucRoutn Nothing),
-    Bound "write" (SoucRoutn (Just (SoucPair (SoucType "OutputStream") (SoucType "String"))))
-    ]
-
 
 builtin_subroutines :: Mapping
 builtin_subroutines = Map.fromList [
