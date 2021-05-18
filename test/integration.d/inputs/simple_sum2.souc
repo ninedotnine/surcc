@@ -1,0 +1,6 @@
+main(stdout: OutputStream) = do
+	if (3 & increment) == 4: Integer do
+		write stdout , "4"
+	else
+		write stdout , "b4d"
+	end if
