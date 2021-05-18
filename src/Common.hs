@@ -142,7 +142,6 @@ data ASTree = Branch Operator ASTree ASTree
 
 data Term = LitInt Integer
           | LitChar Char
-          | LitBool Bool
           | LitString String
           | Var Identifier
           | Constructor String

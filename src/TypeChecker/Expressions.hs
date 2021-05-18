@@ -31,7 +31,6 @@ infer_term :: LocalScope -> Term -> Either TypeError SoucType
 infer_term context term = case term of
     LitInt _    -> Right (SoucType "Integer")
     LitChar _   -> Right (SoucType "Char")
-    LitBool _   -> Right (SoucType "Bool")
     LitString _ -> Right (SoucType "String")
     Var v -> case lookup context v of
         Nothing -> Left (Undeclared v)
