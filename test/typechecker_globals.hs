@@ -6,6 +6,7 @@
 import TypeChecker.TypeChecker
 import TypeChecker.Context
 import Common
+import Builtins
 
 import System.Exit (exitFailure)
 

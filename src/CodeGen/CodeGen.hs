@@ -1,7 +1,7 @@
 module CodeGen.CodeGen (generate) where
 
 import CodeGen.ExprGen (generate_expr, generate_identifier)
-import CodeGen.Builtins
+import Builtins
 import CodeGen.Runtime (runtime)
 import Common (
     Stmt(..),

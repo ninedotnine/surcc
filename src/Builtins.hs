@@ -1,4 +1,4 @@
-module CodeGen.Builtins (
+module Builtins (
     gen_builtin_identifier,
     gen_builtin_data,
     typeof_builtin_identifier,

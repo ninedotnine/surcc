@@ -10,7 +10,7 @@ import Parser.ExprParser (
     PrefixOperator(..)
     )
 
-import CodeGen.Builtins (gen_builtin_data, gen_builtin_identifier)
+import Builtins (gen_builtin_data, gen_builtin_identifier)
 import Common
 
 import Data.Maybe (fromMaybe)

@@ -1,6 +1,5 @@
 module TypeChecker.Context (
     ContextClass(..),
-    BuiltinsCtx(..),
     ExportList(..),
     LocalScope(..),
     BoundLocal(..),
@@ -18,7 +17,7 @@ import Prelude hiding (lookup)
 import Control.Monad.State
 
 import Common
-import CodeGen.Builtins
+import Builtins (typeof_builtin_identifier)
 
 import Parser.Expr.ExprTypes
 

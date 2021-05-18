@@ -15,7 +15,6 @@ import Common
 import Parser.Expr.ExprTypes
 import TypeChecker.Context
 import TypeChecker.Operators
-import CodeGen.Builtins
 
 infer :: LocalScope -> ASTree -> Either TypeError SoucType
 infer ctx tree = case tree of
