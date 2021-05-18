@@ -1,5 +1,6 @@
 module CodeGen.ExprGen (
-    generate_expr
+    generate_expr,
+    generate_identifier
 ) where
 
 import Parser.ExprParser (
@@ -63,10 +64,14 @@ generate_term (LitInt l) = show l
 generate_term (LitChar c) = "\'" ++ c : "\'"
 generate_term (LitBool b) = if b then "true" else "false"
 generate_term (LitString s) = show s
-generate_term (Var (Identifier i)) = fromMaybe ("_souc_user_" ++ i) (gen_builtin_identifier i) -- FIXME copied from CodeGen.hs
+generate_term (Var i) = generate_identifier i
 generate_term (Constructor s) = case gen_builtin_data s of
     Just output -> output
     Nothing -> "45" -- fixme hehe
+
+generate_identifier :: Identifier -> String
+generate_identifier i = fromMaybe (prepend i) (gen_builtin_identifier i) where
+    prepend (Identifier name) = "_souc_user_" ++ name
 
 
 generate_prefix_expr :: PrefixOperator -> String

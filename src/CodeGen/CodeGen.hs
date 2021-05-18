@@ -1,6 +1,6 @@
 module CodeGen.CodeGen (generate) where
 
-import CodeGen.ExprGen (generate_expr)
+import CodeGen.ExprGen (generate_expr, generate_identifier)
 import CodeGen.Builtins
 import CodeGen.Runtime (runtime)
 import Common (
@@ -26,7 +26,7 @@ instance Generatable ASTree where
     gen = generate_expr
 
 instance Generatable Identifier where
-    gen (Identifier v) = fromMaybe ("_souc_user_" ++ v) (gen_builtin_identifier v)
+    gen = generate_identifier
 
 instance Generatable Param where
     gen (Param param _) = "int " ++ gen param -- FIXME
