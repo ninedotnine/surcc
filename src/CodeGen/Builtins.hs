@@ -1,8 +1,5 @@
 module CodeGen.Builtins (
     gen_builtin_identifier,
-    gen_builtin_subroutine,
-    gen_builtin_function,
-    gen_builtin_constant,
     gen_builtin_data,
     typeof_builtin_identifier,
     BuiltinsCtx(..),

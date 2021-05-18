@@ -61,13 +61,10 @@ instance Generatable Stmt where
         expr = case m_expr of
             Nothing -> ""
             Just e -> gen e
-    gen (Stmt_Sub_Call name m_expr) =
-        case gen_builtin_subroutine name m_expr of
-            Just generated -> generated
-            Nothing -> gen name ++ "(" ++ expr ++ "); " where
-                expr = case m_expr of
-                    Nothing -> ""
-                    Just e -> gen e
+    gen (Stmt_Sub_Call name m_expr) = gen name ++ "(" ++ expr ++ "); " where
+        expr = case m_expr of
+            Nothing -> ""
+            Just e -> gen e
     gen (Stmt_Var_Assign name _ expr) =
         "int " ++ gen name ++ " = " ++ gen expr ++ "; "
     gen (Stmt_Const_Assign name _ expr) =
