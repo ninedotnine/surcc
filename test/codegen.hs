@@ -99,7 +99,7 @@ subber_while :: CheckedProgram
 subber_while = CheckedProgram Nothing [] [
     MainDefn Nothing Nothing (Stmts []),
     SubDefn (Identifier "subby") Nothing Nothing (Stmts [
-        Stmt_While (Leaf (LitString "false")) (Stmts [
+        Stmt_While (Leaf (Constructor "False")) (Stmts [
             Stmt_Var_Assign (Identifier "x") Nothing (Leaf (LitInt 41)),
             Stmt_Postfix_Oper (Identifier "x") "++"])])]
 
@@ -107,7 +107,7 @@ subber_if :: CheckedProgram
 subber_if = CheckedProgram Nothing [] [
     MainDefn Nothing Nothing (Stmts []),
     SubDefn (Identifier "subby") Nothing Nothing (Stmts [
-        Stmt_If (Leaf (LitString "false")) (Stmts [
+        Stmt_If (Leaf (Constructor "False")) (Stmts [
             Stmt_Var_Assign (Identifier "x") Nothing (Leaf (LitInt 41)),
             Stmt_Postfix_Oper (Identifier "x") "++"])
             Nothing])]
@@ -127,7 +127,7 @@ subber_unless :: CheckedProgram
 subber_unless = CheckedProgram Nothing [] [
     MainDefn Nothing Nothing (Stmts []),
     SubDefn (Identifier "subby") Nothing Nothing (Stmts [
-        Stmt_Unless (Leaf (LitString "false")) (Stmts [
+        Stmt_Unless (Leaf (Constructor "False")) (Stmts [
             Stmt_Var_Assign (Identifier "x") Nothing (Leaf (LitInt 41)),
             Stmt_Postfix_Oper (Identifier "x") "++"])
             Nothing])]
