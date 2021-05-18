@@ -47,6 +47,10 @@ builtin_functions = Map.fromList [
 builtin_constants :: Mapping
 builtin_constants = Map.fromList [
     ("pi", ("3", SoucType "Integer")) -- biblical value
+    ,
+    ("i42", ("_souc_42", SoucType "Integer"))
+    ,
+    ("ok43", ("_souc_42", SoucType "Integer"))
     ]
 
 builtin_data :: Mapping
@@ -56,4 +60,6 @@ builtin_data = Map.fromList [
     ("False", ("0", SoucType "Bool"))
     ,
     ("None", ("_souc_none", SoucMaybe (SoucType "Integer")))
+    ,
+    ("OK", ("_souc_ok", SoucFn (SoucType "Integer") (SoucMaybe (SoucType "Integer"))))
     ]
