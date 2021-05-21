@@ -21,19 +21,19 @@ generate_expr (Signed e _) = generate_expr e
 generate_expr (Twig op e) = generate_prefix_expr op ++ generate_expr e
 generate_expr (Branch op x y) = case op of
     Plus              ->  "_souc_sum(" ++ generate_expr x ++ "," ++ generate_expr y ++ ")"
-    Minus             ->  gen_simple_op x "-" y
-    Splat             ->  gen_simple_op x "*" y
-    Divide            ->  gen_simple_op x "/" y
+    Minus             ->  "_souc_difference(" ++ generate_expr x ++ "," ++ generate_expr y ++ ")"
+    Splat             ->  "_souc_product(" ++ generate_expr x ++ "," ++ generate_expr y ++ ")"
+    Divide            ->  "_souc_quotient(" ++ generate_expr x ++ "," ++ generate_expr y ++ ")"
     FloorDiv          ->  undefined
-    Modulo            ->  gen_simple_op x "%" y
+    Modulo            ->  "_souc_remainder(" ++ generate_expr x ++ "," ++ generate_expr y ++ ")"
     Hihat             ->  undefined -- FIXME C doesn't have ^
     Equals            ->  "_souc_is_equal(" ++ generate_expr x ++ "," ++ generate_expr y ++ ")"
-    NotEquals         ->  gen_simple_op x "!=" y
+    NotEquals         ->  "_souc_is_unequal(" ++ generate_expr x ++ "," ++ generate_expr y ++ ")"
     RegexMatch        ->  undefined
-    GreaterThan       ->  gen_simple_op x ">" y
+    GreaterThan       ->  "_souc_is_greater(" ++ generate_expr x ++ "," ++ generate_expr y ++ ")"
     LesserThan        ->  "_souc_is_lesser(" ++ generate_expr x ++ "," ++ generate_expr y ++ ")"
-    And               ->  gen_simple_op x "&&" y
-    Or                ->  gen_simple_op x "||" y
+    And               ->  "_souc_conjunction(" ++ generate_expr x ++ "," ++ generate_expr y ++ ")"
+    Or                ->  "_souc_disjunction(" ++ generate_expr x ++ "," ++ generate_expr y ++ ")"
     Xor               ->  undefined
     In                ->  undefined
     Tuple             ->  "_souc_tuple(" ++ generate_expr x ++ "," ++
@@ -56,8 +56,6 @@ generate_expr (Branch op x y) = case op of
     BindRight         ->  undefined
     BindLeft          ->  undefined
 
-gen_simple_op :: ASTree -> String -> ASTree -> String
-gen_simple_op x s y = generate_expr x <> s <> generate_expr y
 
 generate_term :: Term -> String
 generate_term (LitInt l) = "(union _souc_obj) { ._souc_int = " ++ show l ++ "}"
