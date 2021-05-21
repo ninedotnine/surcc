@@ -95,7 +95,7 @@ top_level_const = do
     Raw_Expr val <- spaces *> raw_expr
     case parse_expression val of
         Right expr -> do
-            add_to_bindings name expr
+            add_to_bindings name Immut
             pure $ Top_Level_Const_Defn name m_sig expr
         Left err -> parserFail $ "invalid expression:\n" ++ show err
 

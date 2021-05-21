@@ -3,7 +3,6 @@ module TypeChecker.Context (
     ExportList(..),
     LocalScope(..),
     BoundLocal(..),
-    Mutability(..),
     insert_global,
     insert_param,
     insert_const,
@@ -29,8 +28,6 @@ data BoundLocal = BoundLocal Identifier SoucType Mutability deriving Eq
 instance Show BoundLocal where
     show (BoundLocal (Identifier i) t Mut) = "Bound (mutable)" ++ i ++ ": " ++ show t
     show (BoundLocal (Identifier i) t Immut) = "Bound " ++ i ++ ": " ++ show t
-
-data Mutability = Mut | Immut deriving (Show, Eq)
 
 
 class ContextClass c where

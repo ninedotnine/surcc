@@ -187,7 +187,7 @@ indent_depth = do
     (level, _) <- getState
     count level tab *> pure () <?> "indent"
 
-add_to_bindings :: Identifier -> ASTree -> SouCParser ()
+add_to_bindings :: Identifier -> Mutability -> SouCParser ()
 add_to_bindings key val = do
     (i, (binds :| deeper_binds)) <- getState
     when (Map.member key binds)

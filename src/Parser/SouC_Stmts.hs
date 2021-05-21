@@ -37,7 +37,7 @@ stmt_const_assign name = do
     Raw_Expr val <- spaces *> raw_expr
     case parse_expression val of
         Right expr -> do
-            add_to_bindings name expr
+            add_to_bindings name Immut
             pure $ Stmt_Const_Assign name sig expr
         Left err -> parserFail $ "invalid expression:\n" ++ show err
 

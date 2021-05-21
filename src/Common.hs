@@ -27,6 +27,7 @@ module Common (
 
     SouCParser,
     ParserState,
+    Mutability(..),
     empty_state
 
     ) where
@@ -45,9 +46,11 @@ import Data.Hashable (Hashable)
 -- type Indentation = (Int, [Int])
 -}
 
-type Bindings = Map.Map Identifier ASTree -- FIXME: is ASTree correct here?
+type Bindings = Map.Map Identifier Mutability
 
 type Indentation = Int -- for now, indentation must be exactly one tab
+
+data Mutability = Mut | Immut deriving (Show, Eq)
 
 -- FIXME: should this be a list of maps (for levels of scope)?
 type ParserState = (Indentation, NonEmpty Bindings)
