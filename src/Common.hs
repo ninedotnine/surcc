@@ -47,7 +47,7 @@ import Data.Hashable (Hashable)
 
 type Bindings = Map.Map Identifier ASTree -- FIXME: is ASTree correct here?
 
-type Indentation = Int -- for now, indentation must be exactly 4 spaces
+type Indentation = Int -- for now, indentation must be exactly one tab
 
 -- FIXME: should this be a list of maps (for levels of scope)?
 type ParserState = (Indentation, NonEmpty Bindings)
