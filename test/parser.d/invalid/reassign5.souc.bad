@@ -1,0 +1,5 @@
+f(x: Integer): Integer = x
+
+main() = do
+	f = 3
+	print $f

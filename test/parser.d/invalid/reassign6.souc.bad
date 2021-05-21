@@ -1,0 +1,5 @@
+import thingy
+
+main() = do
+	thingy = 3
+	print $thingy

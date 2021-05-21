@@ -31,6 +31,7 @@ souCParser = do
 module_header :: SouCParser SoucModule
 module_header = do
     name <- string "module" *> space *> raw_identifier
+    add_to_bindings (Identifier name) Immut
     decls <- optionMaybe export_decls
     case decls of
         Just exports ->
@@ -60,6 +61,7 @@ imports = do
 souc_import :: SouCParser Import
 souc_import = do
     name <- string "import" *> spaces *> module_path <* skipMany1 endline
+    add_to_bindings (Identifier name) Immut
     pure $ Import(name)
 
 parseDefs :: SouCParser [Top_Level_Defn]
@@ -85,6 +87,7 @@ main_defn = do
     _ <- spaces <* char '=' <* spaces <* string "do" <* endline
     stmts <- stmt_block
     optional_end_name (Identifier "main")
+    add_to_bindings (Identifier "main") Immut
     pure $ MainDefn param sig stmts
 
 top_level_const :: SouCParser Top_Level_Defn
@@ -102,7 +105,8 @@ top_level_const = do
 top_level_proc :: SouCParser Top_Level_Defn
 top_level_proc = do
     proc_name <- try (identifier <* char '(')
-    pure =<< (try (top_level_func proc_name) <|> top_level_sub proc_name)
+    name <- (try (top_level_func proc_name) <|> top_level_sub proc_name)
+    pure name
 
 top_level_func :: Identifier -> SouCParser Top_Level_Defn
 top_level_func func_name = do
@@ -115,7 +119,9 @@ short_top_level_func :: Identifier -> Param -> Maybe SoucType -> SouCParser Top_
 short_top_level_func func_name param sig = do
     (Raw_Expr body) <- raw_expr
     case parse_expression body of
-        Right result -> pure $ ShortFuncDefn func_name param sig result
+        Right result -> do
+            add_to_bindings func_name Immut
+            pure $ ShortFuncDefn func_name param sig result
 --         Left parse_err -> mergeError (fail "invalid expression") parse_err
         Left err -> fail $ "invalid expression\n" ++ show err
 
@@ -123,6 +129,7 @@ long_top_level_func :: Identifier -> Param -> Maybe SoucType -> SouCParser Top_L
 long_top_level_func func_name param sig = do
     stmts <- string "do" *> endline *> stmt_block
     optional_end_name func_name
+    add_to_bindings func_name Immut
     pure $ FuncDefn func_name param sig stmts
 
 top_level_sub :: Identifier -> SouCParser Top_Level_Defn
@@ -132,4 +139,5 @@ top_level_sub sub_name = do
     _ <- spaces <* char '=' <* spaces <* string "do" <* endline
     stmts <- stmt_block
     optional_end_name sub_name
+    add_to_bindings sub_name Immut
     pure $ SubDefn sub_name param sig stmts
