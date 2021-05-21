@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase #-}
 module Parser.SouC_Stmts where
 
 import Debug.Trace
@@ -36,9 +37,12 @@ stmt_const_assign name = do
     sig <- try (optional_sig <* spaces <* char '=')
     Raw_Expr val <- spaces *> raw_expr
     case parse_expression val of
-        Right expr -> do
-            add_to_bindings name Immut
-            pure $ Stmt_Const_Assign name sig expr
+        Right expr -> bindings_lookup name >>= \case
+            Just Mut -> parserFail $ "tried to reassign as const" ++ show name
+            Just Immut -> parserFail $ "tried to reassign const: " ++ show name
+            Nothing -> do
+                add_to_bindings name Immut
+                pure $ Stmt_Const_Assign name sig expr
         Left err -> parserFail $ "invalid expression:\n" ++ show err
 
 stmt_var_assign :: Identifier -> SouCParser Stmt
@@ -46,12 +50,12 @@ stmt_var_assign name = do
     m_sig <- try (optional_sig <* spaces <* string "<-")
     Raw_Expr val <- spaces *> raw_expr
     case parse_expression val of
-        Right expr -> do
-            have_it <- bindings_contains name
-            if have_it
---                 then pure $ Stmt_Var_Reassign name expr
-                then parserFail $ "tried to reassign: " ++ show name
-                else pure $ Stmt_Var_Assign name m_sig expr
+        Right expr -> bindings_lookup name >>= \case
+            Just Mut -> pure $ Stmt_Var_Reassign name expr
+            Just Immut -> parserFail $ "tried to reassign: " ++ show name
+            Nothing -> do
+                add_to_bindings name Mut
+                pure $ Stmt_Var_Assign name m_sig expr
         Left err -> parserFail $ "invalid expression:\n" ++ show err
 
 stmt_sub_call :: Identifier -> SouCParser Stmt

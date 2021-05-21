@@ -5,7 +5,8 @@ import Debug.Trace
 import Control.Monad (when)
 import Text.Parsec hiding (space, spaces, string, newline)
 import qualified Text.Parsec (string)
-import qualified Data.Map.Strict  as Map (singleton, member)
+import Data.Maybe (isJust)
+import qualified Data.Map.Strict  as Map (singleton, member, lookup)
 import Data.List.NonEmpty ( NonEmpty(..) )
 
 import Common
@@ -200,6 +201,13 @@ bindings_contains i = do
     pure $ foldr f False list
         where
             f binds found = Map.member i binds || found
+
+bindings_lookup :: Identifier -> SouCParser (Maybe Mutability)
+bindings_lookup i = do
+    (_ , list) <- getState
+    pure $ foldr f Nothing list
+        where
+            f binds found = if isJust found then found else Map.lookup i binds
 
 parens :: SouCParser a -> SouCParser a
 parens = between (char '(') (char ')')

@@ -1,0 +1,5 @@
+x: Int = 5
+
+main() = do
+	x = 3
+	print $x
