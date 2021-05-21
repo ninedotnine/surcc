@@ -131,6 +131,7 @@ data Stmt = Stmt_While ASTree Stmts
           | Stmt_Postfix_Oper Identifier String
           | Stmt_Const_Assign Identifier (Maybe SoucType) ASTree
           | Stmt_Var_Assign Identifier (Maybe SoucType) ASTree
+          | Stmt_Var_Reassign Identifier ASTree
           | Stmt_Return (Maybe ASTree)
           deriving (Show, Eq)
 

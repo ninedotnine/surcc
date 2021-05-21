@@ -194,6 +194,13 @@ add_to_bindings key val = do
         (parserFail ("constant `" ++ show key ++ "` already defined"))
     putState (i, ((binds <> Map.singleton key val) :| deeper_binds))
 
+bindings_contains :: Identifier -> SouCParser Bool
+bindings_contains i = do
+    (_ , list) <- getState
+    pure $ foldr f False list
+        where
+            f binds found = Map.member i binds || found
+
 parens :: SouCParser a -> SouCParser a
 parens = between (char '(') (char ')')
 

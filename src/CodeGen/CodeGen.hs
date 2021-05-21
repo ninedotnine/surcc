@@ -68,6 +68,7 @@ instance Generatable Stmt where
             Just e -> gen e
     gen (Stmt_Var_Assign name _ expr) =
         "union _souc_obj " ++ gen name ++ " = " ++ gen expr ++ "; "
+    gen (Stmt_Var_Reassign name expr) = gen name ++ " = " ++ gen expr ++ "; "
     gen (Stmt_Const_Assign name _ expr) =
         "const union _souc_obj " ++ gen name ++ " = " ++ gen expr ++ "; "
     gen (Stmt_Postfix_Oper name oper) = gen name ++ genplusplus oper ++ "; "

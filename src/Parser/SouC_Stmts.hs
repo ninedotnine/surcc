@@ -46,7 +46,12 @@ stmt_var_assign name = do
     m_sig <- try (optional_sig <* spaces <* string "<-")
     Raw_Expr val <- spaces *> raw_expr
     case parse_expression val of
-        Right expr -> pure $ Stmt_Var_Assign name m_sig expr
+        Right expr -> do
+            have_it <- bindings_contains name
+            if have_it
+--                 then pure $ Stmt_Var_Reassign name expr
+                then parserFail $ "tried to reassign: " ++ show name
+                else pure $ Stmt_Var_Assign name m_sig expr
         Left err -> parserFail $ "invalid expression:\n" ++ show err
 
 stmt_sub_call :: Identifier -> SouCParser Stmt

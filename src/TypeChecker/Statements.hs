@@ -41,6 +41,7 @@ check_stmt stmt m_ret = do
         Stmt_Postfix_Oper name oper -> pure () -- FIXME
         Stmt_Const_Assign name m_t expr -> check_stmt_ass name m_t expr
         Stmt_Var_Assign name m_t expr -> check_stmt_mut_ass name m_t expr
+        Stmt_Var_Reassign name expr -> check_stmt_mut_ass name Nothing expr
         Stmt_Return m_expr -> check_stmt_return m_expr m_ret
 
 soucbool :: SoucType
@@ -118,4 +119,5 @@ infer_stmt ctx stmt = case stmt of
     Stmt_Postfix_Oper name oper -> undefined
     Stmt_Const_Assign name m_t expr -> undefined
     Stmt_Var_Assign name m_t expr -> undefined
+    Stmt_Var_Reassign name expr -> undefined
     Stmt_Return m_expr -> undefined
