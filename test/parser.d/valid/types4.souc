@@ -1,5 +1,4 @@
 w = 9: What
-x = 4: Okay + 4: Huh
 y = (4: Okay + 4: Huh)
 z = ((x): Integer + (y): Typey)
 a = ((x): Integer + ((y)): Typey)
