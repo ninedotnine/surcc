@@ -39,7 +39,7 @@ run_tests = do
     test subber "subber"
     test subber_ass "subber_ass"
     test subber_const_ass "subber_const_ass"
-    test subber_postfix_oper "subber_postfix_oper"
+    test subber_postfix_oper "subber_postfix_oper" -- FIXME
     test subber_while "subber_while"
     test subber_if "subber_if"
     test subber_if_else "subber_if_else"
@@ -52,7 +52,7 @@ conster :: CheckedProgram
 conster = CheckedProgram Nothing [] [
     Top_Level_Const_Defn (Identifier "x") Nothing (Leaf (LitInt 42)),
     MainDefn Nothing Nothing (Stmts [
-        Stmt_Return (Just (Leaf (LitInt 0)))])]
+        Stmt_Const_Assign (Identifier "x2") Nothing (Leaf (LitInt 0))])]
 
 func :: CheckedProgram
 func = CheckedProgram Nothing [] [
@@ -66,7 +66,7 @@ func2 = CheckedProgram Nothing [] [
         Stmt_Return (Just (Leaf (LitInt 42)))])]
 
 mainer :: CheckedProgram
-mainer = CheckedProgram Nothing [] [MainDefn Nothing Nothing (Stmts [Stmt_Return (Just (Leaf (LitInt 0)))])]
+mainer = CheckedProgram Nothing [] [MainDefn Nothing Nothing (Stmts [])]
 
 mainer2 :: CheckedProgram
 mainer2 = CheckedProgram Nothing [] [MainDefn Nothing Nothing (Stmts [])]
