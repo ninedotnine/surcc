@@ -27,8 +27,8 @@ generate_expr (Branch op x y) = case op of
     FloorDiv          ->  undefined
     Modulo            ->  gen_call "_souc_remainder(" x y
     Hihat             ->  undefined -- FIXME C doesn't have ^
-    Equals            ->  gen_call "_souc_is_equal(" x y
-    NotEquals         ->  gen_call "_souc_is_unequal(" x y
+    Equals            ->  gen_call "_souc_is_equal_integer(" x y
+    NotEquals         ->  gen_call "_souc_is_unequal_integer(" x y
     RegexMatch        ->  undefined
     GreaterThan       ->  gen_call "_souc_is_greater(" x y
     LesserThan        ->  gen_call "_souc_is_lesser(" x y

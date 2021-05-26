@@ -13,8 +13,10 @@ funcdefs = intercalate "\n" [
     product,
     quotient,
     remainder,
-    is_equal,
-    is_unequal,
+    is_equal_integer,
+    is_unequal_integer,
+    is_equal_bool,
+    is_unequal_bool,
     is_lesser,
     is_greater,
     conjunction,
@@ -35,9 +37,13 @@ quotient = "union _souc_obj _souc_quotient(union _souc_obj x, union _souc_obj y)
 
 remainder = "union _souc_obj _souc_remainder(union _souc_obj x, union _souc_obj y) { return (union _souc_obj) { ._souc_int = x._souc_int % y._souc_int };}"
 
-is_equal = "union _souc_obj _souc_is_equal(union _souc_obj x, union _souc_obj y) { union _souc_obj b; b._souc_bool = x._souc_int == y._souc_int; return b;}"
+is_equal_integer = "union _souc_obj _souc_is_equal_integer(union _souc_obj x, union _souc_obj y) { union _souc_obj b; b._souc_bool = x._souc_int == y._souc_int; return b;}"
 
-is_unequal = "union _souc_obj _souc_is_unequal(union _souc_obj x, union _souc_obj y) { union _souc_obj b; b._souc_bool = x._souc_int != y._souc_int; return b;}"
+is_unequal_integer = "union _souc_obj _souc_is_unequal_integer(union _souc_obj x, union _souc_obj y) { union _souc_obj b; b._souc_bool = x._souc_int != y._souc_int; return b;}"
+
+is_equal_bool = "union _souc_obj _souc_is_equal_bool(union _souc_obj x, union _souc_obj y) { union _souc_obj b; b._souc_bool = x._souc_bool == y._souc_bool; return b;}"
+
+is_unequal_bool = "union _souc_obj _souc_is_unequal_bool(union _souc_obj x, union _souc_obj y) { union _souc_obj b; b._souc_bool = x._souc_bool != y._souc_bool; return b;}"
 
 is_lesser = "union _souc_obj _souc_is_lesser(union _souc_obj x, union _souc_obj y) { union _souc_obj b; b._souc_bool = x._souc_int < y._souc_int; return b;}"
 
