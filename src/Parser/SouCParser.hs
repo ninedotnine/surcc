@@ -1,19 +1,13 @@
 module Parser.SouCParser where
 
--- import System
--- import System.FilePath
 import Text.Parsec hiding (space, spaces, string)
--- import Text.Parsec.Expr
--- import Text.Parsec.String
--- iortsmport Control.Monad
 
--- import Souc_Expr
-import Parser.Basics
 import Common
-import Parser.SouC_Expr
-import Parser.SouC_Stmts
-import Parser.ExprParser
-import Parser.TabChecker
+import Parser.Basics
+import Parser.SouC_Expr  (Raw_Expr(..), raw_expr)
+import Parser.SouC_Stmts (stmt_block)
+import Parser.ExprParser (parse_expression)
+import Parser.TabChecker (check_tabs)
 
 runSouCParser :: SourceName -> String -> Either ParseError Program
 runSouCParser name input =
