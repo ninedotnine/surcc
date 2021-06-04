@@ -12,7 +12,7 @@ import Text.Parsec hiding (newline, space, spaces, string)
 import Data.List.NonEmpty ( NonEmpty(..) )
 import qualified Data.Map.Strict as Map (Map, empty)
 
-import Common
+import Parser.Common
 import Common.Parsing
 import Parser.Basics
 

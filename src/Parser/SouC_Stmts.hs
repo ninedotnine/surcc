@@ -5,6 +5,7 @@ import Debug.Trace
 import Text.Parsec hiding (space, spaces, string)
 
 import Common
+import Parser.Common
 import Common.Parsing
 import Parser.SouC_Expr
 import Parser.Basics

@@ -25,36 +25,13 @@ module Common (
     ImportDecl(..),
     Imports,
 
-    SouCParser,
-    ParserState,
     Mutability(..),
     ) where
 
-import Text.Parsec (Parsec)
-
--- import qualified Data.Map.Strict as Map (Map, singleton, member, insert)
-import qualified Data.Map.Strict as Map (Map, empty)
-import Data.List.NonEmpty ( NonEmpty(..) )
 import Data.String (IsString)
 import Data.Hashable (Hashable)
 
-
-{-
--- the depth and the number of spaces at each level
--- type Indentation = (Int, [Int])
--}
-
-type Bindings = Map.Map Identifier Mutability
-
-type Indentation = Int -- for now, indentation must be exactly one tab
-
 data Mutability = Mut | Immut deriving (Show, Eq)
-
--- FIXME: should this be a list of maps (for levels of scope)?
-type ParserState = (Indentation, NonEmpty Bindings)
-
--- type SouCParser a = Parsec String Indentation a
-type SouCParser a = Parsec String ParserState a
 
 newtype Identifier = Identifier String
                    deriving (Eq, Read, Show, Ord, IsString, Semigroup, Hashable)
