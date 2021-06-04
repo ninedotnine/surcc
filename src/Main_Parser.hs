@@ -3,6 +3,8 @@ module Main_Parser where
 
 import Common
 -- import Text.Parsec.String (parseFromFile)
+import Data.Text (Text)
+import qualified Data.Text.IO as Text
 import Text.Parsec.Error (ParseError)
 import System.Environment (getArgs)
 import System.Exit (exitFailure, exitSuccess)
@@ -10,14 +12,14 @@ import System.Exit (exitFailure, exitSuccess)
 import Imports.Parser (parse_module_header)
 import Parser.SouCParser (runSouCParser)
 
-getFileData :: IO (FilePath, String)
+getFileData :: IO (FilePath, Text)
 getFileData = getArgs >>= \args -> if length args < 1
     then do
-        contents <- getContents
+        contents <- Text.getContents
         putStrLn "no file name provided, reading from stdin."
         pure ("stdin", contents)
     else let name = head args in do
-        contents <- readFile name
+        contents <- Text.readFile name
         pure (name, contents)
 
 outputResult :: FilePath -> ParseTree -> IO ()

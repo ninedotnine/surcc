@@ -2,6 +2,8 @@ module Main_TypeChecker where
 
 import Data.Foldable (traverse_)
 import Data.List (sort)
+import Data.Text (Text)
+import qualified Data.Text.IO as Text
 import System.Directory
 import System.Environment (getArgs)
 import System.Exit (exitFailure, exitSuccess)
@@ -16,7 +18,7 @@ main = do
     args <- getArgs
     if length args < 1
         then do
-            contents <- getContents
+            contents <- Text.getContents
             putStrLn "no file name provided, reading from stdin."
             test "stdin" contents output_results
         else if head args == "--test"
@@ -44,10 +46,10 @@ process_dir handler dir = do
 
 process_file :: Handler -> FilePath -> IO ()
 process_file handler name = do
-    contents <- readFile name
+    contents <- Text.readFile name
     test name contents handler
 
-test :: FilePath -> String -> Handler -> IO ()
+test :: FilePath -> Text -> Handler -> IO ()
 test filename input handle_parsed = do
     putStr filename
     putStr "... "

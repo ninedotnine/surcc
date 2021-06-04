@@ -16,8 +16,10 @@ module Parser.Expr.ExprTypes (
     Stack_State,
 ) where
 
-import qualified Text.Parsec as Parsec
+import Data.Text (Text)
 import Data.Word (Word8)
+import qualified Text.Parsec as Parsec
+
 import Common
 
 newtype Precedence = Precedence Word8 deriving (Eq, Ord)
@@ -89,4 +91,4 @@ newtype Tightness = Tight Bool deriving Eq
 
 type Stack_State = (Oper_Stack, Tree_Stack, Tightness)
 
-type ShuntingYardParser t = Parsec.Parsec String Stack_State t
+type ShuntingYardParser t = Parsec.Parsec Text Stack_State t

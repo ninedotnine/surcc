@@ -2,6 +2,8 @@ module Parser.SouCParser where
 
 import Data.List.NonEmpty ( NonEmpty(..) )
 import qualified Data.Map.Strict as Map (Map, fromList)
+import Data.Text (Text)
+import qualified Data.Text as Text
 import Text.Parsec hiding (space, spaces, string)
 
 
@@ -14,7 +16,7 @@ import Parser.SouC_Stmts (stmt_block)
 import Parser.ExprParser (parse_expression)
 import Parser.TabChecker (check_tabs)
 
-runSouCParser :: SourceName -> SoucModule -> [ImportDecl] -> String -> Either ParseError ParseTree
+runSouCParser :: SourceName -> SoucModule -> [ImportDecl] -> Text -> Either ParseError ParseTree
 runSouCParser source_name (SoucModule name exports) imps input = do
     check_tabs source_name input
     body <- runParser souCParser (start_state name imps) source_name input
@@ -72,7 +74,7 @@ top_level_const = do
     m_sig <- optional_sig
     _ <- spaces <* char '='
     Raw_Expr val <- spaces *> raw_expr
-    case parse_expression val of
+    case parse_expression (Text.pack val) of
         Right expr -> do
             add_to_bindings name Immut
             pure $ Top_Level_Const_Defn name m_sig expr
@@ -94,7 +96,7 @@ top_level_func func_name = do
 short_top_level_func :: Identifier -> Param -> Maybe SoucType -> SouCParser Top_Level_Defn
 short_top_level_func func_name param sig = do
     (Raw_Expr body) <- raw_expr
-    case parse_expression body of
+    case parse_expression (Text.pack body) of
         Right result -> do
             add_to_bindings func_name Immut
             pure $ ShortFuncDefn func_name param sig result

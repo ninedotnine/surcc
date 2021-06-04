@@ -2,6 +2,7 @@ module Parser.SouC_Stmts where
 
 import Debug.Trace
 
+import Data.Text (pack)
 import Text.Parsec hiding (space, spaces, string)
 
 import Common
@@ -37,7 +38,7 @@ stmt_const_assign :: Identifier -> SouCParser Stmt
 stmt_const_assign name = do
     sig <- try (optional_sig <* spaces <* char '=')
     Raw_Expr val <- spaces *> raw_expr
-    case parse_expression val of
+    case parse_expression (pack val) of
         Right expr -> bindings_lookup name >>= \case
             Just Mut -> parserFail $ "tried to reassign as const" ++ show name
             Just Immut -> parserFail $ "tried to reassign const: " ++ show name
@@ -50,7 +51,7 @@ stmt_var_assign :: Identifier -> SouCParser Stmt
 stmt_var_assign name = do
     m_sig <- try (optional_sig <* spaces <* string "<-")
     Raw_Expr val <- spaces *> raw_expr
-    case parse_expression val of
+    case parse_expression (pack val) of
         Right expr -> bindings_lookup name >>= \case
             Just Mut -> pure $ Stmt_Var_Reassign name expr
             Just Immut -> parserFail $ "tried to reassign: " ++ show name
@@ -64,7 +65,7 @@ stmt_sub_call name = do
     m_arg <- optionMaybe (try (spaces *> raw_expr))
     case m_arg of
         Nothing -> pure $ Stmt_Sub_Call name Nothing
-        Just (Raw_Expr arg) -> case parse_expression arg of
+        Just (Raw_Expr arg) -> case parse_expression (pack arg) of
             Left err -> parserFail $ "invalid expression:\n" ++ show err
             Right expr -> pure $ Stmt_Sub_Call name (Just expr)
 
@@ -81,7 +82,7 @@ stmt_while = do
     Raw_Expr condition <- try (reserved "while") *> spaces *> raw_expr <* optional_do <* endline
     stmts <- stmt_block
     _ <- optional_end Stmt_While_End -- FIXME use this for type-checking
-    case parse_expression condition of
+    case parse_expression (pack condition) of
         Right expr -> pure $ Stmt_While expr stmts
         Left err -> parserFail $ "invalid expression:\n" ++ show err
 
@@ -90,7 +91,7 @@ stmt_until = do
     Raw_Expr condition <- try (reserved "until") *> spaces *> raw_expr <* optional_do <* endline
     stmts <- stmt_block
     _ <- optional_end Stmt_Until_End -- FIXME use this for type-checking
-    case parse_expression condition of
+    case parse_expression (pack condition) of
         Right expr -> pure $ Stmt_Until expr stmts
         Left err -> parserFail $ "invalid expression:\n" ++ show err
 
@@ -103,7 +104,7 @@ stmt_if = do
     thenDo <- stmt_block
     elseDo <- optionMaybe (try (endline *> indent_depth *> reserved "else") *> endline *> stmt_block)
     _ <- optional_end Stmt_If_End -- FIXME use this for type-checking
-    case parse_expression condition of
+    case parse_expression (pack condition) of
         Right tree -> pure $ Stmt_If tree thenDo elseDo
         Left err -> parserFail $ "failed expression:\n" ++ show err
 
@@ -113,7 +114,7 @@ stmt_unless = do
     thenDo <- stmt_block
     elseDo <- optionMaybe (try (endline *> indent_depth *> reserved "else") *> endline *> stmt_block)
     _ <- optional_end Stmt_Unless_End -- FIXME use this for type-checking
-    case parse_expression condition of
+    case parse_expression (pack condition) of
         Right tree -> pure $ Stmt_Unless tree thenDo elseDo
         Left err -> parserFail $ "failed expression:\n" ++ show err
 
@@ -122,7 +123,7 @@ stmt_return = do
     result <- reserved "return" *> optionMaybe (try (spaces *> raw_expr))
     case result of
         Nothing -> pure (Stmt_Return Nothing)
-        Just (Raw_Expr raw_exp) -> case parse_expression raw_exp of
+        Just (Raw_Expr raw_exp) -> case parse_expression (pack raw_exp) of
             Right expr -> pure (Stmt_Return (Just expr))
             Left err -> parserFail $ "failed expression:\n" ++ show err
 

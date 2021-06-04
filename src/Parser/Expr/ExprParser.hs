@@ -27,6 +27,9 @@ import Data.List (dropWhileEnd)
 
 import Data.Char (ord) -- for evaluate
 
+import Data.Text (Text)
+import qualified Data.Text as Text
+
 import Parser.Expr.StackManipulations
 import Parser.Expr.ExprTypes
 import Parser.Expr.RegardingSpaces
@@ -116,14 +119,14 @@ pretty_show_expression (Twig oper tree) = concat ["(", show oper, " ", pretty_sh
 pretty_show_expression (Signed tree tree_t) = pretty_show_expression tree ++ ": " ++ show tree_t
 pretty_show_expression (Leaf val) = show val
 
-parse_expression :: String -> Either Parsec.ParseError ASTree
+parse_expression :: Text -> Either Parsec.ParseError ASTree
 parse_expression input = Parsec.runParser parse_term start_state "input" (trim_spaces input)
     where
         start_state = (Oper_Stack [], Tree_Stack [], Tight False)
-        trim_spaces = dropWhile isSpace <&> dropWhileEnd isSpace
+        trim_spaces = Text.dropWhile isSpace <&> Text.dropWhileEnd isSpace
 
 
-parse_print_expression :: String -> IO ()
+parse_print_expression :: Text -> IO ()
 parse_print_expression input = case parse_expression input of
         Left err -> putStrLn (show err)
         Right tree -> putStrLn (pretty_show_expression tree)
@@ -162,7 +165,7 @@ evaluate_astree (Branch op left right) = evaluate_astree left `operate` evaluate
 eval_show_astree :: ASTree -> String
 eval_show_astree = evaluate_astree <&> show
 
-parse_eval_print_expression :: String -> IO ()
+parse_eval_print_expression :: Text -> IO ()
 parse_eval_print_expression input = case parse_expression input of
     Left err -> putStrLn (show err)
     Right tree -> putStrLn (eval_show_astree tree)

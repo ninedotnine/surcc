@@ -26,8 +26,10 @@ module Common (
     Mutability(..),
     ) where
 
-import Data.String (IsString)
 import Data.Hashable (Hashable)
+import Data.String (IsString)
+import Data.Text (Text)
+import qualified Data.Text as Text
 
 data Mutability = Mut | Immut deriving (Show, Eq)
 
@@ -67,7 +69,8 @@ pattern SoucMaybe t = SoucTypeConstructor "Maybe" [t]
 data Bound = Bound Identifier SoucType deriving Eq
 
 instance Show Bound where
-    show (Bound (Identifier i) t) = "Bound " ++ i ++ ": " ++ show t
+--     show (Bound (Identifier i) t) = "Bound " <> Text.unpack i <> ": " <> show t
+    show (Bound (Identifier i) t) = "Bound " <> i <> ": " <> show t
 
 data TypeError = TypeMismatch SoucType SoucType
                | MultipleDeclarations Identifier

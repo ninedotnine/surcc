@@ -11,6 +11,8 @@ import Debug.Trace
 import Text.Parsec hiding (newline, space, spaces, string)
 import Data.List.NonEmpty ( NonEmpty(..) )
 import qualified Data.Map.Strict as Map (Map, empty)
+import Data.Text (Text)
+import qualified Data.Text as Text
 
 import Parser.Common
 import Common.Parsing
@@ -18,11 +20,11 @@ import Parser.Basics
 
 data Raw_Expr = Raw_Expr String deriving (Read, Show)
 
-run_raw_expr_parser :: String -> String
+run_raw_expr_parser :: Text -> Text
 run_raw_expr_parser input = let empty_state = (0, Map.empty :| []) in
     case runParser (raw_expr <* eof) empty_state "raw_expr" input of
-        Left err -> "error: " ++ (show err)
-        Right r -> show r
+        Left err -> "error: " <> Text.pack (show err)
+        Right r -> Text.pack (show r)
 
 raw_expr :: SouCParser Raw_Expr
 raw_expr = Raw_Expr <$> dumb_raw_expr

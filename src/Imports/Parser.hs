@@ -2,6 +2,7 @@ module Imports.Parser (
     parse_module_header
 ) where
 
+import Data.Text (Text)
 import Text.Parsec hiding (string, space, spaces, newline)
 import qualified Text.Parsec (string)
 
@@ -14,15 +15,15 @@ import Parser.TabChecker (check_tabs)
 
 import Debug.Trace
 
-type HeaderParser a = Parsec String [ImportDecl] a
+type HeaderParser a = Parsec Text [ImportDecl] a
 
 add_to_imports :: ImportDecl -> HeaderParser ()
 add_to_imports name = modifyState (\l -> name:l)
 
-parse_module_header :: SourceName -> String -> Either ParseError (SoucModule, [ImportDecl], String)
+parse_module_header :: SourceName -> Text -> Either ParseError (SoucModule, [ImportDecl], Text)
 parse_module_header name input = runParser module_header_and_imports [] name input
 
-module_header_and_imports :: HeaderParser (SoucModule, [ImportDecl], String)
+module_header_and_imports :: HeaderParser (SoucModule, [ImportDecl], Text)
 module_header_and_imports = do
     m_header <- optionMaybe module_header
 

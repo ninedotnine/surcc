@@ -1,16 +1,17 @@
 module Parser.TabChecker (check_tabs) where
 
+import Data.Text (Text)
 import Text.Parsec hiding (space, spaces, string, newline)
 import Text.Parsec.Error
 
 import Common.Parsing
 
-type TabCheckingParser a = Parsec String () a
+type TabCheckingParser a = Parsec Text () a
 
 msg :: Message
 msg = Message "it looks like you tried to indent with spaces instead of tabs?"
 
-check_tabs :: FilePath -> String -> Either ParseError ()
+check_tabs :: FilePath -> Text -> Either ParseError ()
 check_tabs name input = case runParser tab_checker () name input of
         Right () -> Right ()
         Left err -> Left $ setErrorMessage msg err

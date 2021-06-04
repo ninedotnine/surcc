@@ -6,6 +6,7 @@ module Parser.Common (
 ) where
 
 import Data.List.NonEmpty ( NonEmpty(..) )
+import Data.Text (Text)
 import qualified Data.Map.Strict as Map (Map, empty)
 import Text.Parsec (Parsec)
 
@@ -14,7 +15,7 @@ import Common
 -- FIXME: should this be a list of maps (for levels of scope)?
 type ParserState = (Indentation, NonEmpty Bindings)
 
-type SouCParser a = Parsec String ParserState a
+type SouCParser a = Parsec Text ParserState a
 
 type Indentation = Int -- for now, indentation must be exactly one tab
 

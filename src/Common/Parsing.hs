@@ -21,56 +21,57 @@ module Common.Parsing (
     constructor_name
 ) where
 
+import Data.Text (Text, pack, unpack)
 import Text.Parsec hiding (string, space, spaces, newline)
 import qualified Text.Parsec (string)
 
 import Common (SoucType(..), Term(..))
 
-identifier_char :: Parsec String s Char
+identifier_char :: Parsec Text s Char
 identifier_char = (alphaNum <|> char '_')
 
-line_comment :: Parsec String s ()
+line_comment :: Parsec Text s ()
 line_comment = try (skipMany space_or_tab *> char ';') *> manyTill anyChar newline *> pure () <?> ""
 
-block_comment :: Parsec String s ()
+block_comment :: Parsec Text s ()
 block_comment = try (string "{;" *> notFollowedBy (char '>')) *> block_comment_depth 1 *> endline <?> ""
     where
         nest n = string "{;" *> block_comment_depth n
         end = string ";}" *> pure ()
-        block_comment_depth :: Integer -> Parsec String s ()
+        block_comment_depth :: Integer -> Parsec Text s ()
         block_comment_depth 1 = skipManyTill anyChar ((nest 2) <|> end)
         block_comment_depth n = skipManyTill anyChar ((nest (n+1)) <|> end *> block_comment_depth (n-1))
 
-doc_comment :: Parsec String s ()
+doc_comment :: Parsec Text s ()
 doc_comment = string "{;>" *> skipManyTill anyChar (string "<;}") *> endline *> optional endline <?> ""
 
 
-space :: Parsec String s ()
+space :: Parsec Text s ()
 space = char ' ' *> pure () <?> ""
 
-spaces :: Parsec String s ()
+spaces :: Parsec Text s ()
 spaces = many1 space *> pure ()
 
-space_or_tab :: Parsec String s ()
+space_or_tab :: Parsec Text s ()
 space_or_tab = space <|> tab *> pure ()
 
-ignore_spaces :: Parsec String s ()
+ignore_spaces :: Parsec Text s ()
 ignore_spaces = skipMany (char ' ' <?> "")
 
-newline :: Parsec String s ()
+newline :: Parsec Text s ()
 newline = char '\n' *> pure () <?> "newline"
 
 
-pragma :: Parsec String s ()
+pragma :: Parsec Text s ()
 pragma = string "{^;" *> space *> endBy1 (many1 alphaNum) space *> (string ";^}") *> endline <?> "pragma"
 
-skipManyTill :: Parsec String s a -> Parsec String s b -> Parsec String s ()
+skipManyTill :: Parsec Text s a -> Parsec Text s b -> Parsec Text s ()
 skipManyTill p1 p2 = manyTill p1 p2 *> pure ()
 
-reserved :: String -> Parsec String s String
+reserved :: String -> Parsec Text s String
 reserved s = string s <* notFollowedBy identifier_char
 
-reserved_word :: Parsec String s String
+reserved_word :: Parsec Text s String
 reserved_word =
     choice (map reserved long_list) <?> "reserved word" where
         long_list = [
@@ -112,7 +113,7 @@ reserved_word =
 
 
 
-raw_identifier :: Parsec String s String
+raw_identifier :: Parsec Text s String
 raw_identifier = do
     notFollowedBy reserved_word
     first <- lower <|> char '_'
@@ -121,35 +122,36 @@ raw_identifier = do
 
 -- Text.Parsec.string does this silly thing where it might fail while advancing
 -- the stream.
-string :: String -> Parsec String s String
+string :: String -> Parsec Text s String
+-- string = try . Text.Parsec.string . unpack
 string = try . Text.Parsec.string
 
-endline :: Parsec String s ()
+endline :: Parsec Text s ()
 endline = skipMany space *> (line_comment <|> block_comment <|> newline) <?> "end-of-line"
 
-optional_sig :: Parsec String s (Maybe SoucType)
+optional_sig :: Parsec Text s (Maybe SoucType)
 optional_sig = optionMaybe type_signature
 
-type_signature :: Parsec String s SoucType
+type_signature :: Parsec Text s SoucType
 type_signature = char ':' *> ignore_spaces *> type_broadly where
 
-    type_broadly :: Parsec String s SoucType
+    type_broadly :: Parsec Text s SoucType
     type_broadly = try type_constructor <|> type_name
 
-    type_constructor :: Parsec String s SoucType
+    type_constructor :: Parsec Text s SoucType
     type_constructor = do
         name <- upper_name <* char '('
         args <- sepBy1 type_broadly spaces <* char ')'
         pure (SoucTypeConstructor name args)
 
-upper_name :: Parsec String s String
+upper_name :: Parsec Text s String
 upper_name = do
     first <- upper
     rest <- many alphaNum
     pure $ first:rest
 
-type_name :: Parsec String s SoucType
+type_name :: Parsec Text s SoucType
 type_name = SoucType <$> upper_name
 
-constructor_name :: Parsec String s Term
+constructor_name :: Parsec Text s Term
 constructor_name = Constructor <$> upper_name

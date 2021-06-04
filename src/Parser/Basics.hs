@@ -1,10 +1,12 @@
 module Parser.Basics where
 
 import Control.Monad (when)
-import Text.Parsec hiding (space, spaces, string, newline)
-import Data.Maybe (isJust)
-import qualified Data.Map.Strict  as Map (singleton, member, lookup)
+-- import Data.Text (Text)
 import Data.List.NonEmpty ( NonEmpty(..) )
+import qualified Data.Map.Strict as Map (singleton, member, lookup)
+import Data.Maybe (isJust)
+import qualified Data.Text as Text
+import Text.Parsec hiding (space, spaces, string, newline)
 
 import Common
 import Common.Parsing
@@ -81,7 +83,7 @@ optional_end stmt_type = do
     lookAhead endline
     pure (show keyword ++ " " ++ word ++ " " ++ show name)
         where word = case stmt_type of
-                Stmt_While_End -> "while"
+                Stmt_While_End -> "while" :: String
                 Stmt_If_End -> "if"
                 Stmt_Until_End -> "until"
                 Stmt_Unless_End -> "unless"

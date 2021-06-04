@@ -7,6 +7,7 @@ import Parser.SouCParser (runSouCParser)
 import TypeChecker.TypeChecker (type_check)
 
 -- import Text.Parsec.String (parseFromFile)
+import qualified Data.Text.IO as Text
 import Text.Parsec.Error (ParseError)
 import System.Environment (getArgs)
 import System.Exit (exitFailure, exitSuccess)
@@ -14,7 +15,7 @@ import System.Exit (exitFailure, exitSuccess)
 main :: IO ()
 main = do
     file_name <- getArgs >>= sanitize_args
-    file_contents <- readFile file_name
+    file_contents <- Text.readFile file_name
     case parse_module_header file_name file_contents of
         Left parse_error -> print parse_error >> exitFailure
         Right (modul, imports, rest) -> case runSouCParser file_name modul imports rest of
