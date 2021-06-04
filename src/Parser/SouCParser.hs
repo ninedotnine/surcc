@@ -23,16 +23,16 @@ runSouCParser source_name (SoucModule name exports) imps input = do
     pure $ ParseTree (SoucModule name exports) imps body
 
 
-type ModuleName = String
+type ModuleName = Text
 start_state :: ModuleName -> [ImportDecl] -> ParserState
 start_state name imps = (0, binds:|[])
     where
         make_identifier :: ImportDecl -> Identifier
         make_identifier = \case
-            LibImport n -> Identifier (Text.pack n)
-            RelImport n -> Identifier (Text.pack n)
+            LibImport n -> Identifier n
+            RelImport n -> Identifier n
         binds = Map.fromList (zip ids (repeat Immut))
-        ids = (Identifier (Text.pack name)) : map make_identifier imps
+        ids = (Identifier name) : map make_identifier imps
 
 
 souCParser :: SouCParser [Top_Level_Defn]

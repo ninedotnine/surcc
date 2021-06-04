@@ -46,8 +46,8 @@ add_imports imports ctx = Right $ GlobalScope (map make_import_bound (map from_i
     where
         from_import :: ImportDecl -> Text
         from_import = \case
-            LibImport s -> Text.pack s
-            RelImport s -> Text.pack s
+            LibImport s -> s
+            RelImport s -> s
         make_import_bound s = Bound (Identifier s) (SoucType "Module")
 
 

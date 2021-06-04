@@ -69,10 +69,10 @@ pragma = string "{^;" *> space *> endBy1 (many1 alphaNum) space *> (string ";^}"
 skipManyTill :: Parsec Text s a -> Parsec Text s b -> Parsec Text s ()
 skipManyTill p1 p2 = manyTill p1 p2 *> pure ()
 
-reserved :: String -> Parsec Text s String
+reserved :: String -> Parsec Text s Text
 reserved s = string s <* notFollowedBy identifier_char
 
-reserved_word :: Parsec Text s String
+reserved_word :: Parsec Text s Text
 reserved_word =
     choice (map reserved long_list) <?> "reserved word" where
         long_list = [
@@ -114,18 +114,17 @@ reserved_word =
 
 
 
-raw_identifier :: Parsec Text s String
+raw_identifier :: Parsec Text s Text
 raw_identifier = do
     notFollowedBy reserved_word
     first <- lower <|> char '_'
     rest <- many identifier_char
-    pure (first:rest)
+    pure (Text.pack (first:rest))
 
 -- Text.Parsec.string does this silly thing where it might fail while advancing
 -- the stream.
-string :: String -> Parsec Text s String
--- string = try . Text.Parsec.string . unpack
-string = try . Text.Parsec.string
+string :: String -> Parsec Text s Text
+string s = Text.pack <$> try (Text.Parsec.string s)
 
 endline :: Parsec Text s ()
 endline = skipMany space *> (line_comment <|> block_comment <|> newline) <?> "end-of-line"

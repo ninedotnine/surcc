@@ -24,7 +24,7 @@ double_newline :: SouCParser ()
 double_newline = lookAhead (newline *> newline) *> newline -- something like this?
 
 identifier :: SouCParser Identifier
-identifier = Identifier . Text.pack <$> raw_identifier
+identifier = Identifier <$> raw_identifier
 
 -- for pattern matching
 pattern :: SouCParser Param

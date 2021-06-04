@@ -43,9 +43,9 @@ data CheckedProgram = CheckedProgram SoucModule Imports Body
     deriving Show
 
 data ExportDecl = ExportDecl Identifier SoucType deriving (Show)
-data SoucModule = SoucModule String [ExportDecl] deriving (Show)
+data SoucModule = SoucModule Text [ExportDecl] deriving (Show)
 
-data ImportDecl = LibImport String | RelImport String deriving (Read, Show)
+data ImportDecl = LibImport Text | RelImport Text deriving (Read, Show)
 
 type Imports = [ImportDecl]
 type Body = [Top_Level_Defn]

@@ -59,7 +59,7 @@ export_decl :: HeaderParser ExportDecl
 export_decl = do
     i <- raw_identifier <* optional spaces
     t <- type_signature <* endline
-    pure (ExportDecl (Identifier (Text.pack i)) t)
+    pure (ExportDecl (Identifier i) t)
 
 
 import_list :: HeaderParser [ImportDecl]
@@ -73,20 +73,15 @@ souc_import = do
     pure (LibImport name)
 
 
-
------ FIXME
--- basically everything after this is duplicated from Parser.Basics
-
-module_path :: HeaderParser String
+module_path :: HeaderParser Text
 module_path = do
     leading_slash <- option "" slash
     dir <- many $ lookAhead (try (name <> slash)) *> (name <> slash)
     path <- raw_identifier
-    pure (leading_slash ++ concat dir ++ path)
+    pure (leading_slash <> Text.concat dir <> path)
         where
             dot = string "."
             dotdot = string ".."
             slash = string "/"
-            name = (many1 identifier_char) <|> dotdot <|> dot
-
-
+            name :: HeaderParser Text
+            name = Text.pack <$> (many1 identifier_char) <|> dotdot <|> dot
