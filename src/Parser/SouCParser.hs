@@ -35,48 +35,10 @@ start_state name imps = (0, binds:|[])
 
 souCParser :: SouCParser [Top_Level_Defn]
 souCParser = do
-    _ <- optionMaybe module_header
     _ <- many (pragma) *> skipMany endline -- FIXME do something with pragmas
-    _ <- imports
     code <- parseDefs
     eof
     pure $ code
-
-module_header :: SouCParser SoucModule
-module_header = do
-    name <- string "module" *> space *> raw_identifier
-    add_to_bindings (Identifier name) Immut
-    decls <- optionMaybe export_decls
-    case decls of
-        Just exports ->
-            pure $ SoucModule name exports
-        Nothing -> do
-            endline <* many pragma <* endline
-            pure $ SoucModule name []
-
-export_decls :: SouCParser [ExportDecl]
-export_decls = do
-    try (space *> reserved "where") *> endline
-    many1 (tab *> export_decl)
-
-export_decl :: SouCParser ExportDecl
-export_decl = do
-    i <- identifier <* optional spaces
-    t <- type_signature <* endline
-    pure (ExportDecl i t)
-
-
-imports :: SouCParser Imports
-imports = do
-    imps <- many souc_import
-    -- FIXME a blank line is required before any code
-    pure imps
-
-souc_import :: SouCParser ImportDecl
-souc_import = do
-    name <- string "import" *> spaces *> module_path <* skipMany1 endline
-    add_to_bindings (Identifier name) Immut
-    pure $ LibImport(name) -- fixme : delete all this code anyway
 
 parseDefs :: SouCParser [Top_Level_Defn]
 parseDefs = do
