@@ -18,14 +18,8 @@ runSouCParser :: SourceName -> SoucModule -> [ImportDecl] -> String -> Either Pa
 runSouCParser source_name (SoucModule name exports) imps input = do
     check_tabs source_name input
     body <- runParser souCParser (start_state name imps) source_name input
-    pure $ Program (Just (SoucModule name exports)) (map reduced_import_fixme imps) body
+    pure $ Program (Just (SoucModule name exports)) imps body
 
-
-reduced_import_fixme :: ImportDecl -> Import
-reduced_import_fixme = (\case
-    LibImport i -> Import i
-    RelImport i -> Import i
-    )
 
 type ModuleName = String
 start_state :: ModuleName -> [ImportDecl] -> ParserState
@@ -41,7 +35,7 @@ start_state name imps = (0, binds:|[])
 
 souCParser :: SouCParser [Top_Level_Defn]
 souCParser = do
-    nothin <- optionMaybe module_header
+    _ <- optionMaybe module_header
     _ <- many (pragma) *> skipMany endline -- FIXME do something with pragmas
     _ <- imports
     code <- parseDefs
@@ -78,11 +72,11 @@ imports = do
     -- FIXME a blank line is required before any code
     pure imps
 
-souc_import :: SouCParser Import
+souc_import :: SouCParser ImportDecl
 souc_import = do
     name <- string "import" *> spaces *> module_path <* skipMany1 endline
     add_to_bindings (Identifier name) Immut
-    pure $ Import(name)
+    pure $ LibImport(name) -- fixme : delete all this code anyway
 
 parseDefs :: SouCParser [Top_Level_Defn]
 parseDefs = do

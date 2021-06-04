@@ -35,8 +35,10 @@ instance Eq CheckedProgram where
 instance Eq SoucModule where
     SoucModule s0 _ == SoucModule s1 _ = s0 == s1
 
-instance Eq Import where
-    Import s0 == Import s1 = s0 == s1
+instance Eq ImportDecl where
+    RelImport s0 == RelImport s1 = s0 == s1
+    LibImport s0 == LibImport s1 = s0 == s1
+    _ == _ = False
 
 mismatch :: String -> String -> TypeError
 mismatch x y = TypeMismatch (SoucType x) (SoucType y)
@@ -180,7 +182,7 @@ borked_subber_const_ass_checked :: Either TypeError CheckedProgram
 borked_subber_const_ass_checked = Left (mismatch "Integer"  "Char")
 
 borked_import :: Program
-borked_import = Program Nothing [Import "x"] [
+borked_import = Program Nothing [LibImport "x"] [
     Top_Level_Const_Defn (Identifier "x") (Just (SoucType "Integer")) (Leaf (LitInt 42))]
 
 

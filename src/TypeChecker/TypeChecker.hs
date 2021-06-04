@@ -1,3 +1,5 @@
+{-# LANGUAGE LambdaCase #-}
+
 module TypeChecker.TypeChecker (
     type_check,
     add_globals, -- for tests
@@ -45,8 +47,10 @@ add_exports exports = Right $ ExportList (map make_bound exports)
 add_imports :: Imports -> ExportList -> Either TypeError LocalScope
 add_imports imports ctx = Right $ GlobalScope (map make_import_bound (map from_import imports)) ctx
     where
-        from_import :: Import -> String
-        from_import (Import s) = s
+        from_import :: ImportDecl -> String
+        from_import = \case
+            LibImport s -> s
+            RelImport s -> s
         make_import_bound s = Bound (Identifier s) (SoucType "Module")
 
 

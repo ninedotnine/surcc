@@ -23,7 +23,6 @@ module Common (
     ExportDecl(..),
     SoucModule(..),
     ImportDecl(..),
-    Import(..),
     Imports,
 
     SouCParser,
@@ -74,10 +73,8 @@ data SoucModule = SoucModule String [ExportDecl] deriving (Show)
 
 data ImportDecl = LibImport String | RelImport String deriving (Read, Show)
 
-type Imports = [Import]
+type Imports = [ImportDecl]
 type Body = [Top_Level_Defn]
-
-newtype Import = Import String deriving (Read, Show)
 
 newtype Stmts = Stmts [Stmt] deriving (Show, Eq)
 

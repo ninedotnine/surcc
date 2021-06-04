@@ -25,12 +25,12 @@ instance Eq LocalScope where
 no_exports_ctx :: ExportList
 no_exports_ctx = ExportList []
 
-type Test = ([Import], [Top_Level_Defn], Either TypeError LocalScope, String)
+type Test = ([ImportDecl], [Top_Level_Defn], Either TypeError LocalScope, String)
 
 tests :: [Test]
 tests = [
     ([], [Top_Level_Const_Defn "i" (Just (SoucType "Integer")) (Leaf (LitInt 4))], Right (GlobalScope [Bound "i" (SoucType "Integer")] no_exports_ctx), "int"),
-    ([Import "salad", Import "tofu"], [], Right (GlobalScope [Bound "salad" (SoucType "Module"), Bound "tofu" (SoucType "Module")] no_exports_ctx), "imports")
+    ([LibImport "salad", LibImport "tofu"], [], Right (GlobalScope [Bound "salad" (SoucType "Module"), Bound "tofu" (SoucType "Module")] no_exports_ctx), "imports")
     ]
 
 borked_tests :: [Test]
