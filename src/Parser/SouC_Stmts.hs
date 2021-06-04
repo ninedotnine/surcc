@@ -1,4 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
 module Parser.SouC_Stmts where
 
 import Debug.Trace

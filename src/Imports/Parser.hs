@@ -1,5 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
-
 module Imports.Parser (
     parse_module_header
 ) where

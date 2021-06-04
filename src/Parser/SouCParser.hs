@@ -1,5 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
-
 module Parser.SouCParser where
 
 import Data.List.NonEmpty ( NonEmpty(..) )
