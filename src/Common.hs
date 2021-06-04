@@ -62,10 +62,10 @@ newtype Identifier = Identifier String
 -- instance Show Identifier where
 --     show (Identifier x) = show x
 
-data Program = Program (Maybe SoucModule) Imports Body
+data Program = Program SoucModule Imports Body
     deriving Show
 
-data CheckedProgram = CheckedProgram (Maybe SoucModule) Imports Body
+data CheckedProgram = CheckedProgram SoucModule Imports Body
     deriving Show
 
 data ExportDecl = ExportDecl Identifier SoucType deriving (Show)

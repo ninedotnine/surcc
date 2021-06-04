@@ -24,9 +24,7 @@ import TypeChecker.Statements
 type_check :: Program -> Either TypeError CheckedProgram
 -- type_check (Program (SoucModule name exports) imports defns) = do
 type_check (Program module_info imports defns) = do
-    exports_ctx <- case module_info of
-        Just (SoucModule _ exports) ->  add_exports exports
-        Nothing -> add_exports []
+    exports_ctx <- add_exports module_info
     imports_ctx <- add_imports imports exports_ctx
     finished_ctx <- add_globals imports_ctx defns
     let undefined_exports = exports_remaining finished_ctx in
@@ -35,8 +33,8 @@ type_check (Program module_info imports defns) = do
             else Left (ExportedButNotDefined (head undefined_exports))
 
 
-add_exports :: [ExportDecl] -> Either TypeError ExportList
-add_exports exports = Right $ ExportList (map make_bound exports)
+add_exports :: SoucModule -> Either TypeError ExportList
+add_exports (SoucModule _ exports) = Right $ ExportList (map make_bound exports)
     where
         make_bound (ExportDecl i t) = Bound i t
 

@@ -18,7 +18,7 @@ runSouCParser :: SourceName -> SoucModule -> [ImportDecl] -> String -> Either Pa
 runSouCParser source_name (SoucModule name exports) imps input = do
     check_tabs source_name input
     body <- runParser souCParser (start_state name imps) source_name input
-    pure $ Program (Just (SoucModule name exports)) imps body
+    pure $ Program (SoucModule name exports) imps body
 
 
 type ModuleName = String

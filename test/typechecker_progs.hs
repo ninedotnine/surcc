@@ -14,7 +14,6 @@ import System.Exit (exitFailure)
 
 type Test = (Program, Either TypeError CheckedProgram, String)
 
-tests :: [Test]
 tests = [
     (conster, conster_checked, "conster"),
     (int, int_checked, "int"),
@@ -64,13 +63,18 @@ print_err expected actual = putStrLn failmsg where
     failmsg = "FAILED! \n expected:\n   " <> render expected <> "\n but got:\n   " <> render actual
 
 program_header :: [Top_Level_Defn] -> Program
-program_header = Program Nothing [] -- no name, no imports
+program_header = Program default_module [] -- no name, no imports
 
 checked_program_header :: [Top_Level_Defn] -> CheckedProgram
-checked_program_header = CheckedProgram Nothing []
+checked_program_header = CheckedProgram default_module []
+
+tests :: [Test]
 
 notype :: Maybe SoucType
 notype = Nothing
+
+default_module :: SoucModule
+default_module = SoucModule "anonymous_main_module" []
 
 -- tests begin here
 
@@ -182,7 +186,7 @@ borked_subber_const_ass_checked :: Either TypeError CheckedProgram
 borked_subber_const_ass_checked = Left (mismatch "Integer"  "Char")
 
 borked_import :: Program
-borked_import = Program Nothing [LibImport "x"] [
+borked_import = Program default_module [LibImport "x"] [
     Top_Level_Const_Defn (Identifier "x") (Just (SoucType "Integer")) (Leaf (LitInt 42))]
 
 

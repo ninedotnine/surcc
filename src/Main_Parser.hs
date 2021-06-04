@@ -21,13 +21,11 @@ getFileData = getArgs >>= \args -> if length args < 1
         pure (name, contents)
 
 outputResult :: FilePath -> Program -> IO ()
-outputResult filename (Program name imps body) = do
+outputResult filename (Program modul imps body) = do
     putStrLn filename
 --     putStr $ (unlines . map show) toks
     putStrLn "------------------ pretty printing ------------------"
-    case name of
-        Just str -> print $ "importing module: " ++ show str
-        Nothing -> pure ()
+    print $ "importing module: " ++ show modul
     mapM_ print imps
     mapM_ prettyPrint body
     print_file_contents filename
