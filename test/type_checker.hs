@@ -6,16 +6,18 @@ import TypeChecker.Context
 import TypeChecker.Expressions
 import Common
 
+import Data.Text (Text)
+import qualified Data.Text.IO as Text
 import System.Exit (exitFailure)
 
 newtype Expected = Result (Either TypeError ())
 
-type Test = (LocalScope, ASTree, String, Expected, String)
+type Test = (LocalScope, ASTree, Text, Expected, String)
 
 match :: Expected
 match = Result (Right ())
 
-mismatch :: String -> String -> Expected
+mismatch :: Text -> Text -> Expected
 mismatch x y = Result $ Left $ TypeMismatch (SoucType x) (SoucType y)
 
 no_exports_ctx :: ExportList
@@ -108,7 +110,7 @@ main = do
     putStrLn "all type-checker tests passed :^)"
 
 
-render :: Either TypeError () -> String
+render :: Either TypeError () -> Text
 render (Right ()) = "match"
 render (Left (TypeMismatch (SoucType x) (SoucType y))) = "mismatch: " <> x <> " / " <> y
 render (Left (MultipleDeclarations (Identifier i))) = "multiple declarations: " <> i
@@ -116,7 +118,7 @@ render (Left (Undeclared (Identifier i))) = "undeclared identifier " <> i
 render _ = error "FIXME more complex types"
 
 print_err :: Either TypeError () -> Either TypeError () -> IO ()
-print_err expected actual = putStrLn failmsg where
+print_err expected actual = Text.putStrLn failmsg where
     failmsg = "FAILED! \n  expected " <> render expected <> " but got: " <> render actual
 
 test :: Test -> IO ()

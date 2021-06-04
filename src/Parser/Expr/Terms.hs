@@ -3,8 +3,11 @@ module Parser.Expr.Terms (
     parse_term_token
 ) where
 
+
+import qualified Data.Text as Text
 import qualified Text.Parsec as Parsec
 import Text.Parsec ((<|>), (<?>))
+
 import Common
 import Common.Parsing
 
@@ -43,13 +46,13 @@ parse_var :: ShuntingYardParser Term
 parse_var = do
     first <- Parsec.lower <|> Parsec.char '_'
     rest <- Parsec.many (Parsec.lower <|> Parsec.char '_' <|> Parsec.digit)
-    pure $ Var (Identifier (first:rest))
+    pure $ Var $ Identifier $ Text.pack $ first:rest
 
 parse_char :: ShuntingYardParser Term
 parse_char = LitChar <$> ((Parsec.char '\'') *> Parsec.anyChar <* (Parsec.char '\''))
 
 parse_string :: ShuntingYardParser Term
-parse_string = LitString <$> ((Parsec.char '\"') *> Parsec.many (Parsec.noneOf "\"") <* (Parsec.char '\"'))
+parse_string = LitString . Text.pack <$> ((Parsec.char '\"') *> Parsec.many (Parsec.noneOf "\"") <* (Parsec.char '\"'))
 
 parse_left_paren :: ShuntingYardParser TermToken
 parse_left_paren = do

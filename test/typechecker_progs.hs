@@ -7,9 +7,10 @@
 import TypeChecker.TypeChecker
 import Common
 
+import Data.Text (Text)
+import qualified Data.Text as Text
+import qualified Data.Text.IO as Text
 import System.Exit (exitFailure)
-
--- import System.IO
 
 
 type Test = (ParseTree, Either TypeError CheckedProgram, String)
@@ -39,11 +40,11 @@ instance Eq ImportDecl where
     LibImport s0 == LibImport s1 = s0 == s1
     _ == _ = False
 
-mismatch :: String -> String -> TypeError
+mismatch :: Text -> Text -> TypeError
 mismatch x y = TypeMismatch (SoucType x) (SoucType y)
 
-render :: Either TypeError CheckedProgram -> String
-render (Right p) = show p
+render :: Either TypeError CheckedProgram -> Text
+render (Right p) = Text.pack (show p)
 render (Left (TypeMismatch (SoucType x) (SoucType y))) = "mismatch: " <> x <> " / " <> y
 render (Left (MultipleDeclarations (Identifier i))) = "multiple declarations: " <> i
 render (Left (Undeclared (Identifier i))) = "undeclared identifier " <> i
@@ -59,7 +60,7 @@ test (prog, expected, name) = do
         else print_err expected actual >> exitFailure
 
 print_err :: Either TypeError CheckedProgram -> Either TypeError CheckedProgram -> IO ()
-print_err expected actual = putStrLn failmsg where
+print_err expected actual = Text.putStrLn failmsg where
     failmsg = "FAILED! \n expected:\n   " <> render expected <> "\n but got:\n   " <> render actual
 
 program_header :: [Top_Level_Defn] -> ParseTree

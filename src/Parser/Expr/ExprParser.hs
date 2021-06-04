@@ -135,7 +135,7 @@ evaluate_astree :: ASTree -> Integer
 evaluate_astree (Leaf t) = case t of
     LitInt x -> x
     LitChar c -> fromIntegral (ord c)
-    LitString s -> fromIntegral (length s)
+    LitString s -> fromIntegral (Text.length s)
     Var _ -> 42 -- all identifiers are bound to this, sure
     Constructor _ -> 43 -- yeah sure no problem here
 evaluate_astree (Signed e _) = evaluate_astree e

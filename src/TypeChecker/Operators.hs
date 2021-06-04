@@ -11,19 +11,20 @@ module TypeChecker.Operators (
     ) where
 
 import Prelude hiding (lookup)
+import Data.Text (Text)
+import qualified Data.Text as Text
+
 import Common
 import Parser.Expr.ExprTypes
 import TypeChecker.Context
 
-import Debug.Trace
-
 newtype InputType  = InputType SoucType
 newtype ReturnType = ReturnType SoucType
 
-in_t :: String -> InputType
+in_t :: Text -> InputType
 in_t = InputType . SoucType
 
-ret_t :: String -> ReturnType
+ret_t :: Text -> ReturnType
 ret_t = ReturnType . SoucType
 
 ret :: (a, ReturnType) -> SoucType

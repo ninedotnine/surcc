@@ -6,12 +6,15 @@ module Builtins (
     BuiltinsCtx(..),
 ) where
 
+import qualified Data.HashMap.Strict as Map
+import Data.Text (Text)
+import qualified Data.Text as Text
+
 import Common
 import Parser.ExprParser
 
-import qualified Data.HashMap.Strict as Map
 
-type Mapping = Map.HashMap String (String, SoucType)
+type Mapping = Map.HashMap Text (String, SoucType)
 
 newtype BuiltinsCtx = Builtins [Bound] deriving Show
 
@@ -24,10 +27,10 @@ typeof_builtin_identifier (Identifier i) = snd <$> Map.lookup i builtins where
     builtins = builtin_subroutines <> builtin_functions <> builtin_constants
 
 
-gen_builtin_data :: String -> Maybe String
+gen_builtin_data :: Text -> Maybe String
 gen_builtin_data s = fst <$> Map.lookup s builtin_data
 
-typeof_builtin_data :: String -> Maybe SoucType
+typeof_builtin_data :: Text -> Maybe SoucType
 typeof_builtin_data i = snd <$> Map.lookup i builtin_data
 
 builtin_subroutines :: Mapping

@@ -13,21 +13,24 @@ module TypeChecker.Context (
 ) where
 
 import Prelude hiding (lookup)
+import Control.Monad.Except
 import Control.Monad.State
+import Control.Monad.Trans.Except
+
+import Data.Text (Text)
+import qualified Data.Text as Text
 
 import Common
 import Builtins (typeof_builtin_identifier)
 
 import Parser.Expr.ExprTypes
 
-import Control.Monad.Except
-import Control.Monad.Trans.Except
 
 data BoundLocal = BoundLocal Identifier SoucType Mutability deriving Eq
 
 instance Show BoundLocal where
-    show (BoundLocal (Identifier i) t Mut) = "Bound (mutable)" ++ i ++ ": " ++ show t
-    show (BoundLocal (Identifier i) t Immut) = "Bound " ++ i ++ ": " ++ show t
+    show (BoundLocal (Identifier i) t Mut) = Text.unpack ("Bound (mutable)" <> i <> ": ") ++ show t
+    show (BoundLocal (Identifier i) t Immut) = Text.unpack ("Bound " <> i <> ": ") ++ show t
 
 
 class ContextClass c where

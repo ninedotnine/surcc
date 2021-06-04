@@ -24,7 +24,7 @@ double_newline :: SouCParser ()
 double_newline = lookAhead (newline *> newline) *> newline -- something like this?
 
 identifier :: SouCParser Identifier
-identifier = Identifier <$> raw_identifier
+identifier = Identifier . Text.pack <$> raw_identifier
 
 -- for pattern matching
 pattern :: SouCParser Param
@@ -73,7 +73,7 @@ optional_do = skipMany space *> optional (reserved "do") *> pure ()
 optional_end_name :: Identifier -> SouCParser ()
 optional_end_name (Identifier name) = do
     optional (try (endline *> indent_depth *> reserved "end"))
-    optional (try (spaces *> string name))
+    optional (try (spaces *> string (Text.unpack name)))
 
 optional_end :: Endable_Stmts -> SouCParser String
 optional_end stmt_type = do

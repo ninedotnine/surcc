@@ -29,10 +29,10 @@ start_state name imps = (0, binds:|[])
     where
         make_identifier :: ImportDecl -> Identifier
         make_identifier = \case
-            LibImport n -> Identifier n
-            RelImport n -> Identifier n
+            LibImport n -> Identifier (Text.pack n)
+            RelImport n -> Identifier (Text.pack n)
         binds = Map.fromList (zip ids (repeat Immut))
-        ids = (Identifier name) : map make_identifier imps
+        ids = (Identifier (Text.pack name)) : map make_identifier imps
 
 
 souCParser :: SouCParser [Top_Level_Defn]

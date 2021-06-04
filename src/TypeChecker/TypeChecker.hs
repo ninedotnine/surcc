@@ -10,6 +10,8 @@ import Control.Monad.Except
 import Control.Monad.Trans
 import Control.Monad.Trans.Except
 import Data.Either
+import Data.Text (Text)
+import qualified Data.Text as Text
 
 import Prelude hiding (lookup)
 import Common
@@ -42,10 +44,10 @@ add_exports (SoucModule _ exports) = Right $ ExportList (map make_bound exports)
 add_imports :: Imports -> ExportList -> Either TypeError LocalScope
 add_imports imports ctx = Right $ GlobalScope (map make_import_bound (map from_import imports)) ctx
     where
-        from_import :: ImportDecl -> String
+        from_import :: ImportDecl -> Text
         from_import = \case
-            LibImport s -> s
-            RelImport s -> s
+            LibImport s -> Text.pack s
+            RelImport s -> Text.pack s
         make_import_bound s = Bound (Identifier s) (SoucType "Module")
 
 

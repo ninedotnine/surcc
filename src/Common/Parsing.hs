@@ -21,7 +21,8 @@ module Common.Parsing (
     constructor_name
 ) where
 
-import Data.Text (Text, pack, unpack)
+import Data.Text (Text)
+import qualified Data.Text as Text
 import Text.Parsec hiding (string, space, spaces, newline)
 import qualified Text.Parsec (string)
 
@@ -144,11 +145,11 @@ type_signature = char ':' *> ignore_spaces *> type_broadly where
         args <- sepBy1 type_broadly spaces <* char ')'
         pure (SoucTypeConstructor name args)
 
-upper_name :: Parsec Text s String
+upper_name :: Parsec Text s Text
 upper_name = do
     first <- upper
     rest <- many alphaNum
-    pure $ first:rest
+    pure $ Text.pack $ first:rest
 
 type_name :: Parsec Text s SoucType
 type_name = SoucType <$> upper_name

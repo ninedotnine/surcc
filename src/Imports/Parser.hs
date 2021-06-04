@@ -3,6 +3,7 @@ module Imports.Parser (
 ) where
 
 import Data.Text (Text)
+import qualified Data.Text as Text
 import Text.Parsec hiding (string, space, spaces, newline)
 import qualified Text.Parsec (string)
 
@@ -58,7 +59,7 @@ export_decl :: HeaderParser ExportDecl
 export_decl = do
     i <- raw_identifier <* optional spaces
     t <- type_signature <* endline
-    pure (ExportDecl (Identifier i) t)
+    pure (ExportDecl (Identifier (Text.pack i)) t)
 
 
 import_list :: HeaderParser [ImportDecl]

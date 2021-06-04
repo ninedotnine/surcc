@@ -33,7 +33,7 @@ import qualified Data.Text as Text
 
 data Mutability = Mut | Immut deriving (Show, Eq)
 
-newtype Identifier = Identifier String
+newtype Identifier = Identifier Text
                    deriving (Eq, Read, Show, Ord, IsString, Semigroup, Hashable)
 
 data ParseTree = ParseTree SoucModule Imports Body
@@ -52,12 +52,12 @@ type Body = [Top_Level_Defn]
 
 newtype Stmts = Stmts [Stmt] deriving (Show, Eq)
 
-data SoucType = SoucType String
+data SoucType = SoucType Text
               | SoucRoutn (Maybe SoucType) -- param only, because return must be "IO"
               | SoucPair SoucType SoucType
               | SoucEither SoucType SoucType
               | SoucList SoucType
-              | SoucTypeConstructor String [SoucType]
+              | SoucTypeConstructor Text [SoucType]
               deriving (Eq)
 
 pattern SoucFn :: SoucType -> SoucType -> SoucType
@@ -69,13 +69,12 @@ pattern SoucMaybe t = SoucTypeConstructor "Maybe" [t]
 data Bound = Bound Identifier SoucType deriving Eq
 
 instance Show Bound where
---     show (Bound (Identifier i) t) = "Bound " <> Text.unpack i <> ": " <> show t
-    show (Bound (Identifier i) t) = "Bound " <> i <> ": " <> show t
+    show (Bound (Identifier i) t) = "Bound " <> Text.unpack i <> ": " <> show t
 
 data TypeError = TypeMismatch SoucType SoucType
                | MultipleDeclarations Identifier
                | Undeclared Identifier
-               | UnknownData String
+               | UnknownData Text
                | ExportedButNotDefined Bound
     deriving (Eq)
 
@@ -116,9 +115,9 @@ data ASTree = Branch Operator ASTree ASTree
 
 data Term = LitInt Integer
           | LitChar Char
-          | LitString String
+          | LitString Text
           | Var Identifier
-          | Constructor String
+          | Constructor Text
     deriving (Eq, Show)
 
 data Operator = Plus
@@ -215,4 +214,7 @@ instance Show SoucType where
     show (SoucPair t0 t1) = show t0 <> " & " <> show t1
     show (SoucEither t0 t1) = show t0 <> " | " <> show t1
     show (SoucList t) = '[': show t <> "]"
-    show (SoucTypeConstructor t ts) = t <> "(" <> show ts <> ")"
+    show (SoucTypeConstructor t ts) = Text.unpack (t <> "(" <> sho ts <> ")")
+
+sho :: Show a => a -> Text
+sho = Text.pack . show

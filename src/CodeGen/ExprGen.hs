@@ -14,6 +14,8 @@ import Builtins (gen_builtin_data, gen_builtin_identifier)
 import Common
 
 import Data.Maybe (fromMaybe)
+import Data.Text (Text)
+import qualified Data.Text as Text
 
 generate_expr :: ASTree -> String
 generate_expr (Leaf e) = generate_term e
@@ -61,7 +63,7 @@ gen_call s x y = s ++ generate_expr x <> "," <> generate_expr y ++ ")"
 generate_term :: Term -> String
 generate_term (LitInt l) = "(union _souc_obj) { ._souc_int = " ++ show l ++ "}"
 generate_term (LitChar c) = "\'" ++ c : "\'"
-generate_term (LitString s) = "(union _souc_obj) { ._souc_str = " ++ show s ++ "}"
+generate_term (LitString s) = Text.unpack $ "(union _souc_obj) { ._souc_str = \"" <> s <> "\"}"
 generate_term (Var i) = generate_identifier i
 generate_term (Constructor s) = case gen_builtin_data s of
     Just output -> output
@@ -69,7 +71,7 @@ generate_term (Constructor s) = case gen_builtin_data s of
 
 generate_identifier :: Identifier -> String
 generate_identifier i = fromMaybe (prepend i) (gen_builtin_identifier i) where
-    prepend (Identifier name) = "_souc_user_" ++ name
+    prepend (Identifier name) = "_souc_user_" ++ Text.unpack name
 
 
 generate_prefix_expr :: PrefixOperator -> String
