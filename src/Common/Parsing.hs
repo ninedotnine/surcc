@@ -14,13 +14,17 @@ module Common.Parsing (
     raw_identifier,
     string,
     endline,
-    type_signature
+    type_signature,
+    type_name,
+    upper_name,
+    optional_sig,
+    constructor_name
 ) where
 
 import Text.Parsec hiding (string, space, spaces, newline)
 import qualified Text.Parsec (string)
 
-import Common (SoucType(..))
+import Common (SoucType(..), Term(..))
 
 identifier_char :: Parsec String s Char
 identifier_char = (alphaNum <|> char '_')
@@ -49,6 +53,9 @@ spaces = many1 space *> pure ()
 
 space_or_tab :: Parsec String s ()
 space_or_tab = space <|> tab *> pure ()
+
+ignore_spaces :: Parsec String s ()
+ignore_spaces = skipMany (char ' ' <?> "")
 
 newline :: Parsec String s ()
 newline = char '\n' *> pure () <?> "newline"
@@ -120,24 +127,29 @@ string = try . Text.Parsec.string
 endline :: Parsec String s ()
 endline = skipMany space *> (line_comment <|> block_comment <|> newline) <?> "end-of-line"
 
+optional_sig :: Parsec String s (Maybe SoucType)
+optional_sig = optionMaybe type_signature
 
 type_signature :: Parsec String s SoucType
-type_signature = char ':' *> spaces *> type_broadly where
+type_signature = char ':' *> ignore_spaces *> type_broadly where
 
     type_broadly :: Parsec String s SoucType
-    type_broadly = try type_constructor <|> simple_type
+    type_broadly = try type_constructor <|> type_name
 
     type_constructor :: Parsec String s SoucType
     type_constructor = do
-        name <- type_name <* char '('
+        name <- upper_name <* char '('
         args <- sepBy1 type_broadly spaces <* char ')'
         pure (SoucTypeConstructor name args)
 
-    simple_type :: Parsec String s SoucType
-    simple_type = SoucType <$> type_name
-
-type_name :: Parsec String s String
-type_name = do
+upper_name :: Parsec String s String
+upper_name = do
     first <- upper
     rest <- many alphaNum
     pure $ first:rest
+
+type_name :: Parsec String s SoucType
+type_name = SoucType <$> upper_name
+
+constructor_name :: Parsec String s Term
+constructor_name = Constructor <$> upper_name

@@ -30,9 +30,6 @@ pattern = do
     sig <- optionMaybe type_signature
     pure (Param name sig)
 
-optional_sig :: SouCParser (Maybe SoucType)
-optional_sig = optionMaybe type_signature
-
 increase_indent_level :: SouCParser ()
 increase_indent_level = modifyState (\(x,m) -> (x+1,m))
 

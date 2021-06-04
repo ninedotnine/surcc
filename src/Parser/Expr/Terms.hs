@@ -6,6 +6,7 @@ module Parser.Expr.Terms (
 import qualified Text.Parsec as Parsec
 import Text.Parsec ((<|>), (<?>))
 import Common
+import Common.Parsing
 
 import Parser.Expr.ExprTypes
 import Parser.Expr.RegardingSpaces
@@ -18,7 +19,7 @@ parse_term_tok = TermTok <$> (
         parse_num
     <|> parse_char
     <|> parse_string
-    <|> parse_constructor
+    <|> constructor_name
     <|> parse_var)
 
 parse_prefix_op :: ShuntingYardParser TermToken
@@ -37,12 +38,6 @@ parse_prefix_op = do
 
 parse_num :: ShuntingYardParser Term
 parse_num = LitInt <$> read <$> Parsec.many1 Parsec.digit
-
-parse_constructor :: ShuntingYardParser Term
-parse_constructor = do
-    first <- Parsec.upper
-    rest <- Parsec.many (Parsec.upper <|> Parsec.lower <|> Parsec.digit)
-    pure $ Constructor (first:rest)
 
 parse_var :: ShuntingYardParser Term
 parse_var = do
