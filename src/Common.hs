@@ -19,12 +19,10 @@ module Common (
     CheckedProgram(..),
     Program(..),
     Top_Level_Defn(..),
---     Endable_Stmts(..),
     ExportDecl(..),
     SoucModule(..),
     ImportDecl(..),
     Imports,
-
     Mutability(..),
     ) where
 
@@ -35,9 +33,6 @@ data Mutability = Mut | Immut deriving (Show, Eq)
 
 newtype Identifier = Identifier String
                    deriving (Eq, Read, Show, Ord, IsString, Semigroup, Hashable)
-
--- instance Show Identifier where
---     show (Identifier x) = show x
 
 data Program = Program SoucModule Imports Body
     deriving Show
