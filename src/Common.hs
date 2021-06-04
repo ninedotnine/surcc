@@ -17,7 +17,7 @@ module Common (
     TypeError(..),
     Stmts(..),
     CheckedProgram(..),
-    Program(..),
+    ParseTree(..),
     Top_Level_Defn(..),
     ExportDecl(..),
     SoucModule(..),
@@ -34,7 +34,7 @@ data Mutability = Mut | Immut deriving (Show, Eq)
 newtype Identifier = Identifier String
                    deriving (Eq, Read, Show, Ord, IsString, Semigroup, Hashable)
 
-data Program = Program SoucModule Imports Body
+data ParseTree = ParseTree SoucModule Imports Body
     deriving Show
 
 data CheckedProgram = CheckedProgram SoucModule Imports Body

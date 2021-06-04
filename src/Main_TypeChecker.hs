@@ -64,7 +64,7 @@ run_default_test_suite = do
     putStrLn "=== checking invalid inputs ==="
     process_dir handle_prog_bad "test/typechecker.d/invalid/"
 
-type Handler = Program -> IO ()
+type Handler = ParseTree -> IO ()
 
 output_results :: Handler
 output_results prog = case type_check prog of

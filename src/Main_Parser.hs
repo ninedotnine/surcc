@@ -20,8 +20,8 @@ getFileData = getArgs >>= \args -> if length args < 1
         contents <- readFile name
         pure (name, contents)
 
-outputResult :: FilePath -> Program -> IO ()
-outputResult filename (Program modul imps body) = do
+outputResult :: FilePath -> ParseTree -> IO ()
+outputResult filename (ParseTree modul imps body) = do
     putStrLn filename
 --     putStr $ (unlines . map show) toks
     putStrLn "------------------ pretty printing ------------------"
@@ -84,7 +84,7 @@ main = do
             print_file_contents filename
             exitFailure >> pure ()
         Right (modul, imports, rest) -> do
-            let result = runSouCParser filename modul imports rest :: Either ParseError Program
+            let result = runSouCParser filename modul imports rest :: Either ParseError ParseTree
             case result of
                 Left err -> do
                     putStrLn "-------------------- failed parse output:--------------------"

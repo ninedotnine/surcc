@@ -14,11 +14,11 @@ import Parser.SouC_Stmts (stmt_block)
 import Parser.ExprParser (parse_expression)
 import Parser.TabChecker (check_tabs)
 
-runSouCParser :: SourceName -> SoucModule -> [ImportDecl] -> String -> Either ParseError Program
+runSouCParser :: SourceName -> SoucModule -> [ImportDecl] -> String -> Either ParseError ParseTree
 runSouCParser source_name (SoucModule name exports) imps input = do
     check_tabs source_name input
     body <- runParser souCParser (start_state name imps) source_name input
-    pure $ Program (SoucModule name exports) imps body
+    pure $ ParseTree (SoucModule name exports) imps body
 
 
 type ModuleName = String
