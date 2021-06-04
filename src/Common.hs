@@ -22,14 +22,13 @@ module Common (
 --     Endable_Stmts(..),
     ExportDecl(..),
     SoucModule(..),
+    ImportDecl(..),
     Import(..),
     Imports,
 
     SouCParser,
     ParserState,
     Mutability(..),
-    empty_state
-
     ) where
 
 import Text.Parsec (Parsec)
@@ -55,9 +54,6 @@ data Mutability = Mut | Immut deriving (Show, Eq)
 -- FIXME: should this be a list of maps (for levels of scope)?
 type ParserState = (Indentation, NonEmpty Bindings)
 
-empty_state :: ParserState
-empty_state = (0, Map.empty :| [])
-
 -- type SouCParser a = Parsec String Indentation a
 type SouCParser a = Parsec String ParserState a
 
@@ -75,6 +71,8 @@ data CheckedProgram = CheckedProgram (Maybe SoucModule) Imports Body
 
 data ExportDecl = ExportDecl Identifier SoucType deriving (Show)
 data SoucModule = SoucModule String [ExportDecl] deriving (Show)
+
+data ImportDecl = LibImport String | RelImport String deriving (Read, Show)
 
 type Imports = [Import]
 type Body = [Top_Level_Defn]

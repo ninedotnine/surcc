@@ -9,7 +9,8 @@ module Parser.SouC_Expr (
 import Debug.Trace
 
 import Text.Parsec hiding (newline, space, spaces, string)
-import qualified Data.Map.Strict as Map (Map)
+import Data.List.NonEmpty ( NonEmpty(..) )
+import qualified Data.Map.Strict as Map (Map, empty)
 
 import Common
 import Parser.Basics
@@ -17,7 +18,7 @@ import Parser.Basics
 data Raw_Expr = Raw_Expr String deriving (Read, Show)
 
 run_raw_expr_parser :: String -> String
-run_raw_expr_parser input = do
+run_raw_expr_parser input = let empty_state = (0, Map.empty :| []) in
     case runParser (raw_expr <* eof) empty_state "raw_expr" input of
         Left err -> "error: " ++ (show err)
         Right r -> show r

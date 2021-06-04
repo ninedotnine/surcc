@@ -7,7 +7,8 @@ import Text.Parsec.Error (ParseError)
 import System.Environment (getArgs)
 import System.Exit (exitFailure, exitSuccess)
 
-import Parser.SouCParser
+import Imports.Parser (parse_module_header)
+import Parser.SouCParser (runSouCParser)
 
 getFileData :: IO (FilePath, String)
 getFileData = getArgs >>= \args -> if length args < 1
@@ -77,13 +78,21 @@ main :: IO ()
 main = do
     putStrLn "------------------------BEGIN------------------------"
     (filename, input) <- getFileData
-    let result = runSouCParser filename input :: Either ParseError Program
-    case result of
+    let header = parse_module_header filename input
+    case header of
         Left err -> do
             putStrLn "-------------------- failed parse output:--------------------"
             putStrLn (show err)
             print_file_contents filename
             exitFailure >> pure ()
-        Right prog -> do
-            outputResult filename prog
-            exitSuccess >> pure ()
+        Right (modul, imports, rest) -> do
+            let result = runSouCParser filename modul imports rest :: Either ParseError Program
+            case result of
+                Left err -> do
+                    putStrLn "-------------------- failed parse output:--------------------"
+                    putStrLn (show err)
+                    print_file_contents filename
+                    exitFailure >> pure ()
+                Right prog -> do
+                    outputResult filename prog
+                    exitSuccess >> pure ()

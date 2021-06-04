@@ -1,6 +1,11 @@
+{-# LANGUAGE LambdaCase #-}
+
 module Parser.SouCParser where
 
+import Data.List.NonEmpty ( NonEmpty(..) )
+import qualified Data.Map.Strict as Map (Map, fromList)
 import Text.Parsec hiding (space, spaces, string)
+
 
 import Common
 import Parser.Basics
@@ -9,18 +14,39 @@ import Parser.SouC_Stmts (stmt_block)
 import Parser.ExprParser (parse_expression)
 import Parser.TabChecker (check_tabs)
 
-runSouCParser :: SourceName -> String -> Either ParseError Program
-runSouCParser name input =
-    check_tabs name input >> runParser souCParser empty_state name input
+runSouCParser :: SourceName -> SoucModule -> [ImportDecl] -> String -> Either ParseError Program
+runSouCParser source_name (SoucModule name exports) imps input = do
+    check_tabs source_name input
+    body <- runParser souCParser (start_state name imps) source_name input
+    pure $ Program (Just (SoucModule name exports)) (map reduced_import_fixme imps) body
 
-souCParser :: SouCParser Program
+
+reduced_import_fixme :: ImportDecl -> Import
+reduced_import_fixme = (\case
+    LibImport i -> Import i
+    RelImport i -> Import i
+    )
+
+type ModuleName = String
+start_state :: ModuleName -> [ImportDecl] -> ParserState
+start_state name imps = (0, binds:|[])
+    where
+        make_identifier :: ImportDecl -> Identifier
+        make_identifier = \case
+            LibImport n -> Identifier n
+            RelImport n -> Identifier n
+        binds = Map.fromList (zip ids (repeat Immut))
+        ids = (Identifier name) : map make_identifier imps
+
+
+souCParser :: SouCParser [Top_Level_Defn]
 souCParser = do
-    name <- optionMaybe module_header
+    nothin <- optionMaybe module_header
     _ <- many (pragma) *> skipMany endline -- FIXME do something with pragmas
-    imps <- imports
+    _ <- imports
     code <- parseDefs
     eof
-    pure $ Program name imps code -- FIXME pure something useful
+    pure $ code
 
 module_header :: SouCParser SoucModule
 module_header = do

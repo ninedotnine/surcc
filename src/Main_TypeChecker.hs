@@ -7,8 +7,9 @@ import System.Environment (getArgs)
 import System.Exit (exitFailure, exitSuccess)
 
 import Common
-import Parser.SouCParser
-import TypeChecker.TypeChecker
+import Imports.Parser (parse_module_header)
+import Parser.SouCParser (runSouCParser)
+import TypeChecker.TypeChecker (type_check)
 
 main :: IO ()
 main = do
@@ -50,9 +51,11 @@ test :: FilePath -> String -> Handler -> IO ()
 test filename input handle_parsed = do
     putStr filename
     putStr "... "
-    case runSouCParser filename input of
+    case parse_module_header filename input of
         Left err -> putStrLn (show err) >> exitFailure
-        Right parsed -> handle_parsed parsed
+        Right (m, i, rest) -> case runSouCParser filename m i rest of
+            Left err -> putStrLn (show err) >> exitFailure
+            Right parsed -> handle_parsed parsed
 
 run_default_test_suite :: IO ()
 run_default_test_suite = do
