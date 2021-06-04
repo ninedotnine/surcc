@@ -13,6 +13,7 @@ import Data.List.NonEmpty ( NonEmpty(..) )
 import qualified Data.Map.Strict as Map (Map, empty)
 
 import Common
+import Common.Parsing
 import Parser.Basics
 
 data Raw_Expr = Raw_Expr String deriving (Read, Show)

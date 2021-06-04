@@ -6,7 +6,8 @@ import Text.Parsec hiding (space, spaces, string)
 
 
 import Common
-import Parser.Basics
+import Parser.Basics (pattern, optional_end_name, add_to_bindings, identifier, optional_sig)
+import Common.Parsing
 import Parser.SouC_Expr  (Raw_Expr(..), raw_expr)
 import Parser.SouC_Stmts (stmt_block)
 import Parser.ExprParser (parse_expression)

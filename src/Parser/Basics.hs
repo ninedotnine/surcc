@@ -1,94 +1,15 @@
 module Parser.Basics where
 
-import Debug.Trace
-
 import Control.Monad (when)
 import Text.Parsec hiding (space, spaces, string, newline)
-import qualified Text.Parsec (string)
 import Data.Maybe (isJust)
 import qualified Data.Map.Strict  as Map (singleton, member, lookup)
 import Data.List.NonEmpty ( NonEmpty(..) )
 
 import Common
-import Parser.ExprParser
+import Common.Parsing
 
 data Endable_Stmts = Stmt_If_End | Stmt_While_End | Stmt_Unless_End | Stmt_Until_End
-
-reserved :: String -> SouCParser String
-reserved s = string s <* notFollowedBy identifier_char
-
-reserved_word :: SouCParser String
-reserved_word =
-    choice (map reserved long_list) <?> "reserved word" where
-        long_list = [
-            -- these are in use, or i expect will be soon
-            "if", "unless", "else", "while", "until",
-            "for", "in", "do", "end", "where", "return",
-            "break", "continue", "case", "and", "or",
-            "atomic", "module", "import", "unary", "infix", "postfix",
-            "typedef", "newtype", "datatype", "deriving", "typeclass",
-            "define", "attribute", "assert", "trace", "undefined",
-
-            -- these are reserved for future compatibility
-            "abort", "abstract", "alias", "alignof", "allocate", "as",
-            "associate", "asynchronous", "begin", "bind", "block",
-            "breakpoint", "call", "close", "common", "const",
-            "contains", "contiguous", "critical", "cycle", "data",
-            "deallocate", "default", "defer", "deferred", "delegate",
-            "dynamic", "elem", "element", "elif", "entry", "enum",
-            "errno", "error", "eval", "exhibiting", "exhibits",
-            "exists", "exit", "export", "explicit", "extend", "extends",
-            "extern", "external", "fail", "final", "flush", "forall",
-            "foreach", "format", "from", "function", "generic", "given",
-            "global", "goto", "halt", "has", "implement", "implements",
-            "implicit", "inquire", "instance", "intent", "interface",
-            "internal", "is", "it", "kindof", "l", "label", "lambda",
-            "let", "lock", "loop", "macro", "make", "match", "mem",
-            "memory", "method", "mod", "namespace", "native", "new",
-            "noop", "not", "null", "object", "only", "open", "operator",
-            "override", "package", "parameter", "partial", "pass", "pause",
-            "persist", "persistent", "pointer", "private", "procedure",
-            "program", "public", "read", "recurse", "recursive", "ref",
-            "require", "result", "rewind", "routine", "satisfies", "save",
-            "select", "sequence", "sizeof", "static", "static_assert", "stop",
-            "store", "struct", "sub", "subclass", "submodule", "subroutine",
-            "suchthat", "super", "superclass", "switch", "sync", "synchronous",
-            "table", "take", "target", "test", "then", "this", "to", "typeof",
-            "unlock", "undef", "use", "virtual", "void", "volatile", "wait",
-            "when", "with", "yield", "zen"]
-
-space :: SouCParser ()
-space = char ' ' *> pure () <?> ""
-
-spaces :: SouCParser ()
-spaces = many1 space *> pure ()
-
-space_or_tab :: SouCParser ()
-space_or_tab = space <|> tab *> pure ()
-
-newline :: SouCParser ()
-newline = char '\n' *> pure () <?> "newline"
-
-keep_spaces :: SouCParser String
-keep_spaces = many (char ' ')
-
-endline :: SouCParser ()
-endline = skipMany space *> (line_comment <|> block_comment <|> newline) <?> "end-of-line"
-
-line_comment :: SouCParser ()
-line_comment = try (skipMany space_or_tab *> char ';') *> manyTill anyChar newline *> pure () <?> ""
-
-block_comment :: SouCParser ()
-block_comment = try (string "{;" *> notFollowedBy (char '>')) *> block_comment_depth 1 *> endline <?> ""
-    where
-        nest n = string "{;" *> block_comment_depth n
-        end = string ";}" *> pure ()
-        block_comment_depth :: Integer -> SouCParser ()
-        block_comment_depth 1 = skipManyTill anyChar ((nest 2) <|> end)
-        block_comment_depth n = skipManyTill anyChar ((nest (n+1)) <|> end *> block_comment_depth (n-1))
-
-doc_comment :: SouCParser ()
-doc_comment = string "{;>" *> skipManyTill anyChar (string "<;}") *> endline *> optional endline <?> ""
 
 blank_line :: SouCParser ()
 blank_line = try (skipMany space_or_tab *> newline)
@@ -96,85 +17,21 @@ blank_line = try (skipMany space_or_tab *> newline)
 meaningless_fluff :: SouCParser ()
 meaningless_fluff = skipMany (line_comment <|> blank_line)
 
--- pragma :: SouCParser Pragma -- FIXME
-pragma :: SouCParser ()
-pragma = string "{^;" *> space *> endBy1 (many1 alphaNum) space *> (string ";^}") *> endline <?> "pragma"
-
-skipManyTill :: SouCParser a -> SouCParser b -> SouCParser ()
-skipManyTill p1 p2 = manyTill p1 p2 *> pure ()
-
--- Text.Parsec.string does this silly thing where it might fail while advancing the stream.
-string :: String -> SouCParser String
-string = try . Text.Parsec.string
-
 double_newline :: SouCParser ()
 double_newline = lookAhead (newline *> newline) *> newline -- something like this?
-
-identifier_char :: SouCParser Char
-identifier_char = (alphaNum <|> char '_')
-
-upper_name :: SouCParser String
-upper_name = do
-    first <- upper
-    rest <- many identifier_char
-    pure $ first:rest
 
 identifier :: SouCParser Identifier
 identifier = Identifier <$> raw_identifier
 
-raw_identifier :: SouCParser String
-raw_identifier = do
-    notFollowedBy reserved_word
-    first <- lower <|> char '_'
-    rest <- many identifier_char
-    pure (first:rest)
-
-module_path :: SouCParser String
-module_path = do
-    leading_slash <- option "" slash
-    dir <- many $ lookAhead (try (name <> slash)) *> (name <> slash)
-    path <- raw_identifier
-    pure (leading_slash ++ concat dir ++ path)
-        where
-            dot = string "."
-            dotdot = string ".."
-            slash = string "/"
-            name = (many1 identifier_char) <|> dotdot <|> dot
-
 -- for pattern matching
 pattern :: SouCParser Param
 pattern = do
---     name <- identifier `sepBy1` oneOf "," -- for multiple identifiers, maybe not needed
     name <- identifier
     sig <- optionMaybe type_signature
     pure (Param name sig)
 
-
 optional_sig :: SouCParser (Maybe SoucType)
 optional_sig = optionMaybe type_signature
-
-type_signature :: SouCParser SoucType
-type_signature = char ':' *> spaces *> type_broadly where
-
-    type_broadly :: SouCParser SoucType
-    type_broadly = try type_constructor <|> simple_type
-
-    type_constructor :: SouCParser SoucType
-    type_constructor = do
-        name <- type_name <* char '('
-        args <- sepBy1 type_broadly spaces <* char ')'
-        pure (SoucTypeConstructor name args)
-
-    simple_type :: SouCParser SoucType
-    simple_type = SoucType <$> type_name
-
-    type_name :: SouCParser String
-    type_name = do
-        first <- upper
-        rest <- many (lower <|> upper <|> digit)
-        pure (first:rest)
-
-
 
 increase_indent_level :: SouCParser ()
 increase_indent_level = modifyState (\(x,m) -> (x+1,m))
@@ -209,8 +66,6 @@ bindings_lookup i = do
         where
             f binds found = if isJust found then found else Map.lookup i binds
 
-parens :: SouCParser a -> SouCParser a
-parens = between (char '(') (char ')')
 
 optional_do :: SouCParser ()
 optional_do = skipMany space *> optional (reserved "do") *> pure ()
