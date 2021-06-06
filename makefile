@@ -45,11 +45,18 @@ clean:
 test: test/parser test/type_checker test/typechecker_progs test/codegen test/expr_parser test/integration test/typechecker_globals test/typechecker
 	@echo "all tests successful! :^D"
 
-.PHONY: test/parser test/expr_parser test/integration test/typechecker
+.PHONY: test/expr_parser test/integration test/typechecker
 test/expr_parser: parser expr
-test/parser: parser
-test/integration test/expr_parser test/parser: soucc
+test/integration test/expr_parser: soucc
 	@ $@
+
+
+.PHONY: test/parser
+test/parser: test/TestParser.hs parser soucc | $(TEST_DIR)
+	@$(RM) $(CACHE_DIR)/hi_files/Main.hi  	# ugh hack to fix ghc
+	ghc $(FLAGS) -o $(TEST_DIR)/parser -main-is TestParser $<
+	$(TEST_DIR)/parser
+
 
 test/typechecker: typechecker
 	bin/typechecker --test

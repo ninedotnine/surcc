@@ -33,7 +33,7 @@ do
     if 
         bin/parser "$fullname"  >> /dev/null 2>&1
     then
-        echo "ILLEGAL PARSE (this test should have failed):"
+        echo "FAILED (this program should not have been parsed):"
         bin/parser "$fullname"
         exit 1
     else

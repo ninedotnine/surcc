@@ -1,9 +1,15 @@
-module Main_Parser where
+module Main_Parser (
+    main,
+    parse_souc_file,
+    render_file_contents,
+    render_error,
+    pretty_print,
+) where
 
 
 import Common
--- import Text.Parsec.String (parseFromFile)
 import Data.Text (Text)
+import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
 import Text.Parsec.Error (ParseError)
 import System.Environment (getArgs)
@@ -12,8 +18,19 @@ import System.Exit (exitFailure, exitSuccess)
 import Imports.Parser (parse_module_header)
 import Parser.SouCParser (runSouCParser)
 
-getFileData :: IO (FilePath, Text)
-getFileData = getArgs >>= \args -> if length args < 1
+main :: IO ()
+main = do
+    (filename, input) <- getArgs >>= parse_args
+    case parse_souc_file filename input of
+        Left err -> do
+            Text.putStr (render_error err input)
+            exitFailure
+        Right prog -> do
+            pretty_print prog
+            exitSuccess
+
+parse_args :: [String] -> IO (FilePath, Text)
+parse_args args = if length args < 1
     then do
         contents <- Text.getContents
         putStrLn "no file name provided, reading from stdin."
@@ -22,21 +39,27 @@ getFileData = getArgs >>= \args -> if length args < 1
         contents <- Text.readFile name
         pure (name, contents)
 
-outputResult :: FilePath -> ParseTree -> IO ()
-outputResult filename (ParseTree modul imps body) = do
-    putStrLn filename
---     putStr $ (unlines . map show) toks
-    putStrLn "------------------ pretty printing ------------------"
-    print $ "importing module: " ++ show modul
+render_error :: ParseError -> Text -> Text
+render_error err input =  error_start <> Text.pack (show err) <> "\n" <> render_file_contents input
+
+render_file_contents :: Text -> Text
+render_file_contents text = header <> contents
+    where
+        header = "-------------------- file contents: --------------------\n"
+        contents = Text.unlines $ zipWith (<>) numbers indented
+        numbers = fmap (Text.pack . show) ([1..]::[Int])
+        indented = fmap ("   "<>) (Text.lines (text))
+
+parse_souc_file :: FilePath -> Text -> Either ParseError ParseTree
+parse_souc_file filename input = do
+    (modul, imports, rest) <- parse_module_header filename input
+    runSouCParser filename modul imports rest
+
+pretty_print :: ParseTree -> IO ()
+pretty_print (ParseTree modul imps body) = do
+    print modul
     mapM_ print imps
     mapM_ prettyPrint body
-    print_file_contents filename
-
-print_file_contents :: FilePath -> IO ()
-print_file_contents filename = do
-    putStrLn "-------------------- file contents: --------------------"
-    contents <- map ("   "++) . lines <$> readFile filename
-    mapM_ putStrLn $ zipWith (++) (map show ([1..]::[Int])) contents
 
 
 prettyPrint :: Top_Level_Defn -> IO ()
@@ -72,27 +95,4 @@ prettyPrint (MainDefn param Nothing (Stmts stmts)) = do
 prettifyStmt :: Stmt -> String
 prettifyStmt stmt = show stmt -- FIXME could be much prettier
 
-
-
-main :: IO ()
-main = do
-    putStrLn "------------------------BEGIN------------------------"
-    (filename, input) <- getFileData
-    let header = parse_module_header filename input
-    case header of
-        Left err -> do
-            putStrLn "-------------------- failed parse output:--------------------"
-            putStrLn (show err)
-            print_file_contents filename
-            exitFailure >> pure ()
-        Right (modul, imports, rest) -> do
-            let result = runSouCParser filename modul imports rest :: Either ParseError ParseTree
-            case result of
-                Left err -> do
-                    putStrLn "-------------------- failed parse output:--------------------"
-                    putStrLn (show err)
-                    print_file_contents filename
-                    exitFailure >> pure ()
-                Right prog -> do
-                    outputResult filename prog
-                    exitSuccess >> pure ()
+error_start = "-------------------- failed parse output:--------------------\n"
