@@ -3,10 +3,12 @@ module CodeGen.Runtime.FuncDefs (funcdefs) where
 import qualified Prelude
 import Prelude (String)
 
-import Data.List (intercalate)
+import Data.Text (Text)
+import qualified Data.Text as Text
 
-funcdefs :: String
-funcdefs = intercalate "\n" [
+
+funcdefs :: Text
+funcdefs = Text.intercalate "\n" [
     tuple,
     sum,
     difference,

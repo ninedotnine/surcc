@@ -1,15 +1,16 @@
 module CodeGen.Runtime.SubrDefs (subrdefs) where
 
-import Data.List (intercalate)
+import Data.Text (Text)
+import qualified Data.Text as Text
 
-subrdefs :: String
-subrdefs = intercalate "\n" [write, abort]
+subrdefs :: Text
+subrdefs = Text.intercalate "\n" [write, abort]
 
-write :: String
+write :: Text
 write = "void _souc_write(union _souc_obj pair) { puts(pair._souc_pair->second._souc_str); } "
 
-abort :: String
+abort :: Text
 abort = "void _souc_abort(void) { abort(); } "
 
-puts :: String
+puts :: Text
 puts = "void _souc_puts(union _souc_obj val) { puts(val._souc_str); } "

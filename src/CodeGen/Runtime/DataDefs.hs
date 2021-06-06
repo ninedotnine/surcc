@@ -1,9 +1,10 @@
 module CodeGen.Runtime.DataDefs (datadefs) where
 
-import Data.List (intercalate)
+import Data.Text (Text)
+import qualified Data.Text as Text
 
-datadefs :: String
-datadefs = intercalate "\n" [
+datadefs :: Text
+datadefs = Text.intercalate "\n" [
     souc_none,
     souc_ok,
     souc_42,

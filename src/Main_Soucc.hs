@@ -22,7 +22,7 @@ main = do
             Left parse_error -> print parse_error >> exitFailure
             Right prog_tree -> case type_check prog_tree of
                 Left typecheck_error -> print typecheck_error >> exitFailure
-                Right checked_prog -> putStrLn (generate checked_prog)
+                Right checked_prog -> Text.putStrLn (generate checked_prog)
 
 sanitize_args :: [String] -> IO String
 sanitize_args [] = putStrLn "no filename provided." >> exitFailure

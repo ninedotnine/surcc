@@ -14,11 +14,11 @@ import Common
 import Parser.ExprParser
 
 
-type Mapping = Map.HashMap Text (String, SoucType)
+type Mapping = Map.HashMap Text (Text, SoucType)
 
 newtype BuiltinsCtx = Builtins [Bound] deriving Show
 
-gen_builtin_identifier :: Identifier -> Maybe String
+gen_builtin_identifier :: Identifier -> Maybe Text
 gen_builtin_identifier (Identifier i) = fst <$> Map.lookup i builtins where
     builtins = builtin_subroutines <>  builtin_functions <> builtin_constants
 
@@ -27,7 +27,7 @@ typeof_builtin_identifier (Identifier i) = snd <$> Map.lookup i builtins where
     builtins = builtin_subroutines <> builtin_functions <> builtin_constants
 
 
-gen_builtin_data :: Text -> Maybe String
+gen_builtin_data :: Text -> Maybe Text
 gen_builtin_data s = fst <$> Map.lookup s builtin_data
 
 typeof_builtin_data :: Text -> Maybe SoucType

@@ -6,9 +6,11 @@ import CodeGen.Runtime.SubrDefs (subrdefs)
 import CodeGen.Runtime.DataDefs (datadefs)
 
 import Data.List (intercalate)
+import Data.Text (Text)
+import qualified Data.Text as Text
 
-runtime :: String
-runtime = intercalate "\n" [includes, typedefs, funcdefs, subrdefs, datadefs]
+runtime :: Text
+runtime = Text.intercalate "\n" [includes, typedefs, funcdefs, subrdefs, datadefs]
 
-includes :: String
+includes :: Text
 includes = "#include <stdio.h>\n#include <stdbool.h>\n#include <stdlib.h>\n"

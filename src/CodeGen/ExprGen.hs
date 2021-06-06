@@ -17,10 +17,10 @@ import Data.Maybe (fromMaybe)
 import Data.Text (Text)
 import qualified Data.Text as Text
 
-generate_expr :: ASTree -> String
+generate_expr :: ASTree -> Text
 generate_expr (Leaf e) = generate_term e
 generate_expr (Signed e _) = generate_expr e
-generate_expr (Twig op e) = generate_prefix_expr op ++ generate_expr e
+generate_expr (Twig op e) = generate_prefix_expr op <> generate_expr e
 generate_expr (Branch op x y) = case op of
     Plus              ->  gen_call "_souc_sum(" x y
     Minus             ->  gen_call "_souc_difference(" x y
@@ -46,8 +46,8 @@ generate_expr (Branch op x y) = case op of
     Combine           ->  undefined
     Index             ->  undefined
     Lookup            ->  undefined
-    Apply             ->  generate_expr x ++ "(" ++ generate_expr y ++ ") "
-    FlipApply         ->  generate_expr y ++ "(" ++ generate_expr x ++ ") "
+    Apply             ->  generate_expr x <> "(" <> generate_expr y <> ") "
+    FlipApply         ->  generate_expr y <> "(" <> generate_expr x <> ") "
     Map               ->  undefined
     FlipMap           ->  undefined
     Applicative       ->  undefined
@@ -57,24 +57,24 @@ generate_expr (Branch op x y) = case op of
     BindRight         ->  undefined
     BindLeft          ->  undefined
 
-gen_call :: String -> ASTree -> ASTree -> String
-gen_call s x y = s ++ generate_expr x <> "," <> generate_expr y ++ ")"
+gen_call :: Text -> ASTree -> ASTree -> Text
+gen_call s x y = s <> generate_expr x <> "," <> generate_expr y <> ")"
 
-generate_term :: Term -> String
-generate_term (LitInt l) = "(union _souc_obj) { ._souc_int = " ++ show l ++ "}"
-generate_term (LitChar c) = "\'" ++ c : "\'"
-generate_term (LitString s) = Text.unpack $ "(union _souc_obj) { ._souc_str = \"" <> s <> "\"}"
+generate_term :: Term -> Text
+generate_term (LitInt l) = "(union _souc_obj) { ._souc_int = " <> Text.pack (show l) <> "}"
+generate_term (LitChar c) = "\'" <> Text.singleton c <> "\'"
+generate_term (LitString s) = "(union _souc_obj) { ._souc_str = \"" <> s <> "\"}"
 generate_term (Var i) = generate_identifier i
 generate_term (Constructor s) = case gen_builtin_data s of
     Just output -> output
     Nothing -> "45" -- fixme hehe
 
-generate_identifier :: Identifier -> String
+generate_identifier :: Identifier -> Text
 generate_identifier i = fromMaybe (prepend i) (gen_builtin_identifier i) where
-    prepend (Identifier name) = "_souc_user_" ++ Text.unpack name
+    prepend (Identifier name) = "_souc_user_" <> name
 
 
-generate_prefix_expr :: PrefixOperator -> String
+generate_prefix_expr :: PrefixOperator -> Text
 generate_prefix_expr GetAddr    = "&"
 generate_prefix_expr Deref      = "*"
 generate_prefix_expr Negate     = "-"

@@ -4,9 +4,9 @@
 import CodeGen.CodeGen
 import Common
 
+import qualified Data.Text.IO as Text
 import System.Directory (createDirectoryIfMissing)
 import System.Process (callProcess)
--- import System.IO
 
 default_module :: SoucModule
 default_module = SoucModule "anonymous_main_module" []
@@ -21,7 +21,7 @@ test prog name = do
 --     print (generate prog)
     let bin_filename = tmpdir ++ name
         c_filename = bin_filename ++ ".c"
-    writeFile c_filename (generate prog)
+    Text.writeFile c_filename (generate prog)
     callProcess "gcc" [c_filename, "-o", bin_filename]
     putStrLn "OK."
 

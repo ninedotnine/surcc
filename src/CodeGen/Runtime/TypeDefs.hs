@@ -1,9 +1,10 @@
 module CodeGen.Runtime.TypeDefs (typedefs) where
 
-import Data.List (intercalate)
+import Data.Text (Text)
+import qualified Data.Text as Text
 
-typedefs :: String
-typedefs = intercalate "\n" [
+typedefs :: Text
+typedefs = Text.intercalate "\n" [
     souc_obj,
     souc_maybe,
     souc_pair
