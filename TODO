@@ -1,15 +1,10 @@
-currently:
-    shuntingyard stuff could probably use renaming
-        ASTree -> Expr_Tree ?
-    how can i run a parsec parser from within another one?
-
-
 [ ] implement pragmas, don't just skip them
 [ ] in a line-character comment, '}' should not be allowed immediately after ';'
 [ ] right now, doc comments are only supported before procedures. is that good?
 [ ] code gen should use types other than int ?
 [ ] Param should take a pattern instead of an identifier
 [ ] postfix operators need to handle opers other than ++ and --
+        or deleted...
 [ ] expressions should be transformed a lot before being converted to C
         example: `x + y` in souc is *not* the same as x + y in C
 [ ] subroutines should also be converted (mapped?) to do the right thing.
@@ -26,3 +21,4 @@ currently:
 [ ] fix the data structure (or use smart constructors) for the Contexts. shadowing should be impossible.
 [ ] top-level long procedures are assumed to be functions unless an IO signature is explicit
 [ ] module name needs to match filename
+[ ] shuntingyard stuff could probably use renaming. ASTree -> Expr_Tree ?
