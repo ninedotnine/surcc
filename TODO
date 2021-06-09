@@ -1,14 +1,12 @@
 [ ] implement pragmas, don't just skip them
 [ ] in a line-character comment, '}' should not be allowed immediately after ';'
 [ ] right now, doc comments are only supported before procedures. is that good?
-[ ] code gen should use types other than int ?
 [ ] Param should take a pattern instead of an identifier
 [ ] postfix operators need to handle opers other than ++ and --
         or deleted...
 [ ] expressions should be transformed a lot before being converted to C
         example: `x + y` in souc is *not* the same as x + y in C
 [ ] subroutines should also be converted (mapped?) to do the right thing.
-[ ] maybe don't use haskell's `String` and `++` for code gen, that seems slow
 [ ] generating params is really not implemented at all
 [ ] don't always assume `int`, that was super lazy hacking
 [ ] keep bindings of variables (not only constants)
