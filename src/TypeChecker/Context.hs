@@ -4,7 +4,9 @@ module TypeChecker.Context (
     LocalScope(..),
     BoundLocal(..),
     insert_global,
-    insert_param,
+    new_scope,
+    new_param_scope,
+    exit_scope,
     insert_const,
     insert_mut,
     Checker,
@@ -151,6 +153,24 @@ type Checker a = ExceptT TypeError (State LocalScope) a
 
 insert_param :: Identifier -> SoucType -> Checker ()
 insert_param i t = insert_local Immut (Bound i t)
+
+new_scope :: Checker ()
+new_scope = get >>= put . InnerScope []
+
+new_param_scope :: Identifier -> SoucType -> Checker ()
+new_param_scope i t = get >>= put . InnerScope [BoundLocal i t Immut]
+
+exit_scope :: Checker ()
+exit_scope = get >>= \case
+    InnerScope _ inner -> put inner >> pure ()
+    GlobalScope _ _ -> throwE (Undeclared "should be unreachable")
+
+in_scope :: (a -> Checker Bound) -> a -> Checker ()
+in_scope act x = do
+    new_scope
+    bound <- act x
+    exit_scope
+    add_potential_export bound
 
 insert_global :: Bound -> Checker ()
 insert_global bound = do

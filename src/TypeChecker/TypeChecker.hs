@@ -57,117 +57,81 @@ add_globals imports_ctx defns =
         (Right (), ctx) -> Right ctx
         (Left e, _) -> Left e
 
-
 run_globals :: [Top_Level_Defn] -> Checker ()
-run_globals defns = do
-    let (consts, short_fns, long_fns, routines) = split_top_level_stuff defns
-    mapM_ add_top_level_consts consts
-    mapM_ (in_scope add_top_level_short_fns) short_fns
-    mapM_ (in_scope add_top_level_long_fns) long_fns
-    mapM_ (in_scope add_top_level_routines) routines
-    pure ()
+run_globals defns = mapM_ add_top_level_defns defns
+
+add_top_level_defns :: Top_Level_Defn -> Checker ()
+add_top_level_defns = \case
+    Top_Level_Const_Defn i m_t expr -> add_top_level_const i m_t expr
+    FuncDefn i p m_t stmts -> add_top_level_long_fn i p m_t stmts
+    ShortFuncDefn i p m_t expr -> add_top_level_short_fn i p m_t expr
+    SubDefn i m_p m_t stmts -> add_top_level_sub i m_p m_t stmts
+    MainDefn m_p m_t stmts -> add_main_routine m_p m_t stmts
 
 
-add_top_level_consts :: TopLevelConstType -> Checker ()
-add_top_level_consts (TopLevelConstType i m_t expr) = do
+add_top_level_const :: Identifier -> Maybe SoucType -> ASTree -> Checker ()
+add_top_level_const i m_t expr = do
     t <- infer_if_needed m_t expr
     add_potential_export (Bound i t)
 
 
-in_scope :: (a -> Checker Bound) -> a -> Checker ()
-in_scope act x = do
-    new_scope
-    bound <- act x
-    exit_scope >> add_potential_export bound
-
-new_scope :: Checker ()
-new_scope = get >>= put . InnerScope []
-
-exit_scope :: Checker ()
-exit_scope = do
-    ctx <- get
-    case ctx of
-        InnerScope _ inner -> put inner >> pure ()
-        GlobalScope _ _ -> throwE (Undeclared "should be unreachable")
-
-
-add_top_level_short_fns :: TopLevelShortFnType -> Checker Bound
-add_top_level_short_fns (TopLevelShortFnType i p m_t expr) = do
+add_top_level_short_fn :: Identifier -> Param -> Maybe SoucType -> ASTree -> Checker ()
+add_top_level_short_fn i p m_t expr = do
     case p of
         Param _ Nothing -> error "FIXME type inference"
         Param param (Just p_t) -> do
-            insert_param param p_t
+            new_param_scope param p_t
             t <- infer_if_needed m_t expr
-            pure (Bound i (SoucFn p_t t))
+            exit_scope
+            add_potential_export (Bound i (SoucFn p_t t))
 
 
-check_and_bind :: Stmts -> Maybe SoucType -> Bound -> Checker Bound
-check_and_bind stmts t bind = do
-    check_stmts stmts t
-    pure bind
-
-
-add_top_level_long_fns :: TopLevelLongFnType -> Checker Bound
-add_top_level_long_fns (TopLevelLongFnType i p m_t stmts) = do
+add_top_level_long_fn :: Identifier -> Param -> Maybe SoucType -> Stmts -> Checker ()
+add_top_level_long_fn i p m_t stmts = do
     case p of
         Param _ Nothing -> error "FIXME type inference"
         Param param (Just p_t) -> do
-            insert_param param p_t
+            new_param_scope param p_t
             p_ctx <- get
             case m_t of
                 Nothing -> case infer_stmts p_ctx stmts of
-                    Right t -> pure (Bound i (SoucFn p_t t))
+                    Right t -> do
+                        exit_scope
+                        add_potential_export (Bound i (SoucFn p_t t))
                     Left err -> throwE err
                 Just t -> do
-                    check_and_bind stmts (Just t) (Bound i (SoucFn p_t t))
+                    check_stmts stmts (Just t)
+                    exit_scope
+                    add_potential_export (Bound i (SoucFn p_t t))
 
-add_top_level_routines :: TopLevelProcType -> Checker Bound
-add_top_level_routines (TopLevelProcType i m_p m_t stmts) = case m_t of
-    Nothing -> ok_sub
-    Just (SoucType "IO") -> ok_sub
-    Just wrong -> error (show wrong)
+add_top_level_sub :: Identifier -> Maybe Param -> Maybe SoucType -> Stmts -> Checker ()
+add_top_level_sub i m_p m_t stmts = case (i, m_t) of
+    ("main", _) -> error "tried to add \"main\" as a subroutine"
+    (_, Nothing) -> ok_sub
+    (_, Just (SoucType "IO")) -> ok_sub
+    (_, Just wrong) -> error (show wrong)
     where
-        ok_sub = case i of
-            "main" -> add_main_routine m_p stmts
-            _ -> case m_p of
-                Nothing -> do
-                    check_and_bind stmts Nothing (Bound i (SoucType "IO"))
-                Just (Param _ Nothing) -> error "FIXME type inference"
-                Just (Param param (Just p_t)) -> do
-                    insert_param param p_t
-                    check_and_bind stmts Nothing (Bound i (SoucRoutn (Just p_t)))
+        ok_sub = case m_p of
+            Nothing -> do
+                new_scope
+                check_stmts stmts Nothing
+                exit_scope
+                add_potential_export (Bound i (SoucType "IO"))
+            Just (Param _ Nothing) -> error "FIXME type inference"
+            Just (Param param (Just p_t)) -> do
+                new_param_scope param p_t
+                check_stmts stmts Nothing
+                exit_scope
+                add_potential_export (Bound i (SoucRoutn (Just p_t)))
 
-add_main_routine :: Maybe Param -> Stmts -> Checker Bound
-add_main_routine m_p stmts = case m_p of
+add_main_routine :: Maybe Param -> Maybe SoucType -> Stmts -> Checker ()
+add_main_routine m_p m_t stmts = case m_p of
     Just (Param _ Nothing) -> error "FIXME infer param type"
     Just (Param p (Just p_t)) -> do
-        insert_global (Bound p p_t)
-        check_and_bind stmts Nothing (Bound "main" (SoucRoutn (Just p_t)))
-    Nothing -> check_and_bind stmts Nothing (Bound "main" (SoucType "IO"))
-
-
-type BrokenUpList = ([TopLevelConstType], [TopLevelShortFnType], [TopLevelLongFnType], [TopLevelProcType])
-
-split_top_level_stuff :: [Top_Level_Defn] -> BrokenUpList
-split_top_level_stuff defns = reverse_all (split_top_level_stuff_rec ([], [], [], []) defns)
-    where
-        reverse_all (ws, xs, ys, zs) = (reverse ws, reverse xs, reverse ys, reverse zs)
-
-split_top_level_stuff_rec :: BrokenUpList -> [Top_Level_Defn] -> BrokenUpList
-split_top_level_stuff_rec lists [] = lists
-split_top_level_stuff_rec (ws, xs, ys, zs) (d:defns) = case d of
-    Top_Level_Const_Defn i m_t expr -> split_top_level_stuff_rec (TopLevelConstType i m_t expr:ws, xs, ys, zs) defns
-    ShortFuncDefn i p m_t expr ->      split_top_level_stuff_rec (ws, TopLevelShortFnType i p m_t expr:xs, ys, zs) defns
-    FuncDefn i p m_t stmts ->          split_top_level_stuff_rec (ws, xs, TopLevelLongFnType i p m_t stmts:ys, zs) defns
-    SubDefn i m_p m_t stmts ->         split_top_level_stuff_rec (ws, xs, ys, TopLevelProcType i m_p m_t stmts:zs) defns
-    MainDefn m_p m_t stmts ->          split_top_level_stuff_rec (ws, xs, ys, TopLevelProcType "main" m_p m_t stmts:zs) defns
-
-
-data TopLevelConstType = TopLevelConstType Identifier (Maybe SoucType) ASTree
-    deriving (Show, Eq)
-data TopLevelShortFnType = TopLevelShortFnType Identifier Param (Maybe SoucType) ASTree
-    deriving (Show, Eq)
-data TopLevelLongFnType = TopLevelLongFnType Identifier Param (Maybe SoucType) Stmts
-    deriving (Show, Eq)
-data TopLevelProcType = TopLevelProcType Identifier (Maybe Param) (Maybe SoucType) Stmts
-    deriving (Show, Eq)
+        new_param_scope p p_t
+        check_stmts stmts m_t
+        exit_scope
+    Nothing -> do
+        new_scope
+        check_stmts stmts m_t
+        exit_scope
