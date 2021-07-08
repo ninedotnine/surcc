@@ -1,4 +1,4 @@
 n: Integer = 5
 
-f(n: Integer): Integer = do
+f(n: Char): Integer = do
 	return n
