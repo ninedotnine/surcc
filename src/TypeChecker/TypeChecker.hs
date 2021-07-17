@@ -108,7 +108,7 @@ add_top_level_sub :: Identifier -> Maybe Param -> Maybe SoucType -> Stmts -> Che
 add_top_level_sub i m_p m_t stmts = case (i, m_t) of
     ("main", _) -> error "tried to add \"main\" as a subroutine"
     (_, Nothing) -> ok_sub
-    (_, Just (SoucType "IO")) -> ok_sub
+    (_, Just SoucIO) -> ok_sub
     (_, Just wrong) -> error (show wrong)
     where
         ok_sub = case m_p of
@@ -116,7 +116,7 @@ add_top_level_sub i m_p m_t stmts = case (i, m_t) of
                 new_scope
                 check_stmts stmts Nothing
                 exit_scope
-                add_potential_export (Bound i (SoucType "IO"))
+                add_potential_export (Bound i SoucIO)
             Just (Param _ Nothing) -> error "FIXME type inference"
             Just (Param param (Just p_t)) -> do
                 new_param_scope param p_t

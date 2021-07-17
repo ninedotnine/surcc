@@ -57,9 +57,9 @@ check_stmt_return m_expr m_ret = do
                 Right () -> pure ()
             Nothing -> case infer ctx expr of
                 Left err -> throwE err
-                Right t -> throwE (TypeMismatch (SoucType "IO") t)
+                Right t -> throwE (TypeMismatch SoucIO t)
         Nothing -> case m_ret of
-            Just t -> throwE (TypeMismatch t (SoucType "IO"))
+            Just t -> throwE (TypeMismatch t SoucIO)
             Nothing -> pure ()
 
 
@@ -96,14 +96,11 @@ check_stmt_call :: Identifier -> Maybe ASTree -> Checker ()
 check_stmt_call name m_expr = do
     ctx <- get
     case (lookup ctx name , m_expr) of
-         -- FIXME this case is handled twice.
-         -- a val of SoucType "IO" should be a SoucRoutn
-        (Just (SoucType "IO"), Nothing) -> pure ()
         (Just SoucIO, Nothing) -> pure ()
         (Just (SoucRoutn param), Just expr) -> case check_astree ctx expr param of
             Left err -> throwE err
             Right () -> pure ()
-        (Just t, _) -> throwE $ TypeMismatch (SoucType "IO") t
+        (Just t, _) -> throwE $ TypeMismatch SoucIO t
         (Nothing, _) -> throwE $ Undeclared name
 
 infer_stmts :: LocalScope -> Stmts -> Either TypeError SoucType
