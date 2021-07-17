@@ -56,7 +56,8 @@ type Body = [Top_Level_Defn]
 newtype Stmts = Stmts [Stmt] deriving (Show, Eq)
 
 data SoucType = SoucType Text
-              | SoucRoutn (Maybe SoucType) -- param only, because return must be "IO"
+              | SoucIO -- subroutine without param
+              | SoucRoutn SoucType -- subroutine with a param
               | SoucTypeConstructor Text [SoucType]
               deriving (Eq)
 
@@ -219,6 +220,7 @@ instance Show PrefixOperator where
 
 instance Show SoucType where
     show (SoucType t) = show t
+    show SoucIO = "IO"
     show (SoucRoutn t) = show t <> " -> IO"
     show (SoucPair t0 t1) = show t0 <> " & " <> show t1
     show (SoucEither t0 t1) = show t0 <> " | " <> show t1

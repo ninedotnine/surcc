@@ -99,8 +99,8 @@ check_stmt_call name m_expr = do
          -- FIXME this case is handled twice.
          -- a val of SoucType "IO" should be a SoucRoutn
         (Just (SoucType "IO"), Nothing) -> pure ()
-        (Just (SoucRoutn Nothing), Nothing) -> pure ()
-        (Just (SoucRoutn (Just param)), Just expr) -> case check_astree ctx expr param of
+        (Just SoucIO, Nothing) -> pure ()
+        (Just (SoucRoutn param), Just expr) -> case check_astree ctx expr param of
             Left err -> throwE err
             Right () -> pure ()
         (Just t, _) -> throwE $ TypeMismatch (SoucType "IO") t

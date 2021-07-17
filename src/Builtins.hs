@@ -35,11 +35,11 @@ typeof_builtin_data i = snd <$> Map.lookup i builtin_data
 
 builtin_subroutines :: Mapping
 builtin_subroutines = Map.fromList [
-    ("puts", ("_souc_puts", (SoucRoutn (Just (SoucType "String")))))
+    ("puts", ("_souc_puts", (SoucRoutn (SoucType "String"))))
     ,
-    ("write", ("_souc_write", SoucRoutn (Just (SoucPair (SoucType "OutputStream") (SoucType "String")))))
+    ("write", ("_souc_write", SoucRoutn (SoucPair (SoucType "OutputStream") (SoucType "String"))))
     ,
-    ("abort", ("abort", SoucRoutn Nothing))
+    ("abort", ("abort", SoucIO))
     ]
 
 builtin_functions :: Mapping

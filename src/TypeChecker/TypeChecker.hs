@@ -122,7 +122,7 @@ add_top_level_sub i m_p m_t stmts = case (i, m_t) of
                 new_param_scope param p_t
                 check_stmts stmts Nothing
                 exit_scope
-                add_potential_export (Bound i (SoucRoutn (Just p_t)))
+                add_potential_export (Bound i (SoucRoutn p_t))
 
 add_main_routine :: Maybe Param -> Maybe SoucType -> Stmts -> Checker ()
 add_main_routine m_p m_t stmts = case m_p of
