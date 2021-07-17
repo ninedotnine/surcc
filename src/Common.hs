@@ -234,10 +234,12 @@ instance Show PrefixOperator where
 
 instance Show SoucType where
     show SoucIO = "IO"
+    show (SoucFn t0 t1) = show t0 <> " -> " <> show t1
     show (SoucRoutn t) = show t <> " -> IO"
+    show (SoucMaybe t) = '?': show t
+    show (SoucList t) = '[': show t <> "]"
     show (SoucPair t0 t1) = show t0 <> " & " <> show t1
     show (SoucEither t0 t1) = show t0 <> " | " <> show t1
-    show (SoucList t) = '[': show t <> "]"
     show (SoucType t) = show t
     show (SoucTypeVar v) = show v
     show (SoucTypeConstructor t ts) = Text.unpack (t <> "(" <> sho ts <> ")")
