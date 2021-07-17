@@ -37,6 +37,7 @@ module Common (
     Mutability(..),
     ) where
 
+import Control.Monad (join)
 import Data.Hashable (Hashable)
 import Data.String (IsString)
 import Data.Text (Text)
@@ -72,7 +73,7 @@ data TypeVar = TypeVar (Either Word Char) SoucKind deriving (Eq, Show)
 
 instance Show SoucKind where
     show (SoucKind 0) = "*"
-    show (SoucKind k) = "* => " <> show (SoucKind (k-1))
+    show (SoucKind k) = "*" <> join (replicate (fromIntegral k) " => *")
 
 data SoucType = SoucType Text SoucKind
               | SoucTypeConstructor Text SoucKind [SoucType]
