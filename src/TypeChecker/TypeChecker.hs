@@ -48,7 +48,7 @@ add_imports imports ctx = Right $ GlobalScope (map make_import_bound (map from_i
         from_import = \case
             LibImport s -> s
             RelImport s -> s
-        make_import_bound s = Bound (Identifier s) (SoucType "Module" KindStar)
+        make_import_bound s = Bound (Identifier s) (SoucType "Module" (SoucKind 0))
 
 
 add_globals :: LocalScope -> [Top_Level_Defn] -> Either TypeError LocalScope

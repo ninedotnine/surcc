@@ -40,6 +40,7 @@ import Data.Hashable (Hashable)
 import Data.String (IsString)
 import Data.Text (Text)
 import qualified Data.Text as Text
+import Data.Word (Word)
 
 data Mutability = Mut | Immut deriving (Show, Eq)
 
@@ -62,11 +63,11 @@ type Body = [Top_Level_Defn]
 
 newtype Stmts = Stmts [Stmt] deriving (Show, Eq)
 
-data SoucKind = KindStar | HigherKind SoucKind SoucKind deriving (Eq)
+newtype SoucKind = SoucKind Word deriving (Eq)
 
 instance Show SoucKind where
-    show KindStar = "*"
-    show (HigherKind k0 k1) = show k0 <> " => " <> show k1
+    show (SoucKind 0) = "*"
+    show (SoucKind k) = "* => " <> show (SoucKind (k-1))
 
 data SoucType = SoucType Text SoucKind
               | SoucTypeConstructor Text SoucKind [SoucType]
@@ -77,46 +78,37 @@ data SoucType = SoucType Text SoucKind
 -- data Constraint = Instance Text SoucType deriving (Eq)
 
 pattern SoucIO :: SoucType
-pattern SoucIO = SoucType "IO" KindStar
+pattern SoucIO = SoucType "IO" (SoucKind 0)
 
 pattern SoucBool :: SoucType
-pattern SoucBool = SoucType "Bool" KindStar
+pattern SoucBool = SoucType "Bool" (SoucKind 0)
 
 pattern SoucInteger :: SoucType
-pattern SoucInteger = SoucType "Integer" KindStar
+pattern SoucInteger = SoucType "Integer" (SoucKind 0)
 
 pattern SoucChar :: SoucType
-pattern SoucChar = SoucType "Char" KindStar
+pattern SoucChar = SoucType "Char" (SoucKind 0)
 
 pattern SoucString :: SoucType
-pattern SoucString = SoucType "String" KindStar
+pattern SoucString = SoucType "String" (SoucKind 0)
 
 pattern SoucFn :: SoucType -> SoucType -> SoucType
-pattern SoucFn t0 t1 = SoucTypeConstructor "Fn"
-                        (HigherKind KindStar
-                            (HigherKind KindStar KindStar)) [t0,t1]
+pattern SoucFn t0 t1 = SoucTypeConstructor "Fn" (SoucKind 2) [t0,t1]
 
 pattern SoucRoutn :: SoucType -> SoucType
-pattern SoucRoutn t = SoucTypeConstructor "Sub"
-                        (HigherKind KindStar KindStar) [t]
+pattern SoucRoutn t = SoucTypeConstructor "Sub" (SoucKind 1) [t]
 
 pattern SoucMaybe :: SoucType -> SoucType
-pattern SoucMaybe t = SoucTypeConstructor "Maybe"
-                        (HigherKind KindStar KindStar) [t]
+pattern SoucMaybe t = SoucTypeConstructor "Maybe" (SoucKind 1) [t]
 
 pattern SoucList :: SoucType -> SoucType
-pattern SoucList t = SoucTypeConstructor "List"
-                        (HigherKind KindStar KindStar) [t]
+pattern SoucList t = SoucTypeConstructor "List" (SoucKind 1) [t]
 
 pattern SoucPair :: SoucType -> SoucType-> SoucType
-pattern SoucPair t0 t1 = SoucTypeConstructor "Pair"
-                            (HigherKind KindStar
-                                (HigherKind KindStar KindStar)) [t0,t1]
+pattern SoucPair t0 t1 = SoucTypeConstructor "Pair" (SoucKind 2) [t0,t1]
 
 pattern SoucEither :: SoucType -> SoucType-> SoucType
-pattern SoucEither t0 t1 = SoucTypeConstructor "Either"
-                            (HigherKind KindStar
-                                (HigherKind KindStar KindStar)) [t0,t1]
+pattern SoucEither t0 t1 = SoucTypeConstructor "Either" (SoucKind 2) [t0,t1]
 
 data Bound = Bound Identifier SoucType deriving Eq
 

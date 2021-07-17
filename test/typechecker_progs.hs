@@ -41,7 +41,7 @@ instance Eq ImportDecl where
     _ == _ = False
 
 mismatch :: Text -> Text -> TypeError
-mismatch x y = TypeMismatch (SoucType x KindStar) (SoucType y KindStar)
+mismatch x y = TypeMismatch (SoucType x (SoucKind 0)) (SoucType y (SoucKind 0))
 
 render :: Either TypeError CheckedProgram -> Text
 render (Right p) = Text.pack (show p)

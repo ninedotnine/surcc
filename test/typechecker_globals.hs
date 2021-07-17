@@ -33,7 +33,7 @@ type Test = ([ImportDecl], [Top_Level_Defn], Either TypeError LocalScope, String
 tests :: [Test]
 tests = [
     ([], [Top_Level_Const_Defn "i" (Just SoucInteger) (Leaf (LitInt 4))], Right (GlobalScope [Bound "i" SoucInteger] no_exports_ctx), "int"),
-    ([LibImport "salad", LibImport "tofu"], [], Right (GlobalScope [Bound "salad" (SoucType "Module" KindStar), Bound "tofu" (SoucType "Module" KindStar)] no_exports_ctx), "imports")
+    ([LibImport "salad", LibImport "tofu"], [], Right (GlobalScope [Bound "salad" (SoucType "Module" (SoucKind 0)), Bound "tofu" (SoucType "Module" (SoucKind 0))] no_exports_ctx), "imports")
     ]
 
 borked_tests :: [Test]
@@ -61,7 +61,7 @@ render (Left (Undeclared (Identifier i))) = "undeclared identifier " <> i
 render _ = error "FIXME more complex types"
 
 mismatch :: Text -> Text -> TypeError
-mismatch x y = TypeMismatch (SoucType x KindStar) (SoucType y KindStar)
+mismatch x y = TypeMismatch (SoucType x (SoucKind 0)) (SoucType y (SoucKind 0))
 
 print_err :: Either TypeError LocalScope -> Either TypeError LocalScope -> IO ()
 print_err expected actual = Text.putStrLn failmsg where

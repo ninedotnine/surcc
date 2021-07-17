@@ -37,7 +37,7 @@ builtin_subroutines :: Mapping
 builtin_subroutines = Map.fromList [
     ("puts", ("_souc_puts", (SoucRoutn SoucString)))
     ,
-    ("write", ("_souc_write", SoucRoutn (SoucPair (SoucType "OutputStream" KindStar) SoucString)))
+    ("write", ("_souc_write", SoucRoutn (SoucPair (SoucType "OutputStream" (SoucKind 0)) SoucString)))
     ,
     ("abort", ("abort", SoucIO))
     ]
@@ -58,9 +58,9 @@ builtin_constants = Map.fromList [
 
 builtin_data :: Mapping
 builtin_data = Map.fromList [
-    ("True", ("(union _souc_obj) { ._souc_bool = true }", SoucType "Bool" KindStar))
+    ("True", ("(union _souc_obj) { ._souc_bool = true }", SoucType "Bool" (SoucKind 0)))
     ,
-    ("False", ("(union _souc_obj) { ._souc_bool = false }", SoucType "Bool" KindStar))
+    ("False", ("(union _souc_obj) { ._souc_bool = false }", SoucType "Bool" (SoucKind 0)))
     ,
     ("None", ("_souc_none", SoucMaybe SoucInteger))
     ,

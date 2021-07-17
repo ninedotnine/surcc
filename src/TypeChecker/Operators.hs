@@ -22,10 +22,10 @@ newtype InputType  = InputType SoucType
 newtype ReturnType = ReturnType SoucType
 
 in_t :: Text -> InputType
-in_t text = InputType (SoucType text KindStar)
+in_t text = InputType (SoucType text (SoucKind 0))
 
 ret_t :: Text -> ReturnType
-ret_t text = ReturnType (SoucType text KindStar)
+ret_t text = ReturnType (SoucType text (SoucKind 0))
 
 ret :: (a, ReturnType) -> SoucType
 ret (_, ReturnType x) = x

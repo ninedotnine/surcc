@@ -18,7 +18,7 @@ match :: Expected
 match = Result (Right ())
 
 mismatch :: Text -> Text -> Expected
-mismatch x y = Result $ Left $ TypeMismatch (SoucType x KindStar) (SoucType y KindStar)
+mismatch x y = Result $ Left $ TypeMismatch (SoucType x (SoucKind 0)) (SoucType y (SoucKind 0))
 
 no_exports_ctx :: ExportList
 no_exports_ctx = ExportList []
@@ -124,7 +124,7 @@ print_err expected actual = Text.putStrLn failmsg where
 test :: Test -> IO ()
 test (ctx, expr, expr_t, Result expected, name) = do
     putStr name >> putStr "... "
-    let actual = check_astree ctx expr (SoucType expr_t KindStar)
+    let actual = check_astree ctx expr (SoucType expr_t (SoucKind 0))
     if expected == actual
         then putStrLn "OK."
         else print_err expected actual >> exitFailure
