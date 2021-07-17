@@ -12,6 +12,7 @@ module Common (
     PrefixOperator(..),
     SoucType(..),
     pattern SoucFn,
+    pattern SoucRoutn,
     pattern SoucMaybe,
     pattern SoucList,
     pattern SoucPair,
@@ -57,12 +58,14 @@ newtype Stmts = Stmts [Stmt] deriving (Show, Eq)
 
 data SoucType = SoucType Text
               | SoucIO -- subroutine without param
-              | SoucRoutn SoucType -- subroutine with a param
               | SoucTypeConstructor Text [SoucType]
               deriving (Eq)
 
 pattern SoucFn :: SoucType -> SoucType -> SoucType
 pattern SoucFn t0 t1 = SoucTypeConstructor "Fn" [t0, t1]
+
+pattern SoucRoutn :: SoucType -> SoucType
+pattern SoucRoutn t = SoucTypeConstructor "Sub" [t]
 
 pattern SoucMaybe :: SoucType -> SoucType
 pattern SoucMaybe t = SoucTypeConstructor "Maybe" [t]
