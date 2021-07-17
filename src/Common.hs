@@ -56,10 +56,19 @@ type Body = [Top_Level_Defn]
 
 newtype Stmts = Stmts [Stmt] deriving (Show, Eq)
 
+data TypeVar = TypeVar Text SoucKind deriving (Eq, Show)
+
+data SoucKind = Star | HigherKind SoucKind SoucKind deriving (Eq, Show)
+
 data SoucType = SoucType Text
               | SoucIO -- subroutine without param
               | SoucTypeConstructor Text [SoucType]
+              | SoucTypeVar TypeVar
+--               | SoucConstrainedType Constraint SoucType
               deriving (Eq)
+
+-- data Constraint = Instance Text SoucType deriving (Eq)
+
 
 pattern SoucFn :: SoucType -> SoucType -> SoucType
 pattern SoucFn t0 t1 = SoucTypeConstructor "Fn" [t0, t1]
@@ -222,12 +231,13 @@ instance Show PrefixOperator where
     show Join     = ">*<"
 
 instance Show SoucType where
-    show (SoucType t) = show t
     show SoucIO = "IO"
     show (SoucRoutn t) = show t <> " -> IO"
     show (SoucPair t0 t1) = show t0 <> " & " <> show t1
     show (SoucEither t0 t1) = show t0 <> " | " <> show t1
     show (SoucList t) = '[': show t <> "]"
+    show (SoucType t) = show t
+    show (SoucTypeVar v) = show v
     show (SoucTypeConstructor t ts) = Text.unpack (t <> "(" <> sho ts <> ")")
 
 sho :: Show a => a -> Text
