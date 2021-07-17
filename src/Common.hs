@@ -11,6 +11,7 @@ module Common (
     Operator(..),
     PrefixOperator(..),
     SoucType(..),
+    pattern SoucIO,
     pattern SoucFn,
     pattern SoucRoutn,
     pattern SoucMaybe,
@@ -61,7 +62,6 @@ data TypeVar = TypeVar Text SoucKind deriving (Eq, Show)
 data SoucKind = Star | HigherKind SoucKind SoucKind deriving (Eq, Show)
 
 data SoucType = SoucType Text
-              | SoucIO -- subroutine without param
               | SoucTypeConstructor Text [SoucType]
               | SoucTypeVar TypeVar
 --               | SoucConstrainedType Constraint SoucType
@@ -69,6 +69,8 @@ data SoucType = SoucType Text
 
 -- data Constraint = Instance Text SoucType deriving (Eq)
 
+pattern SoucIO :: SoucType
+pattern SoucIO = SoucType "IO"
 
 pattern SoucFn :: SoucType -> SoucType -> SoucType
 pattern SoucFn t0 t1 = SoucTypeConstructor "Fn" [t0, t1]
