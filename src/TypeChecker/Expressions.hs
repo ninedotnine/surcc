@@ -71,7 +71,7 @@ infer_infix_op ctx op left right = case op of
                 r_t <- infer ctx right
                 check_equals r_t t0
                 Right ((InputType l_t, InputType t0), ReturnType t1)
-            _ -> Left (TypeMismatch (SoucFn l_t (SoucTypeVar "T" (SoucKind 0))) l_t)
+            _ -> Left (TypeMismatch (SoucFn l_t (SoucTypeVar (TypeVar (Right 'T') (SoucKind 0)))) l_t)
     FlipApply -> do
         r_t <- infer ctx right
         l_t <- infer ctx left
@@ -79,7 +79,7 @@ infer_infix_op ctx op left right = case op of
             SoucFn t0 t1 -> do
                 check_equals l_t t0
                 Right (((InputType t0, InputType r_t)), ReturnType t1)
-            _ -> Left (TypeMismatch (SoucFn l_t (SoucTypeVar "T" (SoucKind 0))) r_t)
+            _ -> Left (TypeMismatch (SoucFn l_t (SoucTypeVar (TypeVar (Right 'T') (SoucKind 0)))) r_t)
     Tuple -> do
         l_t <- infer ctx left
         r_t <- infer ctx right

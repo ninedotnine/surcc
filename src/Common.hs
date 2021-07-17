@@ -12,6 +12,7 @@ module Common (
     PrefixOperator(..),
     SoucKind(..),
     SoucType(..),
+    TypeVar(..),
     pattern SoucIO,
     pattern SoucBool,
     pattern SoucInteger,
@@ -65,13 +66,17 @@ newtype Stmts = Stmts [Stmt] deriving (Show, Eq)
 
 newtype SoucKind = SoucKind Word deriving (Eq)
 
+-- allowed type names are single chars like 'A'
+-- or 'T' followed by an increasing number (T0, T1, ...)
+data TypeVar = TypeVar (Either Word Char) SoucKind deriving (Eq, Show)
+
 instance Show SoucKind where
     show (SoucKind 0) = "*"
     show (SoucKind k) = "* => " <> show (SoucKind (k-1))
 
 data SoucType = SoucType Text SoucKind
               | SoucTypeConstructor Text SoucKind [SoucType]
-              | SoucTypeVar Text SoucKind
+              | SoucTypeVar TypeVar
 --               | SoucConstrainedType Constraint SoucType
               deriving (Eq)
 
@@ -261,7 +266,8 @@ instance Show SoucType where
     show (SoucPair t0 t1) = show t0 <> " & " <> show t1
     show (SoucEither t0 t1) = show t0 <> " | " <> show t1
     show (SoucType t _) = show t
-    show (SoucTypeVar v _) = show v
+    show (SoucTypeVar (TypeVar (Left  v) _)) = 'T' : show v
+    show (SoucTypeVar (TypeVar (Right v) _)) = v : ""
     show (SoucTypeConstructor t _ ts) = Text.unpack (t <> "(" <> sho ts <> ")")
 
 sho :: Show a => a -> Text
