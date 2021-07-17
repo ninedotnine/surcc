@@ -62,10 +62,14 @@ type Body = [Top_Level_Defn]
 
 newtype Stmts = Stmts [Stmt] deriving (Show, Eq)
 
-data SoucKind = KindStar | HigherKind SoucKind SoucKind deriving (Eq, Show)
+data SoucKind = KindStar | HigherKind SoucKind SoucKind deriving (Eq)
+
+instance Show SoucKind where
+    show KindStar = "*"
+    show (HigherKind k0 k1) = show k0 <> " => " <> show k1
 
 data SoucType = SoucType Text SoucKind
-              | SoucTypeConstructor Text [SoucType]
+              | SoucTypeConstructor Text SoucKind [SoucType]
               | SoucTypeVar Text SoucKind
 --               | SoucConstrainedType Constraint SoucType
               deriving (Eq)
@@ -88,22 +92,31 @@ pattern SoucString :: SoucType
 pattern SoucString = SoucType "String" KindStar
 
 pattern SoucFn :: SoucType -> SoucType -> SoucType
-pattern SoucFn t0 t1 = SoucTypeConstructor "Fn" [t0, t1]
+pattern SoucFn t0 t1 = SoucTypeConstructor "Fn"
+                        (HigherKind KindStar
+                            (HigherKind KindStar KindStar)) [t0,t1]
 
 pattern SoucRoutn :: SoucType -> SoucType
-pattern SoucRoutn t = SoucTypeConstructor "Sub" [t]
+pattern SoucRoutn t = SoucTypeConstructor "Sub"
+                        (HigherKind KindStar KindStar) [t]
 
 pattern SoucMaybe :: SoucType -> SoucType
-pattern SoucMaybe t = SoucTypeConstructor "Maybe" [t]
+pattern SoucMaybe t = SoucTypeConstructor "Maybe"
+                        (HigherKind KindStar KindStar) [t]
 
 pattern SoucList :: SoucType -> SoucType
-pattern SoucList t = SoucTypeConstructor "List" [t]
+pattern SoucList t = SoucTypeConstructor "List"
+                        (HigherKind KindStar KindStar) [t]
 
 pattern SoucPair :: SoucType -> SoucType-> SoucType
-pattern SoucPair t0 t1 = SoucTypeConstructor "Pair" [t0,t1]
+pattern SoucPair t0 t1 = SoucTypeConstructor "Pair"
+                            (HigherKind KindStar
+                                (HigherKind KindStar KindStar)) [t0,t1]
 
 pattern SoucEither :: SoucType -> SoucType-> SoucType
-pattern SoucEither t0 t1 = SoucTypeConstructor "Either" [t0,t1]
+pattern SoucEither t0 t1 = SoucTypeConstructor "Either"
+                            (HigherKind KindStar
+                                (HigherKind KindStar KindStar)) [t0,t1]
 
 data Bound = Bound Identifier SoucType deriving Eq
 
@@ -257,7 +270,7 @@ instance Show SoucType where
     show (SoucEither t0 t1) = show t0 <> " | " <> show t1
     show (SoucType t _) = show t
     show (SoucTypeVar v _) = show v
-    show (SoucTypeConstructor t ts) = Text.unpack (t <> "(" <> sho ts <> ")")
+    show (SoucTypeConstructor t _ ts) = Text.unpack (t <> "(" <> sho ts <> ")")
 
 sho :: Show a => a -> Text
 sho = Text.pack . show

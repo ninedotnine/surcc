@@ -142,7 +142,8 @@ type_signature = char ':' *> ignore_spaces *> type_broadly where
     type_constructor = do
         name <- upper_name <* char '('
         args <- sepBy1 type_broadly spaces <* char ')'
-        pure (SoucTypeConstructor name args)
+        -- FIXME this assumes constructors always have kind star
+        pure (SoucTypeConstructor name (HigherKind KindStar KindStar) args)
 
 upper_name :: Parsec Text s Text
 upper_name = do
