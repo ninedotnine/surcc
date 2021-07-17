@@ -18,7 +18,7 @@ match :: Expected
 match = Result (Right ())
 
 mismatch :: Text -> Text -> Expected
-mismatch x y = Result $ Left $ TypeMismatch (SoucType x) (SoucType y)
+mismatch x y = Result $ Left $ TypeMismatch (SoucType x KindStar) (SoucType y KindStar)
 
 no_exports_ctx :: ExportList
 no_exports_ctx = ExportList []
@@ -28,18 +28,18 @@ empty_ctx = GlobalScope [] (ExportList [])
 
 globals :: LocalScope
 globals = GlobalScope [
-    Bound (Identifier "x") (SoucType "Integer"),
-    Bound (Identifier "s") (SoucType "String"),
-    Bound (Identifier "c") (SoucType "Char"),
-    Bound (Identifier "b") (SoucType "Bool")
+    Bound (Identifier "x") SoucInteger,
+    Bound (Identifier "s") SoucString,
+    Bound (Identifier "c") SoucChar,
+    Bound (Identifier "b") SoucBool
     ] no_exports_ctx
 
 scoped :: LocalScope
 scoped = InnerScope [
-    BoundLocal (Identifier "x") (SoucType "Integer") Immut,
-    BoundLocal (Identifier "s") (SoucType "String") Immut,
-    BoundLocal (Identifier "c") (SoucType "Char") Immut,
-    BoundLocal (Identifier "b") (SoucType "Bool") Immut
+    BoundLocal (Identifier "x") SoucInteger Immut,
+    BoundLocal (Identifier "s") SoucString Immut,
+    BoundLocal (Identifier "c") SoucChar Immut,
+    BoundLocal (Identifier "b") SoucBool Immut
     ] empty_ctx
 
 tests :: [Test]
@@ -53,23 +53,23 @@ tests = [
     (globals, Leaf (Var "s"), "String", match, "stringvar"),
     (globals, Leaf (Var "c"), "Char", match, "charvar"),
     (globals, Leaf (Var "b"), "Bool", match, "boolvar"),
-    (globals, Signed (Leaf (Var "x")) (SoucType "Integer"), "Integer", match, "intvar2"),
-    (globals, Signed (Leaf (Var "s")) (SoucType "String"), "String",  match, "stringvar2"),
-    (globals, Signed (Leaf (Var "c")) (SoucType "Char"),  "Char", match, "charvar2"),
-    (globals, Signed (Leaf (Var "b")) (SoucType "Bool"),  "Bool", match, "boolvar2"),
-    (globals, Signed (Twig Negate (Leaf (Var "b"))) (SoucType "Bool"),  "Bool",     match, "negate"),
+    (globals, Signed (Leaf (Var "x")) SoucInteger, "Integer", match, "intvar2"),
+    (globals, Signed (Leaf (Var "s")) SoucString, "String",  match, "stringvar2"),
+    (globals, Signed (Leaf (Var "c")) SoucChar,  "Char", match, "charvar2"),
+    (globals, Signed (Leaf (Var "b")) SoucBool,  "Bool", match, "boolvar2"),
+    (globals, Signed (Twig Negate (Leaf (Var "b"))) SoucBool,  "Bool",     match, "negate"),
     (globals, Branch Plus (Leaf (Var "x")) (Leaf (Var "x")), "Integer", match, "plus2"),
-    (globals, Signed (Signed (Signed (Signed (Signed (Leaf (LitInt 42)) (SoucType "Integer")) (SoucType "Integer")) (SoucType "Integer")) (SoucType "Integer")) (SoucType "Integer"), "Integer", match, "long int"),
+    (globals, Signed (Signed (Signed (Signed (Signed (Leaf (LitInt 42)) SoucInteger) SoucInteger) SoucInteger) SoucInteger) SoucInteger, "Integer", match, "long int"),
     (scoped, Leaf (Var "x"), "Integer", match, "scoped intvar"),
     (scoped, Leaf (Var "s"), "String", match, "scoped stringvar"),
     (scoped, Leaf (Var "c"), "Char", match, "scoped charvar"),
     (scoped, Leaf (Var "b"), "Bool", match, "scoped boolvar"),
-    (scoped, Signed (Leaf (Var "x")) (SoucType "Integer"),   "Integer", match, "scoped intvar2"),
-    (scoped, Signed (Leaf (Var "s")) (SoucType "String"), "String",  match, "scoped stringvar2"),
-    (scoped, Signed (Leaf (Var "c")) (SoucType "Char"),  "Char", match, "scoped charvar2"),
-    (scoped, Signed (Leaf (Var "b")) (SoucType "Bool"),  "Bool", match, "scoped boolvar2"),
+    (scoped, Signed (Leaf (Var "x")) SoucInteger,   "Integer", match, "scoped intvar2"),
+    (scoped, Signed (Leaf (Var "s")) SoucString, "String",  match, "scoped stringvar2"),
+    (scoped, Signed (Leaf (Var "c")) SoucChar,  "Char", match, "scoped charvar2"),
+    (scoped, Signed (Leaf (Var "b")) SoucBool,  "Bool", match, "scoped boolvar2"),
     (scoped, Twig Negate (Leaf (Var "b")),  "Bool", match, "scoped negate"),
-    (scoped, Signed (Signed (Signed (Signed (Signed (Leaf (LitInt 42)) (SoucType "Integer")) (SoucType "Integer")) (SoucType "Integer")) (SoucType "Integer")) (SoucType "Integer"), "Integer", match, "scoped long int")
+    (scoped, Signed (Signed (Signed (Signed (Signed (Leaf (LitInt 42)) SoucInteger) SoucInteger) SoucInteger) SoucInteger) SoucInteger, "Integer", match, "scoped long int")
     ]
 
 borked_tests :: [Test]
@@ -86,18 +86,18 @@ borked_tests = [
     (globals, Leaf (Var "s"), "Bool", mismatch "Bool" "String", "stringvar"),
     (globals, Leaf (Var "c"), "String", mismatch "String" "Char", "charvar"),
     (globals, Leaf (Var "b"), "Char", mismatch "Char" "Bool", "boolvar"),
-    (globals, Signed (Leaf (Var "x")) (SoucType "Bool"), "Bool", mismatch "Bool" "Integer", "invalid lit"),
-    (globals, Signed (Leaf (Var "x")) (SoucType "Bool"), "Integer", mismatch "Bool" "Integer", "invalid lit 2"),
-    (globals, Signed (Signed (Signed (Signed (Signed (Leaf (LitInt 42)) (SoucType "Integer")) (SoucType "Integer")) (SoucType "Bool")) (SoucType "Integer")) (SoucType "Integer"), "Integer", mismatch "Bool" "Integer", "long int"),
+    (globals, Signed (Leaf (Var "x")) SoucBool, "Bool", mismatch "Bool" "Integer", "invalid lit"),
+    (globals, Signed (Leaf (Var "x")) SoucBool, "Integer", mismatch "Bool" "Integer", "invalid lit 2"),
+    (globals, Signed (Signed (Signed (Signed (Signed (Leaf (LitInt 42)) SoucInteger) SoucInteger) SoucBool) SoucInteger) SoucInteger, "Integer", mismatch "Bool" "Integer", "long int"),
     (scoped, Leaf (Var "x"), "Char", mismatch "Char" "Integer", "scoped intvar"),
     (scoped, Leaf (Var "s"), "Bool", mismatch "Bool" "String", "scoped stringvar"),
     (scoped, Leaf (Var "c"), "String", mismatch "String" "Char", "scoped charvar"),
     (scoped, Leaf (Var "b"), "Char", mismatch "Char" "Bool", "scoped boolvar"),
-    (scoped, Signed (Leaf (Var "x")) (SoucType "Bool"), "Bool", mismatch "Bool" "Integer", "scoped invalid lit"),
-    (scoped, Signed (Leaf (Var "x")) (SoucType "Bool"), "Integer", mismatch "Bool" "Integer", "scoped invalid lit 2"),
-    (scoped, Signed (Leaf (Var "x")) (SoucType "Bool"), "Integer", mismatch "Bool" "Integer", "scoped invalid lit 2"),
+    (scoped, Signed (Leaf (Var "x")) SoucBool, "Bool", mismatch "Bool" "Integer", "scoped invalid lit"),
+    (scoped, Signed (Leaf (Var "x")) SoucBool, "Integer", mismatch "Bool" "Integer", "scoped invalid lit 2"),
+    (scoped, Signed (Leaf (Var "x")) SoucBool, "Integer", mismatch "Bool" "Integer", "scoped invalid lit 2"),
     (scoped, Branch Plus (Leaf (LitInt 2)) (Leaf (Var "s")), "Bork", mismatch "Integer" "String", "plus3"),
-    (scoped, Signed (Signed (Signed (Signed (Signed (Leaf (LitInt 42)) (SoucType "Integer")) (SoucType "Integer")) (SoucType "Bool")) (SoucType "Integer")) (SoucType "Integer"), "Integer", mismatch "Bool" "Integer", "scoped long int")
+    (scoped, Signed (Signed (Signed (Signed (Signed (Leaf (LitInt 42)) SoucInteger) SoucInteger) SoucBool) SoucInteger) SoucInteger, "Integer", mismatch "Bool" "Integer", "scoped long int")
     ]
 
 
@@ -112,7 +112,7 @@ main = do
 
 render :: Either TypeError () -> Text
 render (Right ()) = "match"
-render (Left (TypeMismatch (SoucType x) (SoucType y))) = "mismatch: " <> x <> " / " <> y
+render (Left (TypeMismatch (SoucType x _) (SoucType y _))) = "mismatch: " <> x <> " / " <> y
 render (Left (MultipleDeclarations (Identifier i))) = "multiple declarations: " <> i
 render (Left (Undeclared (Identifier i))) = "undeclared identifier " <> i
 render _ = error "FIXME more complex types"
@@ -124,7 +124,7 @@ print_err expected actual = Text.putStrLn failmsg where
 test :: Test -> IO ()
 test (ctx, expr, expr_t, Result expected, name) = do
     putStr name >> putStr "... "
-    let actual = check_astree ctx expr (SoucType expr_t)
+    let actual = check_astree ctx expr (SoucType expr_t KindStar)
     if expected == actual
         then putStrLn "OK."
         else print_err expected actual >> exitFailure

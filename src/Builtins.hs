@@ -35,34 +35,34 @@ typeof_builtin_data i = snd <$> Map.lookup i builtin_data
 
 builtin_subroutines :: Mapping
 builtin_subroutines = Map.fromList [
-    ("puts", ("_souc_puts", (SoucRoutn (SoucType "String"))))
+    ("puts", ("_souc_puts", (SoucRoutn SoucString)))
     ,
-    ("write", ("_souc_write", SoucRoutn (SoucPair (SoucType "OutputStream") (SoucType "String"))))
+    ("write", ("_souc_write", SoucRoutn (SoucPair (SoucType "OutputStream" KindStar) SoucString)))
     ,
     ("abort", ("abort", SoucIO))
     ]
 
 builtin_functions :: Mapping
 builtin_functions = Map.fromList [
-    ("increment", ("_souc_increment", SoucFn (SoucType "Integer") (SoucType "Integer")))
+    ("increment", ("_souc_increment", SoucFn SoucInteger SoucInteger))
     ]
 
 builtin_constants :: Mapping
 builtin_constants = Map.fromList [
-    ("pi", ("(union _souc_obj) { ._souc_int = 3 }", SoucType "Integer")) -- biblical value
+    ("pi", ("(union _souc_obj) { ._souc_int = 3 }", SoucInteger)) -- biblical value
     ,
-    ("i42", ("_souc_42", SoucType "Integer"))
+    ("i42", ("_souc_42", SoucInteger))
     ,
-    ("ok43", ("_souc_42", SoucType "Integer"))
+    ("ok43", ("_souc_42", SoucInteger))
     ]
 
 builtin_data :: Mapping
 builtin_data = Map.fromList [
-    ("True", ("(union _souc_obj) { ._souc_bool = true }", SoucType "Bool"))
+    ("True", ("(union _souc_obj) { ._souc_bool = true }", SoucType "Bool" KindStar))
     ,
-    ("False", ("(union _souc_obj) { ._souc_bool = false }", SoucType "Bool"))
+    ("False", ("(union _souc_obj) { ._souc_bool = false }", SoucType "Bool" KindStar))
     ,
-    ("None", ("_souc_none", SoucMaybe (SoucType "Integer")))
+    ("None", ("_souc_none", SoucMaybe SoucInteger))
     ,
-    ("OK", ("_souc_ok", SoucFn (SoucType "Integer") (SoucMaybe (SoucType "Integer"))))
+    ("OK", ("_souc_ok", SoucFn SoucInteger (SoucMaybe SoucInteger)))
     ]

@@ -10,8 +10,13 @@ module Common (
     ASTree(..),
     Operator(..),
     PrefixOperator(..),
+    SoucKind(..),
     SoucType(..),
     pattern SoucIO,
+    pattern SoucBool,
+    pattern SoucInteger,
+    pattern SoucChar,
+    pattern SoucString,
     pattern SoucFn,
     pattern SoucRoutn,
     pattern SoucMaybe,
@@ -57,20 +62,30 @@ type Body = [Top_Level_Defn]
 
 newtype Stmts = Stmts [Stmt] deriving (Show, Eq)
 
-data TypeVar = TypeVar Text SoucKind deriving (Eq, Show)
+data SoucKind = KindStar | HigherKind SoucKind SoucKind deriving (Eq, Show)
 
-data SoucKind = Star | HigherKind SoucKind SoucKind deriving (Eq, Show)
-
-data SoucType = SoucType Text
+data SoucType = SoucType Text SoucKind
               | SoucTypeConstructor Text [SoucType]
-              | SoucTypeVar TypeVar
+              | SoucTypeVar Text SoucKind
 --               | SoucConstrainedType Constraint SoucType
               deriving (Eq)
 
 -- data Constraint = Instance Text SoucType deriving (Eq)
 
 pattern SoucIO :: SoucType
-pattern SoucIO = SoucType "IO"
+pattern SoucIO = SoucType "IO" KindStar
+
+pattern SoucBool :: SoucType
+pattern SoucBool = SoucType "Bool" KindStar
+
+pattern SoucInteger :: SoucType
+pattern SoucInteger = SoucType "Integer" KindStar
+
+pattern SoucChar :: SoucType
+pattern SoucChar = SoucType "Char" KindStar
+
+pattern SoucString :: SoucType
+pattern SoucString = SoucType "String" KindStar
 
 pattern SoucFn :: SoucType -> SoucType -> SoucType
 pattern SoucFn t0 t1 = SoucTypeConstructor "Fn" [t0, t1]
@@ -240,8 +255,8 @@ instance Show SoucType where
     show (SoucList t) = '[': show t <> "]"
     show (SoucPair t0 t1) = show t0 <> " & " <> show t1
     show (SoucEither t0 t1) = show t0 <> " | " <> show t1
-    show (SoucType t) = show t
-    show (SoucTypeVar v) = show v
+    show (SoucType t _) = show t
+    show (SoucTypeVar v _) = show v
     show (SoucTypeConstructor t ts) = Text.unpack (t <> "(" <> sho ts <> ")")
 
 sho :: Show a => a -> Text

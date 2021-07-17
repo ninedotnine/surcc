@@ -26,7 +26,7 @@ import qualified Data.Text as Text
 import Text.Parsec hiding (string, space, spaces, newline)
 import qualified Text.Parsec (string)
 
-import Common (SoucType(..), Term(..))
+import Common (SoucKind(..), SoucType(..), Term(..))
 
 identifier_char :: Parsec Text s Char
 identifier_char = (alphaNum <|> char '_')
@@ -151,7 +151,9 @@ upper_name = do
     pure $ Text.pack $ first:rest
 
 type_name :: Parsec Text s SoucType
-type_name = SoucType <$> upper_name
+type_name = do
+    n <- upper_name
+    return $ SoucType n KindStar
 
 constructor_name :: Parsec Text s Term
 constructor_name = Constructor <$> upper_name

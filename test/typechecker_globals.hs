@@ -32,15 +32,15 @@ type Test = ([ImportDecl], [Top_Level_Defn], Either TypeError LocalScope, String
 
 tests :: [Test]
 tests = [
-    ([], [Top_Level_Const_Defn "i" (Just (SoucType "Integer")) (Leaf (LitInt 4))], Right (GlobalScope [Bound "i" (SoucType "Integer")] no_exports_ctx), "int"),
-    ([LibImport "salad", LibImport "tofu"], [], Right (GlobalScope [Bound "salad" (SoucType "Module"), Bound "tofu" (SoucType "Module")] no_exports_ctx), "imports")
+    ([], [Top_Level_Const_Defn "i" (Just SoucInteger) (Leaf (LitInt 4))], Right (GlobalScope [Bound "i" SoucInteger] no_exports_ctx), "int"),
+    ([LibImport "salad", LibImport "tofu"], [], Right (GlobalScope [Bound "salad" (SoucType "Module" KindStar), Bound "tofu" (SoucType "Module" KindStar)] no_exports_ctx), "imports")
     ]
 
 borked_tests :: [Test]
 borked_tests = [
-    ([], [Top_Level_Const_Defn "c" (Just (SoucType "Integer")) (Leaf (LitChar 'a'))], Left (mismatch "Integer" "Char"), "bad char 0"),
-    ([], [Top_Level_Const_Defn "b" Nothing (Signed (Leaf (LitChar 'a')) (SoucType "Bool"))], Left (mismatch "Bool" "Char"), "bad char 1"),
-    ([], [Top_Level_Const_Defn "b" (Just (SoucType "Char")) (Signed (Leaf (LitChar 'a')) (SoucType "Bool"))], Left (mismatch "Bool" "Char"), "bad char 2")
+    ([], [Top_Level_Const_Defn "c" (Just SoucInteger) (Leaf (LitChar 'a'))], Left (mismatch "Integer" "Char"), "bad char 0"),
+    ([], [Top_Level_Const_Defn "b" Nothing (Signed (Leaf (LitChar 'a')) SoucBool)], Left (mismatch "Bool" "Char"), "bad char 1"),
+    ([], [Top_Level_Const_Defn "b" (Just SoucChar) (Signed (Leaf (LitChar 'a')) SoucBool)], Left (mismatch "Bool" "Char"), "bad char 2")
     ]
 
 
@@ -55,13 +55,13 @@ main = do
 
 render :: Either TypeError LocalScope -> Text
 render (Right ctx) = Text.pack (show ctx)
-render (Left (TypeMismatch (SoucType x) (SoucType y))) = "mismatch: " <> x <> " / " <> y
+render (Left (TypeMismatch (SoucType x _) (SoucType y _))) = "mismatch: " <> x <> " / " <> y
 render (Left (MultipleDeclarations (Identifier i))) = "multiple declarations for " <> i
 render (Left (Undeclared (Identifier i))) = "undeclared identifier " <> i
 render _ = error "FIXME more complex types"
 
 mismatch :: Text -> Text -> TypeError
-mismatch x y = TypeMismatch (SoucType x) (SoucType y)
+mismatch x y = TypeMismatch (SoucType x KindStar) (SoucType y KindStar)
 
 print_err :: Either TypeError LocalScope -> Either TypeError LocalScope -> IO ()
 print_err expected actual = Text.putStrLn failmsg where
