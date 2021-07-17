@@ -13,6 +13,9 @@ module Common (
     SoucType(..),
     pattern SoucFn,
     pattern SoucMaybe,
+    pattern SoucList,
+    pattern SoucPair,
+    pattern SoucEither,
     Bound(..),
     TypeError(..),
     Stmts(..),
@@ -54,9 +57,6 @@ newtype Stmts = Stmts [Stmt] deriving (Show, Eq)
 
 data SoucType = SoucType Text
               | SoucRoutn (Maybe SoucType) -- param only, because return must be "IO"
-              | SoucPair SoucType SoucType
-              | SoucEither SoucType SoucType
-              | SoucList SoucType
               | SoucTypeConstructor Text [SoucType]
               deriving (Eq)
 
@@ -65,6 +65,15 @@ pattern SoucFn t0 t1 = SoucTypeConstructor "Fn" [t0, t1]
 
 pattern SoucMaybe :: SoucType -> SoucType
 pattern SoucMaybe t = SoucTypeConstructor "Maybe" [t]
+
+pattern SoucList :: SoucType -> SoucType
+pattern SoucList t = SoucTypeConstructor "List" [t]
+
+pattern SoucPair :: SoucType -> SoucType-> SoucType
+pattern SoucPair t0 t1 = SoucTypeConstructor "Pair" [t0,t1]
+
+pattern SoucEither :: SoucType -> SoucType-> SoucType
+pattern SoucEither t0 t1 = SoucTypeConstructor "Either" [t0,t1]
 
 data Bound = Bound Identifier SoucType deriving Eq
 
