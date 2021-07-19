@@ -25,7 +25,7 @@ generate_expr (Branch op x y) = case op of
     Plus              ->  gen_call "_souc_sum(" x y
     Minus             ->  gen_call "_souc_difference(" x y
     Splat             ->  gen_call "_souc_product(" x y
-    Divide            ->  gen_call "_souc_quotient(" x y
+    FieldDiv          ->  gen_call "_souc_quotient(" x y
     FloorDiv          ->  undefined
     Modulo            ->  gen_call "_souc_remainder(" x y
     Hihat             ->  undefined -- FIXME C doesn't have ^

@@ -173,7 +173,7 @@ data Term = LitInt Integer
 data Operator = Plus
               | Minus
               | Splat
-              | Divide
+              | FieldDiv
               | FloorDiv
               | Modulo
               | Hihat
@@ -218,7 +218,7 @@ instance Show Operator where
     show Plus           = "+"
     show Minus          = "-"
     show Splat          = "*"
-    show Divide         = "/"
+    show FieldDiv       = "/"
     show FloorDiv       = "//"
     show Modulo         = "%"
     show Hihat          = "^"

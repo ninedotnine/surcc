@@ -56,8 +56,8 @@ parse_infix_oper = do
             char '+' *> pure Plus   <|>
             char '-' *> pure Minus  <|>
             char '*' *> pure Splat  <|>
-            char '/' *> pure Divide <|>
             str "//" *> pure FloorDiv <|>
+            char '/' *> pure FieldDiv <|>
             char '%' *> pure Modulo <|>
             char '^' *> pure Hihat  <|>
             char '&' *> pure FlipApply  <|>

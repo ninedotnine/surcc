@@ -151,7 +151,8 @@ evaluate_astree (Branch op left right) = evaluate_astree left `operate` evaluate
             Plus   -> (+)
             Minus  -> (-)
             Splat  -> (*)
-            Divide -> div
+            FieldDiv -> div -- FIXME
+            FloorDiv -> div
             Modulo -> mod
             Hihat  -> (^)
             Equals -> undefined -- can't do this on integers
