@@ -4,9 +4,11 @@
 import CodeGen.CodeGen
 import Common
 
+import Control.Monad (when)
 import qualified Data.Text.IO as Text
 import System.Directory (createDirectoryIfMissing)
-import System.Process (callProcess)
+import System.Exit (exitFailure, ExitCode(..))
+import System.Process.Text (readProcessWithExitCode)
 
 default_module :: SoucModule
 default_module = SoucModule "anonymous_main_module" []
@@ -17,12 +19,11 @@ tmpdir = "/tmp/souc_code_gen_test/"
 test :: CheckedProgram -> String -> IO ()
 test prog name = do
     putStr name >> putStr "... "
---     print prog
---     print (generate prog)
     let bin_filename = tmpdir ++ name
-        c_filename = bin_filename ++ ".c"
-    Text.writeFile c_filename (generate prog)
-    callProcess "gcc" [c_filename, "-o", bin_filename]
+    (code, _, err) <- readProcessWithExitCode
+        "gcc" ["-x", "c", "-o", bin_filename, "-"] (generate prog)
+    when (code /= ExitSuccess) (
+        Text.putStrLn "error" >> Text.putStrLn err >> exitFailure)
     putStrLn "OK."
 
 main :: IO ()
