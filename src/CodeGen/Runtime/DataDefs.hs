@@ -8,7 +8,8 @@ datadefs = Text.intercalate "\n" [
     souc_none,
     souc_ok,
     souc_42,
-    souc_ok43
+    souc_ok43,
+    "// end of datadefs\n"
     ]
 
 souc_none = "struct _souc_maybe _souc_none = { 0 };"

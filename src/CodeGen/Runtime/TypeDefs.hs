@@ -7,7 +7,8 @@ typedefs :: Text
 typedefs = Text.intercalate "\n" [
     souc_obj,
     souc_maybe,
-    souc_pair
+    souc_pair,
+    "// end of typedefs\n"
     ]
 
 souc_obj = "union _souc_obj { int _souc_int; char _souc_char; bool _souc_bool; char * _souc_str; struct _souc_pair * _souc_pair; };"

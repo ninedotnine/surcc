@@ -23,7 +23,8 @@ funcdefs = Text.intercalate "\n" [
     is_greater,
     conjunction,
     disjunction,
-    increment
+    increment,
+    "// end of funcdefs\n"
     ]
 
 tuple = "union _souc_obj _souc_tuple(union _souc_obj x, union _souc_obj y) { struct _souc_pair * p = calloc(sizeof(*p), 1); p->first = x; p->second = y; return (union _souc_obj) { ._souc_pair = p }; }"
