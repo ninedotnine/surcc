@@ -1,6 +1,6 @@
 module CodeGen.ExprGen (
     generate_expr,
-    generate_identifier
+    generate_identifier,
 ) where
 
 import Parser.ExprParser (
@@ -11,16 +11,24 @@ import Parser.ExprParser (
     )
 
 import Builtins (gen_builtin_data, gen_builtin_identifier)
-import Common
+import Common (Identifier(..))
+import CodeGen.Common
 
+import Control.Monad.State (get, put)
+import Control.Monad.Writer (tell)
 import Data.Maybe (fromMaybe)
 import Data.Text (Text)
 import qualified Data.Text as Text
 
-generate_expr :: ASTree -> Text
+
+generate_expr :: ASTree -> Generator Text
 generate_expr (Leaf e) = generate_term e
 generate_expr (Signed e _) = generate_expr e
-generate_expr (Twig op e) = generate_prefix_expr op <> generate_expr e
+generate_expr (Twig op e) = do
+    pref <- generate_prefix_expr op
+    expr <- generate_expr e
+    pure $ pref <> expr <> "// fixme\n"
+
 generate_expr (Branch op x y) = case op of
     Plus              ->  gen_call "_souc_sum(" x y
     Minus             ->  gen_call "_souc_difference(" x y
@@ -38,7 +46,7 @@ generate_expr (Branch op x y) = case op of
     Or                ->  gen_call "_souc_disjunction(" x y
     Xor               ->  undefined
     In                ->  undefined
-    Tuple             ->  gen_call "_souc_tuple(" x y
+    Tuple             ->  gen_tuple x y
     Iff               ->  undefined
     FromMaybe         ->  undefined
     Prepend           ->  undefined
@@ -46,8 +54,8 @@ generate_expr (Branch op x y) = case op of
     Combine           ->  undefined
     Index             ->  undefined
     Lookup            ->  undefined
-    Apply             ->  generate_expr x <> "(" <> generate_expr y <> ") "
-    FlipApply         ->  generate_expr y <> "(" <> generate_expr x <> ") "
+    Apply             ->  gen_apply x y
+    FlipApply         ->  gen_apply y x
     Map               ->  undefined
     FlipMap           ->  undefined
     Applicative       ->  undefined
@@ -57,27 +65,59 @@ generate_expr (Branch op x y) = case op of
     BindRight         ->  undefined
     BindLeft          ->  undefined
 
-gen_call :: Text -> ASTree -> ASTree -> Text
-gen_call s x y = s <> generate_expr x <> "," <> generate_expr y <> ")"
+gen_apply :: ASTree -> ASTree -> Generator Text
+gen_apply x y = do
+    gx <- generate_expr x
+    gy <- generate_expr y
+    pure $ gx <> "(" <> gy <> ")"
 
-generate_term :: Term -> Text
-generate_term (LitInt l) = "(union _souc_obj) { ._souc_int = " <> Text.pack (show l) <> "}"
-generate_term (LitChar c) = "\'" <> Text.singleton c <> "\'"
-generate_term (LitString s) = "(union _souc_obj) { ._souc_str = \"" <> s <> "\"}"
-generate_term (Var i) = generate_identifier i
+gen_call :: Text -> ASTree -> ASTree -> Generator Text
+gen_call s x y = do
+    gx <- generate_expr x
+    gy <- generate_expr y
+    pure $ s <> gx <> "," <> gy <> ")"
+
+gen_tuple :: ASTree -> ASTree -> Generator Text
+gen_tuple x y = do
+    gx <- generate_expr x
+    gy <- generate_expr y
+    (CIdentifier pair) <- get_next_id
+    -- fixme: this works for static storage, but not automatic storage
+    -- space for the return value should be allocated outside of the function
+    tell $ "struct _souc_pair " <> pair <> " = {.first = " <> gx <> ", .second = " <> gy <> "};\n"
+    pure $ "(union _souc_obj) {._souc_pair = &" <> pair <> "}"
+
+
+generate_term :: Term -> Generator Text
+generate_term (LitInt l) = do
+    pure $ "(union _souc_obj) {._souc_int = " <> Text.pack (show l) <> "}"
+generate_term (LitChar c) = do
+    pure $ "(union _souc_obj) {._souc_char =  \'" <> Text.singleton c <> "\'}"
+generate_term (LitString s) = do
+    pure $ "(union _souc_obj) {._souc_str = \"" <> s <> "\"}"
+generate_term (Var v) = do
+    pure $ generate_identifier_text v
 generate_term (Constructor s) = case gen_builtin_data s of
-    Just output -> output
-    Nothing -> "45" -- fixme hehe
+    Just output -> pure output
+    Nothing -> pure "47" -- fixme hehe
 
-generate_identifier :: Identifier -> Text
-generate_identifier i = fromMaybe (prepend i) (gen_builtin_identifier i) where
+generate_identifier :: Identifier -> CIdentifier
+generate_identifier = CIdentifier . generate_identifier_text
+
+generate_identifier_text :: Identifier -> Text
+generate_identifier_text i = fromMaybe (prepend i) (gen_builtin_identifier i) where
     prepend (Identifier name) = "_souc_user_" <> name
 
-
-generate_prefix_expr :: PrefixOperator -> Text
-generate_prefix_expr GetAddr    = "&"
-generate_prefix_expr Deref      = "*"
-generate_prefix_expr Negate     = "-"
+generate_prefix_expr :: PrefixOperator -> Generator Text
+generate_prefix_expr GetAddr    = pure "&"
+generate_prefix_expr Deref      = pure "*"
+generate_prefix_expr Negate     = pure "-"
 generate_prefix_expr ToString   = undefined
 generate_prefix_expr Pure       = undefined
 generate_prefix_expr Join       = undefined
+
+get_next_id :: Generator CIdentifier
+get_next_id = do
+    n <- get
+    put (n+1)
+    pure $ CIdentifier $ Text.pack $ 'v' : show n

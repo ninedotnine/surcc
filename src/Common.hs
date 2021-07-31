@@ -42,7 +42,6 @@ import Data.Hashable (Hashable)
 import Data.String (IsString)
 import Data.Text (Text)
 import qualified Data.Text as Text
-import Data.Word (Word)
 
 data Mutability = Mut | Immut deriving (Show, Eq)
 
@@ -65,11 +64,11 @@ type Body = [Top_Level_Defn]
 
 newtype Stmts = Stmts [Stmt] deriving (Show, Eq)
 
-newtype SoucKind = SoucKind Word deriving (Eq)
+newtype SoucKind = SoucKind Word deriving (Eq, Ord)
 
 -- allowed type names are single chars like 'A'
 -- or 'T' followed by an increasing number (T0, T1, ...)
-data TypeVar = TypeVar (Either Word Char) SoucKind deriving (Eq, Show)
+data TypeVar = TypeVar (Either Word Char) SoucKind deriving (Eq, Ord, Show)
 
 instance Show SoucKind where
     show (SoucKind 0) = "*"

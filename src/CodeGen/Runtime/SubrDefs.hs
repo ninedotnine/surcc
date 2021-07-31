@@ -11,6 +11,3 @@ write = "void _souc_write(union _souc_obj pair) { puts(pair._souc_pair->second._
 
 abort :: Text
 abort = "void _souc_abort(void) { abort(); } "
-
-puts :: Text
-puts = "void _souc_puts(union _souc_obj val) { puts(val._souc_str); } "

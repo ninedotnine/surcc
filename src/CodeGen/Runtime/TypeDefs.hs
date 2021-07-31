@@ -11,8 +11,11 @@ typedefs = Text.intercalate "\n" [
     "// end of typedefs\n"
     ]
 
+
+-- all these things should probably have `const`s
+
 souc_obj = "union _souc_obj { int _souc_int; char _souc_char; bool _souc_bool; char * _souc_str; struct _souc_pair * _souc_pair; };"
 
 souc_maybe = "struct _souc_maybe { int has_val; union _souc_obj val; };"
 
-souc_pair = "struct _souc_pair { union _souc_obj first; union _souc_obj second; };"
+souc_pair = "struct _souc_pair { const union _souc_obj first; const union _souc_obj second; };"

@@ -20,6 +20,7 @@ import TypeChecker.Context
 import TypeChecker.Operators
 import TypeChecker.Expressions
 import TypeChecker.Statements
+import TypeChecker.TypeVariables
 
 type_check :: ParseTree -> Either TypeError CheckedProgram
 type_check (ParseTree module_info imports defns) = do

@@ -1,4 +1,6 @@
--- this test only ensures that *something* is generated for each program tree.
+-- this test only ensures that *something* is generated for each program tree
+-- and that gcc compiles it!
+
 {-# OPTIONS_GHC -Wall #-}
 
 import CodeGen.CodeGen
@@ -10,9 +12,6 @@ import System.Directory (createDirectoryIfMissing)
 import System.Exit (exitFailure, ExitCode(..))
 import System.Process.Text (readProcessWithExitCode)
 
-default_module :: SoucModule
-default_module = SoucModule "anonymous_main_module" []
-
 tmpdir :: FilePath
 tmpdir = "/tmp/souc_code_gen_test/"
 
@@ -23,8 +22,12 @@ test prog name = do
     (code, _, err) <- readProcessWithExitCode
         "gcc" ["-x", "c", "-o", bin_filename, "-"] (generate prog)
     when (code /= ExitSuccess) (
-        Text.putStrLn "error" >> Text.putStrLn err >> exitFailure)
+        Text.putStrLn "error" >> Text.putStrLn err >> debug_output (generate prog) >> exitFailure)
     putStrLn "OK."
+
+-- debug_output :: IO
+debug_output text = do
+    Text.writeFile "/tmp/codegen_fail.c" text
 
 main :: IO ()
 main = do
@@ -38,8 +41,6 @@ run_tests = do
     test conster "conster"
     test func "func"
     test func2 "func2"
-    test mainer "mainer"
-    test mainer2 "mainer2"
     test subber "subber"
     test subber_ass "subber_ass"
     test subber_const_ass "subber_const_ass"
@@ -52,6 +53,15 @@ run_tests = do
     test sub_while "sub_while"
     test sub_until "sub_until"
 
+default_module :: SoucModule
+default_module = SoucModule "anonymous_main_module" []
+
+default_main :: Top_Level_Defn
+default_main = MainDefn (Just (Param (Identifier "stdout") Nothing)) Nothing short_stmts
+
+short_stmts :: Stmts
+short_stmts = Stmts [Stmt_Sub_Call (Identifier "write") (Just (Branch Tuple (Leaf (Var (Identifier "stdout"))) (Leaf (LitString "hello"))))]
+
 conster :: CheckedProgram
 conster = CheckedProgram default_module [] [
     Top_Level_Const_Defn (Identifier "x") Nothing (Leaf (LitInt 42)),
@@ -60,20 +70,15 @@ conster = CheckedProgram default_module [] [
 
 func :: CheckedProgram
 func = CheckedProgram default_module [] [
-    MainDefn Nothing Nothing (Stmts []),
+    default_main,
     ShortFuncDefn (Identifier "f") (Param (Identifier "x") Nothing) Nothing (Leaf (LitInt 42))]
 
 func2 :: CheckedProgram
 func2 = CheckedProgram default_module [] [
-    MainDefn Nothing Nothing (Stmts []),
-    FuncDefn (Identifier "f") (Param  (Identifier "x") Nothing) Nothing (Stmts [
+    default_main,
+    FuncDefn (Identifier "f") (Param (Identifier "x") Nothing) Nothing (Stmts [
         Stmt_Return (Just (Leaf (LitInt 42)))])]
 
-mainer :: CheckedProgram
-mainer = CheckedProgram default_module [] [MainDefn Nothing Nothing (Stmts [])]
-
-mainer2 :: CheckedProgram
-mainer2 = CheckedProgram default_module [] [MainDefn Nothing Nothing (Stmts [])]
 
 subber :: CheckedProgram
 subber = CheckedProgram default_module [] [
@@ -82,26 +87,26 @@ subber = CheckedProgram default_module [] [
 
 subber_ass :: CheckedProgram
 subber_ass = CheckedProgram default_module [] [
-    MainDefn Nothing Nothing (Stmts []),
+    default_main,
     SubDefn (Identifier "subby") Nothing Nothing (Stmts [
         Stmt_Var_Assign (Identifier "x") Nothing (Leaf (LitInt 42))])]
 
 subber_const_ass :: CheckedProgram
 subber_const_ass = CheckedProgram default_module [] [
-    MainDefn Nothing Nothing (Stmts []),
+    default_main,
     SubDefn (Identifier "subby") Nothing Nothing (Stmts [
         Stmt_Const_Assign (Identifier "x") Nothing (Leaf (LitInt 42))])]
 
 subber_postfix_oper :: CheckedProgram
 subber_postfix_oper = CheckedProgram default_module [] [
-    MainDefn Nothing Nothing (Stmts []),
-    SubDefn (Identifier "subby") Nothing Nothing (Stmts [
+    default_main,
+    SubDefn (Identifier "subby_postfix_oper") Nothing Nothing (Stmts [
         Stmt_Var_Assign (Identifier "x") Nothing (Leaf (LitInt 41)),
         Stmt_Postfix_Oper (Identifier "x") "++"])]
 
 subber_while :: CheckedProgram
 subber_while = CheckedProgram default_module [] [
-    MainDefn Nothing Nothing (Stmts []),
+    default_main,
     SubDefn (Identifier "subby") Nothing Nothing (Stmts [
         Stmt_While (Leaf (Constructor "False")) (Stmts [
             Stmt_Var_Assign (Identifier "x") Nothing (Leaf (LitInt 41)),
@@ -109,7 +114,7 @@ subber_while = CheckedProgram default_module [] [
 
 subber_if :: CheckedProgram
 subber_if = CheckedProgram default_module [] [
-    MainDefn Nothing Nothing (Stmts []),
+    default_main,
     SubDefn (Identifier "subby") Nothing Nothing (Stmts [
         Stmt_If (Leaf (Constructor "False")) (Stmts [
             Stmt_Var_Assign (Identifier "x") Nothing (Leaf (LitInt 41)),
@@ -129,7 +134,7 @@ subber_if_else = CheckedProgram default_module [] [
 
 subber_unless :: CheckedProgram
 subber_unless = CheckedProgram default_module [] [
-    MainDefn Nothing Nothing (Stmts []),
+    default_main,
     SubDefn (Identifier "subby") Nothing Nothing (Stmts [
         Stmt_Unless (Leaf (Constructor "False")) (Stmts [
             Stmt_Var_Assign (Identifier "x") Nothing (Leaf (LitInt 41)),

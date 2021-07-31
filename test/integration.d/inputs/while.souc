@@ -1,5 +1,5 @@
 main(stdout: OutputStream) = do
 	i <- 0
-	while i < 4
+	if i < 4
 		i++ ; should be printed
 	write stdout , "done"
