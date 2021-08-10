@@ -185,7 +185,7 @@ data Operator = Plus
               | Or
               | Xor
               | In
-              | Tuple
+              | Comma
               | Iff
               | FromMaybe
               | Prepend
@@ -231,7 +231,7 @@ instance Show Operator where
     show Or             = "||" -- FIXME
     show Xor            = "><"
     show In             = ">|#|<"
-    show Tuple          = ","
+    show Comma          = ","
     show Iff            = "?"
     show FromMaybe      = "??"
     show Prepend        = ">>"

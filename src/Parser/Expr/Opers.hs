@@ -71,7 +71,7 @@ parse_infix_oper = do
             str "OR" *> pure Or <|> -- FIXME
             str "><" *> pure Xor <|>
             str "IN" *> pure In <|> -- FIXME
-            char ',' *> pure Tuple <|>
+            char ',' *> pure Comma <|>
             char '?' *> pure Iff <|>
             str "??" *> pure FromMaybe <|>
             str ">>" *> pure Prepend <|>

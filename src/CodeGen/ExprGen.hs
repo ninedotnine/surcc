@@ -46,7 +46,7 @@ generate_expr (Branch op x y) = case op of
     Or                ->  gen_call "_souc_disjunction(" x y
     Xor               ->  undefined
     In                ->  undefined
-    Tuple             ->  gen_tuple x y
+    Comma             ->  gen_tuple x y
     Iff               ->  undefined
     FromMaybe         ->  undefined
     Prepend           ->  undefined

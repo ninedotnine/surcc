@@ -47,7 +47,7 @@ get_prec :: Operator -> Precedence
 get_prec Apply          = Precedence 10
 get_prec FlipApply      = Precedence 10
 get_prec Iff            = Precedence 20
-get_prec Tuple          = Precedence 30
+get_prec Comma          = Precedence 30
 get_prec BindRight      = Precedence 40
 get_prec BindLeft       = Precedence 40
 get_prec And            = Precedence 50

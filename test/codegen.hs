@@ -60,7 +60,7 @@ default_main :: Top_Level_Defn
 default_main = MainDefn (Just (Param (Identifier "stdout") Nothing)) Nothing short_stmts
 
 short_stmts :: Stmts
-short_stmts = Stmts [Stmt_Sub_Call (Identifier "write") (Just (Branch Tuple (Leaf (Var (Identifier "stdout"))) (Leaf (LitString "hello"))))]
+short_stmts = Stmts [Stmt_Sub_Call (Identifier "write") (Just (Branch Comma (Leaf (Var (Identifier "stdout"))) (Leaf (LitString "hello"))))]
 
 conster :: CheckedProgram
 conster = CheckedProgram default_module [] [
