@@ -1,14 +1,17 @@
 module Main_Soucc where
 
-import Common
+import Common (TypeError)
 import CodeGen.CodeGen (generate)
 import Imports.Parser (parse_module_header)
-import Parser.SouCParser (runSouCParser)
+import Parser.SouCParser (parse)
 import TypeChecker.TypeChecker (type_check)
 
 -- import Text.Parsec.String (parseFromFile)
+import Control.Arrow (left)
+import Data.Functor ((<&>))
+import Data.Text (Text)
 import qualified Data.Text.IO as Text
-import Text.Parsec.Error (ParseError)
+import Text.Parsec (SourceName, ParseError)
 import System.Environment (getArgs)
 import System.Exit (exitFailure, exitSuccess)
 
@@ -16,15 +19,31 @@ main :: IO ()
 main = do
     file_name <- getArgs >>= sanitize_args
     file_contents <- Text.readFile file_name
-    case parse_module_header file_name file_contents of
-        Left parse_error -> print parse_error >> exitFailure
-        Right (modul, imports, rest) -> case runSouCParser file_name modul imports rest of
-            Left parse_error -> print parse_error >> exitFailure
-            Right prog_tree -> case type_check prog_tree of
-                Left typecheck_error -> print typecheck_error >> exitFailure
-                Right checked_prog -> Text.putStrLn (generate checked_prog)
+    output $ pipeline file_name file_contents
 
-sanitize_args :: [String] -> IO String
+pipeline :: SourceName -> Text -> Either SouccError Text
+pipeline name contents =
+    left SouccHeaderError (parse_module_header name contents)
+    >>= left SouccParseError . (parse name)
+    >>= left SouccTypeError . type_check
+    <&> generate
+
+output :: Either SouccError Text -> IO ()
+output = \case
+    Left err -> print err >> exitFailure
+    Right text -> Text.putStrLn text
+
+sanitize_args :: [String] -> IO SourceName
 sanitize_args [] = putStrLn "no filename provided." >> exitFailure
 sanitize_args (x:[]) = pure x
 sanitize_args _ = putStrLn "too many args." >> exitFailure
+
+data SouccError = SouccHeaderError ParseError
+                | SouccParseError ParseError
+                | SouccTypeError TypeError
+
+instance Show SouccError where
+    show = \case
+        SouccHeaderError err -> "invalid header:\n" ++ show err
+        SouccParseError err -> "failed parse:\n" ++ show err
+        SouccTypeError err -> "type error:\n" ++ show err

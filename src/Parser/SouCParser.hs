@@ -1,10 +1,12 @@
-module Parser.SouCParser where
+module Parser.SouCParser (
+    parse
+) where
 
 import Data.List.NonEmpty ( NonEmpty(..) )
 import qualified Data.Map.Strict as Map (Map, fromList)
 import Data.Text (Text)
 import qualified Data.Text as Text
-import Text.Parsec hiding (space, spaces, string)
+import Text.Parsec hiding (space, spaces, string, parse)
 
 
 import Common
@@ -16,8 +18,9 @@ import Parser.SouC_Stmts (stmt_block)
 import Parser.ExprParser (parse_expression)
 import Parser.TabChecker (check_tabs)
 
-runSouCParser :: SourceName -> SoucModule -> [ImportDecl] -> Text -> Either ParseError ParseTree
-runSouCParser source_name (SoucModule name exports) imps input = do
+
+parse :: SourceName -> (SoucModule, [ImportDecl], Text) -> Either ParseError ParseTree
+parse source_name ((SoucModule name exports), imps, input) = do
     check_tabs source_name input
     body <- runParser souCParser (start_state name imps) source_name input
     pure $ ParseTree (SoucModule name exports) imps body

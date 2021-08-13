@@ -16,7 +16,7 @@ import System.Environment (getArgs)
 import System.Exit (exitFailure, exitSuccess)
 
 import Imports.Parser (parse_module_header)
-import Parser.SouCParser (runSouCParser)
+import Parser.SouCParser (parse)
 
 main :: IO ()
 main = do
@@ -52,8 +52,8 @@ render_file_contents text = header <> contents
 
 parse_souc_file :: FilePath -> Text -> Either ParseError ParseTree
 parse_souc_file filename input = do
-    (modul, imports, rest) <- parse_module_header filename input
-    runSouCParser filename modul imports rest
+    module_data <- parse_module_header filename input
+    parse filename module_data
 
 pretty_print :: ParseTree -> IO ()
 pretty_print (ParseTree modul imps body) = do

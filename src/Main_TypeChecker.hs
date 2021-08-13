@@ -10,7 +10,7 @@ import System.Exit (exitFailure, exitSuccess)
 
 import Common
 import Imports.Parser (parse_module_header)
-import Parser.SouCParser (runSouCParser)
+import Parser.SouCParser (parse)
 import TypeChecker.TypeChecker (type_check)
 
 main :: IO ()
@@ -55,7 +55,7 @@ test filename input handle_parsed = do
     putStr "... "
     case parse_module_header filename input of
         Left err -> putStrLn (show err) >> exitFailure
-        Right (m, i, rest) -> case runSouCParser filename m i rest of
+        Right module_data -> case parse filename module_data of
             Left err -> putStrLn (show err) >> exitFailure
             Right parsed -> handle_parsed parsed
 
