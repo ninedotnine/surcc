@@ -34,9 +34,10 @@ output = \case
     Right text -> Text.putStrLn text
 
 sanitize_args :: [String] -> IO SourceName
-sanitize_args [] = putStrLn "no filename provided." >> exitFailure
-sanitize_args (x:[]) = pure x
-sanitize_args _ = putStrLn "too many args." >> exitFailure
+sanitize_args = \case
+    [] -> putStrLn "no filename provided." >> exitFailure
+    (x:[]) -> pure x
+    _ -> putStrLn "too many args." >> exitFailure
 
 data SouccError = SouccHeaderError ParseError
                 | SouccParseError ParseError

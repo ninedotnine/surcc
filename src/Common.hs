@@ -71,8 +71,9 @@ newtype SoucKind = SoucKind Word deriving (Eq, Ord)
 data TypeVar = TypeVar (Either Word Char) SoucKind deriving (Eq, Ord, Show)
 
 instance Show SoucKind where
-    show (SoucKind 0) = "*"
-    show (SoucKind k) = "*" <> join (replicate (fromIntegral k) " => *")
+    show = \case
+        SoucKind 0 -> "*"
+        SoucKind k -> "*" <> join (replicate (fromIntegral k) " => *")
 
 data SoucType = SoucType Text SoucKind
               | SoucTypeConstructor Text SoucKind [SoucType]
@@ -128,11 +129,12 @@ data TypeError = TypeMismatch SoucType SoucType
     deriving (Eq)
 
 instance Show TypeError where
-    show (TypeMismatch t0 t1) = "mismatch: expected " <> show t0 <> " but got " <> show t1
-    show (MultipleDeclarations name) = "multiple declarations of " <> show name
-    show (Undeclared name) = "undeclared " <> show name
-    show (UnknownData name) = "unknown data constructor: " <> show name
-    show (ExportedButNotDefined name) = "declared " <> show name <> " was not defined"
+    show = \case
+        TypeMismatch t0 t1 -> "mismatch: expected " <> show t0 <> " but got " <> show t1
+        MultipleDeclarations name -> "multiple declarations of " <> show name
+        Undeclared name -> "undeclared " <> show name
+        UnknownData name -> "unknown data constructor: " <> show name
+        ExportedButNotDefined name -> "declared " <> show name <> " was not defined"
 
 data Param = Param Identifier (Maybe SoucType) deriving (Show, Eq)
 
@@ -214,61 +216,61 @@ data PrefixOperator = Deref
                     deriving Eq
 
 instance Show Operator where
-    show Plus           = "+"
-    show Minus          = "-"
-    show Splat          = "*"
-    show FieldDiv       = "/"
-    show FloorDiv       = "//"
-    show Modulo         = "%"
-    show Hihat          = "^"
-    show Equals         = "=="
-    show Combine        = "<>"
-    show NotEquals      = "=/="
-    show RegexMatch     = "=~"
-    show GreaterThan    = ">"
-    show LesserThan     = "<"
-    show And            = "&&" -- FIXME
-    show Or             = "||" -- FIXME
-    show Xor            = "><"
-    show In             = ">|#|<"
-    show Comma          = ","
-    show Iff            = "?"
-    show FromMaybe      = "??"
-    show Prepend        = ">>"
-    show Append         = "<<"
-    show Index          = "#"
-    show Lookup         = "##"
-    show Apply          = "~&"
-    show FlipApply      = "&"
-    show Map            = "<~&>"
-    show FlipMap        = "<&>"
-    show Applicative    = "<~*>"
-    show FlipApplicative = "<*>"
-    show SequenceRight  = "*>"
-    show SequenceLeft   = "<*"
-    show BindRight      = ">>="
-    show BindLeft       = "=<<"
+    show = \case
+        Plus            ->  "+"
+        Minus           ->  "-"
+        Splat           ->  "*"
+        FieldDiv        ->  "/"
+        FloorDiv        ->  "//"
+        Modulo          ->  "%"
+        Hihat           ->  "^"
+        Equals          ->  "=="
+        Combine         ->  "<>"
+        NotEquals       ->  "=/="
+        RegexMatch      ->  "=~"
+        GreaterThan     ->  ">"
+        LesserThan      ->  "<"
+        And             ->  "&&" -- FIXME
+        Or              ->  "||" -- FIXME
+        Xor             ->  "><"
+        In              ->  ">|#|<"
+        Comma           ->  ","
+        Iff             ->  "?"
+        FromMaybe       ->  "??"
+        Prepend         ->  ">>"
+        Append          ->  "<<"
+        Index           ->  "#"
+        Lookup          ->  "##"
+        Apply           ->  "~&"
+        FlipApply       ->  "&"
+        Map             ->  "<~&>"
+        FlipMap         ->  "<&>"
+        Applicative     ->  "<~*>"
+        FlipApplicative ->  "<*>"
+        SequenceRight   ->  "*>"
+        SequenceLeft    ->  "<*"
+        BindRight       ->  ">>="
+        BindLeft        ->  "=<<"
 
 instance Show PrefixOperator where
-    show Deref    = "!"
-    show GetAddr  = "@"
-    show Negate   = "~"
-    show ToString = "$"
-    show Pure     = "^*^"
-    show Join     = ">*<"
+    show = \case
+        Deref    -> "!"
+        GetAddr  -> "@"
+        Negate   -> "~"
+        ToString -> "$"
+        Pure     -> "^*^"
+        Join     -> ">*<"
 
 instance Show SoucType where
-    show SoucIO = "IO"
-    show (SoucFn t0 t1) = show t0 <> " -> " <> show t1
-    show (SoucRoutn t) = show t <> " -> IO"
-    show (SoucMaybe t) = '?': show t
-    show (SoucList t) = '[': show t <> "]"
-    show (SoucPair t0 t1) = show t0 <> " & " <> show t1
-    show (SoucEither t0 t1) = show t0 <> " | " <> show t1
-    show (SoucType t _) = show t
-    show (SoucTypeVar (TypeVar (Left  v) _)) = 'T' : show v
-    show (SoucTypeVar (TypeVar (Right v) _)) = v : ""
-    show (SoucTypeConstructor t _ ts) = Text.unpack (t <> "(" <> sho ts <> ")")
-
-sho :: Show a => a -> Text
-sho = Text.pack . show
+    show = \case
+        SoucIO -> "IO"
+        SoucFn t0 t1 -> show t0 <> " -> " <> show t1
+        SoucRoutn t -> show t <> " -> IO"
+        SoucMaybe t -> '?': show t
+        SoucList t -> '[': show t <> "]"
+        SoucPair t0 t1 -> show t0 <> " & " <> show t1
+        SoucEither t0 t1 -> show t0 <> " | " <> show t1
+        SoucType t _ -> show t
+        SoucTypeVar (TypeVar (Left  v) _) -> 'T' : show v
+        SoucTypeVar (TypeVar (Right v) _) -> v : ""
+        SoucTypeConstructor t _ ts -> Text.unpack t <> "(" <> show ts <> ")"
