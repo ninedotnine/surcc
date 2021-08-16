@@ -6,11 +6,11 @@ import Imports.Parser (parse_module_header)
 import Parser.SouCParser (parse)
 import TypeChecker.TypeChecker (type_check)
 
--- import Text.Parsec.String (parseFromFile)
+import Prelude hiding (putStr, putStrLn, readFile)
 import Control.Arrow (left)
 import Data.Functor ((<&>))
 import Data.Text (Text)
-import qualified Data.Text.IO as Text
+import Data.Text.IO (putStr, putStrLn, readFile)
 import Text.Parsec (SourceName, ParseError)
 import System.Environment (getArgs)
 import System.Exit (exitFailure, exitSuccess)
@@ -18,7 +18,7 @@ import System.Exit (exitFailure, exitSuccess)
 main :: IO ()
 main = do
     file_name <- getArgs >>= sanitize_args
-    file_contents <- Text.readFile file_name
+    file_contents <- readFile file_name
     output $ pipeline file_name file_contents
 
 pipeline :: SourceName -> Text -> Either SouccError Text
@@ -31,7 +31,7 @@ pipeline name contents =
 output :: Either SouccError Text -> IO ()
 output = \case
     Left err -> print err >> exitFailure
-    Right text -> Text.putStrLn text
+    Right text -> putStrLn text
 
 sanitize_args :: [String] -> IO SourceName
 sanitize_args = \case
