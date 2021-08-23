@@ -16,34 +16,36 @@ import CodeGen.Common
 
 import Control.Monad.State (get, put)
 import Control.Monad.Writer (tell)
+import Data.Functor
 import Data.Maybe (fromMaybe)
 import Data.Text (Text)
 import qualified Data.Text as Text
 
 
-generate_expr :: ASTree -> Generator Text
-generate_expr (Leaf e) = generate_term e
+
+generate_expr :: ASTree -> Generator (Text,Text)
+generate_expr (Leaf e) = (,) "" <$> generate_term e
 generate_expr (Signed e _) = generate_expr e
 generate_expr (Twig op e) = do
     pref <- generate_prefix_expr op
-    expr <- generate_expr e
-    pure $ pref <> expr <> "// fixme\n"
+    (decls, expr) <- generate_expr e
+    pure $ (decls , pref <> expr <> "// fixme\n")
 
 generate_expr (Branch op x y) = case op of
-    Plus              ->  gen_call "_souc_sum(" x y
-    Minus             ->  gen_call "_souc_difference(" x y
-    Splat             ->  gen_call "_souc_product(" x y
-    FieldDiv          ->  gen_call "_souc_quotient(" x y
+    Plus              ->  (,) "" <$> gen_call "_souc_sum(" x y
+    Minus             ->  (,) "" <$> gen_call "_souc_difference(" x y
+    Splat             ->  (,) "" <$> gen_call "_souc_product(" x y
+    FieldDiv          ->  (,) "" <$> gen_call "_souc_quotient(" x y
     FloorDiv          ->  undefined
-    Modulo            ->  gen_call "_souc_remainder(" x y
+    Modulo            ->  (,) "" <$> gen_call "_souc_remainder(" x y
     Hihat             ->  undefined -- FIXME C doesn't have ^
-    Equals            ->  gen_call "_souc_is_equal_integer(" x y
-    NotEquals         ->  gen_call "_souc_is_unequal_integer(" x y
+    Equals            ->  (,) "" <$> gen_call "_souc_is_equal_integer(" x y
+    NotEquals         ->  (,) "" <$> gen_call "_souc_is_unequal_integer(" x y
     RegexMatch        ->  undefined
-    GreaterThan       ->  gen_call "_souc_is_greater(" x y
-    LesserThan        ->  gen_call "_souc_is_lesser(" x y
-    And               ->  gen_call "_souc_conjunction(" x y
-    Or                ->  gen_call "_souc_disjunction(" x y
+    GreaterThan       ->  (,) "" <$> gen_call "_souc_is_greater(" x y
+    LesserThan        ->  (,) "" <$> gen_call "_souc_is_lesser(" x y
+    And               ->  (,) "" <$> gen_call "_souc_conjunction(" x y
+    Or                ->  (,) "" <$> gen_call "_souc_disjunction(" x y
     Xor               ->  undefined
     In                ->  undefined
     Comma             ->  gen_tuple x y
@@ -54,8 +56,8 @@ generate_expr (Branch op x y) = case op of
     Combine           ->  undefined
     Index             ->  undefined
     Lookup            ->  undefined
-    Apply             ->  gen_apply x y
-    FlipApply         ->  gen_apply y x
+    Apply             ->  (,) "" <$> gen_apply x y
+    FlipApply         ->  (,) "" <$> gen_apply y x
     Map               ->  undefined
     FlipMap           ->  undefined
     Applicative       ->  undefined
@@ -67,25 +69,27 @@ generate_expr (Branch op x y) = case op of
 
 gen_apply :: ASTree -> ASTree -> Generator Text
 gen_apply x y = do
-    gx <- generate_expr x
-    gy <- generate_expr y
-    pure $ gx <> "(" <> gy <> ")"
+    (x_decls, gx) <- generate_expr x
+    (y_decls, gy) <- generate_expr y
+    pure $ x_decls <> y_decls <> gx <> "(" <> gy <> ")"
 
 gen_call :: Text -> ASTree -> ASTree -> Generator Text
 gen_call s x y = do
-    gx <- generate_expr x
-    gy <- generate_expr y
-    pure $ s <> gx <> "," <> gy <> ")"
+    (x_decls, gx) <- generate_expr x
+    (y_decls, gy) <- generate_expr y
+    pure $ x_decls <> y_decls <> s <> gx <> "," <> gy <> ")"
 
-gen_tuple :: ASTree -> ASTree -> Generator Text
+gen_tuple :: ASTree -> ASTree -> Generator (Text,Text)
 gen_tuple x y = do
-    gx <- generate_expr x
-    gy <- generate_expr y
+    (x_decls, gx) <- generate_expr x
+    (y_decls, gy) <- generate_expr y
     (CIdentifier pair) <- get_next_id
     -- fixme: this works for static storage, but not automatic storage
     -- space for the return value should be allocated outside of the function
-    tell $ "struct _souc_pair " <> pair <> " = {.first = " <> gx <> ", .second = " <> gy <> "};\n"
-    pure $ "(union _souc_obj) {._souc_pair = &" <> pair <> "}"
+    tell $ "struct _souc_pair " <> pair <> ";\n"
+    pure $ (x_decls <> y_decls <> pair <> " = (struct _souc_pair) {.first = "
+           <> gx <> ", .second = " <> gy <> "};\n" ,
+           "(union _souc_obj) {._souc_pair = &" <> pair <> "}")
 
 
 generate_term :: Term -> Generator Text

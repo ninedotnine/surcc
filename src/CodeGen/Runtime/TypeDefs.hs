@@ -18,4 +18,4 @@ souc_obj = "union _souc_obj { int _souc_int; char _souc_char; bool _souc_bool; c
 
 souc_maybe = "struct _souc_maybe { int has_val; union _souc_obj val; };"
 
-souc_pair = "struct _souc_pair { const union _souc_obj first; const union _souc_obj second; };"
+souc_pair = "struct _souc_pair { union _souc_obj first; union _souc_obj second; };"
