@@ -11,6 +11,7 @@ import Control.Monad.Trans
 import Control.Monad.Trans.Except
 import Data.Either
 import Data.Text (Text)
+import TextShow (TextShow(..), toString) -- for error
 import qualified Data.Text as Text
 
 import Prelude hiding (lookup)
@@ -110,7 +111,7 @@ add_top_level_sub i m_p m_t stmts = case (i, m_t) of
     ("main", _) -> error "tried to add \"main\" as a subroutine"
     (_, Nothing) -> ok_sub
     (_, Just SoucIO) -> ok_sub
-    (_, Just wrong) -> error (show wrong)
+    (_, Just wrong) -> error (toString (showb wrong))
     where
         ok_sub = case m_p of
             Nothing -> do

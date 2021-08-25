@@ -4,7 +4,6 @@
 -- it gives higher precedence to operators which are not separated by spaces.
 
 module Parser.Expr.ExprParser (
-    pretty_show_expression,
     parse_expression,
     parse_print_expression,
     evaluate_astree,
@@ -29,6 +28,8 @@ import Data.Char (ord) -- for evaluate
 
 import Data.Text (Text)
 import qualified Data.Text as Text
+-- import TextShow (TextShow(..))
+import TextShow
 
 import Parser.Expr.StackManipulations
 import Parser.Expr.ExprTypes
@@ -113,11 +114,6 @@ finish_expr = do
 
 
 -- these are little utilities, unrelated to parsing
-pretty_show_expression :: ASTree -> String
-pretty_show_expression (Branch oper left right) = "(" ++ show oper ++ " "  ++ pretty_show_expression left ++ " " ++ pretty_show_expression right ++ ")"
-pretty_show_expression (Twig oper tree) = concat ["(", show oper, " ", pretty_show_expression tree, ")"]
-pretty_show_expression (Signed tree tree_t) = pretty_show_expression tree ++ ": " ++ show tree_t
-pretty_show_expression (Leaf val) = show val
 
 parse_expression :: Text -> Either Parsec.ParseError ASTree
 parse_expression input = Parsec.runParser parse_term start_state "input" (trim_spaces input)
@@ -129,7 +125,7 @@ parse_expression input = Parsec.runParser parse_term start_state "input" (trim_s
 parse_print_expression :: Text -> IO ()
 parse_print_expression input = case parse_expression input of
         Left err -> putStrLn (show err)
-        Right tree -> putStrLn (pretty_show_expression tree)
+        Right tree -> printT tree
 
 evaluate_astree :: ASTree -> Integer
 evaluate_astree (Leaf t) = case t of
@@ -145,7 +141,8 @@ evaluate_astree (Twig op tree) = operate (evaluate_astree tree)
             GetAddr -> undefined
             Negate -> negate
             ToString -> undefined
-            whatever -> error $ "can't evaluate" ++ show whatever
+            Pure -> error $ "can't evaluate pure"
+            Join -> error $ "can't evaluate join"
 evaluate_astree (Branch op left right) = evaluate_astree left `operate` evaluate_astree right
     where operate = case op of
             Plus   -> (+)

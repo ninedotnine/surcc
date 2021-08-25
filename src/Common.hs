@@ -42,38 +42,33 @@ import Data.Hashable (Hashable)
 import Data.String (IsString)
 import Data.Text (Text)
 import qualified Data.Text as Text
+import TextShow (TextShow(..))
+import qualified TextShow
 
-data Mutability = Mut | Immut deriving (Show, Eq)
+data Mutability = Mut | Immut deriving (Eq)
 
 newtype Identifier = Identifier Text
-                   deriving (Eq, Read, Show, Ord, IsString, Semigroup, Hashable)
+                   deriving (Eq, Read, Ord, IsString, Semigroup, Hashable)
 
 data ParseTree = ParseTree SoucModule Imports Body
-    deriving Show
 
 data CheckedProgram = CheckedProgram SoucModule Imports Body
-    deriving Show
 
-data ExportDecl = ExportDecl Identifier SoucType deriving (Show)
-data SoucModule = SoucModule Text [ExportDecl] deriving (Show)
+data ExportDecl = ExportDecl Identifier SoucType
+data SoucModule = SoucModule Text [ExportDecl]
 
-data ImportDecl = LibImport Text | RelImport Text deriving (Read, Show)
+data ImportDecl = LibImport Text | RelImport Text deriving Read
 
 type Imports = [ImportDecl]
 type Body = [Top_Level_Defn]
 
-newtype Stmts = Stmts [Stmt] deriving (Show, Eq)
+newtype Stmts = Stmts [Stmt] deriving Eq
 
 newtype SoucKind = SoucKind Word deriving (Eq, Ord)
 
 -- allowed type names are single chars like 'A'
 -- or 'T' followed by an increasing number (T0, T1, ...)
-data TypeVar = TypeVar (Either Word Char) SoucKind deriving (Eq, Ord, Show)
-
-instance Show SoucKind where
-    show = \case
-        SoucKind 0 -> "*"
-        SoucKind k -> "*" <> join (replicate (fromIntegral k) " => *")
+data TypeVar = TypeVar (Either Word Char) SoucKind deriving (Eq, Ord)
 
 data SoucType = SoucType Text SoucKind
               | SoucTypeConstructor Text SoucKind [SoucType]
@@ -118,9 +113,6 @@ pattern SoucEither t0 t1 = SoucTypeConstructor "Either" (SoucKind 2) [t0,t1]
 
 data Bound = Bound Identifier SoucType deriving Eq
 
-instance Show Bound where
-    show (Bound (Identifier i) t) = "Bound " <> Text.unpack i <> ": " <> show t
-
 data TypeError = TypeMismatch SoucType SoucType
                | MultipleDeclarations Identifier
                | Undeclared Identifier
@@ -128,15 +120,7 @@ data TypeError = TypeMismatch SoucType SoucType
                | ExportedButNotDefined Bound
     deriving (Eq)
 
-instance Show TypeError where
-    show = \case
-        TypeMismatch t0 t1 -> "mismatch: expected " <> show t0 <> " but got " <> show t1
-        MultipleDeclarations name -> "multiple declarations of " <> show name
-        Undeclared name -> "undeclared " <> show name
-        UnknownData name -> "unknown data constructor: " <> show name
-        ExportedButNotDefined name -> "declared " <> show name <> " was not defined"
-
-data Param = Param Identifier (Maybe SoucType) deriving (Show, Eq)
+data Param = Param Identifier (Maybe SoucType) deriving Eq
 
 
 data Top_Level_Defn = Top_Level_Const_Defn Identifier (Maybe SoucType) ASTree
@@ -144,7 +128,7 @@ data Top_Level_Defn = Top_Level_Const_Defn Identifier (Maybe SoucType) ASTree
                     | ShortFuncDefn Identifier Param (Maybe SoucType) ASTree
                     | SubDefn Identifier (Maybe Param) (Maybe SoucType) Stmts
                     | MainDefn (Maybe Param) (Maybe SoucType) Stmts
-                    deriving (Show, Eq)
+                    deriving Eq
 
 data Stmt = Stmt_While ASTree Stmts
           | Stmt_Until ASTree Stmts
@@ -156,20 +140,21 @@ data Stmt = Stmt_While ASTree Stmts
           | Stmt_Var_Assign Identifier (Maybe SoucType) ASTree
           | Stmt_Var_Reassign Identifier ASTree
           | Stmt_Return (Maybe ASTree)
-          deriving (Show, Eq)
+          deriving Eq
 
 data ASTree = Branch Operator ASTree ASTree
             | Twig PrefixOperator ASTree
             | Signed ASTree SoucType
             | Leaf Term
-         deriving (Show, Eq)
+         deriving Eq
+
 
 data Term = LitInt Integer
           | LitChar Char
           | LitString Text
           | Var Identifier
           | Constructor Text
-    deriving (Eq, Show)
+    deriving Eq
 
 data Operator = Plus
               | Minus
@@ -215,8 +200,136 @@ data PrefixOperator = Deref
                     | Join
                     deriving Eq
 
-instance Show Operator where
-    show = \case
+instance TextShow Identifier where
+    showb (Identifier i) = TextShow.fromText i
+
+instance Show Identifier where
+    show = TextShow.toString . showb
+
+instance TextShow CheckedProgram where
+    showb (CheckedProgram m imports body) =
+        "CheckedProgam " <> showb m <> " uses " <> showb imports <>
+        " : " <> showb body
+
+instance TextShow ExportDecl where
+    showb (ExportDecl name t) = showb name <> ": " <> showb t
+
+instance TextShow SoucModule where
+    showb (SoucModule name exports) = "souc module: " <> showb name <> " exports: " <> showb exports
+
+instance TextShow ImportDecl where
+    showb = \case
+        LibImport name -> "lib import " <> showb name
+        RelImport name -> "rel import " <> showb name
+
+instance TextShow Stmts where
+    showb stmts = "Stmts: " <> showb stmts
+
+instance TextShow TypeVar where
+    showb = \case
+        TypeVar (Left num) k -> showb num <> ":: " <> showb k
+        TypeVar (Right c) k -> showb c <> ":: " <> showb k
+
+instance TextShow SoucKind where
+    showb (SoucKind k) = "*" <>
+        TextShow.fromText (Text.replicate (fromIntegral k) " => *")
+
+instance TextShow Bound where
+    showb (Bound (Identifier i) t) = "Bound " <> showb i <> ": " <> showb t
+
+instance TextShow TypeError where
+    showb = \case
+        TypeMismatch t0 t1 -> "mismatch: expected " <> showb t0 <> " but got " <> showb t1
+        MultipleDeclarations name -> "multiple declarations of " <> showb name
+        Undeclared name -> "undeclared " <> showb name
+        UnknownData name -> "unknown data constructor: " <> showb name
+        ExportedButNotDefined name -> "declared " <> showb name <> " was not defined"
+
+instance TextShow Param where
+    showb = \case
+        Param p (Just t) -> "param: " <> showb p <> ": " <> showb t
+        Param p Nothing -> "param: " <> showb p
+
+instance TextShow Top_Level_Defn where
+    showb = \case
+        Top_Level_Const_Defn name (Just t) expr -> mconcat
+            ["const: ", showb name, ": ", showb t, " = ", showb expr]
+        Top_Level_Const_Defn name Nothing expr -> mconcat
+            ["const: ", showb name, " = ", showb expr]
+        FuncDefn name param (Just t) stmts -> mconcat
+            ["fn: ", showb name, "(", showb param, "): ", showb t,
+             " = ", showb stmts]
+        FuncDefn name param Nothing stmts -> mconcat
+            ["fn: ", showb name, "(", showb param
+            , " = ", showb stmts]
+        ShortFuncDefn name param (Just t) expr -> mconcat
+            ["fn: ", showb name, "(", showb param, "): ", showb t,
+             " = ", showb expr]
+        ShortFuncDefn name param Nothing expr -> mconcat
+            ["fn: ", showb name, "(", showb param, ") = ", showb expr]
+        SubDefn name m_param m_t stmts -> mconcat
+            ["sub: ", showb name, "(", showb m_param, "): ", showb m_t,
+             " = ", showb stmts]
+        MainDefn m_param m_t stmts -> mconcat
+            ["main(", showb m_param, "): ", showb m_t, " = ", showb stmts]
+
+instance TextShow Stmt where
+    showb = \case
+        Stmt_While expr stmts ->
+            "while " <> showb expr <> " do " <> showb stmts
+        Stmt_Until expr stmts ->
+            "until " <> showb expr <> " do " <> showb stmts
+        Stmt_If expr stmts (Just else_stmts) ->
+            "if " <> showb expr <> " do " <> showb stmts <>
+            " else " <> showb else_stmts
+        Stmt_If expr stmts Nothing ->
+            "if " <> showb expr <> " do " <> showb stmts
+        Stmt_Unless expr stmts (Just else_stmts) ->
+            "unless " <> showb expr <> " do " <> showb stmts <>
+            " else " <> showb else_stmts
+        Stmt_Unless expr stmts Nothing ->
+            "unless " <> showb expr <> " do " <> showb stmts
+        Stmt_Sub_Call name (Just expr) ->
+            "call " <> showb name <> " " <> showb expr
+        Stmt_Sub_Call name Nothing ->
+            "call " <> showb name
+        Stmt_Postfix_Oper name op ->
+            showb name <> showb op
+        Stmt_Const_Assign name (Just t) expr ->
+            showb name <> ": " <> showb t <> " = " <> showb expr
+        Stmt_Const_Assign name Nothing expr ->
+            showb name <> " = " <> showb expr
+        Stmt_Var_Assign name (Just t) expr ->
+            showb name <> ": " <> showb t <> " <- " <> showb expr
+        Stmt_Var_Assign name Nothing expr ->
+            showb name <> " <- " <> showb expr
+        Stmt_Var_Reassign name expr ->
+            showb name <> " <-- " <> showb expr
+        Stmt_Return (Just expr) ->
+            "return" <> showb expr
+        Stmt_Return Nothing ->
+            "return"
+
+instance TextShow ASTree where
+    showb = \case
+        Branch oper left right -> mconcat
+            ["(", showb oper, " ", showb left, " ", showb right, ")"]
+        Twig oper tree -> mconcat
+            ["(", showb oper, " ", showb tree, ")"]
+        Signed tree tree_t -> mconcat
+            [showb tree, ": ", showb tree_t]
+        Leaf val -> showb val
+
+instance TextShow Term where
+    showb = \case
+        LitInt i -> showb i
+        LitChar c -> showb c
+        LitString s -> showb s
+        Var v -> showb v
+        Constructor name -> showb name
+
+instance TextShow Operator where
+    showb = \case
         Plus            ->  "+"
         Minus           ->  "-"
         Splat           ->  "*"
@@ -252,8 +365,11 @@ instance Show Operator where
         BindRight       ->  ">>="
         BindLeft        ->  "=<<"
 
-instance Show PrefixOperator where
-    show = \case
+instance Show Operator where
+    show = TextShow.toString . showb
+
+instance TextShow PrefixOperator where
+    showb = \case
         Deref    -> "!"
         GetAddr  -> "@"
         Negate   -> "~"
@@ -261,16 +377,16 @@ instance Show PrefixOperator where
         Pure     -> "^*^"
         Join     -> ">*<"
 
-instance Show SoucType where
-    show = \case
+instance TextShow SoucType where
+    showb = \case
         SoucIO -> "IO"
-        SoucFn t0 t1 -> show t0 <> " -> " <> show t1
-        SoucRoutn t -> show t <> " -> IO"
-        SoucMaybe t -> '?': show t
-        SoucList t -> '[': show t <> "]"
-        SoucPair t0 t1 -> show t0 <> " & " <> show t1
-        SoucEither t0 t1 -> show t0 <> " | " <> show t1
-        SoucType t _ -> show t
-        SoucTypeVar (TypeVar (Left  v) _) -> 'T' : show v
-        SoucTypeVar (TypeVar (Right v) _) -> v : ""
-        SoucTypeConstructor t _ ts -> Text.unpack t <> "(" <> show ts <> ")"
+        SoucFn t0 t1 -> showb t0 <> " -> " <> showb t1
+        SoucRoutn t -> showb t <> " -> IO"
+        SoucMaybe t -> "?" <> showb t
+        SoucList t -> "[" <> showb t <> "]"
+        SoucPair t0 t1 -> showb t0 <> " & " <> showb t1
+        SoucEither t0 t1 -> showb t0 <> " | " <> showb t1
+        SoucType t _ -> showb t
+        SoucTypeVar (TypeVar (Left  v) _) -> "T" <> showb v
+        SoucTypeVar (TypeVar (Right v) _) -> showb v
+        SoucTypeConstructor t _ ts -> showb t <> "(" <> showb ts <> ")"

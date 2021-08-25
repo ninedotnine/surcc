@@ -18,7 +18,7 @@ import Parser.Common
 import Common.Parsing
 import Parser.Basics
 
-data Raw_Expr = Raw_Expr String deriving (Read, Show)
+data Raw_Expr = Raw_Expr Text deriving (Read, Show)
 
 run_raw_expr_parser :: Text -> Text
 run_raw_expr_parser input = let empty_state = (0, Map.empty :| []) in
@@ -27,7 +27,10 @@ run_raw_expr_parser input = let empty_state = (0, Map.empty :| []) in
         Right r -> Text.pack (show r)
 
 raw_expr :: SouCParser Raw_Expr
-raw_expr = Raw_Expr <$> dumb_raw_expr
+-- raw_expr = Raw_Expr $ Text.pack <$> dumb_raw_expr
+raw_expr = do
+    s <- dumb_raw_expr
+    pure $ Raw_Expr $ Text.pack s
 
  -- FIXME eventually this must skip newlines when inside parens, brackets, braces
 dumb_raw_expr :: SouCParser String

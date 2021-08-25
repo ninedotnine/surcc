@@ -7,6 +7,8 @@ import qualified Data.Text.IO as Text
 import System.Directory
 import System.Environment (getArgs)
 import System.Exit (exitFailure, exitSuccess)
+import System.IO
+import TextShow (hPrintT, printT)
 
 import Common
 import Imports.Parser (parse_module_header)
@@ -70,12 +72,12 @@ type Handler = ParseTree -> IO ()
 
 output_results :: Handler
 output_results prog = case type_check prog of
-    Left typecheck_error -> print typecheck_error >> exitFailure
-    Right ok -> putStrLn "OK." >> print ok
+    Left typecheck_error -> hPrintT stderr typecheck_error >> exitFailure
+    Right ok -> putStrLn "OK." >> printT ok
 
 handle_prog_ok :: Handler
 handle_prog_ok prog = case type_check prog of
-    Left typecheck_error -> print typecheck_error >> exitFailure
+    Left typecheck_error -> hPrintT stderr typecheck_error >> exitFailure
     Right _ -> putStrLn "OK."
 
 handle_prog_bad :: Handler

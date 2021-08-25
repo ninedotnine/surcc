@@ -9,6 +9,7 @@ module Builtins (
 import qualified Data.HashMap.Strict as Map
 import Data.Text (Text)
 import qualified Data.Text as Text
+import TextShow (TextShow(..))
 
 import Common
 import Parser.ExprParser
@@ -16,7 +17,10 @@ import Parser.ExprParser
 
 type Mapping = Map.HashMap Text (Text, SoucType)
 
-newtype BuiltinsCtx = Builtins [Bound] deriving Show
+newtype BuiltinsCtx = Builtins [Bound]
+
+instance TextShow BuiltinsCtx where
+    showb list = "Builtins" <> showb list
 
 gen_builtin_identifier :: Identifier -> Maybe Text
 gen_builtin_identifier (Identifier i) = fst <$> Map.lookup i builtins where

@@ -5,8 +5,6 @@ module TypeChecker.Operators (
     ret_t,
     InputType(..),
     ReturnType(..),
-    pattern Arg,
-    pattern Ret,
     ret,
     ) where
 
@@ -29,13 +27,3 @@ ret_t text = ReturnType (SoucType text (SoucKind 0))
 
 ret :: (a, ReturnType) -> SoucType
 ret (_, ReturnType x) = x
-
--- FIXME these patterns might be unused.
-
--- pattern Arg :: String -> InputType
--- pattern Arg x <- InputType (SoucType x)
-pattern Arg :: SoucType -> InputType
-pattern Arg x <- InputType x
-
-pattern Ret :: SoucType -> ReturnType
-pattern Ret x <- ReturnType x

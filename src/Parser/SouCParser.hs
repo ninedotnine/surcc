@@ -77,7 +77,7 @@ top_level_const = do
     m_sig <- optional_sig
     _ <- spaces <* char '='
     Raw_Expr val <- spaces *> raw_expr
-    case parse_expression (Text.pack val) of
+    case parse_expression val of
         Right expr -> do
             add_to_bindings name Immut
             pure $ Top_Level_Const_Defn name m_sig expr
@@ -99,7 +99,7 @@ top_level_func func_name = do
 short_top_level_func :: Identifier -> Param -> Maybe SoucType -> SouCParser Top_Level_Defn
 short_top_level_func func_name param sig = do
     (Raw_Expr body) <- raw_expr
-    case parse_expression (Text.pack body) of
+    case parse_expression body of
         Right result -> do
             add_to_bindings func_name Immut
             pure $ ShortFuncDefn func_name param sig result

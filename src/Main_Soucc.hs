@@ -10,10 +10,12 @@ import Prelude hiding (putStr, putStrLn, readFile)
 import Control.Arrow (left)
 import Data.Functor ((<&>))
 import Data.Text (Text)
-import Data.Text.IO (putStr, putStrLn, readFile)
+import Data.Text.IO (putStr, putStrLn, hPutStrLn, readFile)
 import Text.Parsec (SourceName, ParseError)
+import TextShow
 import System.Environment (getArgs)
 import System.Exit (exitFailure, exitSuccess)
+import System.IO (stderr)
 
 main :: IO ()
 main = do
@@ -30,7 +32,7 @@ pipeline name contents =
 
 output :: Either SouccError Text -> IO ()
 output = \case
-    Left err -> print err >> exitFailure
+    Left err -> hPutStrLn stderr (showt err) >> exitFailure
     Right text -> putStrLn text
 
 sanitize_args :: [String] -> IO SourceName
@@ -43,8 +45,8 @@ data SouccError = SouccHeaderError ParseError
                 | SouccParseError ParseError
                 | SouccTypeError TypeError
 
-instance Show SouccError where
-    show = \case
-        SouccHeaderError err -> "invalid header:\n" ++ show err
-        SouccParseError err -> "failed parse:\n" ++ show err
-        SouccTypeError err -> "type error:\n" ++ show err
+instance TextShow SouccError where
+    showb = \case
+        SouccHeaderError err -> "invalid header:\n" <> showb (show err)
+        SouccParseError err -> "failed parse:\n" <> showb (show err)
+        SouccTypeError err -> "type error:\n" <> showb err

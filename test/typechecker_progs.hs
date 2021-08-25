@@ -8,9 +8,9 @@ import TypeChecker.TypeChecker
 import Common
 
 import Data.Text (Text)
-import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
 import System.Exit (exitFailure)
+import TextShow
 
 
 type Test = (ParseTree, Either TypeError CheckedProgram, String)
@@ -44,7 +44,7 @@ mismatch :: Text -> Text -> TypeError
 mismatch x y = TypeMismatch (SoucType x (SoucKind 0)) (SoucType y (SoucKind 0))
 
 render :: Either TypeError CheckedProgram -> Text
-render (Right p) = Text.pack (show p)
+render (Right p) = showt p
 render (Left (TypeMismatch (SoucType x _) (SoucType y _))) = "mismatch: " <> x <> " / " <> y
 render (Left (MultipleDeclarations (Identifier i))) = "multiple declarations: " <> i
 render (Left (Undeclared (Identifier i))) = "undeclared identifier " <> i

@@ -9,9 +9,9 @@ import Common
 import Builtins
 
 import Data.Text (Text)
-import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
 import System.Exit (exitFailure)
+import TextShow
 
 
 instance Eq BuiltinsCtx where
@@ -24,6 +24,22 @@ instance Eq LocalScope where
     GlobalScope b0 r0 == GlobalScope b1 r1 = b0 == b1 && r0 == r1
     InnerScope b0 r0 == InnerScope b1 r1 = b0 == b1 && r0 == r1
     _ == _ = False
+
+instance TextShow BoundLocal where
+    showb = \case
+        (BoundLocal (Identifier i) t Mut) ->
+            "Bound (mutable)" <> showb i <> ": " <> showb t
+        (BoundLocal (Identifier i) t Immut) ->
+            "Bound " <> showb i <> ": " <> showb t
+
+instance TextShow ExportList where
+    showb (ExportList binds) = "ExportList: " <> showb binds
+
+instance TextShow LocalScope where
+    showb = \case
+        GlobalScope binds exports -> "GlobalScope " <> showb binds <> " , exports " <> showb exports
+        InnerScope binds scope -> "InnerScope " <> showb binds <> " and more: " <> showb scope
+
 
 no_exports_ctx :: ExportList
 no_exports_ctx = ExportList []
@@ -54,7 +70,7 @@ main = do
 
 
 render :: Either TypeError LocalScope -> Text
-render (Right ctx) = Text.pack (show ctx)
+render (Right ctx) = showt ctx
 render (Left (TypeMismatch (SoucType x _) (SoucType y _))) = "mismatch: " <> x <> " / " <> y
 render (Left (MultipleDeclarations (Identifier i))) = "multiple declarations for " <> i
 render (Left (Undeclared (Identifier i))) = "undeclared identifier " <> i
@@ -70,7 +86,7 @@ print_err expected actual = Text.putStrLn failmsg where
 test :: Test -> IO ()
 test (imps, stmts, expected, name) = do
     case add_imports imps no_exports_ctx of
-        Left err -> putStr $ "FAILED (to add imports!?): " <> show err
+        Left err -> Text.putStr $ "FAILED (to add imports!?): " <> showt err
         Right imports_ctx -> do
             putStr name >> putStr "... "
             let actual = add_globals imports_ctx stmts

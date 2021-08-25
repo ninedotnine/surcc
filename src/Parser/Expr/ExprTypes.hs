@@ -28,7 +28,6 @@ data TermToken = TermTok Term
                | TightPreOp PrefixOperator
                | SpacedPreOp PrefixOperator
                | LParen
-    deriving Show
 
 data OperToken = Oper Operator
                | RParen
@@ -41,7 +40,7 @@ data StackOp = StackLParen
              | StackTightPreOp PrefixOperator
              | StackSpacedPreOp PrefixOperator
              | StackSig SoucType
-             deriving (Show, Eq)
+             deriving Eq
 
 get_prec :: Operator -> Precedence
 get_prec Apply          = Precedence 10
@@ -85,8 +84,8 @@ get_prec Combine        = Precedence 210
 -- ultimately the oper stack should be empty and the tree stack should contain
 -- only the complete expression tree
 
-newtype Oper_Stack = Oper_Stack [StackOp] deriving Show
-newtype Tree_Stack = Tree_Stack [ASTree] deriving Show
+newtype Oper_Stack = Oper_Stack [StackOp]
+newtype Tree_Stack = Tree_Stack [ASTree]
 newtype Tightness = Tight Bool deriving Eq
 
 type Stack_State = (Oper_Stack, Tree_Stack, Tightness)

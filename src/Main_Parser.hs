@@ -12,6 +12,7 @@ import Data.Text (Text)
 import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
 import Text.Parsec.Error (ParseError)
+import TextShow (TextShow(..), printT)
 import System.Environment (getArgs)
 import System.Exit (exitFailure, exitSuccess)
 
@@ -41,7 +42,7 @@ parse_args args = if length args < 1
 
 render_error :: ParseError -> Text -> Text
 render_error err input =
-    error_start <> Text.pack (show err) <> "\n" <> render_file_contents input
+    error_start <> showt (show err) <> "\n" <> render_file_contents input
         where
           error_start =
             "-------------------- failed parse output:--------------------\n"
@@ -61,40 +62,40 @@ parse_souc_file filename input = do
 
 pretty_print :: ParseTree -> IO ()
 pretty_print (ParseTree modul imps body) = do
-    print modul
-    mapM_ print imps
+    printT modul
+    mapM_ printT imps
     mapM_ prettyPrint body
 
 
 prettyPrint :: Top_Level_Defn -> IO ()
-prettyPrint = \case
-    SubDefn name param (Just t) (Stmts stmts) -> putStrLn $
-        "sub " ++ show name ++ " returns (should be IO): " ++ show t ++
-        " takes " ++ show param ++ (unlines (map prettifyStmt stmts))
-    SubDefn name param Nothing (Stmts stmts) -> putStrLn $
-        "sub " ++ show name ++ " takes " ++ show param ++
-        " is " ++ (unlines (map prettifyStmt stmts))
-    FuncDefn name param (Just t) (Stmts stmts) -> putStrLn $
-        "fn " ++ show name ++ " takn " ++ show param ++
-        " returns: " ++ show t ++ (unlines (map ((' ':) . prettifyStmt) stmts))
-    FuncDefn name param Nothing (Stmts stmts) -> putStrLn $
-        "fn " ++ show name ++ " takn " ++ show param ++
-        " = " ++ (unlines (map ((' ':) . prettifyStmt) stmts))
-    ShortFuncDefn name param (Just t) expr -> putStrLn $
-        "fn " ++ show name ++ " takn " ++ show param ++
-        " returns: " ++ show t ++ " = " ++ show expr
-    ShortFuncDefn name param Nothing expr -> putStrLn $
-        "fn " ++ show name ++ " takn " ++ show param ++ " = " ++ show expr
-    Top_Level_Const_Defn name (Just type_name) val -> putStrLn $
-        "const " ++ show name ++ ": " ++ show type_name ++ " = " ++ show val
-    Top_Level_Const_Defn name Nothing val -> putStrLn $
-        "const " ++ show name ++ " = " ++ show val
-    MainDefn param (Just t) (Stmts stmts) -> putStrLn $
-        "main with " ++ show param ++ " returns (IO?): " ++ show t ++
-        " = " ++ unlines (map ((' ':) . prettifyStmt) stmts)
-    MainDefn param Nothing (Stmts stmts) -> putStrLn $
-        "main with  " ++ show param ++
-        " = " ++ unlines (map ((' ':) . prettifyStmt) stmts)
+prettyPrint = Text.putStrLn <$> \case
+    SubDefn name param (Just t) (Stmts stmts) -> mconcat
+        ["sub ", showt name, " returns (should be IO): ", showt t,
+         " takes ", showt param, Text.unlines (prettifyStmt <$> stmts)]
+    SubDefn name param Nothing (Stmts stmts) -> mconcat
+        ["sub ", showt name, " takes ", showt param,
+         " is ", (Text.unlines (map prettifyStmt stmts))]
+    FuncDefn name param (Just t) (Stmts stmts) -> mconcat
+        ["fn ", showt name, " takn ", showt param, " returns: ",
+         showt t, (Text.unlines (map ((" "<>) . prettifyStmt) stmts))]
+    FuncDefn name param Nothing (Stmts stmts) -> mconcat
+        ["fn ", showt name, " takn ", showt param,
+         " = ", (Text.unlines (map ((" "<>) . prettifyStmt) stmts))]
+    ShortFuncDefn name param (Just t) expr -> mconcat
+        ["fn ", showt name, " takn ", showt param,
+         " returns: ", showt t, " = ", showt expr]
+    ShortFuncDefn name param Nothing expr -> mconcat
+        ["fn ", showt name, " takn ", showt param, " = ", showt expr]
+    Top_Level_Const_Defn name (Just type_name) val -> mconcat
+        ["const ", showt name, ": ", showt type_name, " = ", showt val]
+    Top_Level_Const_Defn name Nothing val -> mconcat
+        ["const ", showt name, " = ", showt val]
+    MainDefn param (Just t) (Stmts stmts) -> mconcat
+        ["main with ", showt param, " returns (IO?): ", showt t,
+         " = ", Text.unlines (map ((" "<>) . prettifyStmt) stmts)]
+    MainDefn param Nothing (Stmts stmts) -> mconcat
+        ["main with  ", showt param,
+         " = ", Text.unlines (map ((" "<>) . prettifyStmt) stmts)]
 
-prettifyStmt :: Stmt -> String
-prettifyStmt stmt = show stmt -- FIXME could be much prettier
+prettifyStmt :: Stmt -> Text
+prettifyStmt stmt = showt stmt -- FIXME could be much prettier

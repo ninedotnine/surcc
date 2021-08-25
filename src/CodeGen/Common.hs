@@ -13,4 +13,4 @@ import Data.Text (Text)
 type Generator a = WriterT Text (State Word) a
 
 newtype CIdentifier = CIdentifier Text
-                   deriving (Eq, Read, Show, Ord, IsString)
+                   deriving (Eq, Read, Ord, IsString)

@@ -30,18 +30,12 @@ import Parser.Expr.ExprTypes
 
 data BoundLocal = BoundLocal Identifier SoucType Mutability deriving Eq
 
-instance Show BoundLocal where
-    show (BoundLocal (Identifier i) t Mut) = Text.unpack ("Bound (mutable)" <> i <> ": ") ++ show t
-    show (BoundLocal (Identifier i) t Immut) = Text.unpack ("Bound " <> i <> ": ") ++ show t
-
-
 class ContextClass c where
     lookup :: c -> Identifier -> Maybe SoucType
 
-data ExportList = ExportList [Bound] deriving Show
+data ExportList = ExportList [Bound]
 data LocalScope = GlobalScope [Bound] ExportList
                 | InnerScope [BoundLocal] LocalScope
-                deriving Show
 
 -- instance ContextClass BuiltinsCtx where
 -- --     lookup (Builtins bounds) ident = lookup_b bounds ident
