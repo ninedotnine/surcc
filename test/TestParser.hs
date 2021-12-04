@@ -1,5 +1,7 @@
 module TestParser where
 
+import Data.Functor ((<&>))
+import Data.List (isSuffixOf)
 import qualified Data.Text.IO as Text
 import System.Directory
 import System.Exit (exitFailure, exitSuccess)
@@ -22,7 +24,7 @@ parse_invalid_dir = "test/parser.d/invalid/"
 main :: IO ()
 main = do
     putStr "=== testing parser... "
-    valid_files <- listDirectory parse_valid_dir
+    valid_files <- listDirectory parse_valid_dir <&> filter (isSuffixOf ".souc")
     mapM_ test_valid_file (map (parse_valid_dir <>) valid_files)
     putStrLn "=== all valid tests passed. testing bad parses..."
     invalid_files <- listDirectory parse_invalid_dir
