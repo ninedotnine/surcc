@@ -1,0 +1,10 @@
+; FIXME 
+; this should actually fail. 
+; `x` should be in the global scope
+; and not shadowable
+
+main() = do
+	x = 4
+	print x
+
+x = 3

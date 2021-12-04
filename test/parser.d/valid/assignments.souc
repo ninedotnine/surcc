@@ -1,0 +1,7 @@
+f(x) = do
+	y = 4
+	return x
+
+g(x) = do 
+	y = 5
+	return x

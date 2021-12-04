@@ -2,8 +2,8 @@ module Parser.Basics where
 
 import Control.Monad (when)
 -- import Data.Text (Text)
-import Data.List.NonEmpty ( NonEmpty(..) )
-import qualified Data.Map.Strict as Map (singleton, member, lookup)
+import Data.List.NonEmpty ( NonEmpty(..), cons )
+import qualified Data.Map.Strict as Map (empty, singleton, member, lookup)
 import Data.Maybe (isJust)
 import qualified Data.Text as Text
 import Text.Parsec hiding (space, spaces, string, newline)
@@ -34,10 +34,14 @@ pattern = do
     pure (Param name sig)
 
 increase_indent_level :: SouCParser ()
-increase_indent_level = modifyState (\(x,m) -> (x+1,m))
+increase_indent_level = modifyState (\(x,m) -> (x+1, cons Map.empty m))
 
 decrease_indent_level :: SouCParser ()
-decrease_indent_level = modifyState (\(x,m) -> (x-1,m))
+decrease_indent_level = modifyState dedent
+    where
+        dedent = \case
+            (x, _ :| (m:ms)) -> (x-1, m:|ms)
+            (_, _) -> error "should be impossible"
 
 indent_depth :: SouCParser ()
 indent_depth = do

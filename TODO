@@ -20,3 +20,6 @@
 [ ] top-level long procedures are assumed to be functions unless an IO signature is explicit
 [ ] module name needs to match filename
 [ ] shuntingyard stuff could probably use renaming. ASTree -> Expr_Tree ?
+[ ] populate global scope first, then subscopes
+        check test/parser.d/valid/bindings4.souc
+[ ] consider using TaggedList or TaggedVector or VectorSized instead of NonEmpty
