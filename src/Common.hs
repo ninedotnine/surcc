@@ -223,7 +223,7 @@ instance TextShow ImportDecl where
         RelImport name -> "rel import " <> showb name
 
 instance TextShow Stmts where
-    showb stmts = "Stmts: " <> showb stmts
+    showb (Stmts stmts) = "Stmts: " <> showb stmts
 
 instance TextShow TypeVar where
     showb = \case
