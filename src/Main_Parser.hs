@@ -42,7 +42,7 @@ parse_args args = if length args < 1
 
 render_error :: ParseError -> Text -> Text
 render_error err input =
-    error_start <> showt (show err) <> "\n" <> render_file_contents input
+    error_start <> Text.pack (show err) <> "\n" <> render_file_contents input
         where
           error_start =
             "-------------------- failed parse output:--------------------\n"
