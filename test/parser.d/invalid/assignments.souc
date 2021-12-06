@@ -1,0 +1,5 @@
+y = 3
+
+f(x) = do
+	y = 4
+	return x
