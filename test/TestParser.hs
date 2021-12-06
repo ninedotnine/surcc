@@ -27,7 +27,7 @@ main = do
     valid_files <- listDirectory parse_valid_dir <&> filter (isSuffixOf ".souc")
     mapM_ test_valid_file (map (parse_valid_dir <>) valid_files)
     putStrLn "=== all valid tests passed. testing bad parses..."
-    invalid_files <- listDirectory parse_invalid_dir
+    invalid_files <- listDirectory parse_invalid_dir <&> filter (isSuffixOf ".souc")
     mapM_ test_invalid_file (map (parse_invalid_dir <>) invalid_files)
 
 
