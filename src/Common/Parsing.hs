@@ -1,8 +1,6 @@
 module Common.Parsing (
     identifier_char,
     line_comment,
-    block_comment,
-    doc_comment,
     space,
     spaces,
     space_or_tab,
@@ -32,21 +30,9 @@ import Common (SoucKind(..), SoucType(..), Term(..))
 identifier_char :: Parsec Text s Char
 identifier_char = (alphaNum <|> char '_')
 
+
 line_comment :: Parsec Text s ()
 line_comment = try (skipMany space_or_tab *> char ';') *> manyTill anyChar newline *> pure () <?> ""
-
-block_comment :: Parsec Text s ()
-block_comment = try (string "{;" *> notFollowedBy (char '>')) *> block_comment_depth 1 *> endline <?> ""
-    where
-        nest n = string "{;" *> block_comment_depth n
-        end = string ";}" *> pure ()
-        block_comment_depth :: Integer -> Parsec Text s ()
-        block_comment_depth 1 = skipManyTill anyChar ((nest 2) <|> end)
-        block_comment_depth n = skipManyTill anyChar ((nest (n+1)) <|> end *> block_comment_depth (n-1))
-
-doc_comment :: Parsec Text s ()
-doc_comment = string "{;>" *> skipManyTill anyChar (string "<;}") *> endline *> optional endline <?> ""
-
 
 space :: Parsec Text s ()
 space = char ' ' *> pure () <?> ""
@@ -128,7 +114,7 @@ string :: String -> Parsec Text s Text
 string s = Text.pack <$> try (Text.Parsec.string s)
 
 endline :: Parsec Text s ()
-endline = skipMany space *> (line_comment <|> block_comment <|> newline) <?> "end-of-line"
+endline = skipMany space *> (line_comment <|> newline) <?> "end-of-line"
 
 optional_sig :: Parsec Text s (Maybe SoucType)
 optional_sig = optionMaybe type_signature
