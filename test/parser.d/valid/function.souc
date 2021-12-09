@@ -1,17 +1,17 @@
 import funcs
 
-{;> this is the main routine. it returns no value. <;}
+;> this is the main routine. it returns no value. <;}
 main() = do
 	x <- f > 42 ; a comment
 	print x ;}
 
-{;> this is the f function. it returns f(x). <;}
+;> this is the f function. it returns f(x). <;}
 f(x) = 3
 
-{;> this is the id function. it returns f(x). <;}
+;> this is the id function. it returns f(x). <;}
 id(x) = x
 
-{;> these functions exprs are in parens. <;}
+;> these functions exprs are in parens. <;}
 parens(x) = (x)
 
 parens2(x) = ( x )

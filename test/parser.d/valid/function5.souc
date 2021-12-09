@@ -2,6 +2,6 @@ main() = do
 	x = 42 & show
 	print x
 
-{;> this is the show function. it returns $(x). <;}
+;> this is the show function. it returns $(x).
 ; show(x) = $x
 show(x) = $x

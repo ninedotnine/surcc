@@ -1,11 +1,11 @@
 import funcs
 
-{;> this is the main routine. it returns no value. <;}
+;> this is the main routine. it returns no value.
 main() = do
 	x <- 42 & f & g ; a comment
 	print x ;}
 
-{;> this is the f function. it returns f(x). <;}
+;> this is the f function. it returns f(x).
 f(x) = 3 + 5*3
 
 g(x) = 9+2 * 4

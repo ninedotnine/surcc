@@ -11,13 +11,12 @@ import Text.Parsec hiding (space, spaces, string, parse)
 
 import Common
 import Parser.Common
-import Parser.Basics (pattern, optional_end_name, add_to_bindings, identifier)
+import Parser.Basics (pattern, end_block_named, add_to_bindings, identifier)
 import Common.Parsing
 import Parser.SouC_Expr  (Raw_Expr(..), raw_expr)
 import Parser.SouC_Stmts (stmt_block)
 import Parser.ExprParser (parse_expression)
 import Parser.TabChecker (check_tabs)
-
 
 parse :: SourceName -> (SoucModule, [ImportDecl], Text) -> Either ParseError ParseTree
 parse source_name ((SoucModule name exports), imps, input) = do
@@ -47,12 +46,11 @@ souCParser = do
 
 parseDefs :: SouCParser [Top_Level_Defn]
 parseDefs = do
-    defns <- many (parse_def <* many1 endline)
+    defns <- many (parse_def <* many endline)
     pure defns
 
 parse_def :: SouCParser Top_Level_Defn
 parse_def = do
-    optional doc_comment
     defn <- main_defn
             <|> top_level_const
             <|> top_level_proc
@@ -67,7 +65,7 @@ main_defn = do
     sig <- optionMaybe type_signature
     _ <- spaces <* char '=' <* spaces <* string "do" <* endline
     stmts <- stmt_block
-    optional_end_name (Identifier "main")
+    optional $ end_block_named (Identifier "main")
     add_to_bindings (Identifier "main") Immut
     pure $ MainDefn param sig stmts
 
@@ -77,6 +75,7 @@ top_level_const = do
     m_sig <- optional_sig
     _ <- spaces <* char '='
     Raw_Expr val <- spaces *> raw_expr
+    endline
     case parse_expression val of
         Right expr -> do
             add_to_bindings name Immut
@@ -109,7 +108,7 @@ short_top_level_func func_name param sig = do
 long_top_level_func :: Identifier -> Param -> Maybe SoucType -> SouCParser Top_Level_Defn
 long_top_level_func func_name param sig = do
     stmts <- string "do" *> endline *> stmt_block
-    optional_end_name func_name
+    optional $ end_block_named func_name
     add_to_bindings func_name Immut
     pure $ FuncDefn func_name param sig stmts
 
@@ -117,8 +116,8 @@ top_level_sub :: Identifier -> SouCParser Top_Level_Defn
 top_level_sub sub_name = do
     param <- optionMaybe pattern <* char ')'
     sig <- optionMaybe type_signature
-    _ <- spaces <* char '=' <* spaces <* string "do" <* endline
+    spaces *> char '=' *> spaces *> string "do" *> endline
     stmts <- stmt_block
-    optional_end_name sub_name
+    optional $ end_block_named sub_name
     add_to_bindings sub_name Immut
     pure $ SubDefn sub_name param sig stmts

@@ -1,0 +1,8 @@
+main() = do
+	if 85 do
+		print "hello"
+	print "whaw"
+	if "else" do
+		print "else"
+	end if
+end main

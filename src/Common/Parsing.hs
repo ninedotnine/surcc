@@ -47,7 +47,7 @@ ignore_spaces :: Parsec Text s ()
 ignore_spaces = skipMany (char ' ' <?> "")
 
 newline :: Parsec Text s ()
-newline = char '\n' *> pure () <?> "newline"
+newline = (char '\n' *> pure ()) <?> "newline"
 
 
 pragma :: Parsec Text s ()
@@ -56,12 +56,15 @@ pragma = string "{^;" *> space *> endBy1 (many1 alphaNum) space *> (string ";^}"
 skipManyTill :: Parsec Text s a -> Parsec Text s b -> Parsec Text s ()
 skipManyTill p1 p2 = manyTill p1 p2 *> pure ()
 
-reserved :: String -> Parsec Text s Text
-reserved s = string s <* notFollowedBy identifier_char
+reserved_specific :: String -> Parsec Text s Text
+reserved_specific s = string s <* notFollowedBy identifier_char
+
+reserved :: String -> Parsec Text s ()
+reserved s = reserved_specific s *> pure ()
 
 reserved_word :: Parsec Text s Text
 reserved_word =
-    choice (map reserved long_list) <?> "reserved word" where
+    choice (map reserved_specific long_list) <?> "reserved word" where
         long_list = [
             -- these are in use, or i expect will be soon
             "if", "unless", "else", "while", "until",

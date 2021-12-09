@@ -1,9 +1,18 @@
-module Parser.Basics where
+module Parser.Basics (
+    identifier,
+    pattern,
+    indentation,
+    add_to_bindings,
+    bindings_lookup,
+    optional_do,
+    end_block,
+    end_block_named,
+    Endable_Stmts(..),
+) where
 
 import Control.Monad (when)
--- import Data.Text (Text)
-import Data.List.NonEmpty ( NonEmpty(..), cons )
-import qualified Data.Map.Strict as Map (empty, singleton, member, lookup)
+import Data.List.NonEmpty ( NonEmpty(..) )
+import qualified Data.Map.Strict as Map (singleton, member, lookup)
 import Data.Maybe (isJust)
 import qualified Data.Text as Text
 import Text.Parsec hiding (space, spaces, string, newline)
@@ -17,14 +26,8 @@ data Endable_Stmts = Stmt_If_End | Stmt_While_End | Stmt_Unless_End | Stmt_Until
 blank_line :: SouCParser ()
 blank_line = try (skipMany space_or_tab *> newline)
 
-meaningless_fluff :: SouCParser ()
-meaningless_fluff = skipMany (line_comment <|> blank_line)
-
-double_newline :: SouCParser ()
-double_newline = lookAhead (newline *> newline) *> newline -- something like this?
-
 identifier :: SouCParser Identifier
-identifier = Identifier <$> raw_identifier
+identifier = Identifier <$> raw_identifier <?> "identifier"
 
 -- for pattern matching
 pattern :: SouCParser Param
@@ -33,21 +36,11 @@ pattern = do
     sig <- optionMaybe type_signature
     pure (Param name sig)
 
-increase_indent_level :: SouCParser ()
-increase_indent_level = modifyState (\(x,m) -> (x+1, cons Map.empty m))
 
-decrease_indent_level :: SouCParser ()
-decrease_indent_level = modifyState dedent
-    where
-        dedent = \case
-            (x, _ :| (m:ms)) -> (x-1, m:|ms)
-            (_, _) -> error "should be impossible"
-
-indent_depth :: SouCParser ()
-indent_depth = do
-    optional meaningless_fluff
+indentation :: SouCParser ()
+indentation = try $ do
     (level, _) <- getState
-    count level tab *> pure () <?> "indent"
+    count level tab *> pure () <?> "indentation"
 
 add_to_bindings :: Identifier -> Mutability -> SouCParser ()
 add_to_bindings key val = do
@@ -74,18 +67,20 @@ bindings_lookup i = do
 optional_do :: SouCParser ()
 optional_do = skipMany space *> optional (reserved "do") *> pure ()
 
-optional_end_name :: Identifier -> SouCParser ()
-optional_end_name (Identifier name) = do
-    optional (try (endline *> indent_depth *> reserved "end"))
-    optional (try (spaces *> string (Text.unpack name)))
 
-optional_end :: Endable_Stmts -> SouCParser String
-optional_end stmt_type = do
-    keyword <- optionMaybe (try (endline *> indent_depth *> reserved "end"))
-    name <- optionMaybe (try (spaces *> string word))
+end_block_named :: Identifier -> SouCParser ()
+end_block_named (Identifier name) = do
+    _ <- lookAhead (indentation *> reserved "end") *>
+            indentation *> reserved "end"
+    optional (try (spaces *> string (Text.unpack name)))
+    endline
+
+end_block :: Endable_Stmts -> SouCParser ()
+end_block stmt_type = do
+    try (indentation *> reserved "end")
+    optional (try (spaces *> string word))
     -- FIXME also allow type annotation here
-    lookAhead endline
-    pure (show keyword ++ " " ++ word ++ " " ++ show name)
+    endline
         where word = case stmt_type of
                 Stmt_While_End -> "while" :: String
                 Stmt_If_End -> "if"
