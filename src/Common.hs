@@ -45,7 +45,7 @@ import qualified Data.Text as Text
 import TextShow (TextShow(..))
 import qualified TextShow
 
-data Mutability = Mut | Immut deriving (Eq)
+data Mutability = Mut | Immut deriving (Eq, Show)
 
 newtype Identifier = Identifier Text
                    deriving (Eq, Read, Ord, IsString, Semigroup, Hashable)
@@ -62,19 +62,19 @@ data ImportDecl = LibImport Text | RelImport Text deriving Read
 type Imports = [ImportDecl]
 type Body = [Top_Level_Defn]
 
-newtype Stmts = Stmts [Stmt] deriving Eq
+newtype Stmts = Stmts [Stmt] deriving (Eq, Show)
 
-newtype SoucKind = SoucKind Word deriving (Eq, Ord)
+newtype SoucKind = SoucKind Word deriving (Eq, Ord, Show)
 
 -- allowed type names are single chars like 'A'
 -- or 'T' followed by an increasing number (T0, T1, ...)
-data TypeVar = TypeVar (Either Word Char) SoucKind deriving (Eq, Ord)
+data TypeVar = TypeVar (Either Word Char) SoucKind deriving (Eq, Ord, Show)
 
 data SoucType = SoucType Text SoucKind
               | SoucTypeConstructor Text SoucKind [SoucType]
               | SoucTypeVar TypeVar
 --               | SoucConstrainedType Constraint SoucType
-              deriving (Eq)
+              deriving (Eq,Show)
 
 -- data Constraint = Instance Text SoucType deriving (Eq)
 
@@ -120,7 +120,7 @@ data TypeError = TypeMismatch SoucType SoucType
                | ExportedButNotDefined Bound
     deriving (Eq)
 
-data Param = Param Identifier (Maybe SoucType) deriving Eq
+data Param = Param Identifier (Maybe SoucType) deriving (Eq, Show)
 
 
 data Top_Level_Defn = Top_Level_Const_Defn Identifier (Maybe SoucType) ASTree
@@ -128,7 +128,7 @@ data Top_Level_Defn = Top_Level_Const_Defn Identifier (Maybe SoucType) ASTree
                     | ShortFuncDefn Identifier Param (Maybe SoucType) ASTree
                     | SubDefn Identifier (Maybe Param) (Maybe SoucType) Stmts
                     | MainDefn (Maybe Param) (Maybe SoucType) Stmts
-                    deriving Eq
+                    deriving (Eq, Show)
 
 data Stmt = Stmt_While ASTree Stmts
           | Stmt_Until ASTree Stmts
@@ -140,13 +140,13 @@ data Stmt = Stmt_While ASTree Stmts
           | Stmt_Var_Assign Identifier (Maybe SoucType) ASTree
           | Stmt_Var_Reassign Identifier ASTree
           | Stmt_Return (Maybe ASTree)
-          deriving Eq
+          deriving (Eq, Show)
 
 data ASTree = Branch Operator ASTree ASTree
             | Twig PrefixOperator ASTree
             | Signed ASTree SoucType
             | Leaf Term
-         deriving Eq
+         deriving (Eq, Show)
 
 
 data Term = LitInt Integer
@@ -154,7 +154,7 @@ data Term = LitInt Integer
           | LitString Text
           | Var Identifier
           | Constructor Text
-    deriving Eq
+    deriving (Eq, Show)
 
 data Operator = Plus
               | Minus
@@ -198,7 +198,7 @@ data PrefixOperator = Deref
                     | ToString
                     | Pure
                     | Join
-                    deriving Eq
+                    deriving (Eq, Show)
 
 instance TextShow Identifier where
     showb (Identifier i) = TextShow.fromText i
