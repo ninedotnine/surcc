@@ -1,2 +1,2 @@
-f(n: Integer): Integer = do
+f(n: Integer): Integer = fndo
 	return

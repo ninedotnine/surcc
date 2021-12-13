@@ -12,6 +12,6 @@ end
 
 cool_fn(x: Integer): Integer = x + (1: Integer)
 
-cool_fn2(x: Integer): Integer = do
+cool_fn2(x: Integer): Integer = fndo
 	return x: Integer
 end

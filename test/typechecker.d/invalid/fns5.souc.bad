@@ -1,4 +1,4 @@
 f(x: Integer): Char = 'a'
 
-g(x: Integer): Char = do
+g(x: Integer): Char = fndo
 	return 'a' & f

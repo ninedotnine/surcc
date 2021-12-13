@@ -1,4 +1,4 @@
-f(x: Integer): Integer = do
+f(x: Integer): Integer = fndo
 	if "what, a string?"
 		return 3
 	return 3

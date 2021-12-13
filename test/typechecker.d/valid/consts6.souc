@@ -2,5 +2,5 @@ n = 5
 
 plus_n(x: Integer): Integer = x + n
 
-f(x: Integer): Integer = do
+f(x: Integer): Integer = fndo
 	return x

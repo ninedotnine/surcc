@@ -1,6 +1,6 @@
 n = 5
 
-f(x: Integer): Integer = do
+f(x: Integer): Integer = fndo
 	if 4
 		return 3
 	return 3

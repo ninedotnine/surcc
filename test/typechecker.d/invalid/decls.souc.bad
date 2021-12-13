@@ -1,4 +1,4 @@
-f(x: Integer): Integer = do
+f(x: Integer): Integer = fndo
 	i: Integer <- 5
 	return i
 

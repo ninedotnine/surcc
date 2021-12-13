@@ -2,7 +2,7 @@ n = 5
 
 ; silly, but the types are ok.
 
-f(x: Integer): Integer = do
+f(x: Integer): Integer = fndo
 	if True
 		return 3
 	else
@@ -10,7 +10,7 @@ f(x: Integer): Integer = do
 	until False
 		return n
 
-g(x: Integer): Integer = do
+g(x: Integer): Integer = fndo
 	while False
 		return n+1
 	unless True

@@ -2,6 +2,6 @@ n = 5
 
 ; silly, but the types are ok.
 
-f(x: Integer): Integer = do
+f(x: Integer): Integer = fndo
 	i: Integer <- x
 	return x

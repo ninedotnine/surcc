@@ -1,5 +1,5 @@
 ; silly, but the types are ok.
-f(x: Integer): Integer = do
+f(x: Integer): Integer = fndo
 	b = True
 	b2 = b
 	b3 <- b2

@@ -87,14 +87,16 @@ top_level_proc :: SouCParser TopLevelDefn
 top_level_proc = do
     proc_name <- try (identifier <* char '(')
     add_to_bindings proc_name Immut
-    name <- (try (top_level_func proc_name) <|> top_level_sub proc_name)
+    name <- top_level_func proc_name <|> top_level_sub proc_name
     pure name
 
 top_level_func :: Identifier -> SouCParser TopLevelDefn
 top_level_func func_name = do
-    p <- param <* char ')' <* notFollowedBy (char ':' *> spaces *> string "IO")
-    sig <- optionMaybe type_signature
-    _ <- spaces <* char '=' <* spaces
+    (p, sig) <- try $ do
+        p' <- (param <* char ')')
+        sig' <- optionMaybe type_signature
+        spaces *> char '=' *> spaces *> notFollowedBy (string "do")
+        pure (p', sig')
     long_top_level_func func_name p sig <|> short_top_level_func func_name p sig
 
 short_top_level_func :: Identifier -> Param -> Maybe SoucType -> SouCParser TopLevelDefn
@@ -108,7 +110,7 @@ short_top_level_func func_name p sig = do
 
 long_top_level_func :: Identifier -> Param -> Maybe SoucType -> SouCParser TopLevelDefn
 long_top_level_func func_name p sig = do
-    string "do" *> endline
+    string "fndo" *> endline
     stmts <- stmt_block_with_param (Just p)
     optional $ end_block_named func_name
     pure $ FuncDefn func_name p sig stmts

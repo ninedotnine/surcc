@@ -1,2 +1,2 @@
-g(x) = do 
+g(x) = fndo
 	return x
