@@ -13,7 +13,7 @@ module Parser.Expr.ExprParser (
     Term(..),
     Operator(..),
     PrefixOperator(..),
-    Raw_Expr(..),
+    RawExpr(..),
 ) where
 
 
@@ -37,7 +37,7 @@ import Parser.Expr.Types
 import Parser.Expr.RegardingSpaces
 import Parser.Expr.Terms
 import Parser.Expr.Opers
-import Parser.Expr.Raw  (raw_expr)
+import Parser.Expr.Raw  (RawExpr)
 
 import Common
 import Common.Parsing (type_name, upper_name, optional_sig)
@@ -115,8 +115,8 @@ finish_expr = do
         _ -> Parsec.parserFail "invalid expression, something is wrong here."
 
 
-parse_expression :: Raw_Expr -> Either Parsec.ParseError ASTree
-parse_expression (Raw_Expr input) =
+parse_expression :: RawExpr -> Either Parsec.ParseError ASTree
+parse_expression (RawExpr input) =
     Parsec.runParser parse_term start_state "input" (trim_spaces input)
     where
         start_state = (Oper_Stack [], Tree_Stack [], Tight False)
@@ -126,7 +126,7 @@ parse_expression (Raw_Expr input) =
 -- these are little utilities, unrelated to parsing, mostly for testing
 
 parse_print_expression :: Text -> IO ()
-parse_print_expression input = case parse_expression (Raw_Expr input) of
+parse_print_expression input = case parse_expression (RawExpr input) of
         Left err -> putStrLn (show err)
         Right tree -> printT tree
 
@@ -167,6 +167,6 @@ eval_show_astree :: ASTree -> String
 eval_show_astree = evaluate_astree <&> show
 
 parse_eval_print_expression :: Text -> IO ()
-parse_eval_print_expression input = case parse_expression (Raw_Expr input) of
+parse_eval_print_expression input = case parse_expression (RawExpr input) of
     Left err -> putStrLn (show err)
     Right tree -> putStrLn (eval_show_astree tree)

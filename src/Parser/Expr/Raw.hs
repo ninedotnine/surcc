@@ -1,5 +1,5 @@
 module Parser.Expr.Raw (
-    Raw_Expr(..),
+    RawExpr(..),
     raw_expr,
     run_raw_expr_parser,
     postfix_oper -- fixme why is this in this module?
@@ -16,7 +16,7 @@ import qualified Data.Text as Text
 
 import Parser.Common
 import Common.Parsing
-import Parser.Expr.Types (Raw_Expr(..))
+import Parser.Expr.Types (RawExpr(..))
 
 run_raw_expr_parser :: Text -> Text
 run_raw_expr_parser input = let empty_state = (0, Map.empty :| []) in
@@ -24,11 +24,8 @@ run_raw_expr_parser input = let empty_state = (0, Map.empty :| []) in
         Left err -> "error: " <> Text.pack (show err)
         Right r -> Text.pack (show r)
 
-raw_expr :: SouCParser Raw_Expr
--- raw_expr = Raw_Expr $ Text.pack <$> dumb_raw_expr
-raw_expr = do
-    s <- dumb_raw_expr
-    pure $ Raw_Expr $ Text.pack s
+raw_expr :: SouCParser RawExpr
+raw_expr = RawExpr <$> Text.pack <$> dumb_raw_expr
 
  -- FIXME eventually this must skip newlines when inside parens, brackets, braces
 dumb_raw_expr :: SouCParser String

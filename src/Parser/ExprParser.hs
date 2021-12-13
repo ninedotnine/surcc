@@ -9,7 +9,7 @@ module Parser.ExprParser (
     Term(..),
     Operator(..),
     PrefixOperator(..),
-    Raw_Expr(..),
+    RawExpr(..),
 ) where
 
 import Parser.Expr.ExprParser

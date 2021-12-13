@@ -14,7 +14,7 @@ module Parser.Expr.Types (
     Tree_Stack(..),
     Tightness(..),
     Stack_State,
-    Raw_Expr(..),
+    RawExpr(..),
 ) where
 
 import Data.Text (Text)
@@ -23,7 +23,7 @@ import qualified Text.Parsec as Parsec
 
 import Common
 
-data Raw_Expr = Raw_Expr Text deriving (Read, Show)
+data RawExpr = RawExpr Text deriving (Read, Show)
 
 newtype Precedence = Precedence Word8 deriving (Eq, Ord)
 
