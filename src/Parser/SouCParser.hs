@@ -18,10 +18,10 @@ import Parser.SouC_Stmts (stmt_block)
 import Parser.ExprParser (parse_expression)
 import Parser.TabChecker (check_tabs)
 
-parse :: SourceName -> (SoucModule, [ImportDecl], Text) -> Either ParseError ParseTree
-parse source_name ((SoucModule name exports), imps, input) = do
+parse :: SourceName -> (SoucModule, [ImportDecl], Text, SourcePos) -> Either ParseError ParseTree
+parse source_name ((SoucModule name exports), imps, input, pos) = do
     check_tabs source_name input
-    body <- runParser souCParser (start_state name imps) source_name input
+    body <- runParser (souCParser pos) (start_state name imps) source_name input
     pure $ ParseTree (SoucModule name exports) imps body
 
 
@@ -37,8 +37,9 @@ start_state name imps = (0, binds:|[])
         ids = (Identifier name) : map make_identifier imps
 
 
-souCParser :: SouCParser [Top_Level_Defn]
-souCParser = do
+souCParser :: SourcePos -> SouCParser [Top_Level_Defn]
+souCParser pos = do
+    setPosition pos
     _ <- many (pragma) *> skipMany endline -- FIXME do something with pragmas
     code <- parseDefs
     eof

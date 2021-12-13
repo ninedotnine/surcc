@@ -21,17 +21,18 @@ type HeaderParser a = Parsec Text [ImportDecl] a
 add_to_imports :: ImportDecl -> HeaderParser ()
 add_to_imports name = modifyState (\l -> name:l)
 
-parse_module_header :: SourceName -> Text -> Either ParseError (SoucModule, [ImportDecl], Text)
+parse_module_header :: SourceName -> Text -> Either ParseError (SoucModule, [ImportDecl], Text, SourcePos)
 parse_module_header name input = runParser module_header_and_imports [] name input
 
-module_header_and_imports :: HeaderParser (SoucModule, [ImportDecl], Text)
+module_header_and_imports :: HeaderParser (SoucModule, [ImportDecl], Text, SourcePos)
 module_header_and_imports = do
     m_header <- optionMaybe module_header
 
     _ <- many (pragma) *> skipMany endline -- FIXME do something with pragmas
     imps <- import_list
     rest <- getInput
-    pure (spoof_module m_header, imps, rest)
+    pos <- getPosition
+    pure (spoof_module m_header, imps, rest, pos)
 
 spoof_module :: Maybe SoucModule -> SoucModule
 spoof_module = \case
