@@ -11,7 +11,7 @@ import Text.Parsec hiding (space, spaces, string, parse)
 
 import Common
 import Parser.Common
-import Parser.Basics (pattern, end_block_named, add_to_bindings, identifier)
+import Parser.Basics (param, end_block_named, add_to_bindings, identifier)
 import Common.Parsing
 import Parser.Expr.Raw  (raw_expr)
 import Parser.SouC_Stmts (stmt_block, stmt_block_with_param)
@@ -63,12 +63,12 @@ main_defn :: SouCParser TopLevelDefn
 main_defn = do
     _ <- string "main("
     add_to_bindings (Identifier "main") Immut
-    param <- optionMaybe pattern <* char ')'
+    p <- optionMaybe param <* char ')'
     sig <- optionMaybe type_signature
     _ <- spaces <* char '=' <* spaces <* string "do" <* endline
     stmts <- stmt_block
     optional $ end_block_named (Identifier "main")
-    pure $ MainDefn param sig stmts
+    pure $ MainDefn p sig stmts
 
 top_level_const :: SouCParser TopLevelDefn
 top_level_const = do
@@ -92,32 +92,32 @@ top_level_proc = do
 
 top_level_func :: Identifier -> SouCParser TopLevelDefn
 top_level_func func_name = do
-    param <- pattern <* char ')' <* notFollowedBy (char ':' *> spaces *> string "IO")
+    p <- param <* char ')' <* notFollowedBy (char ':' *> spaces *> string "IO")
     sig <- optionMaybe type_signature
     _ <- spaces <* char '=' <* spaces
-    long_top_level_func func_name param sig <|> short_top_level_func func_name param sig
+    long_top_level_func func_name p sig <|> short_top_level_func func_name p sig
 
 short_top_level_func :: Identifier -> Param -> Maybe SoucType -> SouCParser TopLevelDefn
-short_top_level_func func_name param sig = do
+short_top_level_func func_name p sig = do
     body <- raw_expr
     case parse_expression body of
         Right result -> do
-            pure $ ShortFuncDefn func_name param sig result
+            pure $ ShortFuncDefn func_name p sig result
 --         Left parse_err -> mergeError (fail "invalid expression") parse_err
         Left err -> fail $ "invalid expression\n" ++ show err
 
 long_top_level_func :: Identifier -> Param -> Maybe SoucType -> SouCParser TopLevelDefn
-long_top_level_func func_name param sig = do
+long_top_level_func func_name p sig = do
     string "do" *> endline
-    stmts <- stmt_block_with_param (Just param)
+    stmts <- stmt_block_with_param (Just p)
     optional $ end_block_named func_name
-    pure $ FuncDefn func_name param sig stmts
+    pure $ FuncDefn func_name p sig stmts
 
 top_level_sub :: Identifier -> SouCParser TopLevelDefn
 top_level_sub sub_name = do
-    param <- optionMaybe pattern <* char ')'
+    p <- optionMaybe param <* char ')'
     sig <- optionMaybe type_signature
     spaces *> char '=' *> spaces *> string "do" *> endline
-    stmts <- stmt_block_with_param param
+    stmts <- stmt_block_with_param p
     optional $ end_block_named sub_name
-    pure $ SubDefn sub_name param sig stmts
+    pure $ SubDefn sub_name p sig stmts

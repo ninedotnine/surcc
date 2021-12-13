@@ -1,6 +1,6 @@
 module Parser.Basics (
     identifier,
-    pattern,
+    param,
     indentation,
     add_to_bindings,
     bindings_lookup,
@@ -29,9 +29,9 @@ blank_line = try (skipMany space_or_tab *> newline)
 identifier :: SouCParser Identifier
 identifier = Identifier <$> raw_identifier <?> "identifier"
 
--- for pattern matching
-pattern :: SouCParser Param
-pattern = do
+-- a param might have a type sig
+param :: SouCParser Param
+param = do
     name <- identifier
     sig <- optionMaybe type_signature
     pure (Param name sig)
