@@ -13,7 +13,7 @@ import Common
 import Parser.Common
 import Parser.Basics (pattern, end_block_named, add_to_bindings, identifier)
 import Common.Parsing
-import Parser.SouC_Expr  (Raw_Expr(..), raw_expr)
+import Parser.Expr.Raw  (raw_expr)
 import Parser.SouC_Stmts (stmt_block, stmt_block_with_param)
 import Parser.ExprParser (parse_expression)
 import Parser.TabChecker (check_tabs)
@@ -76,7 +76,7 @@ top_level_const = do
     add_to_bindings name Immut
     m_sig <- optional_sig
     _ <- spaces <* char '='
-    Raw_Expr val <- spaces *> raw_expr
+    val <- spaces *> raw_expr
     endline
     case parse_expression val of
         Right expr -> do
@@ -99,7 +99,7 @@ top_level_func func_name = do
 
 short_top_level_func :: Identifier -> Param -> Maybe SoucType -> SouCParser Top_Level_Defn
 short_top_level_func func_name param sig = do
-    (Raw_Expr body) <- raw_expr
+    body <- raw_expr
     case parse_expression body of
         Right result -> do
             pure $ ShortFuncDefn func_name param sig result

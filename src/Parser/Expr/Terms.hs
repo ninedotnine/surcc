@@ -11,7 +11,7 @@ import Text.Parsec ((<|>), (<?>))
 import Common
 import Common.Parsing
 
-import Parser.Expr.ExprTypes
+import Parser.Expr.Types
 import Parser.Expr.RegardingSpaces
 
 parse_term_token :: ShuntingYardParser TermToken

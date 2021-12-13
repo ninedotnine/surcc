@@ -1,6 +1,5 @@
 {-# OPTIONS_GHC -Wno-unused-matches  #-}
 
-
 module TypeChecker.Statements (
     check_stmts,
     infer_stmts,
@@ -15,7 +14,6 @@ import Data.Traversable
 import Prelude hiding (lookup)
 
 import Common
-import Parser.Expr.ExprTypes
 
 import TypeChecker.Context
 import TypeChecker.Operators

@@ -1,5 +1,3 @@
-{-# LANGUAGE PatternSynonyms #-}
-
 module TypeChecker.Expressions (
     infer,
     check_astree,
@@ -12,7 +10,6 @@ import Control.Monad.State
 
 import Prelude hiding (lookup)
 import Common
-import Parser.Expr.ExprTypes
 import TypeChecker.Context
 import TypeChecker.Operators
 

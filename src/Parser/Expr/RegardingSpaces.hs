@@ -15,7 +15,7 @@ import Control.Monad (when)
 import qualified Text.Parsec as Parsec
 import Text.Parsec ((<|>), (<?>))
 
-import Parser.Expr.ExprTypes
+import Parser.Expr.Types
 
 get_tightness :: ShuntingYardParser Tightness
 get_tightness = do

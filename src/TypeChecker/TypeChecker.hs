@@ -16,12 +16,9 @@ import qualified Data.Text as Text
 
 import Prelude hiding (lookup)
 import Common
-import Parser.Expr.ExprTypes
 import TypeChecker.Context
-import TypeChecker.Operators
 import TypeChecker.Expressions
 import TypeChecker.Statements
-import TypeChecker.TypeVariables
 
 type_check :: ParseTree -> Either TypeError CheckedProgram
 type_check (ParseTree module_info imports defns) = do

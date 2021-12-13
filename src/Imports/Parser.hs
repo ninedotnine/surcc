@@ -9,10 +9,6 @@ import qualified Text.Parsec (string)
 
 import Common
 import Common.Parsing
-import Parser.SouC_Expr  (Raw_Expr(..), raw_expr)
-import Parser.SouC_Stmts (stmt_block)
-import Parser.ExprParser (parse_expression)
-import Parser.TabChecker (check_tabs)
 
 import Debug.Trace
 

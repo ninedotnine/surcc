@@ -1,5 +1,3 @@
-{-# LANGUAGE PatternSynonyms #-}
-
 module TypeChecker.Operators (
     in_t,
     ret_t,
@@ -13,7 +11,6 @@ import Data.Text (Text)
 import qualified Data.Text as Text
 
 import Common
-import Parser.Expr.ExprTypes
 import TypeChecker.Context
 
 newtype InputType  = InputType SoucType

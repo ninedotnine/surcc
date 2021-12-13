@@ -1,5 +1,5 @@
 -- all the types needed to implement shunting yard
-module Parser.Expr.ExprTypes (
+module Parser.Expr.Types (
     ShuntingYardParser,
     ASTree(..),
     Term(..),
@@ -14,6 +14,7 @@ module Parser.Expr.ExprTypes (
     Tree_Stack(..),
     Tightness(..),
     Stack_State,
+    Raw_Expr(..),
 ) where
 
 import Data.Text (Text)
@@ -21,6 +22,8 @@ import Data.Word (Word8)
 import qualified Text.Parsec as Parsec
 
 import Common
+
+data Raw_Expr = Raw_Expr Text deriving (Read, Show)
 
 newtype Precedence = Precedence Word8 deriving (Eq, Ord)
 

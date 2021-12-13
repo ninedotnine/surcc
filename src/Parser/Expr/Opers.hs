@@ -6,7 +6,7 @@ module Parser.Expr.Opers (
 import qualified Text.Parsec as Parsec
 import Text.Parsec ((<|>), (<?>))
 
-import Parser.Expr.ExprTypes
+import Parser.Expr.Types
 import Parser.Expr.RegardingSpaces
 import Parser.Expr.StackManipulations
 

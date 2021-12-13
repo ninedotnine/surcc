@@ -1,4 +1,3 @@
-{-# OPTIONS_GHC -Wall #-}
 module Main_Expr where
 
 import Control.Monad (unless)
@@ -35,7 +34,7 @@ pepe line = unless (Text.all isSpace line) (parse_eval_print_expression line)
 parse_stdin :: IO ()
 parse_stdin = do
     input <- getContents
-    case parse_expression (Text.pack input) of
+    case parse_expression (Raw_Expr (Text.pack input)) of
         Left err -> putStrLn (show err) >> exitFailure
         Right tree -> putStrLn (eval_show_astree tree) >> exitSuccess
 

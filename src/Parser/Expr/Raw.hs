@@ -1,4 +1,4 @@
-module Parser.SouC_Expr (
+module Parser.Expr.Raw (
     Raw_Expr(..),
     raw_expr,
     run_raw_expr_parser,
@@ -16,9 +16,7 @@ import qualified Data.Text as Text
 
 import Parser.Common
 import Common.Parsing
-import Parser.Basics
-
-data Raw_Expr = Raw_Expr Text deriving (Read, Show)
+import Parser.Expr.Types (Raw_Expr(..))
 
 run_raw_expr_parser :: Text -> Text
 run_raw_expr_parser input = let empty_state = (0, Map.empty :| []) in

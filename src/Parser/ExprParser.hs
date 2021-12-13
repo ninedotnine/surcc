@@ -8,7 +8,8 @@ module Parser.ExprParser (
     ASTree(..),
     Term(..),
     Operator(..),
-    PrefixOperator(..)
-    ) where
+    PrefixOperator(..),
+    Raw_Expr(..),
+) where
 
 import Parser.Expr.ExprParser

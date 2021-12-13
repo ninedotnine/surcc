@@ -15,7 +15,7 @@ module Parser.Expr.StackManipulations (
 
 import qualified Text.Parsec as Parsec
 
-import Parser.Expr.ExprTypes
+import Parser.Expr.Types
 import Parser.Expr.RegardingSpaces
 
 import Common (SoucType)

@@ -15,7 +15,6 @@ module TypeChecker.Context (
 ) where
 
 import Prelude hiding (lookup)
-import Control.Monad.Except
 import Control.Monad.State
 import Control.Monad.Trans.Except
 
@@ -24,8 +23,6 @@ import qualified Data.Text as Text
 
 import Common
 import Builtins (typeof_builtin_identifier)
-
-import Parser.Expr.ExprTypes
 
 
 data BoundLocal = BoundLocal Identifier SoucType Mutability deriving Eq
