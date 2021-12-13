@@ -50,31 +50,31 @@ add_imports imports ctx = Right $ GlobalScope (map make_import_bound (map from_i
         make_import_bound s = Bound (Identifier s) (SoucType "Module" (SoucKind 0))
 
 
-add_globals :: LocalScope -> [Top_Level_Defn] -> Either TypeError LocalScope
+add_globals :: LocalScope -> [TopLevelDefn] -> Either TypeError LocalScope
 add_globals imports_ctx defns =
     case runState (runExceptT (run_globals defns)) imports_ctx of
         (Right (), ctx) -> Right ctx
         (Left e, _) -> Left e
 
-run_globals :: [Top_Level_Defn] -> Checker ()
+run_globals :: [TopLevelDefn] -> Checker ()
 run_globals defns = mapM_ add_top_level_defns defns
 
-add_top_level_defns :: Top_Level_Defn -> Checker ()
+add_top_level_defns :: TopLevelDefn -> Checker ()
 add_top_level_defns = \case
-    Top_Level_Const_Defn i m_t expr -> add_top_level_const i m_t expr
+    TopLevelConstDefn i m_t expr -> add_top_level_const i m_t expr
     FuncDefn i p m_t stmts -> add_top_level_long_fn i p m_t stmts
     ShortFuncDefn i p m_t expr -> add_top_level_short_fn i p m_t expr
     SubDefn i m_p m_t stmts -> add_top_level_sub i m_p m_t stmts
     MainDefn m_p m_t stmts -> add_main_routine m_p m_t stmts
 
 
-add_top_level_const :: Identifier -> Maybe SoucType -> ASTree -> Checker ()
+add_top_level_const :: Identifier -> Maybe SoucType -> ExprTree -> Checker ()
 add_top_level_const i m_t expr = do
     t <- infer_if_needed m_t expr
     add_potential_export (Bound i t)
 
 
-add_top_level_short_fn :: Identifier -> Param -> Maybe SoucType -> ASTree -> Checker ()
+add_top_level_short_fn :: Identifier -> Param -> Maybe SoucType -> ExprTree -> Checker ()
 add_top_level_short_fn i p m_t expr = do
     case p of
         Param _ Nothing -> error "FIXME type inference"

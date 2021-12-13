@@ -37,7 +37,7 @@ start_state name imps = (0, binds:|[])
         ids = (Identifier name) : map make_identifier imps
 
 
-souCParser :: SourcePos -> SouCParser [Top_Level_Defn]
+souCParser :: SourcePos -> SouCParser [TopLevelDefn]
 souCParser pos = do
     setPosition pos
     _ <- many (pragma) *> skipMany endline -- FIXME do something with pragmas
@@ -45,12 +45,12 @@ souCParser pos = do
     eof
     pure $ code
 
-parseDefs :: SouCParser [Top_Level_Defn]
+parseDefs :: SouCParser [TopLevelDefn]
 parseDefs = do
     defns <- many (parse_def <* many endline)
     pure defns
 
-parse_def :: SouCParser Top_Level_Defn
+parse_def :: SouCParser TopLevelDefn
 parse_def = do
     defn <- main_defn
             <|> top_level_const
@@ -59,7 +59,7 @@ parse_def = do
             <?> "top-level definition"
     pure defn
 
-main_defn :: SouCParser Top_Level_Defn
+main_defn :: SouCParser TopLevelDefn
 main_defn = do
     _ <- string "main("
     add_to_bindings (Identifier "main") Immut
@@ -70,7 +70,7 @@ main_defn = do
     optional $ end_block_named (Identifier "main")
     pure $ MainDefn param sig stmts
 
-top_level_const :: SouCParser Top_Level_Defn
+top_level_const :: SouCParser TopLevelDefn
 top_level_const = do
     name <- try (identifier <* lookAhead (char ':' <|> char ' '))
     add_to_bindings name Immut
@@ -80,24 +80,24 @@ top_level_const = do
     endline
     case parse_expression val of
         Right expr -> do
-            pure $ Top_Level_Const_Defn name m_sig expr
+            pure $ TopLevelConstDefn name m_sig expr
         Left err -> parserFail $ "invalid expression:\n" ++ show err
 
-top_level_proc :: SouCParser Top_Level_Defn
+top_level_proc :: SouCParser TopLevelDefn
 top_level_proc = do
     proc_name <- try (identifier <* char '(')
     add_to_bindings proc_name Immut
     name <- (try (top_level_func proc_name) <|> top_level_sub proc_name)
     pure name
 
-top_level_func :: Identifier -> SouCParser Top_Level_Defn
+top_level_func :: Identifier -> SouCParser TopLevelDefn
 top_level_func func_name = do
     param <- pattern <* char ')' <* notFollowedBy (char ':' *> spaces *> string "IO")
     sig <- optionMaybe type_signature
     _ <- spaces <* char '=' <* spaces
     long_top_level_func func_name param sig <|> short_top_level_func func_name param sig
 
-short_top_level_func :: Identifier -> Param -> Maybe SoucType -> SouCParser Top_Level_Defn
+short_top_level_func :: Identifier -> Param -> Maybe SoucType -> SouCParser TopLevelDefn
 short_top_level_func func_name param sig = do
     body <- raw_expr
     case parse_expression body of
@@ -106,14 +106,14 @@ short_top_level_func func_name param sig = do
 --         Left parse_err -> mergeError (fail "invalid expression") parse_err
         Left err -> fail $ "invalid expression\n" ++ show err
 
-long_top_level_func :: Identifier -> Param -> Maybe SoucType -> SouCParser Top_Level_Defn
+long_top_level_func :: Identifier -> Param -> Maybe SoucType -> SouCParser TopLevelDefn
 long_top_level_func func_name param sig = do
     string "do" *> endline
     stmts <- stmt_block_with_param (Just param)
     optional $ end_block_named func_name
     pure $ FuncDefn func_name param sig stmts
 
-top_level_sub :: Identifier -> SouCParser Top_Level_Defn
+top_level_sub :: Identifier -> SouCParser TopLevelDefn
 top_level_sub sub_name = do
     param <- optionMaybe pattern <* char ')'
     sig <- optionMaybe type_signature

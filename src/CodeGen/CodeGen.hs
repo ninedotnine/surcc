@@ -15,9 +15,9 @@ import Common (
     Identifier(..),
     Stmts(..),
     CheckedProgram(..),
-    Top_Level_Defn(..)
+    TopLevelDefn(..)
     )
-import Parser.ExprParser
+import Parser.ExprParser (ExprTree)
 
 import Control.Monad.State (evalState)
 import Control.Monad.Writer (execWriterT, tell)
@@ -36,18 +36,18 @@ class Genny a b | a -> b where
 instance Genny Identifier CIdentifier where
     gen = pure . generate_identifier
 
-instance Genny ASTree (Text,Text) where
+instance Genny ExprTree (Text,Text) where
     gen = generate_expr
 
-instance Genny (Maybe ASTree) (Text,Text) where
+instance Genny (Maybe ExprTree) (Text,Text) where
     gen = maybe (pure ("","")) gen
 
-instance Genny [Top_Level_Defn] () where
+instance Genny [TopLevelDefn] () where
     gen tree = traverse_ gen tree
 
-instance Genny Top_Level_Defn () where
+instance Genny TopLevelDefn () where
     gen = \case
-        Top_Level_Const_Defn name _ expr -> do
+        TopLevelConstDefn name _ expr -> do
             (CIdentifier n) <- gen name
             (decls, e) <- gen expr
             tell $ decls <> "const union _souc_obj " <> n <> " = " <> e <> ";\n"

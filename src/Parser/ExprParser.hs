@@ -5,7 +5,7 @@ module Parser.ExprParser (
 --     evaluate_astree,
     eval_show_astree,
     parse_eval_print_expression,
-    ASTree(..),
+    ExprTree(..),
     Term(..),
     Operator(..),
     PrefixOperator(..),

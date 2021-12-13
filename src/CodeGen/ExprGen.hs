@@ -4,7 +4,7 @@ module CodeGen.ExprGen (
 ) where
 
 import Parser.ExprParser (
-    ASTree(..),
+    ExprTree(..),
     Term(..),
     Operator(..),
     PrefixOperator(..)
@@ -23,7 +23,7 @@ import qualified Data.Text as Text
 
 
 
-generate_expr :: ASTree -> Generator (Text,Text)
+generate_expr :: ExprTree -> Generator (Text,Text)
 generate_expr (Leaf e) = (,) "" <$> generate_term e
 generate_expr (Signed e _) = generate_expr e
 generate_expr (Twig op e) = do
@@ -67,19 +67,19 @@ generate_expr (Branch op x y) = case op of
     BindRight         ->  undefined
     BindLeft          ->  undefined
 
-gen_apply :: ASTree -> ASTree -> Generator Text
+gen_apply :: ExprTree -> ExprTree -> Generator Text
 gen_apply x y = do
     (x_decls, gx) <- generate_expr x
     (y_decls, gy) <- generate_expr y
     pure $ x_decls <> y_decls <> gx <> "(" <> gy <> ")"
 
-gen_call :: Text -> ASTree -> ASTree -> Generator Text
+gen_call :: Text -> ExprTree -> ExprTree -> Generator Text
 gen_call s x y = do
     (x_decls, gx) <- generate_expr x
     (y_decls, gy) <- generate_expr y
     pure $ x_decls <> y_decls <> s <> gx <> "," <> gy <> ")"
 
-gen_tuple :: ASTree -> ASTree -> Generator (Text,Text)
+gen_tuple :: ExprTree -> ExprTree -> Generator (Text,Text)
 gen_tuple x y = do
     (x_decls, gx) <- generate_expr x
     (y_decls, gy) <- generate_expr y

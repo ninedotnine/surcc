@@ -1,7 +1,7 @@
 -- all the types needed to implement shunting yard
 module Parser.Expr.Types (
     ShuntingYardParser,
-    ASTree(..),
+    ExprTree(..),
     Term(..),
     Operator(..),
     TermToken(..),
@@ -88,7 +88,7 @@ get_prec Combine        = Precedence 210
 -- only the complete expression tree
 
 newtype Oper_Stack = Oper_Stack [StackOp]
-newtype Tree_Stack = Tree_Stack [ASTree]
+newtype Tree_Stack = Tree_Stack [ExprTree]
 newtype Tightness = Tight Bool deriving Eq
 
 type Stack_State = (Oper_Stack, Tree_Stack, Tightness)

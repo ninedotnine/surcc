@@ -7,7 +7,7 @@ module Common (
     Param(..),
     Identifier(..),
     Term(..),
-    ASTree(..),
+    ExprTree(..),
     Operator(..),
     PrefixOperator(..),
     SoucKind(..),
@@ -29,7 +29,7 @@ module Common (
     Stmts(..),
     CheckedProgram(..),
     ParseTree(..),
-    Top_Level_Defn(..),
+    TopLevelDefn(..),
     ExportDecl(..),
     SoucModule(..),
     ImportDecl(..),
@@ -60,7 +60,7 @@ data SoucModule = SoucModule Text [ExportDecl]
 data ImportDecl = LibImport Text | RelImport Text deriving Read
 
 type Imports = [ImportDecl]
-type Body = [Top_Level_Defn]
+type Body = [TopLevelDefn]
 
 newtype Stmts = Stmts [Stmt] deriving (Eq, Show)
 
@@ -123,28 +123,28 @@ data TypeError = TypeMismatch SoucType SoucType
 data Param = Param Identifier (Maybe SoucType) deriving (Eq, Show)
 
 
-data Top_Level_Defn = Top_Level_Const_Defn Identifier (Maybe SoucType) ASTree
+data TopLevelDefn = TopLevelConstDefn Identifier (Maybe SoucType) ExprTree
                     | FuncDefn Identifier Param (Maybe SoucType) Stmts
-                    | ShortFuncDefn Identifier Param (Maybe SoucType) ASTree
+                    | ShortFuncDefn Identifier Param (Maybe SoucType) ExprTree
                     | SubDefn Identifier (Maybe Param) (Maybe SoucType) Stmts
                     | MainDefn (Maybe Param) (Maybe SoucType) Stmts
                     deriving (Eq, Show)
 
-data Stmt = Stmt_While ASTree Stmts
-          | Stmt_Until ASTree Stmts
-          | Stmt_If ASTree Stmts (Maybe Stmts)
-          | Stmt_Unless ASTree Stmts (Maybe Stmts)
-          | Stmt_Sub_Call Identifier (Maybe ASTree)
+data Stmt = Stmt_While ExprTree Stmts
+          | Stmt_Until ExprTree Stmts
+          | Stmt_If ExprTree Stmts (Maybe Stmts)
+          | Stmt_Unless ExprTree Stmts (Maybe Stmts)
+          | Stmt_Sub_Call Identifier (Maybe ExprTree)
           | Stmt_Postfix_Oper Identifier String
-          | Stmt_Const_Assign Identifier (Maybe SoucType) ASTree
-          | Stmt_Var_Assign Identifier (Maybe SoucType) ASTree
-          | Stmt_Var_Reassign Identifier ASTree
-          | Stmt_Return (Maybe ASTree)
+          | Stmt_Const_Assign Identifier (Maybe SoucType) ExprTree
+          | Stmt_Var_Assign Identifier (Maybe SoucType) ExprTree
+          | Stmt_Var_Reassign Identifier ExprTree
+          | Stmt_Return (Maybe ExprTree)
           deriving (Eq, Show)
 
-data ASTree = Branch Operator ASTree ASTree
-            | Twig PrefixOperator ASTree
-            | Signed ASTree SoucType
+data ExprTree = Branch Operator ExprTree ExprTree
+            | Twig PrefixOperator ExprTree
+            | Signed ExprTree SoucType
             | Leaf Term
          deriving (Eq, Show)
 
@@ -250,11 +250,11 @@ instance TextShow Param where
         Param p (Just t) -> "param: " <> showb p <> ": " <> showb t
         Param p Nothing -> "param: " <> showb p
 
-instance TextShow Top_Level_Defn where
+instance TextShow TopLevelDefn where
     showb = \case
-        Top_Level_Const_Defn name (Just t) expr -> mconcat
+        TopLevelConstDefn name (Just t) expr -> mconcat
             ["const: ", showb name, ": ", showb t, " = ", showb expr]
-        Top_Level_Const_Defn name Nothing expr -> mconcat
+        TopLevelConstDefn name Nothing expr -> mconcat
             ["const: ", showb name, " = ", showb expr]
         FuncDefn name param (Just t) stmts -> mconcat
             ["fn: ", showb name, "(", showb param, "): ", showb t,
@@ -310,7 +310,7 @@ instance TextShow Stmt where
         Stmt_Return Nothing ->
             "return"
 
-instance TextShow ASTree where
+instance TextShow ExprTree where
     showb = \case
         Branch oper left right -> mconcat
             ["(", showb oper, " ", showb left, " ", showb right, ")"]

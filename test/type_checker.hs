@@ -12,7 +12,7 @@ import System.Exit (exitFailure)
 
 newtype Expected = Result (Either TypeError ())
 
-type Test = (LocalScope, ASTree, Text, Expected, String)
+type Test = (LocalScope, ExprTree, Text, Expected, String)
 
 match :: Expected
 match = Result (Right ())
@@ -124,7 +124,7 @@ print_err expected actual = Text.putStrLn failmsg where
 test :: Test -> IO ()
 test (ctx, expr, expr_t, Result expected, name) = do
     putStr name >> putStr "... "
-    let actual = check_astree ctx expr (SoucType expr_t (SoucKind 0))
+    let actual = check_expr ctx expr (SoucType expr_t (SoucKind 0))
     if expected == actual
         then putStrLn "OK."
         else print_err expected actual >> exitFailure

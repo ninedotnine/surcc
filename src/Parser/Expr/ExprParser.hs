@@ -9,7 +9,7 @@ module Parser.Expr.ExprParser (
     evaluate_astree,
     eval_show_astree,
     parse_eval_print_expression,
-    ASTree(..),
+    ExprTree(..),
     Term(..),
     Operator(..),
     PrefixOperator(..),
@@ -43,7 +43,7 @@ import Common
 import Common.Parsing (type_name, upper_name, optional_sig)
 
 -- parse_term and parse_oper are alternated until one fails and finish_expr succeeds
-parse_term :: ShuntingYardParser ASTree
+parse_term :: ShuntingYardParser ExprTree
 parse_term = do
     toke <- parse_term_token
     case toke of
@@ -67,7 +67,7 @@ parse_term = do
             oper_stack_push (StackSpacedPreOp op)
             parse_term
 
-parse_oper :: ShuntingYardParser ASTree
+parse_oper :: ShuntingYardParser ExprTree
 parse_oper = do
     toke <- parse_oper_token
     case toke of
@@ -101,7 +101,7 @@ parse_sig = do
        Just sig -> oper_stack_push (StackSig sig)
        Nothing -> pure ()
 
-finish_expr :: ShuntingYardParser ASTree
+finish_expr :: ShuntingYardParser ExprTree
 finish_expr = do
     parse_sig
     ignore_spaces
@@ -115,7 +115,7 @@ finish_expr = do
         _ -> Parsec.parserFail "invalid expression, something is wrong here."
 
 
-parse_expression :: RawExpr -> Either Parsec.ParseError ASTree
+parse_expression :: RawExpr -> Either Parsec.ParseError ExprTree
 parse_expression (RawExpr input) =
     Parsec.runParser parse_term start_state "input" (trim_spaces input)
     where
@@ -130,7 +130,7 @@ parse_print_expression input = case parse_expression (RawExpr input) of
         Left err -> putStrLn (show err)
         Right tree -> printT tree
 
-evaluate_astree :: ASTree -> Integer
+evaluate_astree :: ExprTree -> Integer
 evaluate_astree (Leaf t) = case t of
     LitInt x -> x
     LitChar c -> fromIntegral (ord c)
@@ -163,7 +163,7 @@ evaluate_astree (Branch op left right) = evaluate_astree left `operate` evaluate
             whatever -> error $ "can't evaluate " ++ show whatever
 
 
-eval_show_astree :: ASTree -> String
+eval_show_astree :: ExprTree -> String
 eval_show_astree = evaluate_astree <&> show
 
 parse_eval_print_expression :: Text -> IO ()

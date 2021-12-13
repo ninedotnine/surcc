@@ -56,7 +56,7 @@ run_tests = do
 default_module :: SoucModule
 default_module = SoucModule "anonymous_main_module" []
 
-default_main :: Top_Level_Defn
+default_main :: TopLevelDefn
 default_main = MainDefn (Just (Param (Identifier "stdout") Nothing)) Nothing short_stmts
 
 short_stmts :: Stmts
@@ -64,7 +64,7 @@ short_stmts = Stmts [Stmt_Sub_Call (Identifier "write") (Just (Branch Comma (Lea
 
 conster :: CheckedProgram
 conster = CheckedProgram default_module [] [
-    Top_Level_Const_Defn (Identifier "x") Nothing (Leaf (LitInt 42)),
+    TopLevelConstDefn (Identifier "x") Nothing (Leaf (LitInt 42)),
     MainDefn Nothing Nothing (Stmts [
         Stmt_Const_Assign (Identifier "x2") Nothing (Leaf (LitInt 0))])]
 

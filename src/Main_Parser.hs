@@ -67,7 +67,7 @@ pretty_print (ParseTree modul imps body) = do
     mapM_ prettyPrint body
 
 
-prettyPrint :: Top_Level_Defn -> IO ()
+prettyPrint :: TopLevelDefn -> IO ()
 prettyPrint = Text.putStrLn <$> \case
     SubDefn name param (Just t) (Stmts stmts) -> mconcat
         ["sub ", showt name, " returns (should be IO): ", showt t,
@@ -86,9 +86,9 @@ prettyPrint = Text.putStrLn <$> \case
          " returns: ", showt t, " = ", showt expr]
     ShortFuncDefn name param Nothing expr -> mconcat
         ["fn ", showt name, " takn ", showt param, " = ", showt expr]
-    Top_Level_Const_Defn name (Just type_name) val -> mconcat
+    TopLevelConstDefn name (Just type_name) val -> mconcat
         ["const ", showt name, ": ", showt type_name, " = ", showt val]
-    Top_Level_Const_Defn name Nothing val -> mconcat
+    TopLevelConstDefn name Nothing val -> mconcat
         ["const ", showt name, " = ", showt val]
     MainDefn param (Just t) (Stmts stmts) -> mconcat
         ["main with ", showt param, " returns (IO?): ", showt t,

@@ -39,11 +39,11 @@ oper_stack_push op =
 oper_stack_set :: [StackOp] -> ShuntingYardParser ()
 oper_stack_set tokes = Parsec.modifyState (\(_,s2,b) -> (Oper_Stack tokes, s2, b))
 
-tree_stack_push :: ASTree -> ShuntingYardParser ()
+tree_stack_push :: ExprTree -> ShuntingYardParser ()
 tree_stack_push tree =
     Parsec.modifyState (\(ops, Tree_Stack vals, b) -> (ops, Tree_Stack (tree:vals), b))
 
-tree_stack_pop :: ShuntingYardParser ASTree
+tree_stack_pop :: ShuntingYardParser ExprTree
 tree_stack_pop = do
     (opers, vals, b) <- Parsec.getState
     case vals of
@@ -52,7 +52,7 @@ tree_stack_pop = do
             pure v
         Tree_Stack _ -> Parsec.unexpected "?? did i expect a term?"
 
--- functions that build the ASTree
+-- functions that build the ExprTree
 make_branch :: Operator -> [StackOp] -> ShuntingYardParser ()
 make_branch op tokes = do
     r <- tree_stack_pop

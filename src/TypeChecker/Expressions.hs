@@ -1,6 +1,6 @@
 module TypeChecker.Expressions (
     infer,
-    check_astree,
+    check_expr,
     infer_if_needed,
 ) where
 
@@ -13,7 +13,7 @@ import Common
 import TypeChecker.Context
 import TypeChecker.Operators
 
-infer :: LocalScope -> ASTree -> Either TypeError SoucType
+infer :: LocalScope -> ExprTree -> Either TypeError SoucType
 infer ctx tree = case tree of
     Branch op left right -> ret <$> infer_infix_op ctx op left right
     Twig op expr -> ret <$> infer_prefix_op op expr
@@ -42,7 +42,7 @@ infer_term context term = case term of
 not_implemented :: Either TypeError a
 not_implemented = Left $ TypeMismatch (SoucType "NOT YET" (SoucKind 0)) (SoucType "IMPLEMENTED" (SoucKind 0))
 
-infer_prefix_op :: PrefixOperator -> ASTree -> Either TypeError (InputType, ReturnType)
+infer_prefix_op :: PrefixOperator -> ExprTree -> Either TypeError (InputType, ReturnType)
 infer_prefix_op op _ = case op of
     Deref -> not_implemented
     GetAddr -> not_implemented
@@ -52,7 +52,8 @@ infer_prefix_op op _ = case op of
     Join -> not_implemented
 
 
-infer_infix_op :: LocalScope -> Operator -> ASTree -> ASTree -> Either TypeError ((InputType, InputType), ReturnType)
+infer_infix_op :: LocalScope -> Operator -> ExprTree -> ExprTree
+                  -> Either TypeError ((InputType, InputType), ReturnType)
 infer_infix_op ctx op left right = case op of
     Plus  -> Right ((in_t "Integer", in_t "Integer"), ret_t "Integer")
     Minus -> Right ((in_t "Integer", in_t "Integer"), ret_t "Integer")
@@ -87,18 +88,18 @@ infer_infix_op ctx op left right = case op of
 check_equals :: SoucType -> SoucType -> Either TypeError ()
 check_equals t0 t1 = if t0 == t1 then Right () else Left (TypeMismatch t0 t1)
 
-check_astree :: LocalScope -> ASTree -> SoucType -> Either TypeError ()
-check_astree ctx tree t = case tree of
+check_expr :: LocalScope -> ExprTree -> SoucType -> Either TypeError ()
+check_expr ctx tree t = case tree of
     Branch op left right -> do
         ((InputType l_t, InputType r_t), ReturnType expr_t) <- infer_infix_op ctx op left right
-        check_astree ctx left l_t
-        check_astree ctx right r_t
+        check_expr ctx left l_t
+        check_expr ctx right r_t
         check_equals t expr_t
 
 
     Twig op expr -> do
         (InputType arg_t, ReturnType expr_t) <- infer_prefix_op op expr
-        check_astree ctx expr arg_t
+        check_expr ctx expr arg_t
         check_equals t expr_t
 
     Leaf term -> do
@@ -107,18 +108,18 @@ check_astree ctx tree t = case tree of
 
     Signed expr sig -> do
         expr_t <- infer ctx expr
-        check_astree ctx expr expr_t
+        check_expr ctx expr expr_t
         check_equals sig expr_t
         check_equals t expr_t
 
 
-infer_if_needed :: Maybe SoucType -> ASTree -> Checker SoucType
+infer_if_needed :: Maybe SoucType -> ExprTree -> Checker SoucType
 infer_if_needed m_t expr = do
     ctx <- get
     case m_t of
         Nothing -> case infer ctx expr of
             Right t -> pure t
             Left err -> throwE err
-        Just t -> case check_astree ctx expr t of
+        Just t -> case check_expr ctx expr t of
             Right () -> pure t
             Left err -> throwE err

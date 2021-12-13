@@ -63,10 +63,10 @@ print_err :: Either TypeError CheckedProgram -> Either TypeError CheckedProgram 
 print_err expected actual = Text.putStrLn failmsg where
     failmsg = "FAILED! \n expected:\n   " <> render expected <> "\n but got:\n   " <> render actual
 
-program_header :: [Top_Level_Defn] -> ParseTree
+program_header :: [TopLevelDefn] -> ParseTree
 program_header = ParseTree default_module [] -- no name, no imports
 
-checked_program_header :: [Top_Level_Defn] -> CheckedProgram
+checked_program_header :: [TopLevelDefn] -> CheckedProgram
 checked_program_header = CheckedProgram default_module []
 
 tests :: [Test]
@@ -81,19 +81,19 @@ default_module = SoucModule "anonymous_main_module" []
 
 conster :: ParseTree
 conster =  program_header [
-    Top_Level_Const_Defn (Identifier "n") notype (Leaf (LitInt 42))]
+    TopLevelConstDefn (Identifier "n") notype (Leaf (LitInt 42))]
 
 conster_checked :: Either TypeError CheckedProgram
 conster_checked = Right $ checked_program_header [
-    Top_Level_Const_Defn (Identifier "n") notype (Leaf (LitInt 42))]
+    TopLevelConstDefn (Identifier "n") notype (Leaf (LitInt 42))]
 
 int :: ParseTree
 int =  program_header [
-    Top_Level_Const_Defn (Identifier "n") (Just SoucInteger) (Leaf (LitInt 42))]
+    TopLevelConstDefn (Identifier "n") (Just SoucInteger) (Leaf (LitInt 42))]
 
 int_checked :: Either TypeError CheckedProgram
 int_checked = Right $ checked_program_header [
-    Top_Level_Const_Defn (Identifier "n") (Just SoucInteger) (Leaf (LitInt 42))]
+    TopLevelConstDefn (Identifier "n") (Just SoucInteger) (Leaf (LitInt 42))]
 
 fn :: ParseTree
 fn = program_header [
@@ -117,20 +117,20 @@ fn_checked2 = Right $ checked_program_header [
 
 fn3 :: ParseTree
 fn3 = program_header [
-    Top_Level_Const_Defn (Identifier "n") (Just SoucInteger) (Leaf (LitInt 42)),
+    TopLevelConstDefn (Identifier "n") (Just SoucInteger) (Leaf (LitInt 42)),
     FuncDefn (Identifier "f") (Param  (Identifier "x") (Just SoucInteger)) notype (Stmts [
         Stmt_Return (Just (Leaf (Var "n")))])]
 
 fn3_checked :: Either TypeError CheckedProgram
 fn3_checked = Right $ checked_program_header [
-    Top_Level_Const_Defn (Identifier "n") (Just SoucInteger) (Leaf (LitInt 42)),
+    TopLevelConstDefn (Identifier "n") (Just SoucInteger) (Leaf (LitInt 42)),
     FuncDefn (Identifier "f") (Param  (Identifier "x") (Just SoucInteger)) notype (Stmts [
         Stmt_Return (Just (Leaf (Var "n")))])]
 
 
 borked :: ParseTree
 borked = program_header [
-    Top_Level_Const_Defn (Identifier "n") (Just SoucInteger) (Leaf (LitChar 'a'))]
+    TopLevelConstDefn (Identifier "n") (Just SoucInteger) (Leaf (LitChar 'a'))]
 
 borked_checked :: Either TypeError CheckedProgram
 borked_checked = Left (mismatch "Integer" "Char")
@@ -161,7 +161,7 @@ borked_fn3_checked = Left $ mismatch "Char" "Integer"
 
 borked_fn4 :: ParseTree
 borked_fn4 = program_header [
-    Top_Level_Const_Defn (Identifier "n") (Just SoucInteger) (Leaf (LitInt 42)),
+    TopLevelConstDefn (Identifier "n") (Just SoucInteger) (Leaf (LitInt 42)),
     FuncDefn (Identifier "f") (Param  (Identifier "x") notype) (Just SoucChar) (Stmts [
         Stmt_Return (Just (Leaf (Var "n")))])]
 
@@ -170,7 +170,7 @@ borked_fn4_checked = Left $ mismatch "Char" "Integer"
 
 subber_const_ass :: ParseTree
 subber_const_ass = program_header [
-    Top_Level_Const_Defn (Identifier "n") (Just SoucInteger) (Leaf (LitInt 42)),
+    TopLevelConstDefn (Identifier "n") (Just SoucInteger) (Leaf (LitInt 42)),
     SubDefn (Identifier "subby") Nothing notype (Stmts [
         Stmt_Const_Assign (Identifier "i") notype (Leaf (Var "n"))])]
 
@@ -179,7 +179,7 @@ subber_const_ass_checked = Left (mismatch "Integer" "Char")
 
 borked_subber_const_ass :: ParseTree
 borked_subber_const_ass = program_header [
-    Top_Level_Const_Defn (Identifier "n") (Just SoucInteger) (Leaf (LitInt 42)),
+    TopLevelConstDefn (Identifier "n") (Just SoucInteger) (Leaf (LitInt 42)),
     SubDefn (Identifier "subby") Nothing notype (Stmts [
         Stmt_Const_Assign (Identifier "x") notype (Leaf (Var "x"))])]
 
@@ -188,7 +188,7 @@ borked_subber_const_ass_checked = Left (mismatch "Integer"  "Char")
 
 borked_import :: ParseTree
 borked_import = ParseTree default_module [LibImport "x"] [
-    Top_Level_Const_Defn (Identifier "x") (Just SoucInteger) (Leaf (LitInt 42))]
+    TopLevelConstDefn (Identifier "x") (Just SoucInteger) (Leaf (LitInt 42))]
 
 
 borked_import_checked :: Either TypeError CheckedProgram

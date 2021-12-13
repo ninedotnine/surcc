@@ -44,19 +44,19 @@ instance TextShow LocalScope where
 no_exports_ctx :: ExportList
 no_exports_ctx = ExportList []
 
-type Test = ([ImportDecl], [Top_Level_Defn], Either TypeError LocalScope, String)
+type Test = ([ImportDecl], [TopLevelDefn], Either TypeError LocalScope, String)
 
 tests :: [Test]
 tests = [
-    ([], [Top_Level_Const_Defn "i" (Just SoucInteger) (Leaf (LitInt 4))], Right (GlobalScope [Bound "i" SoucInteger] no_exports_ctx), "int"),
+    ([], [TopLevelConstDefn "i" (Just SoucInteger) (Leaf (LitInt 4))], Right (GlobalScope [Bound "i" SoucInteger] no_exports_ctx), "int"),
     ([LibImport "salad", LibImport "tofu"], [], Right (GlobalScope [Bound "salad" (SoucType "Module" (SoucKind 0)), Bound "tofu" (SoucType "Module" (SoucKind 0))] no_exports_ctx), "imports")
     ]
 
 borked_tests :: [Test]
 borked_tests = [
-    ([], [Top_Level_Const_Defn "c" (Just SoucInteger) (Leaf (LitChar 'a'))], Left (mismatch "Integer" "Char"), "bad char 0"),
-    ([], [Top_Level_Const_Defn "b" Nothing (Signed (Leaf (LitChar 'a')) SoucBool)], Left (mismatch "Bool" "Char"), "bad char 1"),
-    ([], [Top_Level_Const_Defn "b" (Just SoucChar) (Signed (Leaf (LitChar 'a')) SoucBool)], Left (mismatch "Bool" "Char"), "bad char 2")
+    ([], [TopLevelConstDefn "c" (Just SoucInteger) (Leaf (LitChar 'a'))], Left (mismatch "Integer" "Char"), "bad char 0"),
+    ([], [TopLevelConstDefn "b" Nothing (Signed (Leaf (LitChar 'a')) SoucBool)], Left (mismatch "Bool" "Char"), "bad char 1"),
+    ([], [TopLevelConstDefn "b" (Just SoucChar) (Signed (Leaf (LitChar 'a')) SoucBool)], Left (mismatch "Bool" "Char"), "bad char 2")
     ]
 
 

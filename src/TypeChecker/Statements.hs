@@ -45,12 +45,12 @@ check_stmt stmt m_ret = do
 soucbool :: SoucType
 soucbool = SoucType "Bool" (SoucKind 0)
 
-check_stmt_return :: Maybe ASTree -> Maybe SoucType -> Checker ()
+check_stmt_return :: Maybe ExprTree -> Maybe SoucType -> Checker ()
 check_stmt_return m_expr m_ret = do
     ctx <- get
     case m_expr of
         Just expr -> case m_ret of
-            Just t -> case check_astree ctx expr t of
+            Just t -> case check_expr ctx expr t of
                 Left err -> throwE err
                 Right () -> pure ()
             Nothing -> case infer ctx expr of
@@ -61,17 +61,17 @@ check_stmt_return m_expr m_ret = do
             Nothing -> pure ()
 
 
-check_stmt_while :: ASTree -> Stmts -> Maybe SoucType -> Checker ()
+check_stmt_while :: ExprTree -> Stmts -> Maybe SoucType -> Checker ()
 check_stmt_while expr body m_ret = do
     ctx <- get
-    case check_astree ctx expr soucbool of
+    case check_expr ctx expr soucbool of
         Left err -> throwE err
         Right () -> check_stmts body m_ret
 
-check_stmt_if :: ASTree -> Stmts -> (Maybe Stmts) -> (Maybe SoucType) -> Checker ()
+check_stmt_if :: ExprTree -> Stmts -> (Maybe Stmts) -> (Maybe SoucType) -> Checker ()
 check_stmt_if expr body m_else m_ret = do
     ctx <- get
-    case check_astree ctx expr soucbool of
+    case check_expr ctx expr soucbool of
         Left err -> throwE err
         Right () -> do
             check_stmts body m_ret
@@ -79,23 +79,23 @@ check_stmt_if expr body m_else m_ret = do
                 Nothing -> pure ()
                 Just else_body -> check_stmts else_body m_ret
 
-check_stmt_ass :: Identifier -> (Maybe SoucType) -> ASTree -> Checker ()
+check_stmt_ass :: Identifier -> (Maybe SoucType) -> ExprTree -> Checker ()
 check_stmt_ass name m_t expr = do
     t <- infer_if_needed m_t expr
     insert_const (Bound name t)
 
-check_stmt_mut_ass :: Identifier -> (Maybe SoucType) -> ASTree -> Checker ()
+check_stmt_mut_ass :: Identifier -> (Maybe SoucType) -> ExprTree -> Checker ()
 check_stmt_mut_ass name m_t expr = do
     t <- infer_if_needed m_t expr
     insert_mut (Bound name t)
 
 
-check_stmt_call :: Identifier -> Maybe ASTree -> Checker ()
+check_stmt_call :: Identifier -> Maybe ExprTree -> Checker ()
 check_stmt_call name m_expr = do
     ctx <- get
     case (lookup ctx name , m_expr) of
         (Just SoucIO, Nothing) -> pure ()
-        (Just (SoucRoutn param), Just expr) -> case check_astree ctx expr param of
+        (Just (SoucRoutn param), Just expr) -> case check_expr ctx expr param of
             Left err -> throwE err
             Right () -> pure ()
         (Just t, _) -> throwE $ TypeMismatch SoucIO t
