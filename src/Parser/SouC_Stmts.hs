@@ -70,30 +70,30 @@ stmt_beginning_with_identifier = do
 stmt_const_assign :: Identifier -> SouCParser Stmt
 stmt_const_assign name = do
     sig <- try (optional_sig <* spaces <* char '=')
+    add_to_bindings name Immut
     Raw_Expr val <- spaces *> raw_expr
-    endline
-    case parse_expression val of
-        Right expr -> bindings_lookup name >>= \case
-            Just Mut -> parserFail $ "tried to reassign as const" ++ show name
-            Just Immut -> parserFail $ "tried to reassign const: " ++ show name
-            Nothing -> do
-                add_to_bindings name Immut
-                pure $ Stmt_Const_Assign name sig expr
+    expr <- case parse_expression val of
+        Right e -> pure $ Stmt_Const_Assign name sig e
         Left err -> parserFail $ "invalid expression:\n" ++ show err
+    endline
+    pure expr
+
 
 stmt_var_assign :: Identifier -> SouCParser Stmt
 stmt_var_assign name = do
     m_sig <- try (optional_sig <* spaces <* string "<-")
+    constructor <- bindings_lookup name >>= \case
+        Just Mut -> pure $ Stmt_Var_Reassign name
+        Just Immut -> parserFail $ "tried to reassign: " ++ show name
+        Nothing -> do
+            add_to_bindings name Mut
+            pure $ Stmt_Var_Assign name m_sig
     Raw_Expr val <- spaces *> raw_expr
-    endline
-    case parse_expression val of
-        Right expr -> bindings_lookup name >>= \case
-            Just Mut -> pure $ Stmt_Var_Reassign name expr
-            Just Immut -> parserFail $ "tried to reassign: " ++ show name
-            Nothing -> do
-                add_to_bindings name Mut
-                pure $ Stmt_Var_Assign name m_sig expr
+    expr <- case parse_expression val of
+        Right e -> pure e
         Left err -> parserFail $ "invalid expression:\n" ++ show err
+    endline
+    pure (constructor expr)
 
 stmt_sub_call :: Identifier -> SouCParser Stmt
 stmt_sub_call name = do

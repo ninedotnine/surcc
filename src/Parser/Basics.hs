@@ -45,9 +45,23 @@ indentation = try $ do
 add_to_bindings :: Identifier -> Mutability -> SouCParser ()
 add_to_bindings key val = do
     (i, (binds :| deeper_binds)) <- getState
+    found <- bindings_contains key
+    when found
+        (parserFail ("constant `" ++ show key ++ "` already defined"))
+    putState (i, ((binds <> Map.singleton key val) :| deeper_binds))
+
+-- fixme
+-- i think sometimes a variable cannot be reassigned, even if it is visible
+-- from the current scope and is mutable.
+-- nested function definitions, for example?
+-- that's why i might need this function
+add_to_current_scope :: Identifier -> Mutability -> SouCParser ()
+add_to_current_scope key val = do
+    (i, (binds :| deeper_binds)) <- getState
     when (Map.member key binds)
         (parserFail ("constant `" ++ show key ++ "` already defined"))
     putState (i, ((binds <> Map.singleton key val) :| deeper_binds))
+
 
 bindings_contains :: Identifier -> SouCParser Bool
 bindings_contains i = do

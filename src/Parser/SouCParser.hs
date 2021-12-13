@@ -62,30 +62,31 @@ parse_def = do
 main_defn :: SouCParser Top_Level_Defn
 main_defn = do
     _ <- string "main("
+    add_to_bindings (Identifier "main") Immut
     param <- optionMaybe pattern <* char ')'
     sig <- optionMaybe type_signature
     _ <- spaces <* char '=' <* spaces <* string "do" <* endline
     stmts <- stmt_block
     optional $ end_block_named (Identifier "main")
-    add_to_bindings (Identifier "main") Immut
     pure $ MainDefn param sig stmts
 
 top_level_const :: SouCParser Top_Level_Defn
 top_level_const = do
     name <- try (identifier <* lookAhead (char ':' <|> char ' '))
+    add_to_bindings name Immut
     m_sig <- optional_sig
     _ <- spaces <* char '='
     Raw_Expr val <- spaces *> raw_expr
     endline
     case parse_expression val of
         Right expr -> do
-            add_to_bindings name Immut
             pure $ Top_Level_Const_Defn name m_sig expr
         Left err -> parserFail $ "invalid expression:\n" ++ show err
 
 top_level_proc :: SouCParser Top_Level_Defn
 top_level_proc = do
     proc_name <- try (identifier <* char '(')
+    add_to_bindings proc_name Immut
     name <- (try (top_level_func proc_name) <|> top_level_sub proc_name)
     pure name
 
@@ -101,7 +102,6 @@ short_top_level_func func_name param sig = do
     (Raw_Expr body) <- raw_expr
     case parse_expression body of
         Right result -> do
-            add_to_bindings func_name Immut
             pure $ ShortFuncDefn func_name param sig result
 --         Left parse_err -> mergeError (fail "invalid expression") parse_err
         Left err -> fail $ "invalid expression\n" ++ show err
@@ -111,7 +111,6 @@ long_top_level_func func_name param sig = do
     string "do" *> endline
     stmts <- stmt_block_with_param (Just param)
     optional $ end_block_named func_name
-    add_to_bindings func_name Immut
     pure $ FuncDefn func_name param sig stmts
 
 top_level_sub :: Identifier -> SouCParser Top_Level_Defn
@@ -121,5 +120,4 @@ top_level_sub sub_name = do
     spaces *> char '=' *> spaces *> string "do" *> endline
     stmts <- stmt_block_with_param param
     optional $ end_block_named sub_name
-    add_to_bindings sub_name Immut
     pure $ SubDefn sub_name param sig stmts
