@@ -14,7 +14,7 @@ import Parser.Common
 import Parser.Basics (pattern, end_block_named, add_to_bindings, identifier)
 import Common.Parsing
 import Parser.SouC_Expr  (Raw_Expr(..), raw_expr)
-import Parser.SouC_Stmts (stmt_block)
+import Parser.SouC_Stmts (stmt_block, stmt_block_with_param)
 import Parser.ExprParser (parse_expression)
 import Parser.TabChecker (check_tabs)
 
@@ -108,7 +108,8 @@ short_top_level_func func_name param sig = do
 
 long_top_level_func :: Identifier -> Param -> Maybe SoucType -> SouCParser Top_Level_Defn
 long_top_level_func func_name param sig = do
-    stmts <- string "do" *> endline *> stmt_block
+    string "do" *> endline
+    stmts <- stmt_block_with_param (Just param)
     optional $ end_block_named func_name
     add_to_bindings func_name Immut
     pure $ FuncDefn func_name param sig stmts
@@ -118,7 +119,7 @@ top_level_sub sub_name = do
     param <- optionMaybe pattern <* char ')'
     sig <- optionMaybe type_signature
     spaces *> char '=' *> spaces *> string "do" *> endline
-    stmts <- stmt_block
+    stmts <- stmt_block_with_param param
     optional $ end_block_named sub_name
     add_to_bindings sub_name Immut
     pure $ SubDefn sub_name param sig stmts

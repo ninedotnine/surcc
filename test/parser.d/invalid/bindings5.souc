@@ -1,0 +1,11 @@
+; this could be caught in the analysis phase instead.
+; but for now, let's say it's a parse error to try to
+; define a const with a name already in use in the current scope
+
+f(x) = do
+	x = 4
+	return x
+
+g(x) = do
+	y = 5
+	return x

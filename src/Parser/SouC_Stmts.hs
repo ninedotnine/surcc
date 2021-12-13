@@ -1,5 +1,6 @@
 module Parser.SouC_Stmts (
-    stmt_block
+    stmt_block,
+    stmt_block_with_param
 ) where
 
 import qualified Data.Map.Strict as Map (empty, singleton, member, lookup)
@@ -14,8 +15,12 @@ import Parser.Basics
 import Parser.ExprParser
 
 stmt_block :: SouCParser Stmts
-stmt_block = do
+stmt_block = stmt_block_with_param Nothing
+
+stmt_block_with_param :: Maybe Param -> SouCParser Stmts
+stmt_block_with_param p = do
     increase_indent_level
+    add_param_to_bindings p
     statements <- many1 (stmt <* many endline)
     decrease_indent_level
     pure $ Stmts statements
@@ -29,6 +34,24 @@ stmt_block = do
                         (x, _ :| (m:ms)) -> (x-1, m:|ms)
                         (_, _) -> error "should be impossible"
                                     -- consider a tagged type
+
+add_param_to_bindings :: Maybe Param -> SouCParser ()
+add_param_to_bindings = \case
+    Just (Param p _) -> add_to_bindings p Immut
+    _ -> pure ()
+
+
+-- maybe i will find a use for these?
+new_scope :: SouCParser ()
+new_scope = modifyState (\(x,m) -> (x, cons Map.empty m))
+
+end_scope :: SouCParser ()
+end_scope = modifyState dedent
+    where
+        dedent = \case
+            (x, _ :| (m:ms)) -> (x, m:|ms)
+            (_, _) -> error "should be impossible"
+
 
 stmt :: SouCParser Stmt
 stmt = do
