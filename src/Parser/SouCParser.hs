@@ -17,12 +17,17 @@ import Parser.Expr.Raw  (raw_expr)
 import Parser.SouC_Stmts (stmt_block, stmt_block_with_param)
 import Parser.ExprParser (parse_expression)
 import Parser.TabChecker (check_tabs)
+import Parser.TypeDefs (type_def)
 
 parse :: SourceName -> (SoucModule, [ImportDecl], Text, SourcePos) -> Either ParseError ParseTree
 parse source_name ((SoucModule name exports), imps, input, pos) = do
     check_tabs source_name input
-    body <- runParser (souCParser pos) (start_state name imps) source_name input
-    pure $ ParseTree (SoucModule name exports) imps body
+    (typedefs, body) <- runParser
+                            (souCParser pos)
+                            (start_state name imps)
+                            source_name
+                            input
+    pure $ (ParseTree (SoucModule name exports) imps typedefs body)
 
 
 type ModuleName = Text
@@ -37,13 +42,14 @@ start_state name imps = (0, binds:|[])
         ids = (Identifier name) : map make_identifier imps
 
 
-souCParser :: SourcePos -> SouCParser [TopLevelDefn]
+souCParser :: SourcePos -> SouCParser ([TypeDef], [TopLevelDefn])
 souCParser pos = do
     setPosition pos
     _ <- many (pragma) *> skipMany endline -- FIXME do something with pragmas
+    typedefs <- many (type_def <* many endline)
     code <- parseDefs
     eof
-    pure $ code
+    pure $ (typedefs, code)
 
 parseDefs :: SouCParser [TopLevelDefn]
 parseDefs = do

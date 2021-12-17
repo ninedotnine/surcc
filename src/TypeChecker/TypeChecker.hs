@@ -21,7 +21,8 @@ import TypeChecker.Expressions
 import TypeChecker.Statements
 
 type_check :: ParseTree -> Either TypeError CheckedProgram
-type_check (ParseTree module_info imports defns) = do
+-- fixme: use the typedefs
+type_check (ParseTree module_info imports _ defns) = do
     exports_ctx <- add_exports module_info
     imports_ctx <- add_imports imports exports_ctx
     finished_ctx <- add_globals imports_ctx defns

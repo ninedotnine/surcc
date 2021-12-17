@@ -12,7 +12,6 @@ import qualified Data.Text as Text
 import TextShow (TextShow(..))
 
 import Common
-import Parser.ExprParser
 
 
 type Mapping = Map.HashMap Text (Text, SoucType)

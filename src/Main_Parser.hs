@@ -61,9 +61,10 @@ parse_souc_file filename input = do
     parse filename module_data
 
 pretty_print :: ParseTree -> IO ()
-pretty_print (ParseTree modul imps body) = do
+pretty_print (ParseTree modul imps typedefs body) = do
     printT modul
     mapM_ printT imps
+    mapM_ printT typedefs
     mapM_ prettyPrint body
 
 

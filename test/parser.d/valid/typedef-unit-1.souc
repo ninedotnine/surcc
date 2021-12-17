@@ -1,0 +1,5 @@
+import whatever
+
+def unit Unit0 = {Unit}
+
+def unit Unit1 = { Unit }

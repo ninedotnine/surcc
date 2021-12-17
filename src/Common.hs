@@ -29,6 +29,7 @@ module Common (
     Stmts(..),
     CheckedProgram(..),
     ParseTree(..),
+    TypeDef(..),
     TopLevelDefn(..),
     ExportDecl(..),
     SoucModule(..),
@@ -50,7 +51,7 @@ data Mutability = Mut | Immut deriving (Eq, Show)
 newtype Identifier = Identifier Text
                    deriving (Eq, Read, Ord, IsString, Semigroup, Hashable)
 
-data ParseTree = ParseTree SoucModule Imports Body
+data ParseTree = ParseTree SoucModule Imports [TypeDef] Body
 
 data CheckedProgram = CheckedProgram SoucModule Imports Body
 
@@ -77,6 +78,14 @@ data SoucType = SoucType Text SoucKind
               deriving (Eq,Show)
 
 -- data Constraint = Instance Text SoucType deriving (Eq)
+
+data TypeDef = EmptyType SoucType
+             | UnitType SoucType Term
+             | SynonymType SoucType SoucType
+             | WrapperType SoucType Term SoucType
+             | EnumType SoucType [Text]
+             | StructType SoucType -- fixme
+             | GADType SoucType -- fixme
 
 pattern SoucIO :: SoucType
 pattern SoucIO = SoucType "IO" (SoucKind 0)
@@ -390,3 +399,14 @@ instance TextShow SoucType where
         SoucTypeVar (TypeVar (Left  v) _) -> "T" <> showb v
         SoucTypeVar (TypeVar (Right v) _) -> showb v
         SoucTypeConstructor t _ ts -> showb t <> "(" <> showb ts <> ")"
+
+instance TextShow TypeDef where
+    showb = \case
+        EmptyType t -> "empty type " <> showb t
+        UnitType t _ -> "unit type " <> showb t
+        SynonymType t0 t1 -> "synonym " <> showb t0 <> " = " <> showb t1
+        WrapperType t0 _ t1 -> "wrapper " <> showb t0 <> " wraps " <> showb t1
+        EnumType _ _ -> error "fixme typedef textshow"
+        StructType _ -> error "fixme typedef textshow"
+        GADType _ -> error "fixme typedef textshow"
+

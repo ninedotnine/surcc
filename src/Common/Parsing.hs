@@ -72,7 +72,7 @@ reserved_word =
             "break", "continue", "case", "and", "or",
             "atomic", "module", "import", "unary", "infix", "postfix",
             "typedef", "newtype", "datatype", "deriving", "typeclass",
-            "define", "attribute", "assert", "trace", "undefined",
+            "def", "define", "attribute", "assert", "trace", "undefined",
 
             -- these are reserved for future compatibility
             "abort", "abstract", "alias", "alignof", "allocate", "as",

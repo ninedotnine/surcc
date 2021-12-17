@@ -64,7 +64,7 @@ print_err expected actual = Text.putStrLn failmsg where
     failmsg = "FAILED! \n expected:\n   " <> render expected <> "\n but got:\n   " <> render actual
 
 program_header :: [TopLevelDefn] -> ParseTree
-program_header = ParseTree default_module [] -- no name, no imports
+program_header = ParseTree default_module [] [] -- no imports or typedefs
 
 checked_program_header :: [TopLevelDefn] -> CheckedProgram
 checked_program_header = CheckedProgram default_module []
@@ -187,7 +187,7 @@ borked_subber_const_ass_checked :: Either TypeError CheckedProgram
 borked_subber_const_ass_checked = Left (mismatch "Integer"  "Char")
 
 borked_import :: ParseTree
-borked_import = ParseTree default_module [LibImport "x"] [
+borked_import = ParseTree default_module [LibImport "x"] [] [
     TopLevelConstDefn (Identifier "x") (Just SoucInteger) (Leaf (LitInt 42))]
 
 
