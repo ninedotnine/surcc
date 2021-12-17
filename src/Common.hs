@@ -83,7 +83,8 @@ data TypeDef = EmptyType SoucType
              | UnitType SoucType Term
              | SynonymType SoucType SoucType
              | WrapperType SoucType Term SoucType
-             | EnumType SoucType [Text]
+                        -- fixme: a wrapper (a function) is not a term.
+             | EnumType SoucType [Term]
              | StructType SoucType -- fixme
              | GADType SoucType -- fixme
 
