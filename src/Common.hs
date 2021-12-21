@@ -49,7 +49,7 @@ import qualified TextShow
 data Mutability = Mut | Immut deriving (Eq, Show)
 
 newtype Identifier = Identifier Text
-                   deriving (Eq, Read, Ord, IsString, Semigroup, Hashable)
+                   deriving (Eq, Ord, IsString, Semigroup, Hashable)
 
 data ParseTree = ParseTree SoucModule Imports [TypeDef] Body
 
@@ -58,7 +58,7 @@ data CheckedProgram = CheckedProgram SoucModule Imports Body
 data ExportDecl = ExportDecl Identifier SoucType
 data SoucModule = SoucModule Text [ExportDecl]
 
-data ImportDecl = LibImport Text | RelImport Text deriving Read
+data ImportDecl = LibImport Text | RelImport Text
 
 type Imports = [ImportDecl]
 type Body = [TopLevelDefn]

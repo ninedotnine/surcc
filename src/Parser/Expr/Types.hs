@@ -23,7 +23,7 @@ import qualified Text.Parsec as Parsec
 
 import Common
 
-data RawExpr = RawExpr Text deriving (Read, Show)
+data RawExpr = RawExpr Text deriving (Show)
 
 newtype Precedence = Precedence Word8 deriving (Eq, Ord)
 
