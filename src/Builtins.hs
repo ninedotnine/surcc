@@ -1,9 +1,9 @@
 module Builtins (
     gen_builtin_identifier,
     gen_builtin_data,
+    typeof_builtin,
     typeof_builtin_identifier,
     typeof_builtin_data,
-    BuiltinsCtx(..),
 ) where
 
 import qualified Data.HashMap.Strict as Map
@@ -14,29 +14,34 @@ import TextShow (TextShow(..))
 import Common
 
 
-type Mapping = Map.HashMap Text (Text, SoucType)
+type Mapping a = Map.HashMap a (Text, SoucType)
 
 newtype BuiltinsCtx = Builtins [Bound]
 
 instance TextShow BuiltinsCtx where
     showb list = "Builtins" <> showb list
 
+typeof_builtin :: Either Identifier Constant -> Maybe SoucType
+typeof_builtin = \case
+    Left i -> typeof_builtin_identifier i
+    Right c -> typeof_builtin_data c
+
 gen_builtin_identifier :: Identifier -> Maybe Text
-gen_builtin_identifier (Identifier i) = fst <$> Map.lookup i builtins where
+gen_builtin_identifier i = fst <$> Map.lookup i builtins where
     builtins = builtin_subroutines <>  builtin_functions <> builtin_constants
 
 typeof_builtin_identifier :: Identifier -> Maybe SoucType
-typeof_builtin_identifier (Identifier i) = snd <$> Map.lookup i builtins where
+typeof_builtin_identifier i = snd <$> Map.lookup i builtins where
     builtins = builtin_subroutines <> builtin_functions <> builtin_constants
 
 
-gen_builtin_data :: Text -> Maybe Text
-gen_builtin_data s = fst <$> Map.lookup s builtin_data
+gen_builtin_data :: Constant -> Maybe Text
+gen_builtin_data c = fst <$> Map.lookup c builtin_data
 
-typeof_builtin_data :: Text -> Maybe SoucType
-typeof_builtin_data i = snd <$> Map.lookup i builtin_data
+typeof_builtin_data :: Constant -> Maybe SoucType
+typeof_builtin_data c = snd <$> Map.lookup c builtin_data
 
-builtin_subroutines :: Mapping
+builtin_subroutines :: Mapping Identifier
 builtin_subroutines = Map.fromList [
     ("puts", ("_souc_puts", (SoucRoutn SoucString)))
     ,
@@ -45,12 +50,12 @@ builtin_subroutines = Map.fromList [
     ("abort", ("abort", SoucIO))
     ]
 
-builtin_functions :: Mapping
+builtin_functions :: Mapping Identifier
 builtin_functions = Map.fromList [
     ("increment", ("_souc_increment", SoucFn SoucInteger SoucInteger))
     ]
 
-builtin_constants :: Mapping
+builtin_constants :: Mapping Identifier
 builtin_constants = Map.fromList [
     ("pi", ("(union _souc_obj) { ._souc_int = 3 }", SoucInteger)) -- biblical value
     ,
@@ -59,7 +64,7 @@ builtin_constants = Map.fromList [
     ("ok43", ("_souc_42", SoucInteger))
     ]
 
-builtin_data :: Mapping
+builtin_data :: Mapping Constant
 builtin_data = Map.fromList [
     ("True", ("(union _souc_obj) { ._souc_bool = true }", SoucType "Bool" (SoucKind 0)))
     ,

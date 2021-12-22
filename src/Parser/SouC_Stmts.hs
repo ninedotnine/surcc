@@ -82,7 +82,7 @@ stmt_const_assign name = do
 stmt_var_assign :: Identifier -> SouCParser Stmt
 stmt_var_assign name = do
     m_sig <- try (optional_sig <* spaces <* string "<-")
-    constructor <- bindings_lookup name >>= \case
+    ass_or_reass <- bindings_lookup name >>= \case
         Just Mut -> pure $ Stmt_Var_Reassign name
         Just Immut -> parserFail $ "tried to reassign: " ++ show name
         Nothing -> do
@@ -93,7 +93,7 @@ stmt_var_assign name = do
         Right e -> pure e
         Left err -> parserFail $ "invalid expression:\n" ++ show err
     endline
-    pure (constructor expr)
+    pure (ass_or_reass expr)
 
 stmt_sub_call :: Identifier -> SouCParser Stmt
 stmt_sub_call name = do

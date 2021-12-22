@@ -6,16 +6,12 @@
 import TypeChecker.TypeChecker
 import TypeChecker.Context
 import Common
-import Builtins
 
 import Data.Text (Text)
 import qualified Data.Text.IO as Text
 import System.Exit (exitFailure)
 import TextShow
 
-
-instance Eq BuiltinsCtx where
-    Builtins b0 == Builtins b1 = b0 == b1
 
 instance Eq ExportList where
     ExportList b0 == ExportList b1 = b0 == b1
@@ -48,8 +44,8 @@ type Test = ([ImportDecl], [TopLevelDefn], Either TypeError LocalScope, String)
 
 tests :: [Test]
 tests = [
-    ([], [TopLevelConstDefn "i" (Just SoucInteger) (Leaf (LitInt 4))], Right (GlobalScope [Bound "i" SoucInteger] no_exports_ctx), "int"),
-    ([LibImport "salad", LibImport "tofu"], [], Right (GlobalScope [Bound "salad" (SoucType "Module" (SoucKind 0)), Bound "tofu" (SoucType "Module" (SoucKind 0))] no_exports_ctx), "imports")
+    ([], [TopLevelConstDefn "i" (Just SoucInteger) (Leaf (LitInt 4))], Right (GlobalScope [bound_id "i" SoucInteger] no_exports_ctx), "int"),
+    ([LibImport "salad", LibImport "tofu"], [], Right (GlobalScope [bound_id "salad" (SoucType "Module" (SoucKind 0)), bound_id "tofu" (SoucType "Module" (SoucKind 0))] no_exports_ctx), "imports")
     ]
 
 borked_tests :: [Test]

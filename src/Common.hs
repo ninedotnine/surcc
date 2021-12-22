@@ -24,7 +24,11 @@ module Common (
     pattern SoucList,
     pattern SoucPair,
     pattern SoucEither,
+    Constant(..),
+--     Bound,
     Bound(..),
+    bound_id,
+    bound_const,
     TypeError(..),
     Stmts(..),
     CheckedProgram(..),
@@ -55,7 +59,8 @@ data ParseTree = ParseTree SoucModule Imports [TypeDef] Body
 
 data CheckedProgram = CheckedProgram SoucModule Imports Body
 
-data ExportDecl = ExportDecl Identifier SoucType
+data ExportDecl = ExportDecl Bound
+
 data SoucModule = SoucModule Text [ExportDecl]
 
 data ImportDecl = LibImport Text | RelImport Text
@@ -121,12 +126,22 @@ pattern SoucPair t0 t1 = SoucTypeConstructor "Pair" (SoucKind 2) [t0,t1]
 pattern SoucEither :: SoucType -> SoucType-> SoucType
 pattern SoucEither t0 t1 = SoucTypeConstructor "Either" (SoucKind 2) [t0,t1]
 
-data Bound = Bound Identifier SoucType deriving Eq
+newtype Constant = Constant Text
+                   deriving (Eq, IsString, Hashable)
+
+data Bound = Bound (Either Identifier Constant) SoucType deriving Eq
+
+bound_id :: Identifier -> SoucType -> Bound
+bound_id = Bound . Left
+
+bound_const :: Constant -> SoucType -> Bound
+bound_const = Bound . Right
+
 
 data TypeError = TypeMismatch SoucType SoucType
                | MultipleDeclarations Identifier
                | Undeclared Identifier
-               | UnknownData Text
+               | UnknownData Constant
                | ExportedButNotDefined Bound
     deriving (Eq)
 
@@ -163,7 +178,7 @@ data Term = LitInt Integer
           | LitChar Char
           | LitString Text
           | Var Identifier
-          | Constructor Text
+          | Constructor Constant
     deriving (Eq, Show)
 
 data Operator = Plus
@@ -216,13 +231,19 @@ instance TextShow Identifier where
 instance Show Identifier where
     show = TextShow.toString . showb
 
+instance TextShow Constant where
+    showb (Constant c) = TextShow.fromText c
+
+instance Show Constant where
+    show = TextShow.toString . showb
+
 instance TextShow CheckedProgram where
     showb (CheckedProgram m imports body) =
         "CheckedProgam " <> showb m <> " uses " <> showb imports <>
         " : " <> showb body
 
 instance TextShow ExportDecl where
-    showb (ExportDecl name t) = showb name <> ": " <> showb t
+    showb (ExportDecl (Bound name t)) = "export: " <> showb name <> ": " <> showb t
 
 instance TextShow SoucModule where
     showb (SoucModule name exports) = "souc module: " <> showb name <> " exports: " <> showb exports
@@ -245,7 +266,11 @@ instance TextShow SoucKind where
         TextShow.fromText (Text.replicate (fromIntegral k) " => *")
 
 instance TextShow Bound where
-    showb (Bound (Identifier i) t) = "Bound " <> showb i <> ": " <> showb t
+    showb = \case
+        Bound (Left (Identifier i)) t ->
+            "Bound " <> showb i <> ": " <> showb t
+        Bound (Right (Constant c)) t ->
+            "Bound " <> showb c <> ": " <> showb t
 
 instance TextShow TypeError where
     showb = \case

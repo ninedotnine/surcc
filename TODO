@@ -23,3 +23,4 @@
 [ ] populate global scope first, then subscopes
         check test/parser.d/valid/bindings4.souc
 [ ] consider using TaggedList or TaggedVector or VectorSized instead of NonEmpty
+[ ] change different types of Map to HashMap

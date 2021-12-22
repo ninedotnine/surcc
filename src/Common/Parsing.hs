@@ -16,7 +16,6 @@ module Common.Parsing (
     type_name,
     upper_name,
     optional_sig,
-    constructor_name
 ) where
 
 import Data.List (genericLength)
@@ -25,7 +24,7 @@ import qualified Data.Text as Text
 import Text.Parsec hiding (string, space, spaces, newline)
 import qualified Text.Parsec (string)
 
-import Common (SoucKind(..), SoucType(..), Term(..))
+import Common (SoucKind(..), SoucType(..), Term(..), Constant(..))
 
 identifier_char :: Parsec Text s Char
 identifier_char = (alphaNum <|> char '_')
@@ -144,6 +143,3 @@ type_name :: Parsec Text s SoucType
 type_name = do
     n <- upper_name
     return $ SoucType n (SoucKind 0)
-
-constructor_name :: Parsec Text s Term
-constructor_name = Constructor <$> upper_name

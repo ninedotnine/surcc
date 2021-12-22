@@ -28,18 +28,18 @@ empty_ctx = GlobalScope [] (ExportList [])
 
 globals :: LocalScope
 globals = GlobalScope [
-    Bound (Identifier "x") SoucInteger,
-    Bound (Identifier "s") SoucString,
-    Bound (Identifier "c") SoucChar,
-    Bound (Identifier "b") SoucBool
+    bound_id "x" SoucInteger,
+    bound_id "s" SoucString,
+    bound_id "c" SoucChar,
+    bound_id "b" SoucBool
     ] no_exports_ctx
 
 scoped :: LocalScope
 scoped = InnerScope [
-    BoundLocal (Identifier "x") SoucInteger Immut,
-    BoundLocal (Identifier "s") SoucString Immut,
-    BoundLocal (Identifier "c") SoucChar Immut,
-    BoundLocal (Identifier "b") SoucBool Immut
+    BoundLocal "x" SoucInteger Immut,
+    BoundLocal "s" SoucString Immut,
+    BoundLocal "c" SoucChar Immut,
+    BoundLocal "b" SoucBool Immut
     ] empty_ctx
 
 tests :: [Test]

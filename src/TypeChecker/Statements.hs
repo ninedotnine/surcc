@@ -15,7 +15,7 @@ import Prelude hiding (lookup)
 
 import Common
 
-import TypeChecker.Context
+import TypeChecker.Context (Checker, LocalScope, insert_const, insert_mut, lookup_identifier)
 import TypeChecker.Operators
 import TypeChecker.Expressions
 
@@ -82,18 +82,18 @@ check_stmt_if expr body m_else m_ret = do
 check_stmt_ass :: Identifier -> (Maybe SoucType) -> ExprTree -> Checker ()
 check_stmt_ass name m_t expr = do
     t <- infer_if_needed m_t expr
-    insert_const (Bound name t)
+    insert_const name t
 
 check_stmt_mut_ass :: Identifier -> (Maybe SoucType) -> ExprTree -> Checker ()
 check_stmt_mut_ass name m_t expr = do
     t <- infer_if_needed m_t expr
-    insert_mut (Bound name t)
+    insert_mut name t
 
 
 check_stmt_call :: Identifier -> Maybe ExprTree -> Checker ()
 check_stmt_call name m_expr = do
     ctx <- get
-    case (lookup ctx name , m_expr) of
+    case (lookup_identifier name ctx, m_expr) of
         (Just SoucIO, Nothing) -> pure ()
         (Just (SoucRoutn param), Just expr) -> case check_expr ctx expr param of
             Left err -> throwE err

@@ -4,7 +4,7 @@ module Parser.TypeDefs (
 
 import Text.Parsec hiding (space, spaces, string, parse)
 
-import Common (TypeDef(..))
+import Common (TypeDef(..), Term(..), Constant(..))
 import Common.Parsing
 import Parser.Common (SouCParser)
 
@@ -20,15 +20,18 @@ unit_type = do
     reserved "unit" *> spaces
     name <- type_name
     spaces *> char '=' *> spaces *> char '{' *> optional spaces
-    constructor <- constructor_name
+    c <- constructor
     optional spaces *> char '}' *> endline
-    pure $ UnitType name constructor
+    pure $ UnitType name c
 
 enum_type :: SouCParser TypeDef
 enum_type = do
     reserved "enum" *> spaces
     name <- type_name
     spaces *> char '=' *> spaces *> char '{' *> optional spaces
-    constructors <- many1 (constructor_name <* spaces)
+    constructors <- many1 (constructor <* spaces)
     optional spaces *> char '}' *> endline
     pure $ EnumType name constructors
+
+constructor :: SouCParser Term
+constructor = Constructor <$> Constant <$> upper_name

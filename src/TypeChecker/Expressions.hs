@@ -8,9 +8,8 @@ import Control.Applicative
 import Control.Monad.Trans.Except
 import Control.Monad.State
 
-import Prelude hiding (lookup)
 import Common
-import TypeChecker.Context
+import TypeChecker.Context (lookup_identifier, LocalScope, Checker)
 import TypeChecker.Operators
 
 infer :: LocalScope -> ExprTree -> Either TypeError SoucType
@@ -28,7 +27,7 @@ infer_term context term = case term of
     LitInt _    -> Right SoucInteger
     LitChar _   -> Right SoucChar
     LitString _ -> Right SoucString
-    Var v -> case lookup context v of
+    Var v -> case lookup_identifier v context of
         Nothing -> Left (Undeclared v)
         Just t -> Right t
     Constructor s -> case s of

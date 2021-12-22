@@ -22,7 +22,7 @@ parse_term_tok = TermTok <$> (
         parse_num
     <|> parse_char
     <|> parse_string
-    <|> constructor_name
+    <|> parse_constructor
     <|> parse_var)
 
 parse_prefix_op :: ShuntingYardParser TermToken
@@ -53,6 +53,9 @@ parse_char = LitChar <$> ((Parsec.char '\'') *> Parsec.anyChar <* (Parsec.char '
 
 parse_string :: ShuntingYardParser Term
 parse_string = LitString . Text.pack <$> ((Parsec.char '\"') *> Parsec.many (Parsec.noneOf "\"") <* (Parsec.char '\"'))
+
+parse_constructor :: ShuntingYardParser Term
+parse_constructor = Constructor <$> Constant <$> upper_name
 
 parse_left_paren :: ShuntingYardParser TermToken
 parse_left_paren = do
