@@ -1,0 +1,5 @@
+foo(outey: OutputStream) = do
+	write outey , "out"
+
+main(stdout: OutputStream) = do
+	foo stdout
