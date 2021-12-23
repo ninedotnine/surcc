@@ -19,7 +19,7 @@ import Control.Monad.Writer (tell)
 import Data.Functor
 import Data.Maybe (fromMaybe)
 import Data.Text (Text)
-import qualified Data.Text as Text
+import Data.Text qualified as Text
 
 
 generate_expr :: ExprTree -> Generator (Text,Text)

@@ -3,7 +3,7 @@ module Parser.Expr.Opers (
     parse_oper_token
 ) where
 
-import qualified Text.Parsec as Parsec
+import Text.Parsec qualified as Parsec
 import Text.Parsec ((<|>), (<?>))
 
 import Parser.Expr.Types

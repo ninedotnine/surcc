@@ -6,9 +6,9 @@ module Builtins (
     typeof_builtin_data,
 ) where
 
-import qualified Data.HashMap.Strict as Map
+import Data.HashMap.Strict qualified as Map
 import Data.Text (Text)
-import qualified Data.Text as Text
+import Data.Text qualified as Text
 import TextShow (TextShow(..))
 
 import Common

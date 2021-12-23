@@ -8,7 +8,7 @@ import TypeChecker.TypeChecker
 import Common
 
 import Data.Text (Text)
-import qualified Data.Text.IO as Text
+import Data.Text.IO qualified as Text
 import System.Exit (exitFailure)
 import TextShow
 

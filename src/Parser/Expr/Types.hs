@@ -19,7 +19,7 @@ module Parser.Expr.Types (
 
 import Data.Text (Text)
 import Data.Word (Word8)
-import qualified Text.Parsec as Parsec
+import Text.Parsec qualified as Parsec
 
 import Common
 

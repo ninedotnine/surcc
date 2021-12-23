@@ -2,7 +2,7 @@ module TestParser where
 
 import Data.Functor ((<&>))
 import Data.List (isSuffixOf)
-import qualified Data.Text.IO as Text
+import Data.Text.IO qualified as Text
 import System.Directory
 import System.Exit (exitFailure, exitSuccess)
 import System.IO

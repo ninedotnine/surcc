@@ -23,7 +23,7 @@ import Control.Monad.State (evalState)
 import Control.Monad.Writer (execWriterT, tell)
 import Data.Foldable (traverse_)
 import Data.Text (Text)
-import qualified Data.Text as Text
+import Data.Text qualified as Text
 
 generate :: CheckedProgram -> Text
 generate (CheckedProgram _ _ body) = runtime <> text

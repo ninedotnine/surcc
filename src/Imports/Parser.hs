@@ -3,9 +3,9 @@ module Imports.Parser (
 ) where
 
 import Data.Text (Text)
-import qualified Data.Text as Text
+import Data.Text qualified as Text
 import Text.Parsec hiding (string, space, spaces, newline)
-import qualified Text.Parsec (string)
+import Text.Parsec qualified (string)
 
 import Common
 import Common.Parsing

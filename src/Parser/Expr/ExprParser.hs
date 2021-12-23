@@ -17,7 +17,7 @@ module Parser.Expr.ExprParser (
 ) where
 
 
-import qualified Text.Parsec as Parsec
+import Text.Parsec qualified as Parsec
 import Text.Parsec ((<|>), (<?>))
 
 -- for trim_spaces
@@ -28,7 +28,7 @@ import Data.List (dropWhileEnd)
 import Data.Char (ord) -- for evaluate
 
 import Data.Text (Text)
-import qualified Data.Text as Text
+import Data.Text qualified as Text
 -- import TextShow (TextShow(..))
 import TextShow
 

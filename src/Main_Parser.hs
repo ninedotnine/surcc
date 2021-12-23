@@ -9,8 +9,8 @@ module Main_Parser (
 
 import Common
 import Data.Text (Text)
-import qualified Data.Text as Text
-import qualified Data.Text.IO as Text
+import Data.Text qualified as Text
+import Data.Text.IO qualified as Text
 import Text.Parsec.Error (ParseError)
 import TextShow (TextShow(..), printT)
 import System.Environment (getArgs)

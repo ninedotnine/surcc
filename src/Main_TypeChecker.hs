@@ -3,7 +3,7 @@ module Main_TypeChecker where
 import Data.Foldable (traverse_)
 import Data.List (sort)
 import Data.Text (Text)
-import qualified Data.Text.IO as Text
+import Data.Text.IO qualified as Text
 import System.Directory
 import System.Environment (getArgs)
 import System.Exit (exitFailure, exitSuccess)

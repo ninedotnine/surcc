@@ -46,9 +46,9 @@ import Control.Monad (join)
 import Data.Hashable (Hashable)
 import Data.String (IsString)
 import Data.Text (Text)
-import qualified Data.Text as Text
+import Data.Text qualified as Text
 import TextShow (TextShow(..))
-import qualified TextShow
+import TextShow qualified
 
 data Mutability = Mut | Immut deriving (Eq, Show)
 

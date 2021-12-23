@@ -1,7 +1,7 @@
 module CodeGen.Runtime.DataDefs (datadefs) where
 
 import Data.Text (Text)
-import qualified Data.Text as Text
+import Data.Text qualified as Text
 
 datadefs :: Text
 datadefs = Text.intercalate "\n" [

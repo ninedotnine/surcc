@@ -6,9 +6,9 @@ import TypeChecker.Context
 import TypeChecker.Expressions
 import Common
 
-import qualified Data.HashMap.Strict as Map
+import Data.HashMap.Strict qualified as Map
 import Data.Text (Text)
-import qualified Data.Text.IO as Text
+import Data.Text.IO qualified as Text
 import System.Exit (exitFailure)
 
 newtype Expected = Result (Either TypeError ())

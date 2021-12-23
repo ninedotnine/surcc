@@ -12,7 +12,7 @@ import Control.Monad.Trans.Except (runExceptT, throwE)
 import Data.Either ()
 import Data.Text (Text)
 import TextShow (TextShow(..), toString) -- for error
-import qualified Data.Text as Text
+import Data.Text qualified as Text
 
 import Prelude hiding (lookup)
 import Common

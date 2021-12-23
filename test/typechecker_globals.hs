@@ -7,10 +7,10 @@ import TypeChecker.TypeChecker
 import TypeChecker.Context
 import Common
 
-import qualified Data.HashMap.Strict as Map
+import Data.HashMap.Strict qualified as Map
 import Data.Text (Text)
-import qualified Data.Text.IO as Text
-import qualified Data.Text as Text
+import Data.Text.IO qualified as Text
+import Data.Text qualified as Text
 import System.Exit (exitFailure)
 import TextShow
 

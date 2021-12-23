@@ -1,7 +1,7 @@
 module CodeGen.Runtime.SubrDefs (subrdefs) where
 
 import Data.Text (Text)
-import qualified Data.Text as Text
+import Data.Text qualified as Text
 
 subrdefs :: Text
 subrdefs = Text.intercalate "\n" [write, abort, "// end of subrdefs\n"]

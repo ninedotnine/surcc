@@ -7,7 +7,7 @@ module Parser.Common (
 
 import Data.List.NonEmpty ( NonEmpty(..) )
 import Data.Text (Text)
-import qualified Data.Map.Strict as Map (Map, empty)
+import Data.Map.Strict qualified as Map (Map, empty)
 import Text.Parsec (Parsec)
 
 import Common

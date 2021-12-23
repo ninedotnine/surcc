@@ -3,7 +3,7 @@ module Parser.SouC_Stmts (
     stmt_block_with_param
 ) where
 
-import qualified Data.Map.Strict as Map (empty, singleton, member, lookup)
+import Data.Map.Strict qualified as Map (empty, singleton, member, lookup)
 import Data.List.NonEmpty ( NonEmpty(..), cons )
 import Text.Parsec hiding (space, spaces, string)
 

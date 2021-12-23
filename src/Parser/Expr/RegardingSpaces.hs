@@ -12,7 +12,7 @@ module Parser.Expr.RegardingSpaces (
 ) where
 
 import Control.Monad (when)
-import qualified Text.Parsec as Parsec
+import Text.Parsec qualified as Parsec
 import Text.Parsec ((<|>), (<?>))
 
 import Parser.Expr.Types

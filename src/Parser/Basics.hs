@@ -12,9 +12,9 @@ module Parser.Basics (
 
 import Control.Monad (when)
 import Data.List.NonEmpty ( NonEmpty(..) )
-import qualified Data.Map.Strict as Map (singleton, member, lookup)
+import Data.Map.Strict qualified as Map (singleton, member, lookup)
 import Data.Maybe (isJust)
-import qualified Data.Text as Text
+import Data.Text qualified as Text
 import Text.Parsec hiding (space, spaces, string, newline)
 
 import Common

@@ -3,9 +3,9 @@ module Parser.SouCParser (
 ) where
 
 import Data.List.NonEmpty ( NonEmpty(..) )
-import qualified Data.Map.Strict as Map (Map, fromList)
+import Data.Map.Strict qualified as Map (Map, fromList)
 import Data.Text (Text)
-import qualified Data.Text as Text
+import Data.Text qualified as Text
 import Text.Parsec hiding (space, spaces, string, parse)
 
 

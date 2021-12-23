@@ -10,9 +10,9 @@ import Debug.Trace
 
 import Text.Parsec hiding (newline, space, spaces, string)
 import Data.List.NonEmpty ( NonEmpty(..) )
-import qualified Data.Map.Strict as Map (Map, empty)
+import Data.Map.Strict qualified as Map (Map, empty)
 import Data.Text (Text)
-import qualified Data.Text as Text
+import Data.Text qualified as Text
 
 import Parser.Common
 import Common.Parsing

@@ -4,8 +4,8 @@ module Parser.Expr.Terms (
 ) where
 
 
-import qualified Data.Text as Text
-import qualified Text.Parsec as Parsec
+import Data.Text qualified as Text
+import Text.Parsec qualified as Parsec
 import Text.Parsec ((<|>), (<?>))
 
 import Common

@@ -13,7 +13,7 @@ module Parser.Expr.StackManipulations (
     clean_stack
 ) where
 
-import qualified Text.Parsec as Parsec
+import Text.Parsec qualified as Parsec
 
 import Parser.Expr.Types
 import Parser.Expr.RegardingSpaces

@@ -7,7 +7,7 @@ import CodeGen.CodeGen
 import Common
 
 import Control.Monad (when)
-import qualified Data.Text.IO as Text
+import Data.Text.IO qualified as Text
 import System.Directory (createDirectoryIfMissing)
 import System.Exit (exitFailure, ExitCode(..))
 import System.Process.Text (readProcessWithExitCode)

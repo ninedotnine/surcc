@@ -9,7 +9,7 @@ import System.Console.Haskeline (runInputT, defaultSettings, getInputLine)
 
 import Parser.ExprParser
 import Data.Text (Text)
-import qualified Data.Text as Text
+import Data.Text qualified as Text
 
 
 main :: IO ()

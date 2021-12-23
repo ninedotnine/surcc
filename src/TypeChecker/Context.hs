@@ -15,14 +15,14 @@ module TypeChecker.Context (
     undefined_export,
 ) where
 
+import Data.HashMap.Strict qualified as Map
+
 import Prelude hiding (lookup)
 import Control.Monad.State (State, get, put)
 import Control.Monad.Trans.Except (ExceptT, throwE)
 
 import Common
 import Builtins (typeof_builtin)
-
-import qualified Data.HashMap.Strict as Map
 
 type Checker a = ExceptT TypeError (State LocalScope) a
 

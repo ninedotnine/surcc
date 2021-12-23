@@ -1,7 +1,7 @@
 module CodeGen.Runtime.TypeDefs (typedefs) where
 
 import Data.Text (Text)
-import qualified Data.Text as Text
+import Data.Text qualified as Text
 
 typedefs :: Text
 typedefs = Text.intercalate "\n" [

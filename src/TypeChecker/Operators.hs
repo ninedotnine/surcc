@@ -8,7 +8,7 @@ module TypeChecker.Operators (
 
 import Prelude hiding (lookup)
 import Data.Text (Text)
-import qualified Data.Text as Text
+import Data.Text qualified as Text
 
 import Common
 import TypeChecker.Context

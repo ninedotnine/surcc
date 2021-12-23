@@ -6,7 +6,7 @@ import CodeGen.Runtime.SubrDefs (subrdefs)
 import CodeGen.Runtime.DataDefs (datadefs)
 
 import Data.Text (Text)
-import qualified Data.Text as Text
+import Data.Text qualified as Text
 
 runtime :: Text
 runtime = Text.unlines [includes, typedefs, funcdefs, subrdefs, datadefs]

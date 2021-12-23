@@ -1,17 +1,25 @@
 SHELL = /bin/sh
+
 SOURCEDIR := src/
 OUT_DIR := bin
 CACHE_DIR := cache
 TEST_DIR := $(CACHE_DIR)/test
 HI_DIR := $(CACHE_DIR)/hi_files
 OBJ_DIR := $(CACHE_DIR)/obj_files
+
 HSFLAGS := -dynamic -j
-GHC_EXTS := -XOverloadedStrings -XLambdaCase -XStrictData -XScopedTypeVariables
+GHC_EXTS := -XOverloadedStrings -XLambdaCase -XStrictData -XScopedTypeVariables -XImportQualifiedPost
 GHC_FLAGS := -hidir $(HI_DIR) -odir $(OBJ_DIR) -i$(SOURCEDIR)
-GHC_WARNS := -Wall -Wextra -Werror -Wno-unused-imports -Wall-missed-specialisations -Widentities -Weverything
+
+GHC_WARNS := -Wall -Wextra -Werror
+GHC_WARNS += -Wall-missed-specialisations
+GHC_WARNS += -Widentities
+GHC_WARNS += -Weverything
 GHC_WARNS += -Wno-unused-top-binds
-GHC_WARNS += -Wno-missing-home-modules -Wno-implicit-prelude -Wno-prepositive-qualified-module -Wno-missing-safe-haskell-mode -Wno-missing-import-lists -Wno-unsafe -Wno-missing-deriving-strategies -Wno-unused-imports -Wno-missing-local-signatures -Wno-safe -Wno-monomorphism-restriction -Wno-missing-export-lists
+GHC_WARNS += -Wno-unused-imports
+GHC_WARNS += -Wno-missing-home-modules -Wno-implicit-prelude -Wno-missing-safe-haskell-mode -Wno-missing-import-lists -Wno-unsafe -Wno-missing-deriving-strategies -Wno-missing-local-signatures -Wno-safe -Wno-monomorphism-restriction -Wno-missing-export-lists
 GHC_WARNS += -fmax-errors=2
+
 FLAGS := $(HSFLAGS) $(GHC_EXTS) $(GHC_FLAGS) $(GHC_WARNS)
 
 
