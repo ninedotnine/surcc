@@ -24,8 +24,8 @@ module Common (
     pattern SoucList,
     pattern SoucPair,
     pattern SoucEither,
+    pattern SoucModuleType,
     Constant(..),
---     Bound,
     Bound(..),
     bound_id,
     bound_const,
@@ -40,7 +40,7 @@ module Common (
     ImportDecl(..),
     Imports,
     Mutability(..),
-    ) where
+) where
 
 import Control.Monad (join)
 import Data.Hashable (Hashable)
@@ -125,6 +125,9 @@ pattern SoucPair t0 t1 = SoucTypeConstructor "Pair" (SoucKind 2) [t0,t1]
 
 pattern SoucEither :: SoucType -> SoucType-> SoucType
 pattern SoucEither t0 t1 = SoucTypeConstructor "Either" (SoucKind 2) [t0,t1]
+
+pattern SoucModuleType :: SoucType
+pattern SoucModuleType = SoucType "Module" (SoucKind 0)
 
 newtype Constant = Constant Text
                    deriving (Eq, IsString, Hashable)

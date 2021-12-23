@@ -7,8 +7,10 @@ import TypeChecker.TypeChecker
 import TypeChecker.Context
 import Common
 
+import qualified Data.HashMap.Strict as Map
 import Data.Text (Text)
 import qualified Data.Text.IO as Text
+import qualified Data.Text as Text
 import System.Exit (exitFailure)
 import TextShow
 
@@ -21,31 +23,16 @@ instance Eq LocalScope where
     InnerScope b0 r0 == InnerScope b1 r1 = b0 == b1 && r0 == r1
     _ == _ = False
 
-instance TextShow BoundLocal where
-    showb = \case
-        (BoundLocal (Identifier i) t Mut) ->
-            "Bound (mutable)" <> showb i <> ": " <> showb t
-        (BoundLocal (Identifier i) t Immut) ->
-            "Bound " <> showb i <> ": " <> showb t
-
-instance TextShow ExportList where
-    showb (ExportList binds) = "ExportList: " <> showb binds
-
-instance TextShow LocalScope where
-    showb = \case
-        GlobalScope binds exports -> "GlobalScope " <> showb binds <> " , exports " <> showb exports
-        InnerScope binds scope -> "InnerScope " <> showb binds <> " and more: " <> showb scope
-
 
 no_exports_ctx :: ExportList
-no_exports_ctx = ExportList []
+no_exports_ctx = ExportList Map.empty
 
 type Test = ([ImportDecl], [TopLevelDefn], Either TypeError LocalScope, String)
 
 tests :: [Test]
 tests = [
-    ([], [TopLevelConstDefn "i" (Just SoucInteger) (Leaf (LitInt 4))], Right (GlobalScope [bound_id "i" SoucInteger] no_exports_ctx), "int"),
-    ([LibImport "salad", LibImport "tofu"], [], Right (GlobalScope [bound_id "salad" (SoucType "Module" (SoucKind 0)), bound_id "tofu" (SoucType "Module" (SoucKind 0))] no_exports_ctx), "imports")
+    ([], [TopLevelConstDefn "i" (Just SoucInteger) (Leaf (LitInt 4))], Right (GlobalScope (Map.singleton (Left "i") SoucInteger) no_exports_ctx), "int"),
+    ([LibImport "salad", LibImport "tofu"], [], Right (GlobalScope (Map.fromList [(Left "salad", SoucModuleType), (Left "tofu", SoucModuleType)]) no_exports_ctx), "imports")
     ]
 
 borked_tests :: [Test]
@@ -64,9 +51,11 @@ main = do
     mapM_ test borked_tests
     putStrLn "all type-checker tests passed :^)"
 
+deriving instance Show LocalScope
+deriving instance Show ExportList
 
 render :: Either TypeError LocalScope -> Text
-render (Right ctx) = showt ctx
+render (Right ctx) = Text.pack (show ctx)
 render (Left (TypeMismatch (SoucType x _) (SoucType y _))) = "mismatch: " <> x <> " / " <> y
 render (Left (MultipleDeclarations (Identifier i))) = "multiple declarations for " <> i
 render (Left (Undeclared (Identifier i))) = "undeclared identifier " <> i

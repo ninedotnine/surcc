@@ -15,7 +15,11 @@ import Prelude hiding (lookup)
 
 import Common
 
-import TypeChecker.Context (Checker, LocalScope, insert_const, insert_mut, lookup_identifier)
+import TypeChecker.Context (Checker,
+                            LocalScope,
+                            insert_immut,
+                            insert_mut,
+                            lookup_identifier)
 import TypeChecker.Operators
 import TypeChecker.Expressions
 
@@ -82,7 +86,7 @@ check_stmt_if expr body m_else m_ret = do
 check_stmt_ass :: Identifier -> (Maybe SoucType) -> ExprTree -> Checker ()
 check_stmt_ass name m_t expr = do
     t <- infer_if_needed m_t expr
-    insert_const name t
+    insert_immut name t
 
 check_stmt_mut_ass :: Identifier -> (Maybe SoucType) -> ExprTree -> Checker ()
 check_stmt_mut_ass name m_t expr = do

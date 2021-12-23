@@ -6,6 +6,7 @@ import TypeChecker.Context
 import TypeChecker.Expressions
 import Common
 
+import qualified Data.HashMap.Strict as Map
 import Data.Text (Text)
 import qualified Data.Text.IO as Text
 import System.Exit (exitFailure)
@@ -21,26 +22,26 @@ mismatch :: Text -> Text -> Expected
 mismatch x y = Result $ Left $ TypeMismatch (SoucType x (SoucKind 0)) (SoucType y (SoucKind 0))
 
 no_exports_ctx :: ExportList
-no_exports_ctx = ExportList []
+no_exports_ctx = ExportList Map.empty
 
 empty_ctx :: LocalScope
-empty_ctx = GlobalScope [] (ExportList [])
+empty_ctx = GlobalScope Map.empty no_exports_ctx
 
 globals :: LocalScope
-globals = GlobalScope [
-    bound_id "x" SoucInteger,
-    bound_id "s" SoucString,
-    bound_id "c" SoucChar,
-    bound_id "b" SoucBool
-    ] no_exports_ctx
+globals = GlobalScope (Map.fromList [
+    (Left "x", SoucInteger),
+    (Left "s", SoucString),
+    (Left "c", SoucChar),
+    (Left "b", SoucBool)
+    ]) no_exports_ctx
 
 scoped :: LocalScope
-scoped = InnerScope [
-    BoundLocal "x" SoucInteger Immut,
-    BoundLocal "s" SoucString Immut,
-    BoundLocal "c" SoucChar Immut,
-    BoundLocal "b" SoucBool Immut
-    ] empty_ctx
+scoped = InnerScope (Map.fromList [
+    ("x", (SoucInteger, Immut)),
+    ("s", (SoucString, Immut)),
+    ("c", (SoucChar, Immut)),
+    ("b", (SoucBool, Immut))
+    ]) empty_ctx
 
 tests :: [Test]
 tests = [

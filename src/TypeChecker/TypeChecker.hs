@@ -16,7 +16,17 @@ import qualified Data.Text as Text
 
 import Prelude hiding (lookup)
 import Common
-import TypeChecker.Context
+import TypeChecker.Context (Checker,
+                            ExportList(..),
+                            LocalScope,
+                            make_export_list,
+                            make_global_scope,
+                            undefined_export,
+                            add_potential_export,
+                            new_scope,
+                            new_param_scope,
+                            exit_scope,
+                           )
 import TypeChecker.Expressions
 import TypeChecker.Statements
 
@@ -26,30 +36,23 @@ type_check (ParseTree module_info imports _ defns) = do
     exports_ctx <- add_exports module_info
     imports_ctx <- add_imports imports exports_ctx
     finished_ctx <- add_globals imports_ctx defns
-    let undefined_exports = exports_remaining finished_ctx in
-        if undefined_exports == []
-            then Right $ CheckedProgram module_info imports defns
-            else Left (ExportedButNotDefined (head undefined_exports))
+    case undefined_export finished_ctx of
+        Nothing -> Right $ CheckedProgram module_info imports defns
+        Just export -> Left (ExportedButNotDefined export)
 
-
+-- this returns an Either TypeError ExportList because it could fail.
+-- e. g. the same name could be exported multiple times, possibly with
+-- different types even.
+-- don't worry about it for now.
 add_exports :: SoucModule -> Either TypeError ExportList
-add_exports (SoucModule _ exports) = Right $ ExportList (map get_bound exports)
-    where
-        get_bound (ExportDecl b) = b
+add_exports (SoucModule _ exports) = Right $ make_export_list exports
 
 -- getting imports can fail if (e. g.) a file cannot be found.
 -- don't worry about it for now.
 -- should also fail if it tries to import something that was
 -- declared exported with a non-module type
 add_imports :: Imports -> ExportList -> Either TypeError LocalScope
-add_imports imports ctx = Right $ GlobalScope (map make_import_bound (map from_import imports)) ctx
-    where
-        from_import :: ImportDecl -> Identifier
-        from_import = \case
-            LibImport name -> Identifier name
-            RelImport name -> Identifier name
-        make_import_bound i = bound_id i (SoucType "Module" (SoucKind 0))
-
+add_imports imports ctx = Right $ make_global_scope imports ctx
 
 add_globals :: LocalScope -> [TopLevelDefn] -> Either TypeError LocalScope
 add_globals imports_ctx defns =
@@ -75,7 +78,8 @@ add_top_level_const i m_t expr = do
     add_potential_export $ bound_id i t
 
 
-add_top_level_short_fn :: Identifier -> Param -> Maybe SoucType -> ExprTree -> Checker ()
+add_top_level_short_fn :: Identifier -> Param -> Maybe SoucType -> ExprTree
+                        -> Checker ()
 add_top_level_short_fn i p m_t expr = do
     case p of
         Param _ Nothing -> error "FIXME type inference"
@@ -86,7 +90,8 @@ add_top_level_short_fn i p m_t expr = do
             add_potential_export $ bound_id i (SoucFn p_t t)
 
 
-add_top_level_long_fn :: Identifier -> Param -> Maybe SoucType -> Stmts -> Checker ()
+add_top_level_long_fn :: Identifier -> Param -> Maybe SoucType -> Stmts
+                        -> Checker ()
 add_top_level_long_fn i p m_t stmts = do
     case p of
         Param _ Nothing -> error "FIXME type inference"
@@ -104,7 +109,8 @@ add_top_level_long_fn i p m_t stmts = do
                     exit_scope
                     add_potential_export (bound_id i (SoucFn p_t t))
 
-add_top_level_sub :: Identifier -> Maybe Param -> Maybe SoucType -> Stmts -> Checker ()
+add_top_level_sub :: Identifier -> Maybe Param -> Maybe SoucType -> Stmts
+                    -> Checker ()
 add_top_level_sub i m_p m_t stmts = case (i, m_t) of
     ("main", _) -> error "tried to add \"main\" as a subroutine"
     (_, Nothing) -> ok_sub
