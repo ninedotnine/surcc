@@ -1,0 +1,8 @@
+; return must not be followed by any other statements
+
+f(x) = fndo
+	y = x
+	if x
+		return y
+	z = x
+	return z

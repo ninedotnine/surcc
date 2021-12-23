@@ -1,0 +1,5 @@
+import whatever
+
+def enum Number = { One Two Three }
+
+def enum Unit = { Unit }
