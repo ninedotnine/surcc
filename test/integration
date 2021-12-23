@@ -14,7 +14,8 @@ fail() {
 
 echo "=== starting integration tests"
 
-for fi in $(ls -1 "${dir}/outputs/") ; do
+for fi in $(ls -1 "${dir}/inputs/") ; do
+    fi=$(basename "$fi" '.souc')
     echo -n "> ${fi}... "
     bin/soucc "${dir}/inputs/${fi}.souc" > "${tempdir}/${fi}.c" || fail "$fi" "souc won't compile"
     gcc "${tempdir}/${fi}.c" -o "${tempdir}/${fi}" || fail "$fi" "gcc won't compile"
