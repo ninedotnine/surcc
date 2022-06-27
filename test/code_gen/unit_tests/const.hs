@@ -1,5 +1,5 @@
 import CodeGen
-import SouC_Types
+import SurC_Types
 
 prog :: Program
 prog = Program Nothing [] [TopLevelConstDefn (Identifier "x") (RawExpr "42")]

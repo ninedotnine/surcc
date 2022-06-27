@@ -3,8 +3,8 @@
 
 {-# OPTIONS_GHC -Wall #-}
 
-import SouC.CodeGen.CodeGen
-import SouC.Common
+import SurCC.CodeGen.CodeGen
+import SurCC.Common
 
 import Control.Monad (when)
 import Data.Text.IO qualified as Text
@@ -13,7 +13,7 @@ import System.Exit (exitFailure, ExitCode(..))
 import System.Process.Text (readProcessWithExitCode)
 
 tmpdir :: FilePath
-tmpdir = "/tmp/souc_code_gen_test/"
+tmpdir = "/tmp/surcc_code_gen_test/"
 
 test :: CheckedProgram -> String -> IO ()
 test prog name = do
@@ -53,8 +53,8 @@ run_tests = do
     test sub_while "sub_while"
     test sub_until "sub_until"
 
-default_module :: SoucModule
-default_module = SoucModule "anonymous_main_module" []
+default_module :: SurCModule
+default_module = SurCModule "anonymous_main_module" []
 
 default_main :: TopLevelDefn
 default_main = MainDefn (Just (Param (Identifier "stdout") Nothing)) Nothing short_stmts

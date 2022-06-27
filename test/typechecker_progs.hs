@@ -4,8 +4,8 @@
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-import SouC.TypeChecker.TypeChecker
-import SouC.Common
+import SurCC.TypeChecker.TypeChecker
+import SurCC.Common
 
 import Data.Text (Text)
 import Data.Text.IO qualified as Text
@@ -32,8 +32,8 @@ instance Eq CheckedProgram where
     CheckedProgram m0 i0 b0 == CheckedProgram m1 i1 b1 =
         m0 == m1 && i0 == i1 && b0 == b1
 
-instance Eq SoucModule where
-    SoucModule s0 _ == SoucModule s1 _ = s0 == s1
+instance Eq SurCModule where
+    SurCModule s0 _ == SurCModule s1 _ = s0 == s1
 
 instance Eq ImportDecl where
     RelImport s0 == RelImport s1 = s0 == s1
@@ -74,8 +74,8 @@ tests :: [Test]
 notype :: Maybe SoucType
 notype = Nothing
 
-default_module :: SoucModule
-default_module = SoucModule "anonymous_main_module" []
+default_module :: SurCModule
+default_module = SurCModule "anonymous_main_module" []
 
 -- tests begin here
 

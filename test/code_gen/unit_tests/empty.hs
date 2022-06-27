@@ -1,5 +1,4 @@
 import CodeGen
-import SouC_Types
 
 empty_parse_tree :: Program
 empty_parse_tree = Program Nothing [] []

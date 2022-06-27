@@ -23,22 +23,22 @@ GHC_WARNS += -fmax-errors=2
 FLAGS := $(HSFLAGS) $(GHC_EXTS) $(GHC_FLAGS) $(GHC_WARNS)
 
 
-.PHONY: soucc expr parser typechecker all default
+.PHONY: surcc expr parser typechecker all default
 
 default: all test
 
-all: soucc expr parser typechecker
+all: surcc expr parser typechecker
 
-soucc: src/Main_Soucc.hs | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
-	@ghc $(FLAGS) -o $(OUT_DIR)/$@ -main-is Main_Soucc $<
+surcc: src/Main_Surcc.hs | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
+	@ghc $(FLAGS) -o $(OUT_DIR)/$@ -main-is Main_Surcc $<
 
-expr: src/Main_Expr.hs soucc | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
+expr: src/Main_Expr.hs surcc | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
 	@ghc $(FLAGS) -o $(OUT_DIR)/$@ -main-is Main_Expr $<
 
-parser: src/Main_Parser.hs soucc expr | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
+parser: src/Main_Parser.hs surcc expr | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
 	@ghc $(FLAGS) -o $(OUT_DIR)/$@ -main-is Main_Parser $<
 
-typechecker: src/Main_TypeChecker.hs soucc expr parser | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
+typechecker: src/Main_TypeChecker.hs surcc expr parser | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
 	@ghc $(FLAGS) -o $(OUT_DIR)/$@ -main-is Main_TypeChecker $<
 
 
@@ -55,12 +55,12 @@ test: test/parser test/type_checker test/typechecker_progs test/codegen test/exp
 
 .PHONY: test/expr_parser test/integration test/typechecker
 test/expr_parser: parser expr
-test/integration test/expr_parser: soucc
+test/integration test/expr_parser: surcc
 	@ $@
 
 
 .PHONY: test/parser
-test/parser: test/TestParser.hs parser soucc | $(TEST_DIR)
+test/parser: test/TestParser.hs parser surcc | $(TEST_DIR)
 	@$(RM) $(CACHE_DIR)/hi_files/Main.hi  	# ugh hack to fix ghc
 	ghc $(FLAGS) -o $(TEST_DIR)/parser -main-is TestParser $<
 	$(TEST_DIR)/parser
@@ -77,7 +77,7 @@ test/codegen test/type_checker test/typechecker_progs test/typechecker_globals: 
 
 .PHONY: deps
 deps: | $(CACHE_DIR)
-	ghc -M -dep-suffix '' $(FLAGS) -dep-makefile $(CACHE_DIR)/soucc-deps src/Main_Soucc.hs
+	ghc -M -dep-suffix '' $(FLAGS) -dep-makefile $(CACHE_DIR)/surcc-deps src/Main_Surcc.hs
 	ghc -M -dep-suffix '' $(FLAGS) -dep-makefile $(CACHE_DIR)/expr-deps src/Main_Expr.hs
 	ghc -M -dep-suffix '' $(FLAGS) -dep-makefile $(CACHE_DIR)/parser-deps src/Main_Parser.hs
 	ghc -M -dep-suffix '' $(FLAGS) -dep-makefile $(CACHE_DIR)/typechecker-deps src/Main_TypeChecker.hs

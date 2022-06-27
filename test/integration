@@ -5,7 +5,7 @@ set -o errexit -o nounset
 dir="test/integration.d"
 
 trap 'rm -r "$tempdir"' EXIT
-tempdir=$(mktemp -d "/tmp/souc_temp_XXXX")
+tempdir=$(mktemp -d "/tmp/surc_temp_XXXX")
 
 fail() {
     echo "test $1 failed: $2"
@@ -15,9 +15,9 @@ fail() {
 echo "=== starting integration tests"
 
 for fi in $(ls -1 "${dir}/inputs/") ; do
-    fi=$(basename "$fi" '.souc')
+    fi=$(basename "$fi" '.surc')
     echo -n "> ${fi}... "
-    bin/soucc "${dir}/inputs/${fi}.souc" > "${tempdir}/${fi}.c" || fail "$fi" "souc won't compile"
+    bin/surcc "${dir}/inputs/${fi}.surc" > "${tempdir}/${fi}.c" || fail "$fi" "surc won't compile"
     gcc "${tempdir}/${fi}.c" -o "${tempdir}/${fi}" || fail "$fi" "gcc won't compile"
     "${tempdir}/$fi" > "${tempdir}/output" || fail "$fi" "fail during c run"
     diff --brief "${tempdir}/output" "${dir}/outputs/${fi}" || fail "$fi" "incorrect output"

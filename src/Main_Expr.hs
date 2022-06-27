@@ -10,7 +10,7 @@ import System.Console.Haskeline (runInputT, defaultSettings, getInputLine)
 import Data.Text (Text)
 import Data.Text qualified as Text
 
-import SouC.Parser.ExprParser
+import SurCC.Parser.ExprParser
 
 main :: IO ()
 main = do

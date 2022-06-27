@@ -1,6 +1,6 @@
 module Main_Parser (
     main,
-    parse_souc_file,
+    parse_surc_file,
     render_file_contents,
     render_error,
     pretty_print,
@@ -15,14 +15,14 @@ import TextShow (TextShow(..), printT)
 import System.Environment (getArgs)
 import System.Exit (exitFailure, exitSuccess)
 
-import SouC.Common
-import SouC.Imports.Parser (parse_module_header)
-import SouC.Parser.SouCParser (parse)
+import SurCC.Common
+import SurCC.Imports.Parser (parse_module_header)
+import SurCC.Parser.SurCParser (parse)
 
 main :: IO ()
 main = do
     (filename, input) <- getArgs >>= parse_args
-    case parse_souc_file filename input of
+    case parse_surc_file filename input of
         Left err -> do
             Text.putStr (render_error err input)
             exitFailure
@@ -55,8 +55,8 @@ render_file_contents text = header <> contents
         numbers = fmap (Text.pack . show) ([1..]::[Int])
         indented = fmap ("   "<>) (Text.lines (text))
 
-parse_souc_file :: FilePath -> Text -> Either ParseError ParseTree
-parse_souc_file filename input = do
+parse_surc_file :: FilePath -> Text -> Either ParseError ParseTree
+parse_surc_file filename input = do
     module_data <- parse_module_header filename input
     parse filename module_data
 
