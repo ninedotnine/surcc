@@ -53,6 +53,8 @@ builtin_subroutines = Map.fromList [
 builtin_functions :: Mapping Identifier
 builtin_functions = Map.fromList [
     ("increment", ("_souc_increment", SoucFn SoucInteger SoucInteger))
+    ,
+    ("str", ("_souc_int_str", SoucFn SoucInteger SoucString))
     ]
 
 builtin_constants :: Mapping Identifier

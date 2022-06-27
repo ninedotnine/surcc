@@ -22,6 +22,7 @@ funcdefs = Text.intercalate "\n" [
     conjunction,
     disjunction,
     increment,
+    int_str,
     "// end of funcdefs\n"
     ]
 
@@ -52,3 +53,5 @@ conjunction = "union _souc_obj _souc_conjunction(union _souc_obj x, union _souc_
 disjunction = "union _souc_obj _souc_disjunction(union _souc_obj x, union _souc_obj y) { union _souc_obj b = { ._souc_bool = x._souc_bool || y._souc_bool}; return b;}"
 
 increment = "union _souc_obj _souc_increment(union _souc_obj n) { return (union _souc_obj) { ._souc_int = n._souc_int + 1 };}"
+
+int_str = "union _souc_obj _souc_int_str(union _souc_obj n) { return (union _souc_obj) { ._souc_str = \"a number hehe\"};}"
