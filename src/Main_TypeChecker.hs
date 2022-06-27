@@ -10,10 +10,10 @@ import System.Exit (exitFailure, exitSuccess)
 import System.IO
 import TextShow (hPrintT, printT)
 
-import Common
-import Imports.Parser (parse_module_header)
-import Parser.SouCParser (parse)
-import TypeChecker.TypeChecker (type_check)
+import SouC.Common
+import SouC.Imports.Parser (parse_module_header)
+import SouC.Parser.SouCParser (parse)
+import SouC.TypeChecker.TypeChecker (type_check)
 
 main :: IO ()
 main = do

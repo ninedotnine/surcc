@@ -1,10 +1,10 @@
 module Main_Soucc where
 
-import Common (TypeError)
-import CodeGen.CodeGen (generate)
-import Imports.Parser (parse_module_header)
-import Parser.SouCParser (parse)
-import TypeChecker.TypeChecker (type_check)
+import SouC.Common (TypeError)
+import SouC.CodeGen.CodeGen (generate)
+import SouC.Imports.Parser (parse_module_header)
+import SouC.Parser.SouCParser (parse)
+import SouC.TypeChecker.TypeChecker (type_check)
 
 import Prelude hiding (putStr, putStrLn, readFile)
 import Control.Arrow (left)

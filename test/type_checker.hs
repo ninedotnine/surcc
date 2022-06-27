@@ -2,9 +2,9 @@
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-import TypeChecker.Context
-import TypeChecker.Expressions
-import Common
+import SouC.TypeChecker.Context
+import SouC.TypeChecker.Expressions
+import SouC.Common
 
 import Data.HashMap.Strict qualified as Map
 import Data.Text (Text)

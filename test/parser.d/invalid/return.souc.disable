@@ -1,0 +1,6 @@
+; return must not be followed by any other statements
+
+f(x) = do
+	y = x
+	return y
+	z = x

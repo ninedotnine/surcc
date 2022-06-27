@@ -7,7 +7,6 @@ module Main_Parser (
 ) where
 
 
-import Common
 import Data.Text (Text)
 import Data.Text qualified as Text
 import Data.Text.IO qualified as Text
@@ -16,8 +15,9 @@ import TextShow (TextShow(..), printT)
 import System.Environment (getArgs)
 import System.Exit (exitFailure, exitSuccess)
 
-import Imports.Parser (parse_module_header)
-import Parser.SouCParser (parse)
+import SouC.Common
+import SouC.Imports.Parser (parse_module_header)
+import SouC.Parser.SouCParser (parse)
 
 main :: IO ()
 main = do

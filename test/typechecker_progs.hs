@@ -4,8 +4,8 @@
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-import TypeChecker.TypeChecker
-import Common
+import SouC.TypeChecker.TypeChecker
+import SouC.Common
 
 import Data.Text (Text)
 import Data.Text.IO qualified as Text

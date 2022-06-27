@@ -3,8 +3,8 @@
 
 {-# OPTIONS_GHC -Wall #-}
 
-import CodeGen.CodeGen
-import Common
+import SouC.CodeGen.CodeGen
+import SouC.Common
 
 import Control.Monad (when)
 import Data.Text.IO qualified as Text

@@ -7,10 +7,10 @@ import System.Environment (getArgs)
 import System.Exit (exitFailure, exitSuccess)
 import System.Console.Haskeline (runInputT, defaultSettings, getInputLine)
 
-import Parser.ExprParser
 import Data.Text (Text)
 import Data.Text qualified as Text
 
+import SouC.Parser.ExprParser
 
 main :: IO ()
 main = do
