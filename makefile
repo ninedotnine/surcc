@@ -2,7 +2,7 @@ SHELL = /bin/sh
 
 SOURCEDIR := src/
 OUT_DIR := bin
-CACHE_DIR := cache
+CACHE_DIR := .cache
 TEST_DIR := $(CACHE_DIR)/test
 HI_DIR := $(CACHE_DIR)/hi_files
 OBJ_DIR := $(CACHE_DIR)/obj_files
