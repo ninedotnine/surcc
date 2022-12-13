@@ -69,12 +69,38 @@ main_defn :: SurCParser TopLevelDefn
 main_defn = do
     _ <- string "main("
     add_to_bindings (Identifier "main") Immut
-    p <- optionMaybe param <* char ')'
+    p <- main_param <* char ')'
     sig <- optionMaybe type_signature
     _ <- spaces <* char '=' <* spaces <* string "do" <* endline
     stmts <- stmt_block
     optional $ end_block_named (Identifier "main")
     pure $ MainDefn p sig stmts
+
+main_param :: SurCParser MainParam
+main_param = do
+    -- FIXME this should match a pattern,
+    -- not (any) single identifier
+--     name <- choice (string <$>
+--                     ["stdin", "stdout", "stderr",
+--                      "program_name", "args", "env"])
+    p <- optionMaybe $ do
+        stdout <- string "stdout"
+        _ <- optionMaybe type_signature
+        pure stdout
+    -- FIXME yeah i'm not even trying
+    case p of
+        Just _ ->
+            pure $ MainParam
+                (MainParamStdIn False) (MainParamStdOut True)
+                (MainParamStdErr False) (MainParamProgName False)
+                (MainParamArgs False) (MainParamEnv False)
+        Nothing ->
+            pure $ MainParam
+                (MainParamStdIn False) (MainParamStdOut False)
+                (MainParamStdErr False) (MainParamProgName False)
+                (MainParamArgs False) (MainParamEnv False)
+
+
 
 top_level_const :: SurCParser TopLevelDefn
 top_level_const = do

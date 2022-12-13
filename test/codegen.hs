@@ -53,11 +53,19 @@ run_tests = do
     test sub_while "sub_while"
     test sub_until "sub_until"
 
+default_main_param stdout = MainParam
+    (MainParamStdIn False)
+    (MainParamStdOut stdout)
+    (MainParamStdErr False)
+    (MainParamProgName False)
+    (MainParamArgs False)
+    (MainParamEnv False)
+
 default_module :: SurCModule
 default_module = SurCModule "anonymous_main_module" []
 
 default_main :: TopLevelDefn
-default_main = MainDefn (Just (Param (Identifier "stdout") Nothing)) Nothing short_stmts
+default_main = MainDefn (default_main_param True) Nothing short_stmts
 
 short_stmts :: Stmts
 short_stmts = Stmts [Stmt_Sub_Call (Identifier "write") (Just (Branch Comma (Leaf (Var (Identifier "stdout"))) (Leaf (LitString "hello"))))]
@@ -65,7 +73,7 @@ short_stmts = Stmts [Stmt_Sub_Call (Identifier "write") (Just (Branch Comma (Lea
 conster :: CheckedProgram
 conster = CheckedProgram default_module [] [
     TopLevelConstDefn (Identifier "x") Nothing (Leaf (LitInt 42)),
-    MainDefn Nothing Nothing (Stmts [
+    MainDefn (default_main_param False) Nothing (Stmts [
         Stmt_Const_Assign (Identifier "x2") Nothing (Leaf (LitInt 0))])]
 
 func :: CheckedProgram
@@ -82,7 +90,7 @@ func2 = CheckedProgram default_module [] [
 
 subber :: CheckedProgram
 subber = CheckedProgram default_module [] [
-    MainDefn Nothing Nothing (Stmts [
+    MainDefn (default_main_param False) Nothing (Stmts [
         Stmt_Sub_Call (Identifier "abort") Nothing])]
 
 subber_ass :: CheckedProgram
@@ -129,7 +137,7 @@ subber_if_else = CheckedProgram default_module [] [
             Stmt_Postfix_Oper (Identifier "x") "++"])
             (Just (Stmts [
                 (Stmt_Postfix_Oper (Identifier "x") "--")]))]),
-    MainDefn Nothing Nothing (Stmts [
+    MainDefn (default_main_param False) Nothing (Stmts [
         Stmt_Sub_Call (Identifier "subby") Nothing])]
 
 subber_unless :: CheckedProgram
@@ -149,7 +157,7 @@ subber_unless_else = CheckedProgram default_module [] [
             Stmt_Postfix_Oper (Identifier "x") "++"])
             (Just (Stmts [
                 (Stmt_Postfix_Oper (Identifier "x") "--")]))]),
-    MainDefn Nothing Nothing (Stmts [
+    MainDefn (default_main_param False) Nothing (Stmts [
         Stmt_Sub_Call (Identifier "subby") Nothing])]
 
 sub_while :: CheckedProgram
@@ -158,7 +166,7 @@ sub_while = CheckedProgram default_module [] [
         Stmt_Var_Assign (Identifier "x") Nothing (Leaf (LitInt 41)),
         Stmt_While (Leaf (Constructor "True")) (Stmts [
             Stmt_Postfix_Oper (Identifier "x") "++"])]),
-    MainDefn Nothing Nothing (Stmts [
+    MainDefn (default_main_param False) Nothing (Stmts [
         Stmt_Sub_Call (Identifier "subby") Nothing])]
 
 sub_until :: CheckedProgram
@@ -167,5 +175,5 @@ sub_until = CheckedProgram default_module [] [
         Stmt_Var_Assign (Identifier "x") Nothing (Leaf (LitInt 41)),
         Stmt_Until (Leaf (Constructor "False")) (Stmts [
             Stmt_Postfix_Oper (Identifier "x") "++"])]),
-    MainDefn Nothing Nothing (Stmts [
+    MainDefn (default_main_param False) Nothing (Stmts [
         Stmt_Sub_Call (Identifier "subby") Nothing])]

@@ -6,6 +6,7 @@ module SurCC.TypeChecker.Context (
     lookup_constant,
     new_scope,
     new_param_scope,
+    new_main_scope,
     exit_scope,
     insert_immut,
     insert_mut,
@@ -20,6 +21,7 @@ import Data.HashMap.Strict qualified as Map
 import Prelude hiding (lookup)
 import Control.Monad.State (State, get, put)
 import Control.Monad.Trans.Except (ExceptT, throwE)
+import Data.Text (Text)
 
 import SurCC.Common
 import SurCC.Builtins (typeof_builtin)
@@ -137,6 +139,29 @@ new_scope = get >>= put . InnerScope Map.empty
 
 new_param_scope :: Identifier -> SoucType -> Checker ()
 new_param_scope i t = get >>= put . InnerScope (Map.singleton i (t, Immut))
+
+new_main_scope :: MainParam -> Checker ()
+new_main_scope (MainParam
+        (MainParamStdIn stdin)
+        (MainParamStdOut stdout)
+        (MainParamStdErr stderr)
+        (MainParamProgName progname)
+        (MainParamArgs args)
+        (MainParamEnv env)
+    ) = do
+    let list = include stdin "stdin" "InputStream"
+            <> include stdout "stdout" "OutputStream"
+            <> include stderr "stderr" "OutputStream"
+            <> include progname "program_name" "String"
+            <> include args "args" "FIXME"
+            <> include env "env" "FIXME"
+    get >>= put . InnerScope (Map.fromList list)
+
+    where include :: Bool -> Identifier -> Text
+                     -> [(Identifier,(SoucType,Mutability))]
+          include b name t = if b
+            then [(name, (SoucType t (SoucKind 0), Immut))]
+            else []
 
 exit_scope :: Checker ()
 exit_scope = get >>= \case

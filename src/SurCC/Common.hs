@@ -5,6 +5,13 @@
 module SurCC.Common (
     Stmt(..),
     Param(..),
+    MainParam(..),
+    MainParamStdIn(..),
+    MainParamStdOut(..),
+    MainParamStdErr(..),
+    MainParamProgName(..),
+    MainParamArgs(..),
+    MainParamEnv(..),
     Identifier(..),
     Term(..),
     ExprTree(..),
@@ -150,12 +157,26 @@ data TypeError = TypeMismatch SoucType SoucType
 
 data Param = Param Identifier (Maybe SoucType) deriving (Eq, Show)
 
+newtype MainParamStdIn = MainParamStdIn Bool deriving (Eq,Show)
+newtype MainParamStdOut = MainParamStdOut Bool deriving (Eq,Show)
+newtype MainParamStdErr = MainParamStdErr Bool deriving (Eq,Show)
+newtype MainParamProgName = MainParamProgName Bool deriving (Eq,Show)
+newtype MainParamArgs = MainParamArgs Bool deriving (Eq,Show)
+newtype MainParamEnv = MainParamEnv Bool deriving (Eq,Show)
+data MainParam = MainParam
+    MainParamStdIn
+    MainParamStdOut
+    MainParamStdErr
+    MainParamProgName
+    MainParamArgs
+    MainParamEnv
+    deriving (Eq,Show)
 
 data TopLevelDefn = TopLevelConstDefn Identifier (Maybe SoucType) ExprTree
                     | FuncDefn Identifier Param (Maybe SoucType) Stmts
                     | ShortFuncDefn Identifier Param (Maybe SoucType) ExprTree
                     | SubDefn Identifier (Maybe Param) (Maybe SoucType) Stmts
-                    | MainDefn (Maybe Param) (Maybe SoucType) Stmts
+                    | MainDefn MainParam (Maybe SoucType) Stmts
                     deriving (Eq, Show)
 
 data Stmt = Stmt_While ExprTree Stmts
@@ -287,6 +308,18 @@ instance TextShow Param where
     showb = \case
         Param p (Just t) -> "param: " <> showb p <> ": " <> showb t
         Param p Nothing -> "param: " <> showb p
+
+instance TextShow MainParam where
+    showb (MainParam (MainParamStdIn stdin) (MainParamStdOut stdout) (MainParamStdErr stderr) (MainParamProgName progname) (MainParamArgs args) (MainParamEnv env)) =
+        let iff b word = if b then word else ""
+        in "mainparam packing: [ "
+            <> iff stdin "stdin "
+            <> iff stdout "stdout "
+            <> iff stderr "stderr "
+            <> iff progname "progname "
+            <> iff args "args "
+            <> iff env "env "
+            <> "]"
 
 instance TextShow TopLevelDefn where
     showb = \case

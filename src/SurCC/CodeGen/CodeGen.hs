@@ -12,6 +12,13 @@ import SurCC.CodeGen.Runtime (runtime)
 import SurCC.Common (
     Stmt(..),
     Param(..),
+    MainParam(..),
+    MainParamStdIn(..),
+    MainParamStdOut(..),
+    MainParamStdErr(..),
+    MainParamProgName(..),
+    MainParamArgs(..),
+    MainParamEnv(..),
     Identifier(..),
     Stmts(..),
     CheckedProgram(..),
@@ -73,11 +80,40 @@ instance Genny TopLevelDefn () where
             s <- gen stmts
             tell $ s <> "}\n"
 
-        MainDefn m_param _ stmts -> do
-            p <- gen m_param
-            tell $ "int main(" <> p <> ") {\n"
+        MainDefn param _ stmts -> do
+            tell $ "int main(void) {\n"
+            gen param
             s <- gen stmts
             tell $ s <> "}\n"
+
+instance Genny MainParam () where
+    gen (MainParam
+            (MainParamStdIn stdin)
+            (MainParamStdOut stdout)
+            (MainParamStdErr stderr)
+            (MainParamProgName progname)
+            (MainParamArgs args)
+            (MainParamEnv env)
+        ) = do
+        tell $ include stdin "stdin"
+            <> include stdout "stdout"
+            <> include stderr "stderr"
+            <> include progname "program_name"
+            <> include args "args"
+            <> include env "env"
+
+        where include :: Bool -> Text -> Text
+              include b name = if b
+                     -- FIXME
+                     -- zero is fine for an OutputStream,
+                     -- which only exists in SurC (not in C)
+                     -- but program_name, args, and env
+                     -- will need to have actual values here.
+                then "const union _souc_obj _souc_user_"
+                     <> name
+                     <> " = {._souc_int = 0};\n"
+                else ""
+
 
 instance Genny Param Text where
     gen (Param (Identifier param) _) = do

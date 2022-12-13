@@ -25,6 +25,7 @@ import SurCC.TypeChecker.Context (Checker,
                             add_potential_export,
                             new_scope,
                             new_param_scope,
+                            new_main_scope,
                             exit_scope,
                            )
 import SurCC.TypeChecker.Expressions
@@ -69,7 +70,7 @@ add_top_level_defns = \case
     FuncDefn i p m_t stmts -> add_top_level_long_fn i p m_t stmts
     ShortFuncDefn i p m_t expr -> add_top_level_short_fn i p m_t expr
     SubDefn i m_p m_t stmts -> add_top_level_sub i m_p m_t stmts
-    MainDefn m_p m_t stmts -> add_main_routine m_p m_t stmts
+    MainDefn p m_t stmts -> add_main_routine p m_t stmts
 
 
 add_top_level_const :: Identifier -> Maybe SoucType -> ExprTree -> Checker ()
@@ -130,14 +131,12 @@ add_top_level_sub i m_p m_t stmts = case (i, m_t) of
                 exit_scope
                 add_potential_export (bound_id i (SoucRoutn p_t))
 
-add_main_routine :: Maybe Param -> Maybe SoucType -> Stmts -> Checker ()
-add_main_routine m_p m_t stmts = case m_p of
-    Just (Param _ Nothing) -> error "FIXME infer param type"
-    Just (Param p (Just p_t)) -> do
-        new_param_scope p p_t
-        check_stmts stmts m_t
-        exit_scope
-    Nothing -> do
-        new_scope
-        check_stmts stmts m_t
-        exit_scope
+add_main_routine :: MainParam -> Maybe SoucType -> Stmts -> Checker ()
+add_main_routine param m_t stmts = do
+    -- FIXME
+    -- if a type annotation is given,
+    -- it should be checked with the type
+    -- that we know the main param must have
+    new_main_scope param
+    check_stmts stmts m_t
+    exit_scope
