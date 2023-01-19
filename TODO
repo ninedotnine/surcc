@@ -19,3 +19,4 @@
         check test/parser.d/valid/bindings4.surc
 [ ] consider using TaggedList or TaggedVector or VectorSized instead of NonEmpty
 [ ] change different types of Map to HashMap
+[ ] functions/procs can allocate but never free!

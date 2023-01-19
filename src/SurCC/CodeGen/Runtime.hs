@@ -12,4 +12,4 @@ runtime :: Text
 runtime = Text.unlines [includes, typedefs, funcdefs, subrdefs, datadefs]
 
 includes :: Text
-includes = "#include <stdio.h>\n#include <stdbool.h>\n#include <stdlib.h>\n"
+includes = "#include <stdio.h>\n#include <stdbool.h>\n#include <stdlib.h>\n#include <string.h>\n"

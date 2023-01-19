@@ -54,4 +54,4 @@ disjunction = "union _souc_obj _souc_disjunction(union _souc_obj x, union _souc_
 
 increment = "union _souc_obj _souc_increment(union _souc_obj n) { return (union _souc_obj) { ._souc_int = n._souc_int + 1 };}"
 
-int_str = "union _souc_obj _souc_int_str(union _souc_obj n) { return (union _souc_obj) { ._souc_str = \"a number hehe\"};}"
+int_str = "union _souc_obj _souc_int_str(union _souc_obj n) {\n\tchar * p = calloc(14,1);\n\tsnprintf(p, 13, \"%d\", n._souc_int);\n\treturn (union _souc_obj) { ._souc_str = p};}"

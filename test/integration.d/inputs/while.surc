@@ -1,5 +1,6 @@
 main(stdout: OutputStream) = do
 	i <- 0
 	if i < 4
-		i++ ; should be printed
+		i <- i & increment
+		write stdout , (i & str)
 	write stdout , "done"
