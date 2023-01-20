@@ -18,8 +18,10 @@ module SurCC.Common.Parsing (
     optional_sig,
 ) where
 
+import Control.Monad (when)
 import Data.Functor ((<&>))
 import Data.List (genericLength)
+import Data.Set qualified as Set
 import Data.Text (Text)
 import Data.Text qualified as Text
 import Text.Parsec hiding (string, space, spaces, newline)
@@ -28,7 +30,7 @@ import Text.Parsec qualified (string)
 import SurCC.Common (SoucKind(..), SoucType(..), Term(..), Constant(..))
 
 identifier_char :: Parsec Text s Char
-identifier_char = (alphaNum <|> char '_')
+identifier_char = (alphaNum <|> char '_') <?> "identifier char"
 
 
 line_comment :: Parsec Text s ()
@@ -67,10 +69,18 @@ reserved = reserved' <&> try
 reserved' :: String -> Parsec Text s ()
 reserved' s = reserved_specific s *> pure ()
 
-reserved_word :: Parsec Text s Text
-reserved_word =
-    choice (map reserved_specific long_list) <?> "reserved word" where
-        long_list = [
+
+raw_identifier :: Parsec Text s Text
+raw_identifier = do
+    first <- lower <|> char '_'
+    rest <- many identifier_char
+    let i = Text.pack (first:rest)
+    when (Set.member i reserved_words) $
+        unexpected ("keyword: " <> (first:rest))
+    pure i
+
+reserved_words :: Set.Set Text
+reserved_words = Set.fromList [
             -- these are in use, or i expect will be soon
             "if", "unless", "else", "while", "until",
             "for", "in", "do", "end", "where", "return",
@@ -108,14 +118,6 @@ reserved_word =
             "unlock", "undef", "use", "virtual", "void", "volatile", "wait",
             "when", "with", "yield", "zen"]
 
-
-
-raw_identifier :: Parsec Text s Text
-raw_identifier = do
-    notFollowedBy reserved_word
-    first <- lower <|> char '_'
-    rest <- many identifier_char
-    pure (Text.pack (first:rest))
 
 -- Text.Parsec.string does this silly thing where it might fail while advancing
 -- the stream.
