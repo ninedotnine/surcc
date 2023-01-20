@@ -79,19 +79,19 @@ bindings_lookup i = do
 
 
 optional_do :: SurCParser ()
-optional_do = skipMany space *> optional (try (reserved "do")) *> pure ()
+optional_do = skipMany space *> optional (reserved "do") *> pure ()
 
 
 end_block_named :: Identifier -> SurCParser ()
 end_block_named (Identifier name) = do
-    _ <- lookAhead (try (indentation *> reserved "end")) *>
-            indentation *> reserved "end"
+    _ <- lookAhead (try (indentation *> reserved' "end")) *>
+            indentation *> reserved' "end"
     optional (try (spaces *> string (Text.unpack name)))
     endline
 
 end_block :: Endable_Stmts -> SurCParser ()
 end_block stmt_type = do
-    try (indentation *> reserved "end")
+    try (indentation *> reserved' "end")
     optional (try (spaces *> string word))
     -- FIXME also allow type annotation here
     endline

@@ -49,7 +49,7 @@ module_header = do
 
 export_decls :: HeaderParser [ExportDecl]
 export_decls = do
-    try (space *> reserved "where") *> endline
+    try (space *> reserved' "where") *> endline
     many1 (tab *> export_decl)
 
 export_decl :: HeaderParser ExportDecl
@@ -66,7 +66,7 @@ import_list = many souc_import
 
 souc_import :: HeaderParser ImportDecl
 souc_import = do
-    name <- try (reserved "import") *> spaces *> module_path <* skipMany1 endline
+    name <- reserved "import" *> spaces *> module_path <* skipMany1 endline
     pure (LibImport name)
 
 

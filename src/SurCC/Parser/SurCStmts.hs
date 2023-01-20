@@ -66,7 +66,7 @@ stmt_declaration = stmt_declare_dynamic_const <|> stmt_declare_var
 
 stmt_declare_dynamic_const :: SurCParser Stmt
 stmt_declare_dynamic_const = do
-    name <- try (reserved "let") *> spaces *> identifier
+    name <- reserved "let" *> spaces *> identifier
     sig <- optional_sig <* spaces <* char '='
     add_to_bindings name Immut
     val <- spaces *> raw_expr
@@ -78,7 +78,7 @@ stmt_declare_dynamic_const = do
 
 stmt_declare_var :: SurCParser Stmt
 stmt_declare_var = do
-    name <- try (reserved "var") *> spaces *> identifier
+    name <- reserved "var" *> spaces *> identifier
     m_sig <- optional_sig <* spaces <* string "<-"
     add_to_bindings name Mut
     val <- spaces *> raw_expr
@@ -144,7 +144,7 @@ stmt_loop = stmt_while <|> stmt_until
 
 stmt_while :: SurCParser Stmt
 stmt_while = do
-    condition <- try (reserved "while") *> spaces *> raw_expr
+    condition <- reserved "while" *> spaces *> raw_expr
     stmts <- optional_do *> endline *> stmt_block
     optional (many endline *> end_block Stmt_While_End) -- FIXME use this for type-checking
     case parse_expression condition of
@@ -153,7 +153,7 @@ stmt_while = do
 
 stmt_until :: SurCParser Stmt
 stmt_until = do
-    condition <- try (reserved "until") *> spaces *> raw_expr
+    condition <- reserved "until" *> spaces *> raw_expr
     stmts <- optional_do *> endline *> stmt_block
     optional (end_block Stmt_Until_End) -- FIXME use this for type-checking
     case parse_expression condition of
@@ -165,9 +165,9 @@ stmt_cond = stmt_if <|> stmt_unless
 
 stmt_if :: SurCParser Stmt
 stmt_if = do
-    condition <- try (reserved "if") *> spaces *> raw_expr
+    condition <- reserved "if" *> spaces *> raw_expr
     thenDo <- optional_do *> endline *> stmt_block
-    elseDo <- optionMaybe ((try (indentation *> reserved "else"))
+    elseDo <- optionMaybe ((try (indentation *> reserved' "else"))
                                 *> endline
                                 *> stmt_block)
     optional (end_block Stmt_If_End) -- FIXME use this for type-checking
@@ -177,9 +177,9 @@ stmt_if = do
 
 stmt_unless :: SurCParser Stmt
 stmt_unless = do
-    condition <- try (reserved "unless") *> spaces *> raw_expr
+    condition <- reserved "unless" *> spaces *> raw_expr
     thenDo <- optional_do *> endline *> stmt_block
-    elseDo <- optionMaybe ((try (indentation *> reserved "else"))
+    elseDo <- optionMaybe ((try (indentation *> reserved' "else"))
                                 *> endline
                                 *> stmt_block)
     optional (end_block Stmt_Unless_End) -- FIXME use this for type-checking
@@ -189,7 +189,7 @@ stmt_unless = do
 
 stmt_return :: SurCParser Stmt
 stmt_return = do
-    result <- try (reserved "return") *> optionMaybe (try (spaces *> raw_expr))
+    result <- reserved "return" *> optionMaybe (try (spaces *> raw_expr))
     case result of
         Nothing -> pure (Stmt_Return Nothing)
         Just raw_exp -> case parse_expression raw_exp of

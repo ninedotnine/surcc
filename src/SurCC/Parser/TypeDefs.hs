@@ -12,12 +12,12 @@ import SurCC.Parser.Common (SurCParser)
 
 type_def :: SurCParser TypeDef
 type_def = do
-    try (reserved "def") *> spaces
+    reserved "def" *> spaces
     unit_type <|> enum_type
 
 unit_type :: SurCParser TypeDef
 unit_type = do
-    try (reserved "unit") *> spaces
+    reserved "unit" *> spaces
     name <- type_name
     spaces *> char '=' *> spaces *> char '{' *> optional spaces
     c <- constructor
@@ -26,7 +26,7 @@ unit_type = do
 
 enum_type :: SurCParser TypeDef
 enum_type = do
-    try (reserved "enum") *> spaces
+    reserved "enum" *> spaces
     name <- type_name
     spaces *> char '=' *> spaces *> char '{' *> optional spaces
     constructors <- many1 (constructor <* spaces)

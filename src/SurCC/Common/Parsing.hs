@@ -8,7 +8,7 @@ module SurCC.Common.Parsing (
     pragma,
     skipManyTill,
     reserved,
-    reserved_word,
+    reserved',
     raw_identifier,
     string,
     endline,
@@ -18,6 +18,7 @@ module SurCC.Common.Parsing (
     optional_sig,
 ) where
 
+import Data.Functor ((<&>))
 import Data.List (genericLength)
 import Data.Text (Text)
 import Data.Text qualified as Text
@@ -59,7 +60,10 @@ reserved_specific :: String -> Parsec Text s Text
 reserved_specific s = string s <* notFollowedBy identifier_char
 
 reserved :: String -> Parsec Text s ()
-reserved s = reserved_specific s *> pure ()
+reserved = reserved' <&> try
+
+reserved' :: String -> Parsec Text s ()
+reserved' s = reserved_specific s *> pure ()
 
 reserved_word :: Parsec Text s Text
 reserved_word =
