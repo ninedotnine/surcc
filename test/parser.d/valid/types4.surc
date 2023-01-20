@@ -5,7 +5,7 @@ a = ((x): Integer + ((y)): Typey)
 b = (((((x))): Integer + ((((y))): Typey)))
 
 main(stdout: OutputStream): IO = do
-	x <- cool_fn + (41:Integer)
+	var x <- cool_fn + (41:Integer)
 	print (x: LOLBorked)
 	print ((x): LOLBorked)
 	print ((((x)): LOLBorked))

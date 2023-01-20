@@ -1,7 +1,7 @@
 import cocommens
 
 main() = do
-	x <- f & 42 ; a comment
+	var x <- f & 42 ; a comment
 	print x ;}
 
 f(x) = do

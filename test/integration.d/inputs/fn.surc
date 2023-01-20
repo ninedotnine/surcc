@@ -1,7 +1,7 @@
 foo(x: Integer) = x * 2
 
 main(stdout: OutputStream) = do
-	i <- 1
+	var i <- 1
 	while i < 15
 		write stdout , "doublin"
 		i <- i & foo

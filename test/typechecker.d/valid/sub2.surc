@@ -1,5 +1,5 @@
 subr(): IO = do
-	n <- 2
+	var n <- 2
 	return
 
 main(): IO = do

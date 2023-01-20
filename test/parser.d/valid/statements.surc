@@ -1,5 +1,5 @@
 main() = do
-	x <- 41
+	var x <- 41
 	sub_call x
 	print x
 

@@ -3,5 +3,5 @@ con = "const" <> "ant"
 fishy(x) = x <> "fishy"
 
 main() = do
-	variable <- ~42 <> 29 & fishy
+	var variable <- ~42 <> 29 & fishy
 	print variable

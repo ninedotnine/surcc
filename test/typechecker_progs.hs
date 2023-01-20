@@ -172,7 +172,7 @@ subber_const_ass :: ParseTree
 subber_const_ass = program_header [
     TopLevelConstDefn (Identifier "n") (Just SoucInteger) (Leaf (LitInt 42)),
     SubDefn (Identifier "subby") Nothing notype (Stmts [
-        Stmt_Const_Assign (Identifier "i") notype (Leaf (Var "n"))])]
+        Stmt_Const_Assign_Static (Identifier "i") notype (Leaf (Var "n"))])]
 
 subber_const_ass_checked :: Either TypeError CheckedProgram
 subber_const_ass_checked = Left (mismatch "Integer" "Char")
@@ -181,7 +181,7 @@ borked_subber_const_ass :: ParseTree
 borked_subber_const_ass = program_header [
     TopLevelConstDefn (Identifier "n") (Just SoucInteger) (Leaf (LitInt 42)),
     SubDefn (Identifier "subby") Nothing notype (Stmts [
-        Stmt_Const_Assign (Identifier "x") notype (Leaf (Var "x"))])]
+        Stmt_Const_Assign_Static (Identifier "x") notype (Leaf (Var "x"))])]
 
 borked_subber_const_ass_checked :: Either TypeError CheckedProgram
 borked_subber_const_ass_checked = Left (mismatch "Integer"  "Char")

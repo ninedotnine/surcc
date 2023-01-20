@@ -23,5 +23,6 @@
 [ ] change type of procedures to Proc(args)
 [ ] typeclasses
 [ ] type inference
-[ ] `let` and `var`
+[x] `let` and `var`
+[ ] `let` constants should have different semantics from `x = `  constants
 [ ] `T -> IO` becomes `Proc(T)`

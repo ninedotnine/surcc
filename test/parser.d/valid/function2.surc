@@ -1,6 +1,6 @@
 ;> this is the main routine. it returns no value.
 main() = do
-	x <- f & $42 ; a comment
+	var x <- f & $42 ; a comment
 	print x ;}
 
 ;> this is the f function. it returns 3.

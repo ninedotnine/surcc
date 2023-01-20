@@ -4,5 +4,5 @@ import pragmatic
 import soPragma
 
 main() = do
-	x <- 42 ; a comment
+	var x <- 42 ; a comment
 	print x ;}

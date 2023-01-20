@@ -137,15 +137,20 @@ instance Genny Stmt Text where
             (CIdentifier gname) <- gen name
             (decls, expr) <- gen m_expr
             pure $ decls <> gname <> "(" <> expr <> ");\n"
-        Stmt_Var_Assign name _ expr -> do
+        Stmt_Var_Declare name _ expr -> do
             (CIdentifier gname) <- gen name
             (decls, gexpr) <- gen expr
             pure $ decls <> "union _souc_obj " <> gname <> " = " <> gexpr <> ";\n"
-        Stmt_Var_Reassign name expr -> do
+        Stmt_Var_Reassign name _ expr -> do
             (CIdentifier gname) <- gen name
             (decls, gexpr) <- gen expr
             pure $ decls <> gname <> " = " <> gexpr <> ";\n"
-        Stmt_Const_Assign name _ expr -> do
+        Stmt_Const_Assign_Static name _ expr -> do
+            (CIdentifier gname) <- gen name
+            (decls, gexpr) <- gen expr
+            pure $ decls <> "const union _souc_obj " <> gname <> " = " <>
+                    gexpr <> ";\n"
+        Stmt_Const_Assign_Dynamic name _ expr -> do
             (CIdentifier gname) <- gen name
             (decls, gexpr) <- gen expr
             pure $ decls <> "const union _souc_obj " <> gname <> " = " <>

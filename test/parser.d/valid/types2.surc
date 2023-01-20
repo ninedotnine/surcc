@@ -1,5 +1,5 @@
 main(stdout: OutputStream): IO = do
-	x <- 41
+	var x <- 41
 	sub_call x
 	print x
 	x <- cool_fn + x   ; `+` is not be the apply operator, lol

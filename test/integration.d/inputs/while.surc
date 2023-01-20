@@ -1,5 +1,5 @@
 main(stdout: OutputStream) = do
-	i <- 0
+	var i <- 0
 	until i > 3
 		write stdout , (i & str)
 		i <- i & increment

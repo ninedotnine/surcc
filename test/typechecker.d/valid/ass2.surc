@@ -3,7 +3,7 @@ n = 5
 ; silly, but the types are ok.
 
 f(x: Integer): Integer = fndo
-	b <- True
+	var b <- True
 	if b
 		return x
 	else

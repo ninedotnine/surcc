@@ -47,7 +47,7 @@ add_to_bindings key val = do
     (i, (binds :| deeper_binds)) <- getState
     found <- bindings_contains key
     when found
-        (parserFail ("constant `" ++ show key ++ "` already defined"))
+        (parserFail ("constant or variable `" ++ show key ++ "` already defined"))
     putState (i, ((binds <> Map.singleton key val) :| deeper_binds))
 
 -- fixme

@@ -6,8 +6,8 @@ b = True: Bool
 main(stdout: OutputStream): IO = do
 	im = 0: Int
 	cm = 'c': Char
-	sm <- "str": String
-	bm <- False: Bool
+	var sm <- "str": String
+	var bm <- False: Bool
 end
 
 x = ( (( (42: Integer): Integer ): Integer): Integer ): Integer

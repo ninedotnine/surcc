@@ -1,0 +1,2 @@
+main(stdout: OutputStream) = do
+	write stdout , (5 & str)

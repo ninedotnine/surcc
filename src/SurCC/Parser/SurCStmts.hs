@@ -56,13 +56,44 @@ end_scope = modifyState dedent
 stmt :: SurCParser Stmt
 stmt = do
     try (many endline *> indentation)
-    stmt_cond <|> stmt_loop <|> stmt_return <|> stmt_beginning_with_identifier
+    stmt_control_flow <|> stmt_declaration <|> stmt_beginning_with_identifier
+
+stmt_control_flow :: SurCParser Stmt
+stmt_control_flow = stmt_cond <|> stmt_loop <|> stmt_return
+
+stmt_declaration :: SurCParser Stmt
+stmt_declaration = stmt_declare_dynamic_const <|> stmt_declare_var
+
+stmt_declare_dynamic_const :: SurCParser Stmt
+stmt_declare_dynamic_const = do
+    name <- try (reserved "let") *> spaces *> identifier
+    sig <- optional_sig <* spaces <* char '='
+    add_to_bindings name Immut
+    val <- spaces *> raw_expr
+    expr <- case parse_expression val of
+        Right e -> pure e
+        Left err -> parserFail $ "invalid expression:\n" ++ show err
+    endline
+    pure $ Stmt_Const_Assign_Dynamic name sig expr
+
+stmt_declare_var :: SurCParser Stmt
+stmt_declare_var = do
+    name <- try (reserved "var") *> spaces *> identifier
+    m_sig <- optional_sig <* spaces <* string "<-"
+    add_to_bindings name Mut
+    val <- spaces *> raw_expr
+    expr <- case parse_expression val of
+        Right e -> pure e
+        Left err -> parserFail $ "invalid expression:\n" ++ show err
+    endline
+    pure $ Stmt_Var_Declare name m_sig expr
+
 
 stmt_beginning_with_identifier :: SurCParser Stmt
 stmt_beginning_with_identifier = do
     iden <- identifier
     pure =<< (stmt_const_assign iden <|>
-                stmt_var_assign iden <|>
+              stmt_var_reassign iden <|>
                 stmt_postfix_oper iden <|>
                 stmt_sub_call iden)
 
@@ -73,27 +104,25 @@ stmt_const_assign name = do
     add_to_bindings name Immut
     val <- spaces *> raw_expr
     expr <- case parse_expression val of
-        Right e -> pure $ Stmt_Const_Assign name sig e
+        Right e -> pure $ Stmt_Const_Assign_Static name sig e
         Left err -> parserFail $ "invalid expression:\n" ++ show err
     endline
     pure expr
 
 
-stmt_var_assign :: Identifier -> SurCParser Stmt
-stmt_var_assign name = do
+stmt_var_reassign :: Identifier -> SurCParser Stmt
+stmt_var_reassign name = do
     m_sig <- try (optional_sig <* spaces <* string "<-")
-    ass_or_reass <- bindings_lookup name >>= \case
-        Just Mut -> pure $ Stmt_Var_Reassign name
-        Just Immut -> parserFail $ "tried to reassign: " ++ show name
-        Nothing -> do
-            add_to_bindings name Mut
-            pure $ Stmt_Var_Assign name m_sig
+    bindings_lookup name >>= \case
+        Just Mut -> pure ()
+        Just Immut -> parserFail $ "tried to reassign const: " ++ show name
+        Nothing -> parserFail $ "tried to reassign undeclared: " ++ show name
     val <- spaces *> raw_expr
     expr <- case parse_expression val of
         Right e -> pure e
         Left err -> parserFail $ "invalid expression:\n" ++ show err
     endline
-    pure (ass_or_reass expr)
+    pure $ Stmt_Var_Reassign name m_sig expr
 
 stmt_sub_call :: Identifier -> SurCParser Stmt
 stmt_sub_call name = do

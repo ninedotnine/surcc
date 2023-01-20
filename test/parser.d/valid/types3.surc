@@ -1,5 +1,5 @@
 main(stdout: OutputStream): IO = do
-	x <- cool_fn + (41:Integer)
+	var x <- cool_fn + (41:Integer)
 	print (x: LOLBorked)
 	print ((x): LOLBorked)
 	print (( x ): LOLBorked)

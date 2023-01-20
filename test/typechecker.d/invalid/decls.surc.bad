@@ -1,5 +1,5 @@
 f(x: Integer): Integer = fndo
-	i: Integer <- 5
+	var i: Integer <- 5
 	return i
 
 m = i

@@ -1,6 +1,6 @@
 ; note that "puts" is not the name for this surc subroutine (probably)
 main() = do
-	i <- 0
+	var i <- 0
 	while i < 4
 		i++ ; should be printed
 	end

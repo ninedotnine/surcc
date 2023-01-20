@@ -1,7 +1,7 @@
 n = 5
 
 f(x: Integer): Integer = fndo
-	i <- 5
+	var i <- 5
 	if i
 		return x
 	else

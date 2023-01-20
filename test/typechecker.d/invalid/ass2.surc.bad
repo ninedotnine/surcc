@@ -1,7 +1,7 @@
 n = 5
 
 f(x: Integer): Integer = fndo
-	b: Bool <- 'c'
+	var b: Bool <- 'c'
 	if b
 		return x
 	else

@@ -3,5 +3,5 @@ con = "spacesare"<>"notaccepted"<>"yet"
 main() = do
 	val = 843
 	addr_val = @val
-	variable <- 42 == 29 <> !addr_val
+	var variable <- 42 == 29 <> !addr_val
 	print variable<>con

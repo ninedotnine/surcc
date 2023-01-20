@@ -1,8 +1,8 @@
 import hue
 
 main() = do
-	x: Integer <- 42
-	c: Char <- 'c'
+	var x: Integer <- 42
+	var c: Char <- 'c'
 	x <- x+2
 	print x
 

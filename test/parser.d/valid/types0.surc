@@ -1,5 +1,5 @@
 main() = do
-	x <- 41: Integer
+	var x <- 41: Integer
 	sub_call x:String
 	print x: LOLBorked
 

@@ -185,9 +185,10 @@ data Stmt = Stmt_While ExprTree Stmts
           | Stmt_Unless ExprTree Stmts (Maybe Stmts)
           | Stmt_Sub_Call Identifier (Maybe ExprTree)
           | Stmt_Postfix_Oper Identifier String
-          | Stmt_Const_Assign Identifier (Maybe SoucType) ExprTree
-          | Stmt_Var_Assign Identifier (Maybe SoucType) ExprTree
-          | Stmt_Var_Reassign Identifier ExprTree
+          | Stmt_Const_Assign_Static Identifier (Maybe SoucType) ExprTree
+          | Stmt_Const_Assign_Dynamic Identifier (Maybe SoucType) ExprTree
+          | Stmt_Var_Declare Identifier (Maybe SoucType) ExprTree
+          | Stmt_Var_Reassign Identifier (Maybe SoucType) ExprTree
           | Stmt_Return (Maybe ExprTree)
           deriving (Eq, Show)
 
@@ -366,15 +367,21 @@ instance TextShow Stmt where
             "call " <> showb name
         Stmt_Postfix_Oper name op ->
             showb name <> showb op
-        Stmt_Const_Assign name (Just t) expr ->
+        Stmt_Const_Assign_Static name (Just t) expr ->
             showb name <> ": " <> showb t <> " = " <> showb expr
-        Stmt_Const_Assign name Nothing expr ->
+        Stmt_Const_Assign_Static name Nothing expr ->
             showb name <> " = " <> showb expr
-        Stmt_Var_Assign name (Just t) expr ->
+        Stmt_Const_Assign_Dynamic name (Just t) expr ->
+            showb name <> ": " <> showb t <> " = " <> showb expr
+        Stmt_Const_Assign_Dynamic name Nothing expr ->
+            showb name <> " = " <> showb expr
+        Stmt_Var_Declare name (Just t) expr ->
             showb name <> ": " <> showb t <> " <- " <> showb expr
-        Stmt_Var_Assign name Nothing expr ->
+        Stmt_Var_Declare name Nothing expr ->
             showb name <> " <- " <> showb expr
-        Stmt_Var_Reassign name expr ->
+        Stmt_Var_Reassign name (Just t) expr ->
+            showb name <> ": " <> showb t <> " <-- " <> showb expr
+        Stmt_Var_Reassign name Nothing expr ->
             showb name <> " <-- " <> showb expr
         Stmt_Return (Just expr) ->
             "return" <> showb expr

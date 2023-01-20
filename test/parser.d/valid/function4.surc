@@ -2,7 +2,7 @@ import funcs
 
 ;> this is the main routine. it returns no value.
 main() = do
-	x <- 42 & f & g ; a comment
+	var x <- 42 & f & g ; a comment
 	print x ;}
 
 ;> this is the f function. it returns f(x).

@@ -1,7 +1,7 @@
 c: Integer = 41: Integer
 
 main(stdout: OutputStream): IO = do
-	x <- cool_fn + c: Integer
+	var x <- cool_fn + c: Integer
 	print ((x): LOLBorked)
 end
 

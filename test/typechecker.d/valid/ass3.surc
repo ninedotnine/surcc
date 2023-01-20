@@ -2,7 +2,7 @@
 f(x: Integer): Integer = fndo
 	b = True
 	b2 = b
-	b3 <- b2
+	var b3 <- b2
 	if b2
 		return x
 	else

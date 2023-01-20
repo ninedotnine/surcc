@@ -1,5 +1,5 @@
 subroutin(i) = do
-	x <- ((0))
+	var x <- ((0))
 	while (((x < 10))) do
 		print x
 		x++
@@ -8,7 +8,7 @@ end
 
 
 main() = do
-	x <- (41)
+	var x <- (41)
 	subroutin x
 	print x
 end
