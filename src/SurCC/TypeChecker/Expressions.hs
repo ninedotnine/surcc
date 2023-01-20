@@ -61,6 +61,7 @@ infer_infix_op ctx op left right = case op of
     Or  -> Right ((in_t "Bool", in_t "Bool"), ret_t "Bool")
     Equals -> Right ((in_t "Integer", in_t "Integer"), ret_t "Bool") -- FIXME (should be general)
     LesserThan -> Right ((in_t "Integer", in_t "Integer"), ret_t "Bool") -- FIXME (should be general)
+    GreaterThan -> Right ((in_t "Integer", in_t "Integer"), ret_t "Bool") -- FIXME (should be general)
     Apply     -> do
         l_t <- infer ctx left
         case l_t of

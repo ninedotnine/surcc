@@ -1,6 +1,10 @@
 main(stdout: OutputStream) = do
 	i <- 0
-	if i < 4
-		i <- i & increment
+	until i > 3
 		write stdout , (i & str)
+		i <- i & increment
+	end
+	while i < 5
+		write stdout , (i & str)
+		i <- i & increment
 	write stdout , "done"
