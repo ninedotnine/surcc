@@ -71,7 +71,7 @@ main_defn = do
     add_to_bindings (Identifier "main") Immut
     p <- main_param <* char ')'
     sig <- optionMaybe type_signature
-    _ <- spaces <* char '=' <* spaces <* string "do" <* endline
+    _ <- spaces <* char '=' <* spaces <* try (reserved "do") <* endline
     stmts <- stmt_block
     optional $ end_block_named (Identifier "main")
     pure $ MainDefn p sig stmts
@@ -127,7 +127,7 @@ top_level_func func_name = do
     (p, sig) <- try $ do
         p' <- (param <* char ')')
         sig' <- optionMaybe type_signature
-        spaces *> char '=' *> spaces *> notFollowedBy (string "do")
+        spaces *> char '=' *> spaces *> notFollowedBy (try (reserved "do"))
         pure (p', sig')
     long_top_level_func func_name p sig <|> short_top_level_func func_name p sig
 
@@ -151,7 +151,7 @@ top_level_sub :: Identifier -> SurCParser TopLevelDefn
 top_level_sub sub_name = do
     p <- optionMaybe param <* char ')'
     sig <- optionMaybe type_signature
-    spaces *> char '=' *> spaces *> string "do" *> endline
+    spaces *> char '=' *> spaces *> try (reserved "do") *> endline
     stmts <- stmt_block_with_param p
     optional $ end_block_named sub_name
     pure $ SubDefn sub_name p sig stmts

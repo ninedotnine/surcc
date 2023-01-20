@@ -79,12 +79,12 @@ bindings_lookup i = do
 
 
 optional_do :: SurCParser ()
-optional_do = skipMany space *> optional (reserved "do") *> pure ()
+optional_do = skipMany space *> optional (try (reserved "do")) *> pure ()
 
 
 end_block_named :: Identifier -> SurCParser ()
 end_block_named (Identifier name) = do
-    _ <- lookAhead (indentation *> reserved "end") *>
+    _ <- lookAhead (try (indentation *> reserved "end")) *>
             indentation *> reserved "end"
     optional (try (spaces *> string (Text.unpack name)))
     endline

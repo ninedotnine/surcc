@@ -66,7 +66,7 @@ import_list = many souc_import
 
 souc_import :: HeaderParser ImportDecl
 souc_import = do
-    name <- reserved "import" *> spaces *> module_path <* skipMany1 endline
+    name <- try (reserved "import") *> spaces *> module_path <* skipMany1 endline
     pure (LibImport name)
 
 
