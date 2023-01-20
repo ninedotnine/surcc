@@ -47,6 +47,6 @@ data SouccError = SouccHeaderError ParseError
 
 instance TextShow SouccError where
     showb = \case
-        SouccHeaderError err -> "invalid header:\n" <> showb (show err)
-        SouccParseError err -> "failed parse:\n" <> showb (show err)
+        SouccHeaderError err -> "invalid header:\n" <> fromString (show err)
+        SouccParseError err -> "failed parse:\n" <> fromString (show err)
         SouccTypeError err -> "type error:\n" <> showb err
