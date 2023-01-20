@@ -57,11 +57,13 @@ skipManyTill :: Parsec Text s a -> Parsec Text s b -> Parsec Text s ()
 skipManyTill p1 p2 = manyTill p1 p2 *> pure ()
 
 reserved_specific :: String -> Parsec Text s Text
-reserved_specific s = string s <* notFollowedBy identifier_char
+reserved_specific s = Text.Parsec.string s <* notFollowedBy identifier_char
+                  <&> Text.pack
 
 reserved :: String -> Parsec Text s ()
 reserved = reserved' <&> try
 
+-- for those occasional cases when the try is higher-up.
 reserved' :: String -> Parsec Text s ()
 reserved' s = reserved_specific s *> pure ()
 
