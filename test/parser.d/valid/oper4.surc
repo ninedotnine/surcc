@@ -1,6 +1,10 @@
+; this file contains an error
+; in the expression: (! @ val)
+; val is a constant, taking its address is not allowed
+
 con = "spacesare"<>"notaccepted"<>"yet"
 
 main() = do
 	val = 829
-	var <- 42 <> 29 + (! @val)
-	print var<>con
+	variable <- 42 <> 29 + (! @val)
+	print variable<>con

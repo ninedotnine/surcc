@@ -1,5 +1,5 @@
 con = 3+5
 
 main() = do
-	var <- 9^2
-	print var
+	variable <- 9^2
+	print variable
