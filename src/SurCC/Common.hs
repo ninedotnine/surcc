@@ -475,7 +475,7 @@ instance TextShow TypeDef where
         UnitType t _ -> "unit type " <> showb t
         SynonymType t0 t1 -> "synonym " <> showb t0 <> " = " <> showb t1
         WrapperType t0 _ t1 -> "wrapper " <> showb t0 <> " wraps " <> showb t1
-        EnumType _ _ -> error "fixme typedef textshow"
+        EnumType t terms -> "enum type " <> showb t <> " = " <> showb terms
         StructType _ -> error "fixme typedef textshow"
         GADType _ -> error "fixme typedef textshow"
 
