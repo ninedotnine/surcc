@@ -70,9 +70,7 @@ stmt_declare_dynamic_const = do
     sig <- optional_sig <* spaces <* char '='
     add_to_bindings name Immut
     val <- spaces *> raw_expr
-    expr <- case parse_expression val of
-        Right e -> pure e
-        Left err -> parserFail $ "invalid expression:\n" ++ show err
+    expr <- parse_expression val
     endline
     pure $ Stmt_Const_Assign_Dynamic name sig expr
 
@@ -82,9 +80,7 @@ stmt_declare_var = do
     m_sig <- optional_sig <* spaces <* string "<-"
     add_to_bindings name Mut
     val <- spaces *> raw_expr
-    expr <- case parse_expression val of
-        Right e -> pure e
-        Left err -> parserFail $ "invalid expression:\n" ++ show err
+    expr <- parse_expression val
     endline
     pure $ Stmt_Var_Declare name m_sig expr
 
@@ -103,11 +99,9 @@ stmt_const_assign name = do
     sig <- try (optional_sig <* spaces <* char '=')
     add_to_bindings name Immut
     val <- spaces *> raw_expr
-    expr <- case parse_expression val of
-        Right e -> pure $ Stmt_Const_Assign_Static name sig e
-        Left err -> parserFail $ "invalid expression:\n" ++ show err
+    expr <- parse_expression val
     endline
-    pure expr
+    pure $ Stmt_Const_Assign_Static name sig expr
 
 
 stmt_var_reassign :: Identifier -> SurCParser Stmt
@@ -118,9 +112,7 @@ stmt_var_reassign name = do
         Just Immut -> parserFail $ "tried to reassign const: " ++ show name
         Nothing -> parserFail $ "tried to reassign undeclared: " ++ show name
     val <- spaces *> raw_expr
-    expr <- case parse_expression val of
-        Right e -> pure e
-        Left err -> parserFail $ "invalid expression:\n" ++ show err
+    expr <- parse_expression val
     endline
     pure $ Stmt_Var_Reassign name m_sig expr
 
@@ -130,9 +122,9 @@ stmt_sub_call name = do
     endline
     case m_arg of
         Nothing -> pure $ Stmt_Sub_Call name Nothing
-        Just arg -> case parse_expression arg of
-            Left err -> parserFail $ "invalid expression:\n" ++ show err
-            Right expr -> pure $ Stmt_Sub_Call name (Just expr)
+        Just arg -> do
+            expr <- parse_expression arg
+            pure $ Stmt_Sub_Call name (Just expr)
 
 stmt_postfix_oper :: Identifier -> SurCParser Stmt
 stmt_postfix_oper name = do
@@ -147,18 +139,16 @@ stmt_while = do
     condition <- reserved "while" *> spaces *> raw_expr
     stmts <- optional_do *> endline *> stmt_block
     optional (many endline *> end_block Stmt_While_End) -- FIXME use this for type-checking
-    case parse_expression condition of
-        Right expr -> pure $ Stmt_While expr stmts
-        Left err -> parserFail $ "invalid expression:\n" ++ show err
+    expr <- parse_expression condition
+    pure $ Stmt_While expr stmts
 
 stmt_until :: SurCParser Stmt
 stmt_until = do
     condition <- reserved "until" *> spaces *> raw_expr
     stmts <- optional_do *> endline *> stmt_block
     optional (end_block Stmt_Until_End) -- FIXME use this for type-checking
-    case parse_expression condition of
-        Right expr -> pure $ Stmt_Until expr stmts
-        Left err -> parserFail $ "invalid expression:\n" ++ show err
+    expr <- parse_expression condition
+    pure $ Stmt_Until expr stmts
 
 stmt_cond :: SurCParser Stmt
 stmt_cond = stmt_if <|> stmt_unless
@@ -171,9 +161,8 @@ stmt_if = do
                                 *> endline
                                 *> stmt_block)
     optional (end_block Stmt_If_End) -- FIXME use this for type-checking
-    case parse_expression condition of
-        Right tree -> pure $ Stmt_If tree thenDo elseDo
-        Left err -> parserFail $ "failed expression:\n" ++ show err
+    expr <- parse_expression condition
+    pure $ Stmt_If expr thenDo elseDo
 
 stmt_unless :: SurCParser Stmt
 stmt_unless = do
@@ -183,16 +172,14 @@ stmt_unless = do
                                 *> endline
                                 *> stmt_block)
     optional (end_block Stmt_Unless_End) -- FIXME use this for type-checking
-    case parse_expression condition of
-        Right tree -> pure $ Stmt_Unless tree thenDo elseDo
-        Left err -> parserFail $ "failed expression:\n" ++ show err
+    expr <- parse_expression condition
+    pure $ Stmt_Unless expr thenDo elseDo
 
 stmt_return :: SurCParser Stmt
 stmt_return = do
     result <- reserved "return" *> optionMaybe (try (spaces *> raw_expr))
     case result of
         Nothing -> pure (Stmt_Return Nothing)
-        Just raw_exp -> case parse_expression raw_exp of
-            Right expr -> pure (Stmt_Return (Just expr))
-            Left err -> parserFail $ "failed expression:\n" ++ show err
-
+        Just raw_exp -> do
+            expr <- parse_expression raw_exp
+            pure (Stmt_Return (Just expr))

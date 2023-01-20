@@ -110,10 +110,8 @@ top_level_const = do
     _ <- spaces <* char '='
     val <- spaces *> raw_expr
     endline
-    case parse_expression val of
-        Right expr -> do
-            pure $ TopLevelConstDefn name m_sig expr
-        Left err -> parserFail $ "invalid expression:\n" ++ show err
+    expr <- parse_expression val
+    pure $ TopLevelConstDefn name m_sig expr
 
 top_level_proc :: SurCParser TopLevelDefn
 top_level_proc = do
@@ -134,11 +132,8 @@ top_level_func func_name = do
 short_top_level_func :: Identifier -> Param -> Maybe SoucType -> SurCParser TopLevelDefn
 short_top_level_func func_name p sig = do
     body <- raw_expr
-    case parse_expression body of
-        Right result -> do
-            pure $ ShortFuncDefn func_name p sig result
---         Left parse_err -> mergeError (fail "invalid expression") parse_err
-        Left err -> fail $ "invalid expression\n" ++ show err
+    expr <- parse_expression body
+    pure $ ShortFuncDefn func_name p sig expr
 
 long_top_level_func :: Identifier -> Param -> Maybe SoucType -> SurCParser TopLevelDefn
 long_top_level_func func_name p sig = do
