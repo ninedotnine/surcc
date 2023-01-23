@@ -94,7 +94,7 @@ parse_infix_oper = do
 parse_right_paren :: ShuntingYardParser OperToken
 parse_right_paren = do
     spacing <- Parsec.optionMaybe respect_spaces
-    _ <- Parsec.char ')'
+    _ <- Parsec.char ')' <?> ""
     pure $ case spacing of
         Nothing -> RParen
         Just () -> RParenAfterSpace
