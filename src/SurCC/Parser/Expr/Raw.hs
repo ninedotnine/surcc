@@ -31,7 +31,7 @@ raw_expr = RawExpr <$> Text.pack <$> dumb_raw_expr
 dumb_raw_expr :: SurCParser String
 dumb_raw_expr = fmap pure expr_char <> manyTill expr_char (lookAhead (eol <|> do_keyword)) where
     expr_char = oper_char <|> funky_expr_char <|> identifier_char
-    do_keyword = try (string "do" *> (oneOf " \n")) *> pure ()
+    do_keyword = try (reserved' "do" *> (oneOf " \n")) *> pure ()
     eol = try endline
 
 funky_expr_char :: SurCParser Char
