@@ -5,7 +5,7 @@
 
 module SurCC.Parser.Expr.ExprParser (
     parse_expression,
-    parse_expression',
+    parse_raw_expression,
     parse_print_expression,
     evaluate_astree,
     eval_show_astree,
@@ -38,7 +38,7 @@ import SurCC.Parser.Expr.Types
 import SurCC.Parser.Expr.RegardingSpaces
 import SurCC.Parser.Expr.Terms
 import SurCC.Parser.Expr.Opers
-import SurCC.Parser.Expr.Raw  (RawExpr)
+import SurCC.Parser.Expr.Raw  (RawExpr, raw_expr)
 
 import SurCC.Common
 import SurCC.Parser.Common (SurCParser)
@@ -116,14 +116,13 @@ finish_expr = do
         (result:[]) -> pure result
         _ -> Parsec.parserFail "invalid expression, something is wrong here."
 
-
-parse_expression :: RawExpr -> SurCParser ExprTree
-parse_expression = parse_expression' <&> \case
+parse_expression :: SurCParser ExprTree
+parse_expression = (raw_expr >>=) $ parse_raw_expression <&> \case
     Right e -> pure e
     Left err -> parserFail $ "invalid expression:\n" ++ show err
 
-parse_expression' :: RawExpr -> Either Parsec.ParseError ExprTree
-parse_expression' (RawExpr input) =
+parse_raw_expression :: RawExpr -> Either Parsec.ParseError ExprTree
+parse_raw_expression (RawExpr input) =
     Parsec.runParser parse_term start_state "input" (trim_spaces input)
     where
         start_state = (Oper_Stack [], Tree_Stack [], Tight False)
@@ -133,7 +132,7 @@ parse_expression' (RawExpr input) =
 -- these are little utilities, unrelated to parsing, mostly for testing
 
 parse_print_expression :: Text -> IO ()
-parse_print_expression input = case parse_expression' (RawExpr input) of
+parse_print_expression input = case parse_raw_expression (RawExpr input) of
         Left err -> putStrLn (show err)
         Right tree -> printT tree
 
@@ -174,6 +173,6 @@ eval_show_astree :: ExprTree -> String
 eval_show_astree = evaluate_astree <&> show
 
 parse_eval_print_expression :: Text -> IO ()
-parse_eval_print_expression input = case parse_expression' (RawExpr input) of
+parse_eval_print_expression input = case parse_raw_expression (RawExpr input) of
     Left err -> putStrLn (show err)
     Right tree -> putStrLn (eval_show_astree tree)

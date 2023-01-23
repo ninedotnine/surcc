@@ -69,8 +69,7 @@ stmt_declare_dynamic_const = do
     name <- reserved "let" *> spaces *> identifier
     sig <- optional_sig <* spaces <* char '='
     add_to_bindings name Immut
-    val <- spaces *> raw_expr
-    expr <- parse_expression val
+    expr <- spaces *> parse_expression
     endline
     pure $ Stmt_Const_Assign_Dynamic name sig expr
 
@@ -79,8 +78,7 @@ stmt_declare_var = do
     name <- reserved "var" *> spaces *> identifier
     m_sig <- optional_sig <* spaces <* string "<-"
     add_to_bindings name Mut
-    val <- spaces *> raw_expr
-    expr <- parse_expression val
+    expr <- spaces *> parse_expression
     endline
     pure $ Stmt_Var_Declare name m_sig expr
 
@@ -98,8 +96,7 @@ stmt_const_assign :: Identifier -> SurCParser Stmt
 stmt_const_assign name = do
     sig <- try (optional_sig <* spaces <* char '=')
     add_to_bindings name Immut
-    val <- spaces *> raw_expr
-    expr <- parse_expression val
+    expr <- spaces *> parse_expression
     endline
     pure $ Stmt_Const_Assign_Static name sig expr
 
@@ -111,20 +108,15 @@ stmt_var_reassign name = do
         Just Mut -> pure ()
         Just Immut -> parserFail $ "tried to reassign const: " ++ show name
         Nothing -> parserFail $ "tried to reassign undeclared: " ++ show name
-    val <- spaces *> raw_expr
-    expr <- parse_expression val
+    expr <- spaces *> parse_expression
     endline
     pure $ Stmt_Var_Reassign name m_sig expr
 
 stmt_sub_call :: Identifier -> SurCParser Stmt
 stmt_sub_call name = do
-    m_arg <- optionMaybe (try (spaces *> raw_expr))
+    m_arg <- optionMaybe (try (spaces *> parse_expression))
     endline
-    case m_arg of
-        Nothing -> pure $ Stmt_Sub_Call name Nothing
-        Just arg -> do
-            expr <- parse_expression arg
-            pure $ Stmt_Sub_Call name (Just expr)
+    pure $ Stmt_Sub_Call name m_arg
 
 stmt_postfix_oper :: Identifier -> SurCParser Stmt
 stmt_postfix_oper name = do
@@ -136,50 +128,42 @@ stmt_loop = stmt_while <|> stmt_until
 
 stmt_while :: SurCParser Stmt
 stmt_while = do
-    condition <- reserved "while" *> spaces *> raw_expr
+    condition <- reserved "while" *> spaces *> parse_expression
     stmts <- optional_do *> endline *> stmt_block
     optional (many endline *> end_block Stmt_While_End) -- FIXME use this for type-checking
-    expr <- parse_expression condition
-    pure $ Stmt_While expr stmts
+    pure $ Stmt_While condition stmts
 
 stmt_until :: SurCParser Stmt
 stmt_until = do
-    condition <- reserved "until" *> spaces *> raw_expr
+    condition <- reserved "until" *> spaces *> parse_expression
     stmts <- optional_do *> endline *> stmt_block
     optional (end_block Stmt_Until_End) -- FIXME use this for type-checking
-    expr <- parse_expression condition
-    pure $ Stmt_Until expr stmts
+    pure $ Stmt_Until condition stmts
 
 stmt_cond :: SurCParser Stmt
 stmt_cond = stmt_if <|> stmt_unless
 
 stmt_if :: SurCParser Stmt
 stmt_if = do
-    condition <- reserved "if" *> spaces *> raw_expr
+    condition <- reserved "if" *> spaces *> parse_expression
     thenDo <- optional_do *> endline *> stmt_block
     elseDo <- optionMaybe ((try (indentation *> reserved' "else"))
                                 *> endline
                                 *> stmt_block)
     optional (end_block Stmt_If_End) -- FIXME use this for type-checking
-    expr <- parse_expression condition
-    pure $ Stmt_If expr thenDo elseDo
+    pure $ Stmt_If condition thenDo elseDo
 
 stmt_unless :: SurCParser Stmt
 stmt_unless = do
-    condition <- reserved "unless" *> spaces *> raw_expr
+    condition <- reserved "unless" *> spaces *> parse_expression
     thenDo <- optional_do *> endline *> stmt_block
     elseDo <- optionMaybe ((try (indentation *> reserved' "else"))
                                 *> endline
                                 *> stmt_block)
     optional (end_block Stmt_Unless_End) -- FIXME use this for type-checking
-    expr <- parse_expression condition
-    pure $ Stmt_Unless expr thenDo elseDo
+    pure $ Stmt_Unless condition thenDo elseDo
 
 stmt_return :: SurCParser Stmt
 stmt_return = do
-    result <- reserved "return" *> optionMaybe (try (spaces *> raw_expr))
-    case result of
-        Nothing -> pure (Stmt_Return Nothing)
-        Just raw_exp -> do
-            expr <- parse_expression raw_exp
-            pure (Stmt_Return (Just expr))
+    expr <- reserved "return" *> optionMaybe (try (spaces *> parse_expression))
+    pure $ Stmt_Return expr

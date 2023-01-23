@@ -108,9 +108,8 @@ top_level_const = do
     add_to_bindings name Immut
     m_sig <- optional_sig
     _ <- spaces <* char '='
-    val <- spaces *> raw_expr
+    expr <- spaces *> parse_expression
     endline
-    expr <- parse_expression val
     pure $ TopLevelConstDefn name m_sig expr
 
 top_level_proc :: SurCParser TopLevelDefn
@@ -131,8 +130,7 @@ top_level_func func_name = do
 
 short_top_level_func :: Identifier -> Param -> Maybe SoucType -> SurCParser TopLevelDefn
 short_top_level_func func_name p sig = do
-    body <- raw_expr
-    expr <- parse_expression body
+    expr <- parse_expression
     pure $ ShortFuncDefn func_name p sig expr
 
 long_top_level_func :: Identifier -> Param -> Maybe SoucType -> SurCParser TopLevelDefn
