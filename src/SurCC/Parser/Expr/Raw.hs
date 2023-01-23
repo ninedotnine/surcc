@@ -38,9 +38,7 @@ funky_expr_char :: SurCParser Char
 funky_expr_char = oneOf " \"'()[]{}:"
 
 oper_char :: SurCParser Char
-oper_char = infix_oper_char <|> prefix_oper_char where
-    infix_oper_char  = oneOf "#$%&*+-/<=>?\\^|~,"
-    prefix_oper_char = oneOf "@!"
+oper_char = oneOf "!@#$%&*+-/<=>?\\^|~,"
 
 postfix_oper :: SurCParser String
 postfix_oper = many1 oper_char
