@@ -46,40 +46,41 @@ data StackOp = StackLParen
              deriving Eq
 
 get_prec :: Operator -> Precedence
-get_prec Apply          = Precedence 10
-get_prec FlipApply      = Precedence 10
-get_prec Iff            = Precedence 20
-get_prec Comma          = Precedence 30
-get_prec BindRight      = Precedence 40
-get_prec BindLeft       = Precedence 40
-get_prec And            = Precedence 50
-get_prec Or             = Precedence 50
-get_prec Xor            = Precedence 50
-get_prec Applicative    = Precedence 60
-get_prec FlipApplicative = Precedence 60
-get_prec SequenceRight  = Precedence 60
-get_prec SequenceLeft   = Precedence 60
-get_prec Equals         = Precedence 70
-get_prec NotEquals      = Precedence 70
-get_prec RegexMatch     = Precedence 70
-get_prec GreaterThan    = Precedence 80
-get_prec LesserThan     = Precedence 80
-get_prec Map            = Precedence 110
-get_prec FlipMap        = Precedence 110
-get_prec Plus           = Precedence 130
-get_prec Minus          = Precedence 130
-get_prec Splat          = Precedence 140
-get_prec FieldDiv       = Precedence 140
-get_prec FloorDiv       = Precedence 140
-get_prec Modulo         = Precedence 140
-get_prec Hihat          = Precedence 150
-get_prec FromMaybe      = Precedence 160
-get_prec Prepend        = Precedence 170
-get_prec Append         = Precedence 170
-get_prec Index          = Precedence 180
-get_prec Lookup         = Precedence 190
-get_prec In             = Precedence 200
-get_prec Combine        = Precedence 210
+get_prec = \case
+    Apply          -> Precedence 10
+    FlipApply      -> Precedence 10
+    Iff            -> Precedence 20
+    Comma          -> Precedence 30
+    BindRight      -> Precedence 40
+    BindLeft       -> Precedence 40
+    And            -> Precedence 50
+    Or             -> Precedence 50
+    Xor            -> Precedence 50
+    Applicative    -> Precedence 60
+    FlipApplicative -> Precedence 60
+    SequenceRight  -> Precedence 60
+    SequenceLeft   -> Precedence 60
+    Equals         -> Precedence 70
+    NotEquals      -> Precedence 70
+    RegexMatch     -> Precedence 70
+    GreaterThan    -> Precedence 80
+    LesserThan     -> Precedence 80
+    Map            -> Precedence 110
+    FlipMap        -> Precedence 110
+    Plus           -> Precedence 130
+    Minus          -> Precedence 130
+    Splat          -> Precedence 140
+    FieldDiv       -> Precedence 140
+    FloorDiv       -> Precedence 140
+    Modulo         -> Precedence 140
+    Hihat          -> Precedence 150
+    FromMaybe      -> Precedence 160
+    Prepend        -> Precedence 170
+    Append         -> Precedence 170
+    Index          -> Precedence 180
+    Lookup         -> Precedence 190
+    In             -> Precedence 200
+    Combine        -> Precedence 210
 
 -- the oper stack is a temporary storage place for opers
 -- the tree stack holds the result, the output, as well as being used for
