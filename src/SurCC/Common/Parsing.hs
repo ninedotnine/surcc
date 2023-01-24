@@ -19,7 +19,7 @@ module SurCC.Common.Parsing (
 ) where
 
 import Control.Monad (when)
-import Data.Functor ((<&>))
+import Data.Functor ((<&>), void)
 import Data.List (genericLength)
 import Data.Set qualified as Set
 import Data.Text (Text)
@@ -58,16 +58,13 @@ pragma = string "{^;" *> space *> endBy1 (many1 alphaNum) space *> (string ";^}"
 skipManyTill :: Parsec Text s a -> Parsec Text s b -> Parsec Text s ()
 skipManyTill p1 p2 = manyTill p1 p2 *> pure ()
 
-reserved_specific :: String -> Parsec Text s Text
-reserved_specific s = Text.Parsec.string s <* notFollowedBy identifier_char
-                  <&> Text.pack
 
 reserved :: String -> Parsec Text s ()
 reserved = reserved' <&> try
 
 -- for those occasional cases when the try is higher-up.
 reserved' :: String -> Parsec Text s ()
-reserved' s = reserved_specific s *> pure ()
+reserved' s = void $ Text.Parsec.string s <* notFollowedBy identifier_char
 
 
 raw_identifier :: Parsec Text s Text
