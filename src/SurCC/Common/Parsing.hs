@@ -16,6 +16,7 @@ module SurCC.Common.Parsing (
     type_name,
     upper_name,
     optional_sig,
+    literal,
 ) where
 
 import Control.Monad (when)
@@ -27,7 +28,7 @@ import Data.Text qualified as Text
 import Text.Parsec hiding (string, space, spaces, newline)
 import Text.Parsec qualified (string)
 
-import SurCC.Common (SoucKind(..), SoucType(..), Term(..), Constant(..))
+import SurCC.Common (SoucKind(..), SoucType(..), Term(..), Constant(..), Literal(..))
 
 identifier_char :: Parsec Text s Char
 identifier_char = (alphaNum <|> char '_') <?> "identifier char"
@@ -149,3 +150,18 @@ type_name :: Parsec Text s SoucType
 type_name = do
     n <- upper_name
     return $ SoucType n (SoucKind 0)
+
+
+literal :: Parsec Text s Literal
+literal = parse_num
+      <|> parse_char
+      <|> parse_string
+
+parse_num :: Parsec Text s Literal
+parse_num = LiteralInt <$> read <$> many1 digit
+
+parse_char :: Parsec Text s Literal
+parse_char = LiteralChar <$> ((char '\'') *> anyChar <* (char '\''))
+
+parse_string :: Parsec Text s Literal
+parse_string = LiteralString . Text.pack <$> ((char '\"') *> many (noneOf "\"") <* (char '\"'))

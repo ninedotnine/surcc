@@ -1,6 +1,7 @@
 -- term parsers
 module SurCC.Parser.Expr.Terms (
-    parse_term_token
+    parse_term_token,
+    parse_var
 ) where
 
 
@@ -11,12 +12,15 @@ import Text.Parsec ((<|>), (<?>))
 import SurCC.Common
 import SurCC.Common.Parsing
 
+import SurCC.Parser.Basics (identifier)
 import SurCC.Parser.Expr.Types
 import SurCC.Parser.Expr.RegardingSpaces
 
 parse_term_token :: ShuntingYardParser TermToken
 parse_term_token = parse_term_tok <|> parse_left_paren <|> parse_prefix_op
 
+
+-- FIXME : delete these and use the ones from Common/Parsing.hs ?
 parse_term_tok :: ShuntingYardParser TermToken
 parse_term_tok = TermTok <$> (
         parse_num
@@ -44,9 +48,8 @@ parse_num = LitInt <$> read <$> Parsec.many1 Parsec.digit
 
 parse_var :: ShuntingYardParser Term
 parse_var = do
-    first <- Parsec.lower <|> Parsec.char '_'
-    rest <- Parsec.many (Parsec.lower <|> Parsec.char '_' <|> Parsec.digit)
-    pure $ Var $ Identifier $ Text.pack $ first:rest
+    i <- identifier
+    pure $ Var i
 
 parse_char :: ShuntingYardParser Term
 parse_char = LitChar <$> ((Parsec.char '\'') *> Parsec.anyChar <* (Parsec.char '\''))

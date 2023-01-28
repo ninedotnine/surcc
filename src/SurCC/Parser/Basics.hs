@@ -26,7 +26,7 @@ data Endable_Stmts = Stmt_If_End | Stmt_While_End | Stmt_Unless_End | Stmt_Until
 blank_line :: SurCParser ()
 blank_line = try (skipMany space_or_tab *> newline)
 
-identifier :: SurCParser Identifier
+identifier :: Parsec Text.Text s Identifier
 identifier = Identifier <$> raw_identifier <?> "identifier"
 
 -- a param might have a type sig

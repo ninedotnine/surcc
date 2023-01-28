@@ -17,6 +17,8 @@ module SurCC.Common (
     ExprTree(..),
     Operator(..),
     PrefixOperator(..),
+    Literal(..),
+    Pattern(..),
     SoucKind(..),
     SoucType(..),
     TypeVar(..),
@@ -196,9 +198,11 @@ data ExprTree = Branch Operator ExprTree ExprTree
             | Twig PrefixOperator ExprTree
             | Signed ExprTree SoucType
             | Leaf Term
+            | Match ExprTree [(Pattern, ExprTree)]
          deriving (Eq, Show)
 
 
+-- FIXME convert this to use Literal?
 data Term = LitInt Integer
           | LitChar Char
           | LitString Text
@@ -249,6 +253,37 @@ data PrefixOperator = Deref
                     | Pure
                     | Join
                     deriving (Eq, Show)
+
+
+data Literal = LiteralInt Integer
+             | LiteralChar Char
+             | LiteralString Text
+    deriving (Eq, Show)
+
+
+data Pattern = PatLit Literal -- FIXME ints only for now hehe
+             | PatId Identifier
+--              | PatConstant Constant
+--              | PatConstructor Constant [Pattern]
+             deriving (Eq, Show)
+
+
+instance TextShow Literal where
+    showb = \case
+        LiteralInt i -> "int " <> showb i
+        LiteralChar c -> "char " <> showb c
+        LiteralString s -> "string " <> showb s
+
+
+instance TextShow Pattern where
+    showb = \case
+        PatLit l -> "lit " <> showb l
+        PatId i -> "ident " <> showb i
+--  FIXME do i need these? i do need sub-patterns
+--         PatConstant k -> "constant " <> showb k
+--         PatConstructor k pats -> mconcat
+--             ["constructor ", showb k, " pats: ", showb pats]
+
 
 instance TextShow Identifier where
     showb (Identifier i) = TextShow.fromText i
@@ -397,6 +432,8 @@ instance TextShow ExprTree where
         Signed tree tree_t -> mconcat
             [showb tree, ": ", showb tree_t]
         Leaf val -> showb val
+        Match expr branches -> mconcat
+            ["match ", showb expr, " of ", showb branches]
 
 instance TextShow Term where
     showb = \case
@@ -478,4 +515,3 @@ instance TextShow TypeDef where
         EnumType t terms -> "enum type " <> showb t <> " = " <> showb terms
         StructType _ -> error "fixme typedef textshow"
         GADType _ -> error "fixme typedef textshow"
-

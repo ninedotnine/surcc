@@ -27,19 +27,19 @@ FLAGS := $(HSFLAGS) $(GHC_EXTS) $(GHC_FLAGS) $(GHC_WARNS)
 
 default: all test
 
-all: surcc expr parser typechecker
+all: parser expr typechecker surcc
 
-surcc: src/Main_Surcc.hs | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
+surcc: src/Main_Surcc.hs expr parser typechecker | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
 	@ghc $(FLAGS) -o $(OUT_DIR)/$@ -main-is Main_Surcc $<
 
-expr: src/Main_Expr.hs surcc | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
+expr: src/Main_Expr.hs parser typechecker | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
 	@ghc $(FLAGS) -o $(OUT_DIR)/$@ -main-is Main_Expr $<
 
-parser: src/Main_Parser.hs surcc expr | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
-	@ghc $(FLAGS) -o $(OUT_DIR)/$@ -main-is Main_Parser $<
-
-typechecker: src/Main_TypeChecker.hs surcc expr parser | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
+typechecker: src/Main_TypeChecker.hs parser | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
 	@ghc $(FLAGS) -o $(OUT_DIR)/$@ -main-is Main_TypeChecker $<
+
+parser: src/Main_Parser.hs | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
+	@ghc $(FLAGS) -o $(OUT_DIR)/$@ -main-is Main_Parser $<
 
 
 $(OUT_DIR) $(CACHE_DIR) $(TEST_DIR) $(HI_DIR) $(OBJ_DIR):

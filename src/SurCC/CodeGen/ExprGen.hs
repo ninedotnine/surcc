@@ -30,6 +30,7 @@ generate_expr = \case
         pref <- generate_prefix_expr op
         (decls, expr) <- generate_expr e
         pure $ (decls , pref <> expr <> "// fixme\n")
+    Match _expr _branches -> undefined
     Branch op x y -> case op of
         Plus              ->  (,) "" <$> gen_call "_souc_sum(" x y
         Minus             ->  (,) "" <$> gen_call "_souc_difference(" x y

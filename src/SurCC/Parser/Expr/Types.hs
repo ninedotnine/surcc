@@ -13,6 +13,7 @@ module SurCC.Parser.Expr.Types (
     Oper_Stack(..),
     Tree_Stack(..),
     Tightness(..),
+    Indent(..),
     Stack_State,
     RawExpr(..),
 ) where
@@ -91,7 +92,14 @@ get_prec = \case
 newtype Oper_Stack = Oper_Stack [StackOp]
 newtype Tree_Stack = Tree_Stack [ExprTree]
 newtype Tightness = Tight Bool deriving Eq
+newtype Indent = Indent Int deriving Eq
 
-type Stack_State = (Oper_Stack, Tree_Stack, Tightness)
+type Stack_State = (Oper_Stack, Tree_Stack, Tightness, Indent)
+-- data Stack_State = Stack_State {
+--     get_op_stack :: Oper_Stack,
+--     get_tree_stack :: Tree_Stack,
+--     get_tightness :: Tightness,
+--     get_indent_level :: Indent
+-- }
 
 type ShuntingYardParser t = Parsec.Parsec Text Stack_State t

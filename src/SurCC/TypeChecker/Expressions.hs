@@ -21,6 +21,7 @@ infer ctx tree = case tree of
         check_equals t inferred
         Right inferred
     Leaf term -> infer_term ctx term
+    Match _expr _branches -> undefined -- FIXME
 
 infer_term :: LocalScope -> Term -> Either TypeError SoucType
 infer_term context term = case term of
@@ -112,6 +113,7 @@ check_expr ctx tree t = case tree of
         check_equals sig expr_t
         check_equals t expr_t
 
+    Match _expr _branches -> undefined
 
 infer_if_needed :: Maybe SoucType -> ExprTree -> Checker SoucType
 infer_if_needed m_t expr = do

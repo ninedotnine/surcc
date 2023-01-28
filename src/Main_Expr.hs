@@ -34,7 +34,7 @@ pepe line = unless (Text.all isSpace line) (parse_eval_print_expression line)
 parse_stdin :: IO ()
 parse_stdin = do
     input <- getContents
-    case parse_raw_expression (RawExpr (Text.pack input)) of
+    case parse_raw_top_level_expression (RawExpr (Text.pack input)) of
         Left err -> putStrLn (show err) >> exitFailure
         Right tree -> putStrLn (eval_show_astree tree) >> exitSuccess
 

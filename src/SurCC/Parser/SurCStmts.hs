@@ -10,9 +10,9 @@ import Text.Parsec hiding (space, spaces, string)
 import SurCC.Common
 import SurCC.Parser.Common
 import SurCC.Common.Parsing
-import SurCC.Parser.Expr.Raw
+import SurCC.Parser.Expr.Raw (postfix_oper) -- fixme delete this?
 import SurCC.Parser.Basics
-import SurCC.Parser.ExprParser
+import SurCC.Parser.ExprParser (parse_expression)
 
 stmt_block :: SurCParser Stmts
 stmt_block = stmt_block_with_param Nothing

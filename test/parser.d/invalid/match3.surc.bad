@@ -1,0 +1,3 @@
+; match expressions cannot be part of other expressions
+match3(dox: Integer): Integer = 1 + match 4
+    7 -> 7

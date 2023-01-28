@@ -1,0 +1,2 @@
+match2(dox: Integer): Integer = match 4
+		7 -> 7

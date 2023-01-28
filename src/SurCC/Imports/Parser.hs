@@ -9,6 +9,7 @@ import Text.Parsec qualified (string)
 
 import SurCC.Common
 import SurCC.Common.Parsing
+import SurCC.Parser.Basics (identifier)
 
 import Debug.Trace
 
@@ -54,9 +55,9 @@ export_decls = do
 
 export_decl :: HeaderParser ExportDecl
 export_decl = do
-    i <- raw_identifier <* optional spaces
+    i <- identifier <* optional spaces
     t <- type_signature <* endline
-    pure $ ExportDecl $ bound_id (Identifier i) t
+    pure $ ExportDecl $ bound_id i t
 
 
 import_list :: HeaderParser [ImportDecl]
