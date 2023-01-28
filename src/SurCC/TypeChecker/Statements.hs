@@ -48,6 +48,17 @@ check_stmt stmt m_ret = do
         Stmt_Var_Declare name m_t expr -> check_stmt_mut_ass name m_t expr
         Stmt_Var_Reassign name m_t expr -> check_stmt_mut_ass name m_t expr
         Stmt_Return m_expr -> check_stmt_return m_expr m_ret
+    where
+        check_stmt_ass :: Identifier -> (Maybe SoucType) -> ExprTree -> Checker ()
+        check_stmt_ass name m_t expr = do
+            t <- infer_if_needed m_t expr
+            insert_immut name t
+
+        check_stmt_mut_ass :: Identifier -> (Maybe SoucType) -> ExprTree -> Checker ()
+        check_stmt_mut_ass name m_t expr = do
+            t <- infer_if_needed m_t expr
+            insert_mut name t
+
 
 soucbool :: SoucType
 soucbool = SoucType "Bool" (SoucKind 0)
@@ -85,16 +96,6 @@ check_stmt_if expr body m_else m_ret = do
             case m_else of
                 Nothing -> pure ()
                 Just else_body -> check_stmts else_body m_ret
-
-check_stmt_ass :: Identifier -> (Maybe SoucType) -> ExprTree -> Checker ()
-check_stmt_ass name m_t expr = do
-    t <- infer_if_needed m_t expr
-    insert_immut name t
-
-check_stmt_mut_ass :: Identifier -> (Maybe SoucType) -> ExprTree -> Checker ()
-check_stmt_mut_ass name m_t expr = do
-    t <- infer_if_needed m_t expr
-    insert_mut name t
 
 
 check_stmt_call :: Identifier -> Maybe ExprTree -> Checker ()
