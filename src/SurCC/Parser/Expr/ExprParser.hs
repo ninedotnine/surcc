@@ -5,12 +5,12 @@
 
 module SurCC.Parser.Expr.ExprParser (
     parse_expression,
-    parse_raw_top_level_expression,
+    parse_raw_expression,
     parse_print_expression,
     evaluate_astree,
     eval_show_astree,
     parse_eval_print_expression,
-    ExprTree(..),
+    ExprTree(..), -- fixme exported by common
     Term(..),
     Operator(..),
     PrefixOperator(..),
@@ -40,79 +40,56 @@ import SurCC.Parser.Expr.RegardingSpaces
 import SurCC.Parser.Expr.Terms
 import SurCC.Parser.Expr.Opers
 import SurCC.Parser.Expr.Raw  (RawExpr, raw_expr)
--- import SurCC.Parser.Expr.Patterns
 
 import SurCC.Common
 import SurCC.Parser.Common (SurCParser)
 import SurCC.Common.Parsing (type_name, upper_name, optional_sig, reserved, endline, spaces, string)
 import SurCC.Parser.Patterns  (parse_pattern)
 
+
 parse_expression :: SurCParser ExprTree
-parse_expression = do
-    (i, _) <- Parsec.getState
-    raw <- raw_expr (Indent i)
-    report "invalid expression:\n" $ parse_raw_expression raw (Indent i)
-
-
--- just like `parse_expression`,
--- except for their types
-parse_expression' :: ShuntingYardParser ExprTree
-parse_expression' = do
-    i <- get_indent_level
-    raw <- raw_expr i
-    report "invalid sub-expression:\n" $ parse_raw_expression raw i
-
-
--- just like `parse_expression'`,
--- except subexpressions cannot be `match` expressions
-parse_subexpression :: ShuntingYardParser ExprTree
-parse_subexpression = do
-    i <- get_indent_level
-    (RawExpr raw) <- raw_expr i
-    let start_state = (Oper_Stack [], Tree_Stack [], Tight False, i)
-    report "invalid sub-expression:\n"
-        $ Parsec.runParser parse_term start_state "subexpr" raw
-
-
-report :: String -> Either ParseError ExprTree -> Parsec.Parsec Text s ExprTree
-report msg = \case
-    Right e -> pure e
-    Left err -> parserFail $ msg ++ show err
-
-
-parse_raw_expression :: RawExpr -> Indent -> Either ParseError ExprTree
-parse_raw_expression (RawExpr input) indent =
-    Parsec.runParser parse_subexpr start_state "input" (trim_spaces input)
-    where
-        start_state = (Oper_Stack [], Tree_Stack [], Tight False, indent)
-        trim_spaces = Text.dropWhile isSpace <&> Text.dropWhileEnd isSpace
-        parse_subexpr = parse_match <|> parse_term
+parse_expression = parse_match <|> parse_infix_expression
 
 
 -- parse_match cannot be followed by anything else
 
-parse_match :: ShuntingYardParser ExprTree
+parse_match :: SurCParser ExprTree
 parse_match = do
     reserved "match" *> spaces
-    expr <- parse_subexpression
+    expr <- parse_infix_expression
     endline
-    (Indent level) <- get_indent_level
-    let indent = Parsec.count (level+1) Parsec.tab
-    cases <- Parsec.sepBy1 (indent *> parse_match_case) endline
-    Parsec.eof
+    (i, _) <- Parsec.getState
+    let indent = Parsec.count (i+1) Parsec.tab
+    cases <- Parsec.many1 (indent *> parse_match_case)
     pure $ Match expr cases
     where
-        parse_match_case :: ShuntingYardParser (Pattern, ExprTree)
+        parse_match_case :: SurCParser (Pattern, ExprTree)
         parse_match_case = do
             pat <- parse_pattern
             spaces *> string "->" *> spaces
-            expr <- parse_expression'
+            expr <- parse_expression
+            endline
             pure (pat, expr)
+
+
+parse_infix_expression :: Parsec.Parsec Text s ExprTree
+parse_infix_expression = do
+    raw <- raw_expr
+    case parse_raw_expression raw of
+        Right e -> pure e
+        Left err -> parserFail $ "invalid expression:\n" ++ show err
+
+
+parse_raw_expression :: RawExpr -> Either ParseError ExprTree
+parse_raw_expression (RawExpr input) =
+    Parsec.runParser parse_term start_state "input" (trim_spaces input)
+    where
+        start_state = (Oper_Stack [], Tree_Stack [], Tight False)
+        trim_spaces = Text.dropWhile isSpace <&> Text.dropWhileEnd isSpace
 
 
 -- parse_term and parse_oper are alternated
 -- until one fails and finish_expr succeeds
-
 
 parse_term :: ShuntingYardParser ExprTree
 parse_term = do
@@ -191,7 +168,7 @@ finish_expr = do
 
 parse_print_expression :: Text -> IO ()
 parse_print_expression input =
-    case parse_raw_top_level_expression (RawExpr input) of
+    case parse_raw_expression (RawExpr input) of
         Left err -> putStrLn (show err)
         Right tree -> printT tree
 
@@ -236,10 +213,6 @@ eval_show_astree = evaluate_astree <&> show
 
 parse_eval_print_expression :: Text -> IO ()
 parse_eval_print_expression input =
-    case parse_raw_top_level_expression (RawExpr input) of
+    case parse_raw_expression (RawExpr input) of
         Left err -> putStrLn (show err)
         Right tree -> putStrLn (eval_show_astree tree)
-
-
-parse_raw_top_level_expression :: RawExpr -> Either ParseError ExprTree
-parse_raw_top_level_expression e = parse_raw_expression e (Indent 0)

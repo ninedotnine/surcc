@@ -1,7 +1,6 @@
 module SurCC.Parser.Expr.StackManipulations (
     get_op_stack,
     get_tree_stack,
-    get_indent_level,
     oper_stack_push,
     oper_stack_set,
     tree_stack_push,
@@ -24,37 +23,32 @@ import SurCC.Common (SoucType)
 -- functions to get the current state
 get_op_stack :: ShuntingYardParser Oper_Stack
 get_op_stack = do
-    (stack, _, _, _) <- Parsec.getState
+    (stack, _, _) <- Parsec.getState
     pure stack
 
 get_tree_stack :: ShuntingYardParser Tree_Stack
 get_tree_stack = do
-    (_, stack, _, _) <- Parsec.getState
+    (_, stack, _) <- Parsec.getState
     pure stack
-
-get_indent_level :: ShuntingYardParser Indent
-get_indent_level = do
-    (_, _, _, i) <- Parsec.getState
-    pure i
 
 -- functions to change or set the current state
 oper_stack_push :: StackOp -> ShuntingYardParser ()
 oper_stack_push op =
-    Parsec.modifyState (\(Oper_Stack ops, terms, b, i) -> (Oper_Stack (op:ops), terms, b, i))
+    Parsec.modifyState (\(Oper_Stack ops, terms, b) -> (Oper_Stack (op:ops), terms, b))
 
 oper_stack_set :: [StackOp] -> ShuntingYardParser ()
-oper_stack_set tokes = Parsec.modifyState (\(_,s2,b,i) -> (Oper_Stack tokes, s2, b, i))
+oper_stack_set tokes = Parsec.modifyState (\(_,s2,b) -> (Oper_Stack tokes, s2, b))
 
 tree_stack_push :: ExprTree -> ShuntingYardParser ()
 tree_stack_push tree =
-    Parsec.modifyState (\(ops, Tree_Stack vals, b, i) -> (ops, Tree_Stack (tree:vals), b, i))
+    Parsec.modifyState (\(ops, Tree_Stack vals, b) -> (ops, Tree_Stack (tree:vals), b))
 
 tree_stack_pop :: ShuntingYardParser ExprTree
 tree_stack_pop = do
-    (opers, vals, b, i) <- Parsec.getState
+    (opers, vals, b) <- Parsec.getState
     case vals of
         Tree_Stack (v:vs) -> do
-            Parsec.setState (opers, Tree_Stack vs, b, i)
+            Parsec.setState (opers, Tree_Stack vs, b)
             pure v
         Tree_Stack _ -> Parsec.unexpected "?? did i expect a term?"
 

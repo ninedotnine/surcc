@@ -19,12 +19,12 @@ import SurCC.Parser.Expr.Types
 
 get_tightness :: ShuntingYardParser Tightness
 get_tightness = do
-    (_, _, tightness, _) <- Parsec.getState
+    (_, _, tightness) <- Parsec.getState
     pure tightness
 
 
 set_spacing_tight :: Bool -> ShuntingYardParser ()
-set_spacing_tight b = Parsec.modifyState (\(s1,s2,_,s3) -> (s1, s2, Tight b,s3))
+set_spacing_tight b = Parsec.modifyState (\(s1,s2,_) -> (s1, s2, Tight b))
 
 respect_spaces :: ShuntingYardParser ()
 respect_spaces = Parsec.skipMany1 silent_space

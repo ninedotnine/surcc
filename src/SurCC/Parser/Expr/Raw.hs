@@ -19,7 +19,7 @@ import Data.Text qualified as Text
 
 import SurCC.Parser.Common
 import SurCC.Common.Parsing
-import SurCC.Parser.Expr.Types (RawExpr(..), Indent(..))
+import SurCC.Parser.Expr.Types (RawExpr(..))
 
 --
 -- run_raw_expr_parser :: Text -> Text
@@ -32,29 +32,8 @@ import SurCC.Parser.Expr.Types (RawExpr(..), Indent(..))
 -- this function stupidly grabs characters
 -- until a newline
 -- without consuming that newline
-raw_expr :: Indent -> Parsec Text s RawExpr
-raw_expr i = RawExpr <$> Text.pack <$> (match_expr i <|> dumb_raw_expr)
-
-
-match_expr :: Indent -> Parsec Text s String
-match_expr i =
-    str "match" <> (spaces *> pure " ") <> dumb_raw_expr <> (endline *> pure "\n") <> (many1 pat_line <&> (intersperse "\n") <&> mconcat)
-        where
-            pat_line = indentation i
-                    <> many1 identifier_char
-                    <> str " -> "
-                    <> (dumb_raw_expr <* endline)
-
-
-indentation :: Indent -> Parsec Text s String
-indentation (Indent level) = try $ do
---     (level, _) <- getState
-    count (level+1) tab <?> "indentation"
-
-
-
-str :: String -> Parsec Text s String
-str s = try (Text.Parsec.string s)
+raw_expr :: Parsec Text s RawExpr
+raw_expr = RawExpr <$> Text.pack <$> dumb_raw_expr
 
 
  -- FIXME eventually this must skip newlines when inside parens, brackets, braces
