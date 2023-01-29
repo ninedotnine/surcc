@@ -252,6 +252,9 @@ data PrefixOperator = Deref
                     | ToString
                     | Pure
                     | Join
+--                     | Void
+--                     | Curry
+--                     | Uncurry
                     deriving (Eq, Show)
 
 
