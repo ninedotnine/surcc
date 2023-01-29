@@ -7,6 +7,7 @@ module SurCC.TypeChecker.Expressions (
 import Control.Applicative
 import Control.Monad.Trans.Except
 import Control.Monad.State
+import Data.Functor ((<&>))
 
 import SurCC.Common
 import SurCC.TypeChecker.Context (lookup_identifier, LocalScope, Checker)
@@ -84,6 +85,7 @@ infer_infix_op ctx op left right = case op of
                 r_t <- infer ctx right
                 check_equals r_t t0
                 Right ((InputType l_t, InputType t0), ReturnType t1)
+            -- FIXME  l_t is used twice here and r_t is not used?
             _ -> Left (TypeMismatch (SoucFn l_t (SoucTypeVar (TypeVar (Right 'T') (SoucKind 0)))) l_t)
     FlipApply -> do
         r_t <- infer ctx right
@@ -132,8 +134,8 @@ check_expr ctx t = \case
         check_equals t expr_t
 
     Match expr branches -> do
-        check_expr ctx t expr
-        check_patterns ctx t (branches <&> fst)
+        expr_t <- infer ctx expr
+        check_patterns ctx expr_t (branches <&> fst)
         check_cases ctx t (branches <&> snd)
 
 

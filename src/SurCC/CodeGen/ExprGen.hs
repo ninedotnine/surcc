@@ -11,7 +11,7 @@ import SurCC.Parser.ExprParser (
     )
 
 import SurCC.Builtins (gen_builtin_data, gen_builtin_identifier)
-import SurCC.Common (Identifier(..))
+import SurCC.Common (Identifier(..), Pattern(..), Literal(..))
 import SurCC.CodeGen.Common
 
 import Control.Monad.State (get, put)
@@ -22,6 +22,7 @@ import Data.Text (Text)
 import Data.Text qualified as Text
 
 
+-- first is declarations, second is the expression itself
 generate_expr :: ExprTree -> Generator (Text,Text)
 generate_expr = \case
     Leaf e -> (,) "" <$> generate_term e
@@ -30,7 +31,13 @@ generate_expr = \case
         pref <- generate_prefix_expr op
         (decls, expr) <- generate_expr e
         pure $ (decls , pref <> expr <> "// fixme\n")
-    Match _expr _branches -> undefined
+    Match expr branches -> do
+        (decls, e) <- generate_expr expr
+        (case_decls, cases) <- generate_cases e branches
+        failure <- generate_term (LitInt 0)
+        pure $ (decls <> case_decls,
+                cases <> " " <> failure)
+
     Branch op x y -> case op of
         Plus              ->  (,) "" <$> gen_call "_souc_sum(" x y
         Minus             ->  (,) "" <$> gen_call "_souc_difference(" x y
@@ -123,6 +130,27 @@ generate_prefix_expr = \case
     ToString   -> undefined
     Pure       -> undefined
     Join       -> undefined
+
+
+generate_cases :: Text -> [(Pattern,ExprTree)] -> Generator (Text,Text)
+generate_cases expr branches =
+    mconcat <$> traverse (generate_case expr) branches
+
+generate_case :: Text -> (Pattern,ExprTree) -> Generator (Text,Text)
+generate_case tested_expr (pat,expr) = do
+    (decls, e) <- generate_expr expr
+    p <- generate_pattern pat
+    pure $ (decls,
+            "(_souc_is_equal_integer((" <> tested_expr <> "),(" <> p <> "))._souc_bool) ? (" <> e <> ") :\n")
+
+generate_pattern :: Pattern -> Generator Text
+generate_pattern = \case
+    PatLit l -> case l of
+        LiteralInt i -> generate_term (LitInt i)
+        LiteralChar c -> generate_term (LitChar c)
+        LiteralString s -> generate_term (LitString s)
+    PatId _i -> undefined
+
 
 get_next_id :: Generator CIdentifier
 get_next_id = do
