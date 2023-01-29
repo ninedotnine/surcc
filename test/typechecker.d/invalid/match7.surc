@@ -1,0 +1,3 @@
+match2(dox: Integer) = match 4
+	'a' -> 4
+	dum -> 4

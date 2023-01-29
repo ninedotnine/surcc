@@ -1,0 +1,4 @@
+match2(dox: Integer): Integer = match dox
+	'a' -> 3
+	3 -> 4
+	n -> 4

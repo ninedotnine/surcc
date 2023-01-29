@@ -1,0 +1,3 @@
+match4(dox: Integer): Integer = match dox: Integer
+	3 -> "str"
+	n -> 4

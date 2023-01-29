@@ -1,0 +1,15 @@
+partial_increment(x: Integer) = match x
+	5 -> 6
+	7 -> 8
+
+char_match(ch: Char): Integer = match ch
+	'a' -> 1
+	'b' -> 2
+	'c' -> 3
+
+main(stdout: OutputStream) = do
+	write stdout , 5 & partial_increment & str
+	n: Integer = 7
+	write stdout , n & partial_increment & str
+	var c <- 'c'
+	write stdout , c & char_match & str
