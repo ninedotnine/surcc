@@ -158,10 +158,10 @@ literal = parse_num
       <|> parse_string
 
 parse_num :: Parsec Text s Literal
-parse_num = LiteralInt <$> read <$> many1 digit
+parse_num = LitInt <$> read <$> many1 digit
 
 parse_char :: Parsec Text s Literal
-parse_char = LiteralChar <$> ((char '\'') *> anyChar <* (char '\''))
+parse_char = LitChar <$> ((char '\'') *> anyChar <* (char '\''))
 
 parse_string :: Parsec Text s Literal
-parse_string = LiteralString . Text.pack <$> ((char '\"') *> many (noneOf "\"") <* (char '\"'))
+parse_string = LitString . Text.pack <$> ((char '\"') *> many (noneOf "\"") <* (char '\"'))

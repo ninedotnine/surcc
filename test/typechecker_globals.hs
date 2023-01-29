@@ -31,15 +31,15 @@ type Test = ([ImportDecl], [TopLevelDefn], Either TypeError LocalScope, String)
 
 tests :: [Test]
 tests = [
-    ([], [TopLevelConstDefn "i" (Just SoucInteger) (Leaf (LitInt 4))], Right (GlobalScope (Map.singleton (Left "i") SoucInteger) no_exports_ctx), "int"),
+    ([], [TopLevelConstDefn "i" (Just SoucInteger) (Leaf (Lit (LitInt 4)))], Right (GlobalScope (Map.singleton (Left "i") SoucInteger) no_exports_ctx), "int"),
     ([LibImport "salad", LibImport "tofu"], [], Right (GlobalScope (Map.fromList [(Left "salad", SoucModuleType), (Left "tofu", SoucModuleType)]) no_exports_ctx), "imports")
     ]
 
 borked_tests :: [Test]
 borked_tests = [
-    ([], [TopLevelConstDefn "c" (Just SoucInteger) (Leaf (LitChar 'a'))], Left (mismatch "Integer" "Char"), "bad char 0"),
-    ([], [TopLevelConstDefn "b" Nothing (Signed (Leaf (LitChar 'a')) SoucBool)], Left (mismatch "Bool" "Char"), "bad char 1"),
-    ([], [TopLevelConstDefn "b" (Just SoucChar) (Signed (Leaf (LitChar 'a')) SoucBool)], Left (mismatch "Bool" "Char"), "bad char 2")
+    ([], [TopLevelConstDefn "c" (Just SoucInteger) (Leaf (Lit (LitChar 'a')))], Left (mismatch "Integer" "Char"), "bad char 0"),
+    ([], [TopLevelConstDefn "b" Nothing (Signed (Leaf (Lit (LitChar 'a'))) SoucBool)], Left (mismatch "Bool" "Char"), "bad char 1"),
+    ([], [TopLevelConstDefn "b" (Just SoucChar) (Signed (Leaf (Lit (LitChar 'a'))) SoucBool)], Left (mismatch "Bool" "Char"), "bad char 2")
     ]
 
 

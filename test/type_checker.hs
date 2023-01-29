@@ -45,11 +45,11 @@ scoped = InnerScope (Map.fromList [
 
 tests :: [Test]
 tests = [
-    (empty_ctx, Leaf (LitInt 3), "Integer", match, "int"),
-    (empty_ctx, Leaf (LitChar 'a'), "Char", match, "char"),
-    (empty_ctx, Leaf (LitString "what"), "String", match, "string"),
+    (empty_ctx, Leaf (Lit (LitInt 3)), "Integer", match, "int"),
+    (empty_ctx, Leaf (Lit (LitChar 'a')), "Char", match, "char"),
+    (empty_ctx, Leaf (Lit (LitString "what")), "String", match, "string"),
     (empty_ctx, Leaf (Constructor "True"), "Bool", match, "bool"),
-    (empty_ctx, Branch Plus (Leaf (LitInt 1)) (Leaf (LitInt 2)), "Integer", match, "plus"),
+    (empty_ctx, Branch Plus (Leaf (Lit (LitInt 1))) (Leaf (Lit (LitInt 2))), "Integer", match, "plus"),
     (globals, Leaf (Var "x"), "Integer", match, "intvar"),
     (globals, Leaf (Var "s"), "String", match, "stringvar"),
     (globals, Leaf (Var "c"), "Char", match, "charvar"),
@@ -60,7 +60,7 @@ tests = [
     (globals, Signed (Leaf (Var "b")) SoucBool,  "Bool", match, "boolvar2"),
     (globals, Signed (Twig Negate (Leaf (Var "b"))) SoucBool,  "Bool",     match, "negate"),
     (globals, Branch Plus (Leaf (Var "x")) (Leaf (Var "x")), "Integer", match, "plus2"),
-    (globals, Signed (Signed (Signed (Signed (Signed (Leaf (LitInt 42)) SoucInteger) SoucInteger) SoucInteger) SoucInteger) SoucInteger, "Integer", match, "long int"),
+    (globals, Signed (Signed (Signed (Signed (Signed (Leaf (Lit (LitInt 42))) SoucInteger) SoucInteger) SoucInteger) SoucInteger) SoucInteger, "Integer", match, "long int"),
     (scoped, Leaf (Var "x"), "Integer", match, "scoped intvar"),
     (scoped, Leaf (Var "s"), "String", match, "scoped stringvar"),
     (scoped, Leaf (Var "c"), "Char", match, "scoped charvar"),
@@ -70,26 +70,26 @@ tests = [
     (scoped, Signed (Leaf (Var "c")) SoucChar,  "Char", match, "scoped charvar2"),
     (scoped, Signed (Leaf (Var "b")) SoucBool,  "Bool", match, "scoped boolvar2"),
     (scoped, Twig Negate (Leaf (Var "b")),  "Bool", match, "scoped negate"),
-    (scoped, Signed (Signed (Signed (Signed (Signed (Leaf (LitInt 42)) SoucInteger) SoucInteger) SoucInteger) SoucInteger) SoucInteger, "Integer", match, "scoped long int")
+    (scoped, Signed (Signed (Signed (Signed (Signed (Leaf (Lit (LitInt 42))) SoucInteger) SoucInteger) SoucInteger) SoucInteger) SoucInteger, "Integer", match, "scoped long int")
     ]
 
 borked_tests :: [Test]
 borked_tests = [
-    (empty_ctx, Leaf (LitInt 3), "Char", mismatch "Char" "Integer", "int"),
-    (empty_ctx, Leaf (LitChar 'a'), "Integer", mismatch "Integer" "Char", "char"),
-    (empty_ctx, Leaf (LitString "what"), "Char", mismatch "Char" "String", "string"),
+    (empty_ctx, Leaf (Lit (LitInt 3)), "Char", mismatch "Char" "Integer", "int"),
+    (empty_ctx, Leaf (Lit (LitChar 'a')), "Integer", mismatch "Integer" "Char", "char"),
+    (empty_ctx, Leaf (Lit (LitString "what")), "Char", mismatch "Char" "String", "string"),
     (empty_ctx, Leaf (Constructor "True"), "Char", mismatch "Char" "Bool", "bool"),
-    (empty_ctx, Twig Negate (Leaf (LitChar 'a')), "Bork", mismatch "Bool" "Char", "negate"),
-    (empty_ctx, Twig Negate (Leaf (LitChar 'a')), "Bork", mismatch "Bool" "Char", "negate2"),
-    (empty_ctx, Branch Plus (Leaf (LitChar 'a')) (Leaf (LitInt 2)), "Bork", mismatch "Integer" "Char", "plus1"),
-    (empty_ctx, Branch Plus (Leaf (LitInt 2)) (Leaf (LitChar 'a')), "Bork", mismatch "Integer" "Char", "plus2"),
+    (empty_ctx, Twig Negate (Leaf (Lit (LitChar 'a'))), "Bork", mismatch "Bool" "Char", "negate"),
+    (empty_ctx, Twig Negate (Leaf (Lit (LitChar 'a'))), "Bork", mismatch "Bool" "Char", "negate2"),
+    (empty_ctx, Branch Plus (Leaf (Lit (LitChar 'a'))) (Leaf (Lit (LitInt 2))), "Bork", mismatch "Integer" "Char", "plus1"),
+    (empty_ctx, Branch Plus (Leaf (Lit (LitInt 2))) (Leaf (Lit (LitChar 'a'))), "Bork", mismatch "Integer" "Char", "plus2"),
     (globals, Leaf (Var "x"), "Char", mismatch "Char" "Integer", "intvar"),
     (globals, Leaf (Var "s"), "Bool", mismatch "Bool" "String", "stringvar"),
     (globals, Leaf (Var "c"), "String", mismatch "String" "Char", "charvar"),
     (globals, Leaf (Var "b"), "Char", mismatch "Char" "Bool", "boolvar"),
     (globals, Signed (Leaf (Var "x")) SoucBool, "Bool", mismatch "Bool" "Integer", "invalid lit"),
     (globals, Signed (Leaf (Var "x")) SoucBool, "Integer", mismatch "Bool" "Integer", "invalid lit 2"),
-    (globals, Signed (Signed (Signed (Signed (Signed (Leaf (LitInt 42)) SoucInteger) SoucInteger) SoucBool) SoucInteger) SoucInteger, "Integer", mismatch "Bool" "Integer", "long int"),
+    (globals, Signed (Signed (Signed (Signed (Signed (Leaf (Lit (LitInt 42))) SoucInteger) SoucInteger) SoucBool) SoucInteger) SoucInteger, "Integer", mismatch "Bool" "Integer", "long int"),
     (scoped, Leaf (Var "x"), "Char", mismatch "Char" "Integer", "scoped intvar"),
     (scoped, Leaf (Var "s"), "Bool", mismatch "Bool" "String", "scoped stringvar"),
     (scoped, Leaf (Var "c"), "String", mismatch "String" "Char", "scoped charvar"),
@@ -97,8 +97,8 @@ borked_tests = [
     (scoped, Signed (Leaf (Var "x")) SoucBool, "Bool", mismatch "Bool" "Integer", "scoped invalid lit"),
     (scoped, Signed (Leaf (Var "x")) SoucBool, "Integer", mismatch "Bool" "Integer", "scoped invalid lit 2"),
     (scoped, Signed (Leaf (Var "x")) SoucBool, "Integer", mismatch "Bool" "Integer", "scoped invalid lit 2"),
-    (scoped, Branch Plus (Leaf (LitInt 2)) (Leaf (Var "s")), "Bork", mismatch "Integer" "String", "plus3"),
-    (scoped, Signed (Signed (Signed (Signed (Signed (Leaf (LitInt 42)) SoucInteger) SoucInteger) SoucBool) SoucInteger) SoucInteger, "Integer", mismatch "Bool" "Integer", "scoped long int")
+    (scoped, Branch Plus (Leaf (Lit (LitInt 2))) (Leaf (Var "s")), "Bork", mismatch "Integer" "String", "plus3"),
+    (scoped, Signed (Signed (Signed (Signed (Signed (Leaf (Lit (LitInt 42))) SoucInteger) SoucInteger) SoucBool) SoucInteger) SoucInteger, "Integer", mismatch "Bool" "Integer", "scoped long int")
     ]
 
 

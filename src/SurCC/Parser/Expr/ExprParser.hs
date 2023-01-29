@@ -174,9 +174,10 @@ parse_print_expression input =
 
 evaluate_astree :: ExprTree -> Integer
 evaluate_astree (Leaf t) = case t of
-    LitInt x -> x
-    LitChar c -> fromIntegral (ord c)
-    LitString s -> fromIntegral (Text.length s)
+    Lit l -> case l of
+        LitInt x -> x
+        LitChar c -> fromIntegral (ord c)
+        LitString s -> fromIntegral (Text.length s)
     Var _ -> 42 -- all identifiers are bound to this, sure
     Constructor _ -> 43 -- yeah sure no problem here
 

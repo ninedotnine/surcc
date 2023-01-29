@@ -202,10 +202,7 @@ data ExprTree = Branch Operator ExprTree ExprTree
          deriving (Eq, Show)
 
 
--- FIXME convert this to use Literal?
-data Term = LitInt Integer
-          | LitChar Char
-          | LitString Text
+data Term = Lit Literal
           | Var Identifier
           | Constructor Constant
     deriving (Eq, Show)
@@ -258,9 +255,9 @@ data PrefixOperator = Deref
                     deriving (Eq, Show)
 
 
-data Literal = LiteralInt Integer
-             | LiteralChar Char
-             | LiteralString Text
+data Literal = LitInt Integer
+             | LitChar Char
+             | LitString Text
     deriving (Eq, Show)
 
 
@@ -273,9 +270,9 @@ data Pattern = PatLit Literal -- FIXME ints only for now hehe
 
 instance TextShow Literal where
     showb = \case
-        LiteralInt i -> "int " <> showb i
-        LiteralChar c -> "char " <> showb c
-        LiteralString s -> "string " <> showb s
+        LitInt i -> "int " <> showb i
+        LitChar c -> "char " <> showb c
+        LitString s -> "string " <> showb s
 
 
 instance TextShow Pattern where
@@ -440,9 +437,7 @@ instance TextShow ExprTree where
 
 instance TextShow Term where
     showb = \case
-        LitInt i -> showb i
-        LitChar c -> showb c
-        LitString s -> showb s
+        Lit l -> showb l
         Var v -> showb v
         Constructor name -> showb name
 

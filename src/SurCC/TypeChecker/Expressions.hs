@@ -40,9 +40,10 @@ infer ctx tree = case tree of
 
 infer_term :: LocalScope -> Term -> Either TypeError SoucType
 infer_term context term = case term of
-    LitInt _    -> Right SoucInteger
-    LitChar _   -> Right SoucChar
-    LitString _ -> Right SoucString
+    Lit l -> case l of
+        LitInt _    -> Right SoucInteger
+        LitChar _   -> Right SoucChar
+        LitString _ -> Right SoucString
     Var v -> case lookup_identifier v context of
         Nothing -> Left (Undeclared v)
         Just t -> Right t
@@ -145,9 +146,9 @@ check_patterns ctx t = foldr ((>>) . check_pattern) (Right ())
         check_pattern :: Pattern -> Either TypeError ()
         check_pattern = \case
             PatLit l -> case l of
-                LiteralInt _ -> check_equals t SoucInteger
-                LiteralChar _ -> check_equals t SoucChar
-                LiteralString _ -> check_equals t SoucString
+                LitInt _ -> check_equals t SoucInteger
+                LitChar _ -> check_equals t SoucChar
+                LitString _ -> check_equals t SoucString
             PatId i -> case lookup_identifier i ctx of
                 Nothing -> do
                     -- FIXME bind this identifier in a new context?

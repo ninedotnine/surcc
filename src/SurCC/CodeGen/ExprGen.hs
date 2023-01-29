@@ -34,7 +34,7 @@ generate_expr = \case
     Match expr branches -> do
         (decls, e) <- generate_expr expr
         (case_decls, cases) <- generate_cases e branches
-        failure <- generate_term (LitInt 0)
+        let failure = generate_literal (LitInt 0) -- FIXME default to 0
         pure $ (decls <> case_decls,
                 cases <> " " <> failure)
 
@@ -46,7 +46,8 @@ generate_expr = \case
         FloorDiv          ->  undefined
         Modulo            ->  (,) "" <$> gen_call "_souc_remainder(" x y
         Hihat             ->  undefined -- FIXME C doesn't have ^
-        Equals            ->  (,) "" <$> gen_call "_souc_is_equal_integer(" x y
+        Equals            ->  (,) "" <$>
+                                gen_call "_souc_is_equal_integer(" x y
         NotEquals         ->  (,) "" <$>
                                 gen_call "_souc_is_unequal_integer(" x y
         RegexMatch        ->  undefined
@@ -102,16 +103,21 @@ gen_tuple x y = do
 
 generate_term :: Term -> Generator Text
 generate_term = \case
-    LitInt l -> pure $
-        "(union _souc_obj) {._souc_int = " <> Text.pack (show l) <> "}"
-    LitChar c -> pure $
-        "(union _souc_obj) {._souc_char =  \'" <> Text.singleton c <> "\'}"
-    LitString s -> pure $
-        "(union _souc_obj) {._souc_str = \"" <> s <> "\"}"
+    Lit l -> pure $ generate_literal l
     Var v -> pure $ generate_identifier_text v
     Constructor s -> case gen_builtin_data s of
         Just output -> pure output
         Nothing -> pure "47" -- fixme hehe
+
+
+generate_literal :: Literal -> Text
+generate_literal = \case
+    LitInt i -> "(union _souc_obj) {._souc_int = "
+                <> Text.pack (show i) <> "}"
+    LitChar c -> "(union _souc_obj) {._souc_char =  \'"
+                 <> Text.singleton c <> "\'}"
+    LitString s -> "(union _souc_obj) {._souc_str = \""
+                   <> s <> "\"}"
 
 
 generate_identifier :: Identifier -> CIdentifier
@@ -141,14 +147,15 @@ generate_case tested_expr (pat,expr) = do
     (decls, e) <- generate_expr expr
     p <- generate_pattern pat
     pure $ (decls,
-            "(_souc_is_equal_integer((" <> tested_expr <> "),(" <> p <> "))._souc_bool) ? (" <> e <> ") :\n")
+            "(_souc_is_equal_integer((" <> tested_expr
+            <> "),(" <> p <> "))._souc_bool) ? (" <> e <> ") :\n")
 
 generate_pattern :: Pattern -> Generator Text
 generate_pattern = \case
-    PatLit l -> case l of
-        LiteralInt i -> generate_term (LitInt i)
-        LiteralChar c -> generate_term (LitChar c)
-        LiteralString s -> generate_term (LitString s)
+    PatLit l -> pure $ case l of
+        LitInt i -> generate_literal (LitInt i)
+        LitChar c -> generate_literal (LitChar c)
+        LitString s -> generate_literal (LitString s)
     PatId _i -> undefined
 
 

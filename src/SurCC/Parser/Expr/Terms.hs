@@ -44,7 +44,7 @@ parse_prefix_op = do
             ) <?> "prefix operator"
 
 parse_num :: ShuntingYardParser Term
-parse_num = LitInt <$> read <$> Parsec.many1 Parsec.digit
+parse_num = Lit <$> LitInt <$> read <$> Parsec.many1 Parsec.digit
 
 parse_var :: ShuntingYardParser Term
 parse_var = do
@@ -52,10 +52,10 @@ parse_var = do
     pure $ Var i
 
 parse_char :: ShuntingYardParser Term
-parse_char = LitChar <$> ((Parsec.char '\'') *> Parsec.anyChar <* (Parsec.char '\''))
+parse_char = Lit <$> LitChar <$> ((Parsec.char '\'') *> Parsec.anyChar <* (Parsec.char '\''))
 
 parse_string :: ShuntingYardParser Term
-parse_string = LitString . Text.pack <$> ((Parsec.char '\"') *> Parsec.many (Parsec.noneOf "\"") <* (Parsec.char '\"'))
+parse_string = Lit <$> LitString . Text.pack <$> ((Parsec.char '\"') *> Parsec.many (Parsec.noneOf "\"") <* (Parsec.char '\"'))
 
 parse_constructor :: ShuntingYardParser Term
 parse_constructor = Constructor <$> Constant <$> upper_name
