@@ -47,26 +47,26 @@ data StackOp = StackLParen
 
 get_prec :: Operator -> Precedence
 get_prec = \case
-    Apply          -> Precedence 10
-    FlipApply      -> Precedence 10
+    Comma          -> Precedence 10
     Iff            -> Precedence 20
-    Comma          -> Precedence 30
-    BindRight      -> Precedence 40
-    BindLeft       -> Precedence 40
+    BindRight      -> Precedence 30
+    BindLeft       -> Precedence 30
+    Applicative    -> Precedence 40
+    FlipApplicative -> Precedence 40
+    SequenceRight  -> Precedence 40
+    SequenceLeft   -> Precedence 40
+    Map            -> Precedence 43
+    FlipMap        -> Precedence 43
+    Apply          -> Precedence 46
+    FlipApply      -> Precedence 46
     And            -> Precedence 50
     Or             -> Precedence 50
     Xor            -> Precedence 50
-    Applicative    -> Precedence 60
-    FlipApplicative -> Precedence 60
-    SequenceRight  -> Precedence 60
-    SequenceLeft   -> Precedence 60
     Equals         -> Precedence 70
     NotEquals      -> Precedence 70
     RegexMatch     -> Precedence 70
     GreaterThan    -> Precedence 80
     LesserThan     -> Precedence 80
-    Map            -> Precedence 110
-    FlipMap        -> Precedence 110
     Plus           -> Precedence 130
     Minus          -> Precedence 130
     Splat          -> Precedence 140
