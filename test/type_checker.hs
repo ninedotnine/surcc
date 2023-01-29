@@ -125,7 +125,7 @@ print_err expected actual = Text.putStrLn failmsg where
 test :: Test -> IO ()
 test (ctx, expr, expr_t, Result expected, name) = do
     putStr name >> putStr "... "
-    let actual = check_expr ctx expr (SoucType expr_t (SoucKind 0))
+    let actual = check_expr ctx (SoucType expr_t (SoucKind 0)) expr
     if expected == actual
         then putStrLn "OK."
         else print_err expected actual >> exitFailure

@@ -68,7 +68,7 @@ check_stmt_return m_expr m_ret = do
     ctx <- get
     case m_expr of
         Just expr -> case m_ret of
-            Just t -> case check_expr ctx expr t of
+            Just t -> case check_expr ctx t expr of
                 Left err -> throwE err
                 Right () -> pure ()
             Nothing -> case infer ctx expr of
@@ -82,14 +82,14 @@ check_stmt_return m_expr m_ret = do
 check_stmt_while :: ExprTree -> Stmts -> Maybe SoucType -> Checker ()
 check_stmt_while expr body m_ret = do
     ctx <- get
-    case check_expr ctx expr soucbool of
+    case check_expr ctx soucbool expr of
         Left err -> throwE err
         Right () -> check_stmts body m_ret
 
 check_stmt_if :: ExprTree -> Stmts -> (Maybe Stmts) -> (Maybe SoucType) -> Checker ()
 check_stmt_if expr body m_else m_ret = do
     ctx <- get
-    case check_expr ctx expr soucbool of
+    case check_expr ctx soucbool expr of
         Left err -> throwE err
         Right () -> do
             check_stmts body m_ret
@@ -103,7 +103,7 @@ check_stmt_call name m_expr = do
     ctx <- get
     case (lookup_identifier name ctx, m_expr) of
         (Just SoucIO, Nothing) -> pure ()
-        (Just (SoucRoutn param), Just expr) -> case check_expr ctx expr param of
+        (Just (SoucRoutn param), Just expr) -> case check_expr ctx param expr of
             Left err -> throwE err
             Right () -> pure ()
         (Just t, _) -> throwE $ TypeMismatch SoucIO t

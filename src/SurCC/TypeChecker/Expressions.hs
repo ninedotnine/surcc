@@ -21,7 +21,21 @@ infer ctx tree = case tree of
         check_equals t inferred
         Right inferred
     Leaf term -> infer_term ctx term
-    Match _expr _branches -> undefined -- FIXME
+    Match expr branches -> do
+        expr_t <- infer ctx expr
+        check_patterns ctx expr_t (branches <&> fst)
+        infer_cases (branches <&> snd)
+        where
+            infer_cases :: [ExprTree] -> Either TypeError SoucType
+            infer_cases = \case
+                -- the expression parser should require at least one branch
+                [] -> error "unreachable: empty cases in a match expression"
+                (c:cs) -> do
+                    t <- infer ctx c
+                    check_cases ctx t cs
+                    pure t
+
+
 
 infer_term :: LocalScope -> Term -> Either TypeError SoucType
 infer_term context term = case term of
@@ -86,21 +100,25 @@ infer_infix_op ctx op left right = case op of
 
     _ -> not_implemented
 
+
+
+
 check_equals :: SoucType -> SoucType -> Either TypeError ()
 check_equals t0 t1 = if t0 == t1 then Right () else Left (TypeMismatch t0 t1)
 
-check_expr :: LocalScope -> ExprTree -> SoucType -> Either TypeError ()
-check_expr ctx tree t = case tree of
+
+check_expr :: LocalScope -> SoucType -> ExprTree -> Either TypeError ()
+check_expr ctx t = \case
     Branch op left right -> do
         ((InputType l_t, InputType r_t), ReturnType expr_t) <- infer_infix_op ctx op left right
-        check_expr ctx left l_t
-        check_expr ctx right r_t
+        check_expr ctx l_t left
+        check_expr ctx r_t right
         check_equals t expr_t
 
 
     Twig op expr -> do
         (InputType arg_t, ReturnType expr_t) <- infer_prefix_op op expr
-        check_expr ctx expr arg_t
+        check_expr ctx arg_t expr
         check_equals t expr_t
 
     Leaf term -> do
@@ -109,11 +127,36 @@ check_expr ctx tree t = case tree of
 
     Signed expr sig -> do
         expr_t <- infer ctx expr
-        check_expr ctx expr expr_t
+        check_expr ctx expr_t expr
         check_equals sig expr_t
         check_equals t expr_t
 
-    Match _expr _branches -> undefined
+    Match expr branches -> do
+        check_expr ctx t expr
+        check_patterns ctx t (branches <&> fst)
+        check_cases ctx t (branches <&> snd)
+
+
+check_patterns :: LocalScope -> SoucType -> [Pattern] -> Either TypeError ()
+check_patterns ctx t = foldr ((>>) . check_pattern) (Right ())
+    where
+        check_pattern :: Pattern -> Either TypeError ()
+        check_pattern = \case
+            PatLit l -> case l of
+                LiteralInt _ -> check_equals t SoucInteger
+                LiteralChar _ -> check_equals t SoucChar
+                LiteralString _ -> check_equals t SoucString
+            PatId i -> case lookup_identifier i ctx of
+                Nothing -> do
+                    -- FIXME bind this identifier in a new context?
+                    pure ()
+                Just i_t -> check_equals t i_t
+
+
+check_cases :: LocalScope -> SoucType -> [ExprTree] -> Either TypeError ()
+check_cases ctx t = foldr ((>>) . check_expr ctx t) (Right ())
+
+
 
 infer_if_needed :: Maybe SoucType -> ExprTree -> Checker SoucType
 infer_if_needed m_t expr = do
@@ -122,6 +165,6 @@ infer_if_needed m_t expr = do
         Nothing -> case infer ctx expr of
             Right t -> pure t
             Left err -> throwE err
-        Just t -> case check_expr ctx expr t of
+        Just t -> case check_expr ctx t expr of
             Right () -> pure t
             Left err -> throwE err
