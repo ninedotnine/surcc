@@ -46,41 +46,41 @@ data StackOp = StackLParen
              deriving Eq
 
 get_prec :: Operator -> Precedence
-get_prec = \case
-    Comma          -> Precedence 10
-    Iff            -> Precedence 20
-    BindRight      -> Precedence 30
-    BindLeft       -> Precedence 30
-    Applicative    -> Precedence 40
-    FlipApplicative -> Precedence 40
-    SequenceRight  -> Precedence 40
-    SequenceLeft   -> Precedence 40
-    Map            -> Precedence 43
-    FlipMap        -> Precedence 43
-    Apply          -> Precedence 46
-    FlipApply      -> Precedence 46
-    And            -> Precedence 50
-    Or             -> Precedence 50
-    Xor            -> Precedence 50
-    Equals         -> Precedence 70
-    NotEquals      -> Precedence 70
-    RegexMatch     -> Precedence 70
-    GreaterThan    -> Precedence 80
-    LesserThan     -> Precedence 80
-    Plus           -> Precedence 130
-    Minus          -> Precedence 130
-    Splat          -> Precedence 140
-    FieldDiv       -> Precedence 140
-    FloorDiv       -> Precedence 140
-    Modulo         -> Precedence 140
-    Hihat          -> Precedence 150
-    FromMaybe      -> Precedence 160
-    Prepend        -> Precedence 170
-    Append         -> Precedence 170
-    Index          -> Precedence 180
-    Lookup         -> Precedence 190
-    In             -> Precedence 200
-    Combine        -> Precedence 210
+get_prec = Precedence <$> \case
+    Comma          -> 10
+    Iff            -> 20
+    BindRight      -> 30
+    BindLeft       -> 30
+    Applicative    -> 40
+    FlipApplicative -> 40
+    SequenceRight  -> 40
+    SequenceLeft   -> 40
+    Map            -> 43
+    FlipMap        -> 43
+    Apply          -> 46
+    FlipApply      -> 46
+    And            -> 50
+    Or             -> 50
+    Xor            -> 50
+    Equals         -> 70
+    NotEquals      -> 70
+    RegexMatch     -> 70
+    GreaterThan    -> 80
+    LesserThan     -> 80
+    Plus           -> 130
+    Minus          -> 130
+    Splat          -> 140
+    FieldDiv       -> 140
+    FloorDiv       -> 140
+    Modulo         -> 140
+    Hihat          -> 150
+    FromMaybe      -> 160
+    Prepend        -> 170
+    Append         -> 170
+    Index          -> 180
+    Lookup         -> 190
+    In             -> 200
+    Combine        -> 210
 
 -- the oper stack is a temporary storage place for opers
 -- the tree stack holds the result, the output, as well as being used for
