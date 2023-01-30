@@ -3,4 +3,5 @@ n = 5
 plus_n(x: Integer): Integer = x + n
 
 f(x: Integer): Integer = fndo
-	return x
+	var x2 <- x
+	return x2

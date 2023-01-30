@@ -13,5 +13,6 @@ end
 cool_fn(x: Integer): Integer = x + (1: Integer)
 
 cool_fn2(x: Integer): Integer = fndo
-	return x: Integer
+	n = 2
+	return (x: Integer) + n
 end

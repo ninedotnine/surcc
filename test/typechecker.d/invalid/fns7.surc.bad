@@ -1,4 +1,3 @@
 n: Integer = 5
 
-f(x: Char): Integer = fndo
-	return x
+f(x: Char): Integer = x

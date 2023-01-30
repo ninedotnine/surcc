@@ -39,7 +39,8 @@ module SurCC.Common (
     bound_id,
     bound_const,
     TypeError(..),
-    Stmts(..),
+    Stmts(..), -- FIXME rename to StmtBlock ?
+    Return(..),
     CheckedProgram(..),
     ParseTree(..),
     TypeDef(..),
@@ -77,7 +78,7 @@ data ImportDecl = LibImport Text | RelImport Text
 type Imports = [ImportDecl]
 type Body = [TopLevelDefn]
 
-newtype Stmts = Stmts [Stmt] deriving (Eq, Show)
+data Stmts = Stmts [Stmt] (Maybe Return) deriving (Eq, Show)
 
 newtype SoucKind = SoucKind Word deriving (Eq, Ord, Show)
 
@@ -178,6 +179,8 @@ data TopLevelDefn = TopLevelConstDefn Identifier (Maybe SoucType) ExprTree
                     | FuncDefn Identifier Param (Maybe SoucType) Stmts
                     | ShortFuncDefn Identifier Param (Maybe SoucType) ExprTree
                     | SubDefn Identifier (Maybe Param) (Maybe SoucType) Stmts
+                    -- FIXME make this take a [Stmt] instead of Stmts?
+                    -- main routine should not be Return ed from
                     | MainDefn MainParam (Maybe SoucType) Stmts
                     deriving (Eq, Show)
 
@@ -191,8 +194,10 @@ data Stmt = Stmt_While ExprTree Stmts
           | Stmt_Const_Assign_Dynamic Identifier (Maybe SoucType) ExprTree
           | Stmt_Var_Declare Identifier (Maybe SoucType) ExprTree
           | Stmt_Var_Reassign Identifier (Maybe SoucType) ExprTree
-          | Stmt_Return (Maybe ExprTree)
           deriving (Eq, Show)
+
+newtype Return = Return (Maybe ExprTree)
+    deriving (Eq, Show)
 
 data ExprTree = Branch Operator ExprTree ExprTree
             | Twig PrefixOperator ExprTree
@@ -314,7 +319,8 @@ instance TextShow ImportDecl where
         RelImport name -> "rel import " <> showb name
 
 instance TextShow Stmts where
-    showb (Stmts stmts) = "Stmts: " <> showb stmts
+    showb (Stmts stmts ret) = "Stmts: " <> showb stmts
+                              <> " " <> showb ret
 
 instance TextShow TypeVar where
     showb = \case
@@ -418,10 +424,13 @@ instance TextShow Stmt where
             showb name <> ": " <> showb t <> " <-- " <> showb expr
         Stmt_Var_Reassign name Nothing expr ->
             showb name <> " <-- " <> showb expr
-        Stmt_Return (Just expr) ->
-            "return" <> showb expr
-        Stmt_Return Nothing ->
-            "return"
+
+
+instance TextShow Return where
+    showb = \case
+        Return (Just expr) -> "return" <> showb expr
+        Return Nothing -> "return"
+
 
 instance TextShow ExprTree where
     showb = \case

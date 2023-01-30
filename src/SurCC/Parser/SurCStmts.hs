@@ -14,26 +14,61 @@ import SurCC.Parser.Expr.Raw (postfix_oper) -- fixme delete this?
 import SurCC.Parser.Basics
 import SurCC.Parser.ExprParser (parse_expression)
 
+
+-- FIXME -- not all blocks are the same:
+-- if blocks can be only a return statement
+-- while blocks cannot have returns at all
+
+
 stmt_block :: SurCParser Stmts
 stmt_block = stmt_block_with_param Nothing
 
+
 stmt_block_with_param :: Maybe Param -> SurCParser Stmts
 stmt_block_with_param p = do
-    increase_indent_level
+    new_scope
     add_param_to_bindings p
     statements <- many1 (stmt <* many endline)
-    decrease_indent_level
-    pure $ Stmts statements
-        where
-            increase_indent_level :: SurCParser ()
-            increase_indent_level = modifyState (\(x,m) -> (x+1, cons Map.empty m))
-            decrease_indent_level :: SurCParser ()
-            decrease_indent_level = modifyState dedent
-                where
-                    dedent = \case
-                        (x, _ :| (m:ms)) -> (x-1, m:|ms)
-                        (_, _) -> error "should be impossible"
-                                    -- consider a tagged type
+    ret <- optionMaybe (stmt_return <* endline)
+    end_scope
+    pure $ Stmts statements ret
+
+
+stmt_block_if :: SurCParser Stmts
+stmt_block_if = do
+    new_scope
+    immediate_ret <- optionMaybe (stmt_return <* endline)
+    block <- case immediate_ret of
+        Just _ -> pure $ Stmts [] immediate_ret
+        Nothing -> do
+            statements <- many1 (stmt <* many endline)
+            ret <- optionMaybe (stmt_return <* endline)
+            pure $ Stmts statements ret
+    end_scope
+    pure block
+
+
+stmt_block_while :: SurCParser Stmts
+stmt_block_while = do
+    new_scope
+    statements <- many1 (stmt <* many endline)
+    end_scope
+    pure $ Stmts statements Nothing
+
+
+
+
+new_scope :: SurCParser ()
+new_scope = modifyState (\(x,m) -> (x+1, cons Map.empty m))
+
+end_scope :: SurCParser ()
+end_scope = modifyState dedent
+    where
+        dedent = \case
+            (x, _ :| (m:ms)) -> (x-1, m:|ms)
+            (_, _) -> error "should be impossible"
+                        -- consider a tagged type
+
 
 add_param_to_bindings :: Maybe Param -> SurCParser ()
 add_param_to_bindings = \case
@@ -41,25 +76,14 @@ add_param_to_bindings = \case
     _ -> pure ()
 
 
--- maybe i will find a use for these?
-new_scope :: SurCParser ()
-new_scope = modifyState (\(x,m) -> (x, cons Map.empty m))
-
-end_scope :: SurCParser ()
-end_scope = modifyState dedent
-    where
-        dedent = \case
-            (x, _ :| (m:ms)) -> (x, m:|ms)
-            (_, _) -> error "should be impossible"
-
 
 stmt :: SurCParser Stmt
 stmt = do
-    try (many endline *> indentation)
+    try (many endline *> indentation *> notFollowedBy (reserved "return"))
     stmt_control_flow <|> stmt_declaration <|> stmt_beginning_with_identifier
 
 stmt_control_flow :: SurCParser Stmt
-stmt_control_flow = stmt_cond <|> stmt_loop <|> stmt_return
+stmt_control_flow = stmt_cond <|> stmt_loop
 
 stmt_declaration :: SurCParser Stmt
 stmt_declaration = stmt_declare_dynamic_const <|> stmt_declare_var
@@ -129,14 +153,14 @@ stmt_loop = stmt_while <|> stmt_until
 stmt_while :: SurCParser Stmt
 stmt_while = do
     condition <- reserved "while" *> spaces *> parse_expression
-    stmts <- optional_do *> endline *> stmt_block
+    stmts <- optional_do *> endline *> stmt_block_while
     optional (many endline *> end_block Stmt_While_End) -- FIXME use this for type-checking
     pure $ Stmt_While condition stmts
 
 stmt_until :: SurCParser Stmt
 stmt_until = do
     condition <- reserved "until" *> spaces *> parse_expression
-    stmts <- optional_do *> endline *> stmt_block
+    stmts <- optional_do *> endline *> stmt_block_while
     optional (end_block Stmt_Until_End) -- FIXME use this for type-checking
     pure $ Stmt_Until condition stmts
 
@@ -146,24 +170,25 @@ stmt_cond = stmt_if <|> stmt_unless
 stmt_if :: SurCParser Stmt
 stmt_if = do
     condition <- reserved "if" *> spaces *> parse_expression
-    thenDo <- optional_do *> endline *> stmt_block
+    thenDo <- optional_do *> endline *> stmt_block_if
     elseDo <- optionMaybe ((try (indentation *> reserved' "else"))
                                 *> endline
-                                *> stmt_block)
+                                *> stmt_block_if)
     optional (end_block Stmt_If_End) -- FIXME use this for type-checking
     pure $ Stmt_If condition thenDo elseDo
 
 stmt_unless :: SurCParser Stmt
 stmt_unless = do
     condition <- reserved "unless" *> spaces *> parse_expression
-    thenDo <- optional_do *> endline *> stmt_block
+    thenDo <- optional_do *> endline *> stmt_block_if
     elseDo <- optionMaybe ((try (indentation *> reserved' "else"))
                                 *> endline
-                                *> stmt_block)
+                                *> stmt_block_if)
     optional (end_block Stmt_Unless_End) -- FIXME use this for type-checking
     pure $ Stmt_Unless condition thenDo elseDo
 
-stmt_return :: SurCParser Stmt
+stmt_return :: SurCParser Return
 stmt_return = do
-    expr <- reserved "return" *> optionMaybe (try (spaces *> parse_expression))
-    pure $ Stmt_Return expr
+    try (many endline *> indentation *> reserved "return")
+    m_expr <- optionMaybe (try (spaces *> parse_expression))
+    pure $ Return m_expr

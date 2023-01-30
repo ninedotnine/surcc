@@ -7,12 +7,18 @@ f(x: Integer): Integer = fndo
 		return 3
 	else
 		return 4
-	until False
+	unless False
 		return n
+	var n2: Integer <- n
+	return n2
 
 g(x: Integer): Integer = fndo
 	while False
-		return n+1
-	unless True
-		return n*3
+		let n1 = n+1 
+		if n == n1
+			return n1
+	until True
+		let n3 = n*3
+		unless n == n3
+			return n3
 	return 4

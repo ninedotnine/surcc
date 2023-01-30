@@ -70,18 +70,22 @@ pretty_print (ParseTree modul imps typedefs body) = do
 
 prettyPrint :: TopLevelDefn -> IO ()
 prettyPrint = Text.putStrLn <$> \case
-    SubDefn name param (Just t) (Stmts stmts) -> mconcat
+    SubDefn name param (Just t) (Stmts stmts r) -> mconcat
         ["sub ", showt name, " returns (should be IO): ", showt t,
-         " takes ", showt param, Text.unlines (prettifyStmt <$> stmts)]
-    SubDefn name param Nothing (Stmts stmts) -> mconcat
+         " takes ", showt param, Text.unlines (prettifyStmt <$> stmts),
+         " returns " <> showt r]
+    SubDefn name param Nothing (Stmts stmts r) -> mconcat
         ["sub ", showt name, " takes ", showt param,
-         " is ", (Text.unlines (map prettifyStmt stmts))]
-    FuncDefn name param (Just t) (Stmts stmts) -> mconcat
+         " is ", (Text.unlines (map prettifyStmt stmts)),
+         " returns " <> showt r]
+    FuncDefn name param (Just t) (Stmts stmts r) -> mconcat
         ["fn ", showt name, " takn ", showt param, " returns: ",
-         showt t, (Text.unlines (map ((" "<>) . prettifyStmt) stmts))]
-    FuncDefn name param Nothing (Stmts stmts) -> mconcat
+         showt t, (Text.unlines (map ((" "<>) . prettifyStmt) stmts)),
+         "returns " <> showt r]
+    FuncDefn name param Nothing (Stmts stmts r) -> mconcat
         ["fn ", showt name, " takn ", showt param,
-         " = ", (Text.unlines (map ((" "<>) . prettifyStmt) stmts))]
+         " = ", (Text.unlines (map ((" "<>) . prettifyStmt) stmts)),
+         "returns " <> showt r]
     ShortFuncDefn name param (Just t) expr -> mconcat
         ["fn ", showt name, " takn ", showt param,
          " returns: ", showt t, " = ", showt expr]
@@ -91,10 +95,10 @@ prettyPrint = Text.putStrLn <$> \case
         ["const ", showt name, ": ", showt type_name, " = ", showt val]
     TopLevelConstDefn name Nothing val -> mconcat
         ["const ", showt name, " = ", showt val]
-    MainDefn param (Just t) (Stmts stmts) -> mconcat
+    MainDefn param (Just t) (Stmts stmts _r) -> mconcat
         ["main with ", showt param, " returns (IO?): ", showt t,
          " = ", Text.unlines (map ((" "<>) . prettifyStmt) stmts)]
-    MainDefn param Nothing (Stmts stmts) -> mconcat
+    MainDefn param Nothing (Stmts stmts _r) -> mconcat
         ["main with  ", showt param,
          " = ", Text.unlines (map ((" "<>) . prettifyStmt) stmts)]
 

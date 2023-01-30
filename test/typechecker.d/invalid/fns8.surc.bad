@@ -1,2 +1,3 @@
 f(n: Integer): Integer = fndo
+	var x <- n
 	return

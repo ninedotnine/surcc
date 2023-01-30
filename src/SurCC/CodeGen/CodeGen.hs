@@ -21,6 +21,7 @@ import SurCC.Common (
     MainParamEnv(..),
     Identifier(..),
     Stmts(..),
+    Return(..),
     CheckedProgram(..),
     TopLevelDefn(..)
     )
@@ -123,16 +124,19 @@ instance Genny (Maybe Param) Text where
     gen = maybe (pure "void") gen
 
 instance Genny Stmts Text where
-    gen (Stmts stmts) = mconcat <$> traverse gen stmts
+    gen (Stmts stmts m_ret) = do
+        body <- mconcat <$> traverse gen stmts
+        case m_ret of
+            Nothing -> pure body
+            (Just (Return m_expr)) -> do
+                (decls, expr) <- gen m_expr
+                pure $ decls <> body <> "return " <> expr <> ";\n"
 
 instance Genny (Maybe Stmts) Text where
     gen = maybe (pure "") gen
 
 instance Genny Stmt Text where
     gen = \case
-        Stmt_Return m_expr -> do
-            (decls, expr) <- gen m_expr
-            pure $ decls <> "return " <> expr <> ";\n"
         Stmt_Sub_Call name m_expr -> do
             (CIdentifier gname) <- gen name
             (decls, expr) <- gen m_expr

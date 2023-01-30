@@ -26,8 +26,11 @@ import SurCC.TypeChecker.Expressions
 import Debug.Trace
 
 check_stmts :: Stmts -> Maybe SoucType -> Checker ()
-check_stmts (Stmts stmts) m_t = do
+check_stmts (Stmts stmts m_ret) m_t = do
     mapM_ check stmts
+    case m_ret of
+        Just (Return expr) -> check_return expr m_t
+        Nothing -> pure ()
     where
         check s = check_stmt s m_t
 
@@ -40,14 +43,13 @@ check_stmt stmt m_ret = do
         Stmt_If     expr body m_else -> check_stmt_if expr body m_else m_ret
         Stmt_Unless expr body m_else -> check_stmt_if expr body m_else m_ret
         Stmt_Sub_Call name m_arg -> check_stmt_call name m_arg
-        Stmt_Postfix_Oper name oper -> pure () -- FIXME
+        Stmt_Postfix_Oper name oper -> pure () -- FIXME delete this?
         Stmt_Const_Assign_Static name m_t expr ->
             check_stmt_ass name m_t expr
         Stmt_Const_Assign_Dynamic name m_t expr ->
             check_stmt_ass name m_t expr
         Stmt_Var_Declare name m_t expr -> check_stmt_mut_ass name m_t expr
         Stmt_Var_Reassign name m_t expr -> check_stmt_mut_ass name m_t expr
-        Stmt_Return m_expr -> check_stmt_return m_expr m_ret
     where
         check_stmt_ass :: Identifier -> (Maybe SoucType) -> ExprTree -> Checker ()
         check_stmt_ass name m_t expr = do
@@ -63,8 +65,9 @@ check_stmt stmt m_ret = do
 soucbool :: SoucType
 soucbool = SoucType "Bool" (SoucKind 0)
 
-check_stmt_return :: Maybe ExprTree -> Maybe SoucType -> Checker ()
-check_stmt_return m_expr m_ret = do
+
+check_return :: Maybe ExprTree -> Maybe SoucType -> Checker ()
+check_return m_expr m_ret = do
     ctx <- get
     case m_expr of
         Just expr -> case m_ret of
@@ -110,18 +113,6 @@ check_stmt_call name m_expr = do
         (Nothing, _) -> throwE $ Undeclared name
 
 infer_stmts :: LocalScope -> Stmts -> Either TypeError SoucType
-infer_stmts ctx (Stmts stmts) = undefined
-
-infer_stmt :: LocalScope -> Stmt -> Either TypeError SoucType
-infer_stmt ctx stmt = case stmt of
-    Stmt_While expr body -> undefined
-    Stmt_Until expr body -> undefined
-    Stmt_If expr body m_else -> undefined
-    Stmt_Unless expr body m_else -> undefined
-    Stmt_Sub_Call name m_arg -> undefined
-    Stmt_Postfix_Oper name oper -> undefined
-    Stmt_Const_Assign_Static name m_t expr -> undefined
-    Stmt_Const_Assign_Dynamic name m_t expr -> undefined
-    Stmt_Var_Declare name m_t expr -> undefined
-    Stmt_Var_Reassign name m_t expr -> undefined
-    Stmt_Return m_expr -> undefined
+infer_stmts ctx (Stmts _ m_ret) = case m_ret of
+    Just (Return r) -> undefined
+    Nothing -> undefined

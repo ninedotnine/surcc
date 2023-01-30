@@ -1,2 +1,1 @@
-g(x) = fndo
-	return x
+g(x) = ( x )

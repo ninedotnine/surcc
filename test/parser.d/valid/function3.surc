@@ -4,18 +4,16 @@ main() = do
 	print x ;}
 
 ;> this is the f function. it returns 3.
-f(x) = fndo
-	return 3
+f(x) = 3
 
 ;> this is the id function. it returns f(x).
-id(x) = fndo
-	return x & f
+id(x) = x & f
 
 ;> this function returns double its arg.
 double(x) = fndo
-	return 2 * x
+	var x2 <- 2 * x
+	return x2
 
 ;> this function combines its arg with double(itself).
 ;> x must be a member of a semigroup
-combine(x) = fndo
-	return x&double <> x&double
+combine(x) = x&double <> x&double

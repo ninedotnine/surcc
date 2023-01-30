@@ -3,4 +3,5 @@ n: Integer = 5
 f(x: Integer): Integer = x + 1
 
 g(x: Integer): Integer = fndo
-	return x & n
+	var r <- x & n
+	return r
