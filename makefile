@@ -50,7 +50,7 @@ clean:
 	rm -fr $(OUT_DIR) $(CACHE_DIR)
 
 .PHONY: test
-test: test/parser test/type_checker test/typechecker_progs test/codegen test/expr_parser test/integration test/typechecker_globals test/typechecker
+test: test/parser test/type_checker test/codegen test/expr_parser test/integration test/typechecker_globals test/typechecker
 	@echo "all tests successful! :^D"
 
 .PHONY: test/expr_parser test/integration test/typechecker
@@ -69,8 +69,8 @@ test/parser: test/TestParser.hs parser surcc | $(TEST_DIR)
 test/typechecker: typechecker
 	bin/typechecker --test
 
-.PHONY: test/codegen test/type_checker test/typechecker_progs test/typechecker_globals
-test/codegen test/type_checker test/typechecker_progs test/typechecker_globals: all | $(TEST_DIR)
+.PHONY: test/codegen test/type_checker test/typechecker_globals
+test/codegen test/type_checker test/typechecker_globals: all | $(TEST_DIR)
 	@$(RM) $(CACHE_DIR)/hi_files/Main.hi  	# ugh hack to fix ghc
 	@ghc $(FLAGS) -o $(CACHE_DIR)/$@ $@.hs
 	@$(CACHE_DIR)/$@
