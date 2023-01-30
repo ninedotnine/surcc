@@ -1,3 +1,5 @@
+{-# LANGUAGE TupleSections #-}
+
 module SurCC.TypeChecker.Context (
     Checker,
     ExportList(..),
@@ -6,6 +8,7 @@ module SurCC.TypeChecker.Context (
     lookup_constant,
     new_scope,
     new_param_scope,
+    new_pattern_scope,
     new_main_scope,
     exit_scope,
     insert_immut,
@@ -16,6 +19,8 @@ module SurCC.TypeChecker.Context (
     undefined_export,
 ) where
 
+import Control.Arrow (second)
+import Data.Functor ((<&>))
 import Data.HashMap.Strict qualified as Map
 
 import Prelude hiding (lookup)
@@ -139,6 +144,15 @@ new_scope = get >>= put . InnerScope Map.empty
 
 new_param_scope :: Identifier -> SoucType -> Checker ()
 new_param_scope i t = get >>= put . InnerScope (Map.singleton i (t, Immut))
+
+
+new_pattern_scope :: [(Identifier,SoucType)] -> Checker ()
+-- FIXME Map.fromList does not check for duplicate Identifiers
+new_pattern_scope binds = get >>= put . InnerScope new_map
+    where
+--         new_map = Map.fromList (binds <&> (\(i,t) -> (i,(t,Immut))))
+        new_map = Map.fromList (binds <&> second (,Immut))
+
 
 new_main_scope :: MainParam -> Checker ()
 new_main_scope (MainParam

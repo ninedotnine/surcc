@@ -36,7 +36,6 @@ check_stmts (Stmts stmts m_ret) m_t = do
 
 check_stmt :: Stmt -> Maybe SoucType -> Checker ()
 check_stmt stmt m_ret = do
-    ctx <- get
     case stmt of
         Stmt_While expr body -> check_stmt_while expr body m_ret
         Stmt_Until expr body -> check_stmt_while expr body m_ret
@@ -68,15 +67,12 @@ soucbool = SoucType "Bool" (SoucKind 0)
 
 check_return :: Maybe ExprTree -> Maybe SoucType -> Checker ()
 check_return m_expr m_ret = do
-    ctx <- get
     case m_expr of
         Just expr -> case m_ret of
-            Just t -> case check_expr ctx t expr of
-                Left err -> throwE err
-                Right () -> pure ()
-            Nothing -> case infer ctx expr of
-                Left err -> throwE err
-                Right t -> throwE (TypeMismatch SoucIO t)
+            Just t -> check_expr t expr
+            Nothing -> do
+                expr_t <- infer expr
+                throwE (TypeMismatch SoucIO expr_t)
         Nothing -> case m_ret of
             Just t -> throwE (TypeMismatch t SoucIO)
             Nothing -> pure ()
@@ -84,21 +80,16 @@ check_return m_expr m_ret = do
 
 check_stmt_while :: ExprTree -> Stmts -> Maybe SoucType -> Checker ()
 check_stmt_while expr body m_ret = do
-    ctx <- get
-    case check_expr ctx soucbool expr of
-        Left err -> throwE err
-        Right () -> check_stmts body m_ret
+    check_expr soucbool expr
+    check_stmts body m_ret
 
 check_stmt_if :: ExprTree -> Stmts -> (Maybe Stmts) -> (Maybe SoucType) -> Checker ()
 check_stmt_if expr body m_else m_ret = do
-    ctx <- get
-    case check_expr ctx soucbool expr of
-        Left err -> throwE err
-        Right () -> do
-            check_stmts body m_ret
-            case m_else of
-                Nothing -> pure ()
-                Just else_body -> check_stmts else_body m_ret
+    check_expr soucbool expr
+    check_stmts body m_ret
+    case m_else of
+        Nothing -> pure ()
+        Just else_body -> check_stmts else_body m_ret
 
 
 check_stmt_call :: Identifier -> Maybe ExprTree -> Checker ()
@@ -106,13 +97,11 @@ check_stmt_call name m_expr = do
     ctx <- get
     case (lookup_identifier name ctx, m_expr) of
         (Just SoucIO, Nothing) -> pure ()
-        (Just (SoucRoutn param), Just expr) -> case check_expr ctx param expr of
-            Left err -> throwE err
-            Right () -> pure ()
+        (Just (SoucRoutn param), Just expr) -> check_expr param expr
         (Just t, _) -> throwE $ TypeMismatch SoucIO t
         (Nothing, _) -> throwE $ Undeclared name
 
-infer_stmts :: LocalScope -> Stmts -> Either TypeError SoucType
-infer_stmts ctx (Stmts _ m_ret) = case m_ret of
+infer_stmts :: Stmts -> Either TypeError SoucType
+infer_stmts (Stmts _ m_ret) = case m_ret of
     Just (Return r) -> undefined
     Nothing -> undefined

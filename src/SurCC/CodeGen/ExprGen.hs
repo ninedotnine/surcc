@@ -156,7 +156,9 @@ generate_pattern = \case
         LitInt i -> generate_literal (LitInt i)
         LitChar c -> generate_literal (LitChar c)
         LitString s -> generate_literal (LitString s)
-    PatId _i -> undefined
+    PatId i -> pure $ generate_identifier_text i
+    -- FIXME need to do bindings, probably gonna need decls
+    PatBinding i -> pure $ generate_identifier_text i
 
 
 get_next_id :: Generator CIdentifier

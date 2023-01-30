@@ -98,9 +98,8 @@ add_top_level_long_fn i p m_t stmts = do
         Param _ Nothing -> error "FIXME type inference"
         Param param (Just p_t) -> do
             new_param_scope param p_t
-            p_ctx <- get
             case m_t of
-                Nothing -> case infer_stmts p_ctx stmts of
+                Nothing -> case infer_stmts stmts of
                     Right t -> do
                         exit_scope
                         add_potential_export (bound_id i (SoucFn p_t t))
@@ -130,6 +129,7 @@ add_top_level_sub i m_p m_t stmts = case (i, m_t) of
                 check_stmts stmts Nothing
                 exit_scope
                 add_potential_export (bound_id i (SoucRoutn p_t))
+
 
 add_main_routine :: MainParam -> Maybe SoucType -> Stmts -> Checker ()
 add_main_routine param m_t stmts = do

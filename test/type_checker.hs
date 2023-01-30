@@ -6,6 +6,9 @@ import SurCC.TypeChecker.Context
 import SurCC.TypeChecker.Expressions
 import SurCC.Common
 
+import Control.Monad.Trans.Except (runExceptT)
+import Control.Monad.State (evalState)
+
 import Data.HashMap.Strict qualified as Map
 import Data.Text (Text)
 import Data.Text.IO qualified as Text
@@ -125,7 +128,8 @@ print_err expected actual = Text.putStrLn failmsg where
 test :: Test -> IO ()
 test (ctx, expr, expr_t, Result expected, name) = do
     putStr name >> putStr "... "
-    let actual = check_expr ctx (SoucType expr_t (SoucKind 0)) expr
+    let actual = evalState (runExceptT (check_expr
+                    (SoucType expr_t (SoucKind 0)) expr)) ctx
     if expected == actual
         then putStrLn "OK."
         else print_err expected actual >> exitFailure
