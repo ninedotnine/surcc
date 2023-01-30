@@ -26,3 +26,9 @@
 [x] `let` and `var`
 [ ] `let` constants should have different semantics from `x = `  constants
 [ ] `T -> IO` becomes `Proc(T)`
+[ ] you can match a pattern against itself:
+        ```
+        match x
+            x -> x
+        ```
+    this trivially always matches and is not useful. disallow this?
