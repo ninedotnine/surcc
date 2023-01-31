@@ -23,7 +23,6 @@ import SurCC.TypeChecker.Context (Checker,
 import SurCC.TypeChecker.Operators
 import SurCC.TypeChecker.Expressions
 
-import Debug.Trace
 
 check_stmts :: Stmts -> Maybe SoucType -> Checker ()
 check_stmts (Stmts stmts m_ret) m_t = do
@@ -47,6 +46,10 @@ check_stmt stmt m_ret = do
             check_stmt_ass name m_t expr
         Stmt_Const_Assign_Dynamic name m_t expr ->
             check_stmt_ass name m_t expr
+        -- FIXME
+        -- the typechecker relies on the parser to not allow
+        -- redeclaring of the same variable.
+        -- eventually this functionality should be removed from the parser
         Stmt_Var_Declare name m_t expr -> check_stmt_mut_ass name m_t expr
         Stmt_Var_Reassign name m_t expr -> check_stmt_mut_ass name m_t expr
     where

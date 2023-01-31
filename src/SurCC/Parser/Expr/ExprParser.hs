@@ -56,12 +56,12 @@ parse_expression = parse_match <|> parse_infix_expression
 parse_match :: SurCParser ExprTree
 parse_match = do
     reserved "match" *> spaces
-    expr <- parse_infix_expression
+    scrutinee <- parse_infix_expression
     endline
     (i, _) <- Parsec.getState
     let indent = Parsec.count (i+1) Parsec.tab
     cases <- Parsec.many1 (indent *> parse_match_case)
-    pure $ Match expr cases
+    pure $ Match scrutinee cases
     where
         parse_match_case :: SurCParser (Pattern, ExprTree)
         parse_match_case = do

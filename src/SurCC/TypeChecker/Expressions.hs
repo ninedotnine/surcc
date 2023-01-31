@@ -12,8 +12,10 @@ import Data.Functor ((<&>))
 import SurCC.Common
 import SurCC.TypeChecker.Context (
     lookup_identifier,
+    new_scope,
     new_pattern_scope,
     exit_scope,
+    insert_immut,
     LocalScope,
     Checker,
     )
@@ -28,20 +30,21 @@ infer = \case
         check_equals t inferred
         pure inferred
     Leaf term -> infer_term term
-    Match expr branches -> do
-        expr_t <- infer expr
-        check_patterns expr_t (branches <&> fst)
-        infer_cases (branches <&> snd)
-        where
-            infer_cases :: [ExprTree] -> Checker SoucType
-            infer_cases = \case
-                -- the expression parser should require at least one branch
-                [] -> error "unreachable: empty cases in a match expression"
-                (c:cs) -> do
-                    t <- infer c
-                    check_cases t cs
-                    pure t
-
+    Match scrutinee branches -> do
+        pat_t <- infer scrutinee
+        case branches of
+            -- the expression parser should require at least one branch
+            -- FIXME consider a non-empty list type
+            [] -> error "unreachable: empty cases in a match expression"
+            ((pat,expr):etc) -> do
+                -- the pattern might bind an identifier,
+                -- and the expr must be checked in that context
+                new_scope
+                check_pattern pat_t pat
+                expr_t <- infer expr
+                exit_scope
+                check_branches (pat_t,expr_t) etc
+                pure expr_t
 
 
 infer_term :: Term -> Checker SoucType
@@ -60,9 +63,6 @@ infer_term term = case term of
         "OK" -> pure (SoucMaybe (SoucFn SoucInteger SoucInteger))
         _ -> throwE (UnknownData s)
 
-
-not_implemented :: Checker a
-not_implemented = throwE $ TypeMismatch (SoucType "NOT YET" (SoucKind 0)) (SoucType "IMPLEMENTED" (SoucKind 0))
 
 infer_prefix_op :: PrefixOperator -> ExprTree -> Checker (InputType, ReturnType)
 infer_prefix_op op _ = case op of
@@ -110,12 +110,6 @@ infer_infix_op op left right = case op of
     _ -> not_implemented
 
 
-
-
-check_equals :: SoucType -> SoucType -> Checker ()
-check_equals t0 t1 = if t0 == t1 then pure () else throwE (TypeMismatch t0 t1)
-
-
 check_expr :: SoucType -> ExprTree -> Checker ()
 check_expr t = \case
     Branch op left right -> do
@@ -123,7 +117,6 @@ check_expr t = \case
         check_expr l_t left
         check_expr r_t right
         check_equals t expr_t
-
 
     Twig op expr -> do
         (InputType arg_t, ReturnType expr_t) <- infer_prefix_op op expr
@@ -140,61 +133,29 @@ check_expr t = \case
         check_equals sig expr_t
         check_equals t expr_t
 
-    Match expr branches -> do
-        expr_t <- infer expr
-        check_patterns expr_t (branches <&> fst)
-        check_cases t (branches <&> snd)
+    Match scrutinee branches -> do
+        pat_t <- infer scrutinee
+        check_branches (pat_t,t) branches
 
 
-check_patterns :: SoucType -> [Pattern] -> Checker ()
-check_patterns t = foldr ((>>) . (check_pattern t)) (pure ())
+check_branches :: (SoucType,SoucType) -> [(Pattern,ExprTree)] -> Checker ()
+check_branches (pat_t,expr_t) = foldr ((*>) . check_branch) (pure ())
+    where
+        check_branch :: (Pattern,ExprTree) -> Checker ()
+        check_branch (pat,expr) = do
+            new_scope
+            check_pattern pat_t pat
+            check_expr expr_t expr
+            exit_scope
 
 
-check_pattern :: SoucType -> Pattern
-                 -> Checker ()
+check_pattern :: SoucType -> Pattern -> Checker ()
 check_pattern t = \case
     PatLit l -> case l of
         LitInt _ -> check_equals t SoucInteger
         LitChar _ -> check_equals t SoucChar
         LitString _ -> check_equals t SoucString
-    PatId i -> get >>= \ctx -> case lookup_identifier i ctx of
-        Nothing -> do
-            -- FIXME bind this identifier in a new context?
-            pure ()
-        Just i_t -> check_equals t i_t
-    PatBinding i -> undefined i
-
-
-check_pattern_new :: SoucType -> Pattern
-                 -> Checker [(Identifier, SoucType)]
-check_pattern_new t = \case
-    PatLit l -> case l of
-        LitInt _ -> check_equals t SoucInteger *> pure []
-        LitChar _ -> check_equals t SoucChar *> pure []
-        LitString _ -> check_equals t SoucString *> pure []
-    PatId i -> get >>= \ctx -> case lookup_identifier i ctx of
-        Nothing -> do
-            -- FIXME bind this identifier in a new context?
-            pure []
-        Just i_t -> check_equals t i_t *> pure []
-    PatBinding i -> undefined i
-
-
-
-check_cases :: SoucType -> [ExprTree] -> Checker ()
-check_cases t = foldr ((>>) . check_expr t) (pure ())
-
-
-check_pats_cases :: SoucType -> [(Pattern,ExprTree)] -> Checker ()
--- check_pats_cases ctx t = foldr ((>>) . check_expr ctx t) (pure ())
-check_pats_cases t = undefined t -- FIXME
-
-
-check_pat_case :: SoucType -> (Pattern,ExprTree) -> Checker ()
-check_pat_case t (pat,expr) = do
-    binds <- check_pattern_new t pat
-    new_pattern_scope binds
-    undefined expr binds -- FIXME
+    PatBinding i -> insert_immut i t
 
 
 infer_if_needed :: Maybe SoucType -> ExprTree -> Checker SoucType
@@ -202,3 +163,11 @@ infer_if_needed m_t expr = do
     case m_t of
         Nothing -> infer expr
         Just t -> check_expr t expr *> pure t
+
+
+check_equals :: SoucType -> SoucType -> Checker ()
+check_equals t0 t1 = if t0 == t1 then pure () else throwE (TypeMismatch t0 t1)
+
+
+not_implemented :: Checker a
+not_implemented = throwE $ TypeMismatch (SoucType "NOT YET" (SoucKind 0)) (SoucType "IMPLEMENTED" (SoucKind 0))

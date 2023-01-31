@@ -31,8 +31,8 @@ generate_expr = \case
         pref <- generate_prefix_expr op
         (decls, expr) <- generate_expr e
         pure $ (decls , pref <> expr <> "// fixme\n")
-    Match expr branches -> do
-        (decls, e) <- generate_expr expr
+    Match scrutinee branches -> do
+        (decls, e) <- generate_expr scrutinee
         (case_decls, cases) <- generate_cases e branches
         let failure = generate_literal (LitInt 0) -- FIXME default to 0
         pure $ (decls <> case_decls,
@@ -156,7 +156,6 @@ generate_pattern = \case
         LitInt i -> generate_literal (LitInt i)
         LitChar c -> generate_literal (LitChar c)
         LitString s -> generate_literal (LitString s)
-    PatId i -> pure $ generate_identifier_text i
     -- FIXME need to do bindings, probably gonna need decls
     PatBinding i -> pure $ generate_identifier_text i
 

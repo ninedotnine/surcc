@@ -19,4 +19,4 @@ parse_pattern :: Parsec Text s Pattern
 parse_pattern = parse_pat_lit <|> parse_pat_var
     where
         parse_pat_lit = literal <&> PatLit
-        parse_pat_var = identifier <&> PatId
+        parse_pat_var = identifier <&> PatBinding
