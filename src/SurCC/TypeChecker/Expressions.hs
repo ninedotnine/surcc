@@ -23,8 +23,8 @@ import SurCC.TypeChecker.Operators
 
 infer :: ExprTree -> Checker SoucType
 infer = \case
-    Branch op left right -> ret <$> infer_infix_op op left right
-    Twig op expr -> ret <$> infer_prefix_op op expr
+    Branch op left right -> ret <$> infer_infix_op left right op
+    Twig op expr -> ret <$> infer_prefix_op expr op
     Signed expr t -> do
         inferred <- infer expr
         check_equals t inferred
@@ -48,7 +48,7 @@ infer = \case
 
 
 infer_term :: Term -> Checker SoucType
-infer_term term = case term of
+infer_term = \case
     Lit l -> case l of
         LitInt _    -> pure SoucInteger
         LitChar _   -> pure SoucChar
@@ -64,8 +64,9 @@ infer_term term = case term of
         _ -> throwE (UnknownData s)
 
 
-infer_prefix_op :: PrefixOperator -> ExprTree -> Checker (InputType, ReturnType)
-infer_prefix_op op _ = case op of
+infer_prefix_op :: ExprTree -> PrefixOperator
+                   -> Checker (InputType, ReturnType)
+infer_prefix_op _ = \case
     Deref -> not_implemented
     GetAddr -> not_implemented
     Negate -> pure (in_t "Bool", ret_t "Bool")
@@ -74,17 +75,18 @@ infer_prefix_op op _ = case op of
     Join -> not_implemented
 
 
-infer_infix_op :: Operator -> ExprTree -> ExprTree
+infer_infix_op :: ExprTree -> ExprTree -> Operator
                   -> Checker ((InputType, InputType), ReturnType)
-infer_infix_op op left right = case op of
+infer_infix_op left right = \case
     Plus  -> pure ((in_t "Integer", in_t "Integer"), ret_t "Integer")
     Minus -> pure ((in_t "Integer", in_t "Integer"), ret_t "Integer")
     Splat -> pure ((in_t "Integer", in_t "Integer"), ret_t "Integer")
     And -> pure ((in_t "Bool", in_t "Bool"), ret_t "Bool")
     Or  -> pure ((in_t "Bool", in_t "Bool"), ret_t "Bool")
-    Equals -> pure ((in_t "Integer", in_t "Integer"), ret_t "Bool") -- FIXME (should be general)
-    LesserThan -> pure ((in_t "Integer", in_t "Integer"), ret_t "Bool") -- FIXME (should be general)
-    GreaterThan -> pure ((in_t "Integer", in_t "Integer"), ret_t "Bool") -- FIXME (should be general)
+    -- FIXME (should be general)
+    Equals -> pure ((in_t "Integer", in_t "Integer"), ret_t "Bool")
+    LesserThan -> pure ((in_t "Integer", in_t "Integer"), ret_t "Bool")
+    GreaterThan -> pure ((in_t "Integer", in_t "Integer"), ret_t "Bool")
     Apply     -> do
         l_t <- infer left
         case l_t of
@@ -113,13 +115,14 @@ infer_infix_op op left right = case op of
 check_expr :: SoucType -> ExprTree -> Checker ()
 check_expr t = \case
     Branch op left right -> do
-        ((InputType l_t, InputType r_t), ReturnType expr_t) <- infer_infix_op op left right
+        ((InputType l_t, InputType r_t), ReturnType expr_t) <-
+            infer_infix_op left right op
         check_expr l_t left
         check_expr r_t right
         check_equals t expr_t
 
     Twig op expr -> do
-        (InputType arg_t, ReturnType expr_t) <- infer_prefix_op op expr
+        (InputType arg_t, ReturnType expr_t) <- infer_prefix_op expr op
         check_expr arg_t expr
         check_equals t expr_t
 
