@@ -12,7 +12,7 @@ import SurCC.Parser.ExprParser (
     )
 
 import SurCC.Builtins (gen_builtin_data, gen_builtin_identifier)
-import SurCC.Common (Identifier(..), Pattern(..), Literal(..))
+import SurCC.Common (Identifier(..), Pattern(..), Literal(..), Guard(..))
 import SurCC.CodeGen.Common
 
 import Control.Monad.State (get, put)
@@ -35,7 +35,7 @@ generate_expr = \case
     Match scrutinee branches -> do
         (decls, expr) <- generate_match_expr scrutinee branches
         let failure = generate_literal (LitInt 0) -- FIXME default to 0
-        pure $ (decls, expr <> " " <> failure)
+        pure $ (decls, expr <> " /* fail clause */ " <> failure <> "\n)")
     Branch op x y -> case op of
         Plus              ->  (,) "" <$> gen_call "_souc_sum(" x y
         Minus             ->  (,) "" <$> gen_call "_souc_difference(" x y
@@ -129,29 +129,41 @@ generate_prefix_expr = \case
     Join       -> undefined
 
 
-generate_match_expr :: ExprTree -> [(Pattern,ExprTree)] -> Generator (Text,Text)
+generate_match_expr :: ExprTree -> [(Pattern,Maybe Guard,ExprTree)]
+                       -> Generator (Text,Text)
 generate_match_expr scrutinee branches = do
     (decls, expr) <- generate_expr scrutinee
     alloc <- get_next_id
     tell $ "union _souc_obj " <> gen_c_identifier alloc <> "; // hehehe \n"
     arms <- mconcat <$> traverse (generate_case alloc) branches
-    pure $ (decls, "\n" <> gen_c_identifier alloc <> " = " <> expr <> ",\n") <> arms
+    pure $ (decls, "(\n" <> gen_c_identifier alloc <> " = " <> expr <> ",\n") <> arms
 
 
-generate_case :: CIdentifier -> (Pattern,ExprTree) -> Generator (Text,Text)
-generate_case alloc (pat,expr) = do
+generate_case :: CIdentifier -> (Pattern,Maybe Guard,ExprTree)
+                 -> Generator (Text,Text)
+generate_case alloc (pat,m_guard,expr) = do
     (decls, e) <- generate_expr expr
+
     p <- case pat of
         PatLit l -> pure $ "(_souc_is_equal_integer(("
                            <> gen_c_identifier alloc
                            <> "),(" <> generate_literal l
-                           <> "))._souc_bool) ? (" <> e <> ") :\n"
+                           <> "))._souc_bool"
         PatBinding i -> do
             tell $ "union _souc_obj " <> gen_identifier i <> ";\n"
             -- the `true` can eventually be replaced by a guard
             pure $  "(" <> gen_identifier i <> " = "
-                    <> gen_c_identifier alloc <> ", true) ?\n(" <> e <> ") :\n"
-    pure (decls, p)
+                    <> gen_c_identifier alloc <> ", true"
+
+    g <- case m_guard of
+        Nothing -> pure ""
+        Just (Guard guar) -> do
+            (guard_decls, guard_clause) <- generate_expr guar
+            tell $ guard_decls
+            pure $ ", (" <> guard_clause <> ")._souc_bool"
+
+    let closer = ") ?\n(" <> e <> ") :\n"
+    pure (decls, p <> g <> closer)
 
 
 gen_c_identifier :: CIdentifier -> Text

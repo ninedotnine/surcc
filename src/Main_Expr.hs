@@ -11,6 +11,7 @@ import Data.Text (Text)
 import Data.Text qualified as Text
 
 import SurCC.Parser.ExprParser
+import SurCC.Parser.Expr.Types (RawExpr(..))
 
 main :: IO ()
 main = do

@@ -14,7 +14,6 @@ module SurCC.Parser.Expr.ExprParser (
     Term(..),
     Operator(..),
     PrefixOperator(..),
-    RawExpr(..),
 ) where
 
 
@@ -63,13 +62,25 @@ parse_match = do
     cases <- Parsec.many1 (indent *> parse_match_case)
     pure $ Match scrutinee cases
     where
-        parse_match_case :: SurCParser (Pattern, ExprTree)
+        parse_match_case :: SurCParser (Pattern, Maybe Guard, ExprTree)
         parse_match_case = do
             pat <- parse_pattern
-            spaces *> string "->" *> spaces
+            spaces
+            guard <- Parsec.optionMaybe parse_guard
+            string "->" *> spaces
             expr <- parse_expression
             endline
-            pure (pat, expr)
+            pure (pat, guard, expr)
+        parse_guard :: SurCParser Guard
+        parse_guard = do
+            Parsec.try (reserved "if")
+            raw <- Parsec.manyTill Parsec.anyChar
+                                   (Parsec.lookAhead (string " ->"))
+            spaces
+            case parse_raw_expression (RawExpr (Text.pack raw)) of
+                Right expr -> pure (Guard expr)
+                Left err -> parserFail $
+                    "invalid pattern guard:\n" ++ show err
 
 
 parse_infix_expression :: Parsec.Parsec Text s ExprTree

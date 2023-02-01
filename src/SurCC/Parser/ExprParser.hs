@@ -10,7 +10,6 @@ module SurCC.Parser.ExprParser (
     Term(..),
     Operator(..),
     PrefixOperator(..),
-    RawExpr(..),
 ) where
 
 import SurCC.Parser.Expr.ExprParser

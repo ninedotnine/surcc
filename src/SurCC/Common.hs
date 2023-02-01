@@ -19,6 +19,7 @@ module SurCC.Common (
     PrefixOperator(..),
     Literal(..),
     Pattern(..),
+    Guard(..),
     SoucKind(..),
     SoucType(..),
     TypeVar(..),
@@ -203,7 +204,7 @@ data ExprTree = Branch Operator ExprTree ExprTree
             | Twig PrefixOperator ExprTree
             | Signed ExprTree SoucType
             | Leaf Term
-            | Match ExprTree [(Pattern, ExprTree)]
+            | Match ExprTree [(Pattern, Maybe Guard, ExprTree)]
          deriving (Eq, Show)
 
 
@@ -274,6 +275,9 @@ data Pattern = PatLit Literal -- FIXME ints only for now hehe
              deriving (Eq, Show)
 
 
+newtype Guard = Guard ExprTree
+    deriving (Eq, Show)
+
 instance TextShow Literal where
     showb = \case
         LitInt i -> "int " <> showb i
@@ -289,6 +293,11 @@ instance TextShow Pattern where
 --         PatConstant k -> "constant " <> showb k
 --         PatConstructor k pats -> mconcat
 --             ["constructor ", showb k, " pats: ", showb pats]
+
+
+instance TextShow Guard where
+    showb (Guard cond) = "iff " <> showb cond
+
 
 
 instance TextShow Identifier where

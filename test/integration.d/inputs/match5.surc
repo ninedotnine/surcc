@@ -1,0 +1,12 @@
+nine: Integer = 9
+
+partial_increment(x: Integer) = match x
+	5 -> 6
+	7 -> 8
+	n if (n == 3) -> 1
+	m -> m
+
+main(stdout: OutputStream) = do
+	write stdout , 7 & partial_increment & str
+	write stdout , 3 & partial_increment & str
+	write stdout , 9 & partial_increment & str

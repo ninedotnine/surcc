@@ -35,11 +35,12 @@ infer = \case
             -- the expression parser should require at least one branch
             -- FIXME consider a non-empty list type
             [] -> error "unreachable: empty cases in a match expression"
-            ((pat,expr):etc) -> do
+            ((pat,g,expr):etc) -> do
                 -- the pattern might bind an identifier,
                 -- and the expr must be checked in that context
                 new_scope
                 check_pattern pat_t pat
+                check_guard g
                 expr_t <- infer expr
                 exit_scope
                 check_branches (pat_t,expr_t) etc
@@ -128,16 +129,23 @@ check_expr :: SoucType -> ExprTree -> Checker ()
 check_expr t expr = infer expr >>= assert_equals t
 
 
-check_branches :: (SoucType,SoucType) -> [(Pattern,ExprTree)] -> Checker ()
+check_branches :: (SoucType,SoucType) -> [(Pattern,Maybe Guard,ExprTree)]
+                  -> Checker ()
 check_branches (pat_t,expr_t) = foldr ((*>) . check_branch) (pure ())
     where
-        check_branch :: (Pattern,ExprTree) -> Checker ()
-        check_branch (pat,expr) = do
+        check_branch :: (Pattern,Maybe Guard,ExprTree) -> Checker ()
+        check_branch (pat,g,expr) = do
             new_scope
             check_pattern pat_t pat
+            check_guard g
             check_expr expr_t expr
             exit_scope
 
+
+check_guard :: Maybe Guard -> Checker ()
+check_guard = \case
+    Nothing -> pure ()
+    Just (Guard g) -> check_expr SoucBool g
 
 check_lit :: SoucType -> Literal -> Checker ()
 check_lit t l = do
