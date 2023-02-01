@@ -5,6 +5,7 @@ module SurCC.TypeChecker.Expressions (
 ) where
 
 import Control.Applicative
+import Control.Monad (unless)
 import Control.Monad.Trans.Except
 import Control.Monad.State
 import Data.Functor ((<&>))
@@ -27,7 +28,7 @@ infer = \case
     Twig op expr -> ret <$> infer_prefix_op expr op
     Signed expr t -> do
         inferred <- infer expr
-        check_equals t inferred
+        assert_equals t inferred
         pure inferred
     Leaf term -> infer_term term
     Match scrutinee branches -> do
@@ -92,7 +93,7 @@ infer_infix_op left right = \case
         case l_t of
             SoucFn t0 t1 -> do
                 r_t <- infer right
-                check_equals r_t t0
+                assert_equals r_t t0
                 pure ((InputType l_t, InputType t0), ReturnType t1)
             -- FIXME  l_t is used twice here and r_t is not used?
             _ -> throwE (TypeMismatch (SoucFn l_t (SoucTypeVar (TypeVar (Right 'T') (SoucKind 0)))) l_t)
@@ -101,7 +102,7 @@ infer_infix_op left right = \case
         l_t <- infer left
         case r_t of
             SoucFn t0 t1 -> do
-                check_equals l_t t0
+                assert_equals l_t t0
                 pure (((InputType t0, InputType r_t)), ReturnType t1)
             _ -> throwE (TypeMismatch (SoucFn l_t (SoucTypeVar (TypeVar (Right 'T') (SoucKind 0)))) r_t)
     Comma -> do
@@ -119,22 +120,22 @@ check_expr t = \case
             infer_infix_op left right op
         check_expr l_t left
         check_expr r_t right
-        check_equals t expr_t
+        assert_equals t expr_t
 
     Twig op expr -> do
         (InputType arg_t, ReturnType expr_t) <- infer_prefix_op expr op
         check_expr arg_t expr
-        check_equals t expr_t
+        assert_equals t expr_t
 
     Leaf term -> do
         term_t <- infer_term term
-        check_equals t term_t
+        assert_equals t term_t
 
     Signed expr sig -> do
         expr_t <- infer expr
         check_expr expr_t expr
-        check_equals sig expr_t
-        check_equals t expr_t
+        assert_equals sig expr_t
+        assert_equals t expr_t
 
     Match scrutinee branches -> do
         pat_t <- infer scrutinee
@@ -155,9 +156,9 @@ check_branches (pat_t,expr_t) = foldr ((*>) . check_branch) (pure ())
 check_pattern :: SoucType -> Pattern -> Checker ()
 check_pattern t = \case
     PatLit l -> case l of
-        LitInt _ -> check_equals t SoucInteger
-        LitChar _ -> check_equals t SoucChar
-        LitString _ -> check_equals t SoucString
+        LitInt _ -> assert_equals t SoucInteger
+        LitChar _ -> assert_equals t SoucChar
+        LitString _ -> assert_equals t SoucString
     PatBinding i -> insert_immut i t
 
 
@@ -168,8 +169,8 @@ infer_if_needed m_t expr = do
         Just t -> check_expr t expr *> pure t
 
 
-check_equals :: SoucType -> SoucType -> Checker ()
-check_equals t0 t1 = if t0 == t1 then pure () else throwE (TypeMismatch t0 t1)
+assert_equals :: SoucType -> SoucType -> Checker ()
+assert_equals t0 t1 = unless (t0 == t1) (throwE (TypeMismatch t0 t1))
 
 
 not_implemented :: Checker a
