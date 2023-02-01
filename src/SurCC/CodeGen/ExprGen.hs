@@ -139,24 +139,27 @@ generate_prefix_expr = \case
 
 
 generate_cases :: Text -> [(Pattern,ExprTree)] -> Generator (Text,Text)
-generate_cases expr branches =
-    mconcat <$> traverse (generate_case expr) branches
+generate_cases expr branches = do
+    (CIdentifier alloc) <- get_next_id
+    tell $ "union _souc_obj " <> alloc <> "; // hehehe \n"
+    arms <- mconcat <$> traverse (generate_case alloc) branches
+    pure $ ("", "\n" <> alloc <> " = " <> expr <> ",\n") <> arms
 
 
 generate_case :: Text -> (Pattern,ExprTree) -> Generator (Text,Text)
-generate_case tested_expr (pat,expr) = do
+generate_case alloc (pat,expr) = do
     (decls, e) <- generate_expr expr
     case pat of
         PatLit l -> pure $ (decls,
-                            "(_souc_is_equal_integer((" <> tested_expr
+                            "(_souc_is_equal_integer((" <> alloc
                             <> "),(" <> generate_literal l
                             <> "))._souc_bool) ? (" <> e <> ") :\n")
         PatBinding i -> do
             tell $ "union _souc_obj " <> generate_identifier_text i <> ";\n"
             -- the `true` can eventually be replaced by a guard
             pure $ (decls,
-                    "(" <> generate_identifier_text i <> " = " <>
-                    tested_expr <> ", true) ?\n(" <> e <> ") :\n")
+                    "(" <> generate_identifier_text i <> " = " <> alloc
+                    <> ", true) ?\n(" <> e <> ") :\n")
 
 
 get_next_id :: Generator CIdentifier
