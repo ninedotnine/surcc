@@ -1,0 +1,3 @@
+main(stdout: OutputStream) = do
+	s = (5+'a') & str
+	write stdout , s

@@ -20,8 +20,11 @@ import SurCC.TypeChecker.Context (Checker,
                             insert_immut,
                             insert_mut,
                             lookup_identifier)
-import SurCC.TypeChecker.Operators
-import SurCC.TypeChecker.Expressions
+import SurCC.TypeChecker.Expressions (
+    check_expr,
+    infer,
+    infer_if_needed,
+    )
 
 
 check_stmts :: Stmts -> Maybe SoucType -> Checker ()
@@ -64,10 +67,6 @@ check_stmt stmt m_ret = do
             insert_mut name t
 
 
-soucbool :: SoucType
-soucbool = SoucType "Bool" (SoucKind 0)
-
-
 check_return :: Maybe ExprTree -> Maybe SoucType -> Checker ()
 check_return m_expr m_ret = do
     case m_expr of
@@ -83,12 +82,13 @@ check_return m_expr m_ret = do
 
 check_stmt_while :: ExprTree -> Stmts -> Maybe SoucType -> Checker ()
 check_stmt_while expr body m_ret = do
-    check_expr soucbool expr
+    check_expr SoucBool expr
     check_stmts body m_ret
+
 
 check_stmt_if :: ExprTree -> Stmts -> (Maybe Stmts) -> (Maybe SoucType) -> Checker ()
 check_stmt_if expr body m_else m_ret = do
-    check_expr soucbool expr
+    check_expr SoucBool expr
     check_stmts body m_ret
     case m_else of
         Nothing -> pure ()

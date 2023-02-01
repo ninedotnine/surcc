@@ -20,22 +20,14 @@ import SurCC.TypeChecker.Context (
     LocalScope,
     Checker,
     )
-import SurCC.TypeChecker.Operators
 
 infer :: ExprTree -> Checker SoucType
 infer = \case
-    -- FIXME this should probably
---     do
---         ((InputType l_t, InputType r_t), ReturnType expr_t) <-
---             infer_infix_op left right op
---         check_expr l_t left
---         check_expr r_t right
-    Branch op left right -> ret <$> infer_infix_op left right op
-    Twig op expr -> ret <$> infer_prefix_op expr op
+    Branch op left right -> infer_infix_op left right op
+    Twig op expr -> infer_prefix_op expr op
     Signed expr t -> do
-        inferred <- infer expr
-        assert_equals t inferred
-        pure inferred
+        check_expr t expr
+        pure t
     Leaf term -> infer_term term
     Match scrutinee branches -> do
         pat_t <- infer scrutinee
@@ -56,11 +48,10 @@ infer = \case
 
 infer_term :: Term -> Checker SoucType
 infer_term = \case
-    Lit l -> case l of
-        LitInt _    -> pure SoucInteger
-        LitChar _   -> pure SoucChar
-        LitString _ -> pure SoucString
+    Lit l -> infer_lit l
     Var v -> get >>= \ctx -> case lookup_identifier v ctx of
+        -- FIXME is this unreachable?
+        -- the scrutinee has already been inferred
         Nothing -> throwE (Undeclared v)
         Just t -> pure t
     Constructor s -> case s of
@@ -71,83 +62,70 @@ infer_term = \case
         _ -> throwE (UnknownData s)
 
 
-infer_prefix_op :: ExprTree -> PrefixOperator
-                   -> Checker (InputType, ReturnType)
-infer_prefix_op _ = \case
+infer_lit :: Literal -> Checker SoucType
+infer_lit = pure <$> \case
+    LitInt _    -> SoucInteger
+    LitChar _   -> SoucChar
+    LitString _ -> SoucString
+
+
+infer_prefix_op :: ExprTree -> PrefixOperator -> Checker SoucType
+infer_prefix_op expr = \case
     Deref -> not_implemented
     GetAddr -> not_implemented
-    Negate -> pure (in_t "Bool", ret_t "Bool")
-    ToString -> pure (in_t "Integer", ret_t "String")
+    Negate -> do
+        check_expr SoucBool expr
+        pure SoucBool
+    ToString -> do
+        check_expr SoucInteger expr
+        pure SoucString
     Pure -> not_implemented
     Join -> not_implemented
 
 
-infer_infix_op :: ExprTree -> ExprTree -> Operator
-                  -> Checker ((InputType, InputType), ReturnType)
+infer_infix_op :: ExprTree -> ExprTree -> Operator -> Checker SoucType
 infer_infix_op left right = \case
-    -- FIXME this was lazy
-    -- should infer the types of each arg
-    Plus  -> pure ((in_t "Integer", in_t "Integer"), ret_t "Integer")
-    Minus -> pure ((in_t "Integer", in_t "Integer"), ret_t "Integer")
-    Splat -> pure ((in_t "Integer", in_t "Integer"), ret_t "Integer")
-    And -> pure ((in_t "Bool", in_t "Bool"), ret_t "Bool")
-    Or  -> pure ((in_t "Bool", in_t "Bool"), ret_t "Bool")
-    -- FIXME (should be general)
-    Equals -> pure ((in_t "Integer", in_t "Integer"), ret_t "Bool")
-    LesserThan -> pure ((in_t "Integer", in_t "Integer"), ret_t "Bool")
-    GreaterThan -> pure ((in_t "Integer", in_t "Integer"), ret_t "Bool")
-    Apply     -> do
+    -- FIXME we're not polymorphic yet
+    Plus  -> do
+        check_expr SoucInteger left
+        check_expr SoucInteger right
+        pure SoucInteger
+    Minus -> infer_infix_op left right Plus
+    Splat -> infer_infix_op left right Plus
+
+    And -> do
+        check_expr SoucBool left
+        check_expr SoucBool right
+        pure SoucBool
+    Or  -> infer_infix_op left right And
+    Xor -> infer_infix_op left right And
+
+    Equals -> do
+        check_expr SoucInteger left
+        check_expr SoucInteger right
+        pure SoucBool
+    LesserThan -> infer_infix_op left right Equals
+    GreaterThan -> infer_infix_op left right Equals
+
+    Apply -> do
         l_t <- infer left
         case l_t of
             SoucFn t0 t1 -> do
-                r_t <- infer right
-                assert_equals r_t t0
-                pure ((InputType l_t, InputType t0), ReturnType t1)
-            -- FIXME  l_t is used twice here and r_t is not used?
+                check_expr t0 right
+                pure t1
             _ -> throwE (TypeMismatch (SoucFn l_t (SoucTypeVar (TypeVar (Right 'T') (SoucKind 0)))) l_t)
-    FlipApply -> do
-        r_t <- infer right
-        l_t <- infer left
-        case r_t of
-            SoucFn t0 t1 -> do
-                assert_equals l_t t0
-                pure (((InputType t0, InputType r_t)), ReturnType t1)
-            _ -> throwE (TypeMismatch (SoucFn l_t (SoucTypeVar (TypeVar (Right 'T') (SoucKind 0)))) r_t)
+    FlipApply -> infer_infix_op right left Apply
+
     Comma -> do
         l_t <- infer left
         r_t <- infer right
-        pure ((InputType l_t, InputType r_t), ReturnType (SoucPair l_t r_t))
+        pure (SoucPair l_t r_t)
 
     _ -> not_implemented
 
 
 check_expr :: SoucType -> ExprTree -> Checker ()
-check_expr t = \case
-    Branch op left right -> do
-        ((InputType l_t, InputType r_t), ReturnType expr_t) <-
-            infer_infix_op left right op
-        check_expr l_t left
-        check_expr r_t right
-        assert_equals t expr_t
-
-    Twig op expr -> do
-        (InputType arg_t, ReturnType expr_t) <- infer_prefix_op expr op
-        check_expr arg_t expr
-        assert_equals t expr_t
-
-    Leaf term -> do
-        term_t <- infer_term term
-        assert_equals t term_t
-
-    Signed expr sig -> do
-        expr_t <- infer expr
-        check_expr expr_t expr
-        assert_equals sig expr_t
-        assert_equals t expr_t
-
-    Match scrutinee branches -> do
-        pat_t <- infer scrutinee
-        check_branches (pat_t,t) branches
+check_expr t expr = infer expr >>= assert_equals t
 
 
 check_branches :: (SoucType,SoucType) -> [(Pattern,ExprTree)] -> Checker ()
@@ -161,12 +139,15 @@ check_branches (pat_t,expr_t) = foldr ((*>) . check_branch) (pure ())
             exit_scope
 
 
+check_lit :: SoucType -> Literal -> Checker ()
+check_lit t l = do
+    l_t <- infer_lit l
+    assert_equals t l_t
+
+
 check_pattern :: SoucType -> Pattern -> Checker ()
 check_pattern t = \case
-    PatLit l -> case l of
-        LitInt _ -> assert_equals t SoucInteger
-        LitChar _ -> assert_equals t SoucChar
-        LitString _ -> assert_equals t SoucString
+    PatLit l -> check_lit t l
     PatBinding i -> insert_immut i t
 
 
