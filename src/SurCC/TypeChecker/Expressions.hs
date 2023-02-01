@@ -24,6 +24,12 @@ import SurCC.TypeChecker.Operators
 
 infer :: ExprTree -> Checker SoucType
 infer = \case
+    -- FIXME this should probably
+--     do
+--         ((InputType l_t, InputType r_t), ReturnType expr_t) <-
+--             infer_infix_op left right op
+--         check_expr l_t left
+--         check_expr r_t right
     Branch op left right -> ret <$> infer_infix_op left right op
     Twig op expr -> ret <$> infer_prefix_op expr op
     Signed expr t -> do
@@ -79,6 +85,8 @@ infer_prefix_op _ = \case
 infer_infix_op :: ExprTree -> ExprTree -> Operator
                   -> Checker ((InputType, InputType), ReturnType)
 infer_infix_op left right = \case
+    -- FIXME this was lazy
+    -- should infer the types of each arg
     Plus  -> pure ((in_t "Integer", in_t "Integer"), ret_t "Integer")
     Minus -> pure ((in_t "Integer", in_t "Integer"), ret_t "Integer")
     Splat -> pure ((in_t "Integer", in_t "Integer"), ret_t "Integer")
