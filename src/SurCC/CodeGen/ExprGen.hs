@@ -142,22 +142,21 @@ generate_cases :: Text -> [(Pattern,ExprTree)] -> Generator (Text,Text)
 generate_cases expr branches =
     mconcat <$> traverse (generate_case expr) branches
 
+
 generate_case :: Text -> (Pattern,ExprTree) -> Generator (Text,Text)
 generate_case tested_expr (pat,expr) = do
     (decls, e) <- generate_expr expr
-    p <- generate_pattern pat
-    pure $ (decls,
-            "(_souc_is_equal_integer((" <> tested_expr
-            <> "),(" <> p <> "))._souc_bool) ? (" <> e <> ") :\n")
-
-generate_pattern :: Pattern -> Generator Text
-generate_pattern = \case
-    PatLit l -> pure $ case l of
-        LitInt i -> generate_literal (LitInt i)
-        LitChar c -> generate_literal (LitChar c)
-        LitString s -> generate_literal (LitString s)
-    -- FIXME need to do bindings, probably gonna need decls
-    PatBinding i -> pure $ generate_identifier_text i
+    case pat of
+        PatLit l -> pure $ (decls,
+                            "(_souc_is_equal_integer((" <> tested_expr
+                            <> "),(" <> generate_literal l
+                            <> "))._souc_bool) ? (" <> e <> ") :\n")
+        PatBinding i -> do
+            tell $ "union _souc_obj " <> generate_identifier_text i <> ";\n"
+            -- the `true` can eventually be replaced by a guard
+            pure $ (decls,
+                    "(" <> generate_identifier_text i <> " = " <>
+                    tested_expr <> ", true) ?\n(" <> e <> ") :\n")
 
 
 get_next_id :: Generator CIdentifier

@@ -1,0 +1,10 @@
+weird(x: Integer) = match x
+	5 -> 6
+	7 -> 8
+	n -> n+1
+
+main(stdout: OutputStream) = do
+	write stdout , 5 & weird & str
+	write stdout , 9 & weird & str
+	ten = 10
+	write stdout , ten & weird & str
