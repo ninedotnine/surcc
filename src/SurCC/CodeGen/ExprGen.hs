@@ -1,6 +1,7 @@
 module SurCC.CodeGen.ExprGen (
     generate_expr,
-    generate_identifier,
+    gen_identifier,
+    gen_c_identifier,
 ) where
 
 import SurCC.Parser.ExprParser (
@@ -32,12 +33,9 @@ generate_expr = \case
         (decls, expr) <- generate_expr e
         pure $ (decls , pref <> expr <> "// fixme\n")
     Match scrutinee branches -> do
-        (decls, e) <- generate_expr scrutinee
-        (case_decls, cases) <- generate_cases e branches
+        (decls, expr) <- generate_match_expr scrutinee branches
         let failure = generate_literal (LitInt 0) -- FIXME default to 0
-        pure $ (decls <> case_decls,
-                cases <> " " <> failure)
-
+        pure $ (decls, expr <> " " <> failure)
     Branch op x y -> case op of
         Plus              ->  (,) "" <$> gen_call "_souc_sum(" x y
         Minus             ->  (,) "" <$> gen_call "_souc_difference(" x y
@@ -76,6 +74,7 @@ generate_expr = \case
         BindRight         ->  undefined
         BindLeft          ->  undefined
 
+
 gen_apply :: ExprTree -> ExprTree -> Generator Text
 gen_apply x y = do
     (x_decls, gx) <- generate_expr x
@@ -104,7 +103,7 @@ gen_tuple x y = do
 generate_term :: Term -> Generator Text
 generate_term = \case
     Lit l -> pure $ generate_literal l
-    Var v -> pure $ generate_identifier_text v
+    Var v -> pure $ gen_identifier v
     Constructor s -> case gen_builtin_data s of
         Just output -> pure output
         Nothing -> pure "47" -- fixme hehe
@@ -120,14 +119,6 @@ generate_literal = \case
                    <> s <> "\"}"
 
 
-generate_identifier :: Identifier -> CIdentifier
-generate_identifier = CIdentifier . generate_identifier_text
-
-generate_identifier_text :: Identifier -> Text
-generate_identifier_text i = fromMaybe (prepend i) (gen_builtin_identifier i)
-    where
-        prepend (Identifier name) = "_souc_user_" <> name
-
 generate_prefix_expr :: PrefixOperator -> Generator Text
 generate_prefix_expr = \case
     GetAddr    -> pure "&"
@@ -138,28 +129,39 @@ generate_prefix_expr = \case
     Join       -> undefined
 
 
-generate_cases :: Text -> [(Pattern,ExprTree)] -> Generator (Text,Text)
-generate_cases expr branches = do
-    (CIdentifier alloc) <- get_next_id
-    tell $ "union _souc_obj " <> alloc <> "; // hehehe \n"
+generate_match_expr :: ExprTree -> [(Pattern,ExprTree)] -> Generator (Text,Text)
+generate_match_expr scrutinee branches = do
+    (decls, expr) <- generate_expr scrutinee
+    alloc <- get_next_id
+    tell $ "union _souc_obj " <> gen_c_identifier alloc <> "; // hehehe \n"
     arms <- mconcat <$> traverse (generate_case alloc) branches
-    pure $ ("", "\n" <> alloc <> " = " <> expr <> ",\n") <> arms
+    pure $ (decls, "\n" <> gen_c_identifier alloc <> " = " <> expr <> ",\n") <> arms
 
 
-generate_case :: Text -> (Pattern,ExprTree) -> Generator (Text,Text)
+generate_case :: CIdentifier -> (Pattern,ExprTree) -> Generator (Text,Text)
 generate_case alloc (pat,expr) = do
     (decls, e) <- generate_expr expr
-    case pat of
-        PatLit l -> pure $ (decls,
-                            "(_souc_is_equal_integer((" <> alloc
-                            <> "),(" <> generate_literal l
-                            <> "))._souc_bool) ? (" <> e <> ") :\n")
+    p <- case pat of
+        PatLit l -> pure $ "(_souc_is_equal_integer(("
+                           <> gen_c_identifier alloc
+                           <> "),(" <> generate_literal l
+                           <> "))._souc_bool) ? (" <> e <> ") :\n"
         PatBinding i -> do
-            tell $ "union _souc_obj " <> generate_identifier_text i <> ";\n"
+            tell $ "union _souc_obj " <> gen_identifier i <> ";\n"
             -- the `true` can eventually be replaced by a guard
-            pure $ (decls,
-                    "(" <> generate_identifier_text i <> " = " <> alloc
-                    <> ", true) ?\n(" <> e <> ") :\n")
+            pure $  "(" <> gen_identifier i <> " = "
+                    <> gen_c_identifier alloc <> ", true) ?\n(" <> e <> ") :\n"
+    pure (decls, p)
+
+
+gen_c_identifier :: CIdentifier -> Text
+gen_c_identifier (CIdentifier i) = i
+
+
+gen_identifier :: Identifier -> Text
+gen_identifier i = fromMaybe (prepend i) (gen_builtin_identifier i)
+    where
+        prepend (Identifier name) = "_souc_user_" <> name
 
 
 get_next_id :: Generator CIdentifier

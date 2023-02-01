@@ -7,7 +7,11 @@ module SurCC.CodeGen.CodeGen (
 ) where
 
 import SurCC.CodeGen.Common
-import SurCC.CodeGen.ExprGen (generate_expr, generate_identifier)
+import SurCC.CodeGen.ExprGen (
+    generate_expr,
+    gen_identifier,
+    gen_c_identifier
+    )
 import SurCC.CodeGen.Runtime (runtime)
 import SurCC.Common (
     Stmt(..),
@@ -41,8 +45,8 @@ generate (CheckedProgram _ _ body) = runtime <> text
 class Genny a b | a -> b where
     gen :: a -> Generator b
 
-instance Genny Identifier CIdentifier where
-    gen = pure . generate_identifier
+instance Genny Identifier Text where
+    gen = pure . gen_identifier
 
 instance Genny ExprTree (Text,Text) where
     gen = generate_expr
@@ -56,26 +60,26 @@ instance Genny [TopLevelDefn] () where
 instance Genny TopLevelDefn () where
     gen = \case
         TopLevelConstDefn name _ expr -> do
-            (CIdentifier n) <- gen name
+            n <- gen name
             (decls, e) <- gen expr
             tell $ decls <> "const union _souc_obj " <> n <> " = " <> e <> ";\n"
 
         FuncDefn name param _ stmts -> do
-            (CIdentifier n) <- gen name
+            n <- gen name
             p <- gen param
             tell $ "union _souc_obj " <> n <> "(" <> p <> ") {\n"
             s <- gen stmts
             tell $ s <> "}\n"
 
         ShortFuncDefn name param _ expr -> do
-            (CIdentifier n) <- gen name
+            n <- gen name
             p <- gen param
             tell $ "union _souc_obj " <> n <> "(" <> p <> ") {\n"
             (decls, e) <- gen expr -- fixme decls need to be statically allocd
             tell $ decls <> "return " <> e <> ";\n}\n"
 
         SubDefn name m_param _ stmts -> do
-            (CIdentifier n) <- gen name
+            n <- gen name
             p <- gen m_param
             tell $ "void " <> n <> "(" <> p <> ") {\n"
             s <- gen stmts
@@ -138,29 +142,29 @@ instance Genny (Maybe Stmts) Text where
 instance Genny Stmt Text where
     gen = \case
         Stmt_Sub_Call name m_expr -> do
-            (CIdentifier gname) <- gen name
+            gname <- gen name
             (decls, expr) <- gen m_expr
             pure $ decls <> gname <> "(" <> expr <> ");\n"
         Stmt_Var_Declare name _ expr -> do
-            (CIdentifier gname) <- gen name
+            gname <- gen name
             (decls, gexpr) <- gen expr
             pure $ decls <> "union _souc_obj " <> gname <> " = " <> gexpr <> ";\n"
         Stmt_Var_Reassign name _ expr -> do
-            (CIdentifier gname) <- gen name
+            gname <- gen name
             (decls, gexpr) <- gen expr
             pure $ decls <> gname <> " = " <> gexpr <> ";\n"
         Stmt_Const_Assign_Static name _ expr -> do
-            (CIdentifier gname) <- gen name
+            gname <- gen name
             (decls, gexpr) <- gen expr
             pure $ decls <> "const union _souc_obj " <> gname <> " = " <>
                     gexpr <> ";\n"
         Stmt_Const_Assign_Dynamic name _ expr -> do
-            (CIdentifier gname) <- gen name
+            gname <- gen name
             (decls, gexpr) <- gen expr
             pure $ decls <> "const union _souc_obj " <> gname <> " = " <>
                     gexpr <> ";\n"
         Stmt_Postfix_Oper name op -> do
-            (CIdentifier gname) <- gen name
+            gname <- gen name
             pure $ "\n; // fixme gname: " <> gname <>
                         " unsupported operator: `" <> Text.pack op <> "`\n"
         Stmt_While expr stmts -> do
