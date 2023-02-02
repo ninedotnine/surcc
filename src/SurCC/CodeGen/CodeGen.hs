@@ -8,9 +8,8 @@ module SurCC.CodeGen.CodeGen (
 
 import SurCC.CodeGen.Common
 import SurCC.CodeGen.ExprGen (
-    generate_expr,
+    gen_expr,
     gen_identifier,
-    gen_decls,
     )
 import SurCC.CodeGen.Runtime (runtime)
 import SurCC.Common (
@@ -49,13 +48,10 @@ class Genny a b | a -> b where
 instance Genny Identifier Text where
     gen = pure . gen_identifier
 
-instance Genny ExprTree (Decls,Text) where
-    gen = generate_expr
+instance Genny ExprTree Text where
+    gen = gen_expr
 
-instance Genny Decls Text where
-    gen = pure . gen_decls
-
-instance Genny (Maybe ExprTree) (Decls,Text) where
+instance Genny (Maybe ExprTree) Text where
     gen = maybe (pure mempty) gen
 
 instance Genny [TopLevelDefn] () where
@@ -65,9 +61,8 @@ instance Genny TopLevelDefn () where
     gen = \case
         TopLevelConstDefn name _ expr -> do
             n <- gen name
-            (d, e) <- gen expr
-            decls <- gen d
-            tell $ decls <> "const union _souc_obj " <> n <> " = " <> e <> ";\n"
+            e <- gen expr
+            tell $ "const union _souc_obj " <> n <> " = " <> e <> ";\n"
 
         FuncDefn name param _ stmts -> do
             n <- gen name
@@ -80,9 +75,9 @@ instance Genny TopLevelDefn () where
             n <- gen name
             p <- gen param
             tell $ "union _souc_obj " <> n <> "(" <> p <> ") {\n"
-            (ds, e) <- gen expr
-            decls <- gen ds -- fixme decls need to be statically allocd
-            tell $ decls <> "return " <> e <> ";\n}\n"
+            -- fixme decls need to be statically allocd
+            e <- gen expr
+            tell $ "return " <> e <> ";\n}\n"
 
         SubDefn name m_param _ stmts -> do
             n <- gen name
@@ -139,9 +134,8 @@ instance Genny Stmts Text where
         case m_ret of
             Nothing -> pure body
             (Just (Return m_expr)) -> do
-                (ds, expr) <- gen m_expr
-                decls <- gen ds
-                pure $ decls <> body <> "return " <> expr <> ";\n"
+                expr <- gen m_expr
+                pure $ body <> "return " <> expr <> ";\n"
 
 instance Genny (Maybe Stmts) Text where
     gen = maybe (pure "") gen
@@ -150,58 +144,49 @@ instance Genny Stmt Text where
     gen = \case
         Stmt_Sub_Call name m_expr -> do
             gname <- gen name
-            (ds, expr) <- gen m_expr
-            decls <- gen ds
-            pure $ decls <> gname <> "(" <> expr <> ");\n"
+            expr <- gen m_expr
+            pure $ gname <> "(" <> expr <> ");\n"
         Stmt_Var_Declare name _ expr -> do
             gname <- gen name
-            (ds, gexpr) <- gen expr
-            decls <- gen ds
-            pure $ decls <> "union _souc_obj " <> gname <> " = " <> gexpr <> ";\n"
+            gexpr <- gen expr
+            pure $ "union _souc_obj " <> gname <> " = " <> gexpr <> ";\n"
         Stmt_Var_Reassign name _ expr -> do
             gname <- gen name
-            (ds, gexpr) <- gen expr
-            decls <- gen ds
-            pure $ decls <> gname <> " = " <> gexpr <> ";\n"
+            gexpr <- gen expr
+            pure $ gname <> " = " <> gexpr <> ";\n"
         Stmt_Const_Assign_Static name _ expr -> do
             gname <- gen name
-            (ds, gexpr) <- gen expr
-            decls <- gen ds
-            pure $ decls <> "const union _souc_obj " <> gname <> " = " <>
+            gexpr <- gen expr
+            pure $ "const union _souc_obj " <> gname <> " = " <>
                     gexpr <> ";\n"
         Stmt_Const_Assign_Dynamic name _ expr -> do
             gname <- gen name
-            (ds, gexpr) <- gen expr
-            decls <- gen ds
-            pure $ decls <> "const union _souc_obj " <> gname <> " = " <>
+            gexpr <- gen expr
+            pure $ "const union _souc_obj " <> gname <> " = " <>
                     gexpr <> ";\n"
         Stmt_Postfix_Oper name op -> do
             gname <- gen name
             pure $ "\n; // fixme gname: " <> gname <>
                         " unsupported operator: `" <> Text.pack op <> "`\n"
         Stmt_While expr stmts -> do
-            (ds, gexpr) <- gen expr
-            decls <- gen ds
+            gexpr <- gen expr
             gstmts <- gen stmts
-            pure $ decls <> "while ((" <> gexpr <> ")._souc_bool ) {\n" <>
+            pure $ "while ((" <> gexpr <> ")._souc_bool ) {\n" <>
                     gstmts <> "\n}\n"
         Stmt_Until expr stmts -> do
-            (ds, gexpr) <- gen expr
-            decls <- gen ds
+            gexpr <- gen expr
             gstmts <- gen stmts
-            pure $ decls <> "while (!((" <> gexpr <> ")._souc_bool )) {\n" <>
+            pure $ "while (!((" <> gexpr <> ")._souc_bool )) {\n" <>
                     gstmts <> "\n}\n"
         Stmt_If expr stmts m_else_stmts -> do
-            (ds, gexpr) <- gen expr
-            decls <- gen ds
+            gexpr <- gen expr
             gstmts <- gen stmts
             gelse_stmts <- gen m_else_stmts
-            pure $ decls <> "if ((" <> gexpr <> ")._souc_bool ) {\n" <>
+            pure $ "if ((" <> gexpr <> ")._souc_bool ) {\n" <>
                     gstmts <> "} else {" <> gelse_stmts <> "\n}\n"
         Stmt_Unless expr stmts m_else_stmts -> do
-            (ds, gexpr) <- gen expr
-            decls <- gen ds
+            gexpr <- gen expr
             gstmts <- gen stmts
             gelse_stmts <- gen m_else_stmts
-            pure $ decls <> "if (!((" <> gexpr <> ")._souc_bool )) {\n" <>
+            pure $ "if (!((" <> gexpr <> ")._souc_bool )) {\n" <>
                     gstmts <> "} else {" <> gelse_stmts <> "\n}\n"

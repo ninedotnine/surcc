@@ -1,9 +1,9 @@
 {-# LANGUAGE TupleSections #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module SurCC.CodeGen.ExprGen (
-    generate_expr,
+    gen_expr,
     gen_identifier,
-    gen_decls,
 ) where
 
 import SurCC.Parser.ExprParser (
@@ -26,6 +26,17 @@ import Data.Set (Set)
 import Data.Set qualified as Set
 import Data.Text (Text)
 import Data.Text qualified as Text
+
+gen_expr :: ExprTree -> Generator Text
+gen_expr expr = do
+    (decls, text) <- generate_expr expr
+    tell $ gen_decls decls
+    pure text
+
+
+newtype Decls = Decls (Set Identifier)
+    deriving (Eq, Ord, Show, Semigroup, Monoid)
+
 
 -- first is declarations, second is the expression itself
 generate_expr :: ExprTree -> Generator (Decls,Text)
