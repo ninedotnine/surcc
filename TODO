@@ -32,3 +32,4 @@
             x -> x
         ```
     this trivially always matches and is not useful. disallow this?
+[ ] global constants must be declared before they can be used

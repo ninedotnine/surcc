@@ -1,7 +1,9 @@
+{-# LANGUAGE TupleSections #-}
+
 module SurCC.CodeGen.ExprGen (
     generate_expr,
     gen_identifier,
-    gen_c_identifier,
+    gen_decls,
 ) where
 
 import SurCC.Parser.ExprParser (
@@ -17,16 +19,18 @@ import SurCC.CodeGen.Common
 
 import Control.Monad.State (get, put)
 import Control.Monad.Writer (tell)
-import Data.Functor
 import Data.Maybe (fromMaybe)
+import Data.Foldable (fold)
+import Data.Functor
+import Data.Set (Set)
+import Data.Set qualified as Set
 import Data.Text (Text)
 import Data.Text qualified as Text
 
-
 -- first is declarations, second is the expression itself
-generate_expr :: ExprTree -> Generator (Text,Text)
+generate_expr :: ExprTree -> Generator (Decls,Text)
 generate_expr = \case
-    Leaf e -> (,) "" <$> generate_term e
+    Leaf e -> (mempty,) <$> generate_term e
     Signed e _ -> generate_expr e
     Twig op e -> do
         pref <- generate_prefix_expr op
@@ -34,25 +38,26 @@ generate_expr = \case
         pure $ (decls , pref <> expr <> "// fixme\n")
     Match scrutinee branches -> do
         (decls, expr) <- generate_match_expr scrutinee branches
+        tell $ gen_decls decls
         let failure = generate_literal (LitInt 0) -- FIXME default to 0
-        pure $ (decls, expr <> " /* fail clause */ " <> failure <> "\n)")
+        pure $ (mempty, expr <> " /* fail clause */ " <> failure <> "\n)")
     Branch op x y -> case op of
-        Plus              ->  (,) "" <$> gen_call "_souc_sum(" x y
-        Minus             ->  (,) "" <$> gen_call "_souc_difference(" x y
-        Splat             ->  (,) "" <$> gen_call "_souc_product(" x y
-        FieldDiv          ->  (,) "" <$> gen_call "_souc_quotient(" x y
+        Plus              ->  (,) mempty <$> gen_call "_souc_sum(" x y
+        Minus             ->  (,) mempty <$> gen_call "_souc_difference(" x y
+        Splat             ->  (,) mempty <$> gen_call "_souc_product(" x y
+        FieldDiv          ->  (,) mempty <$> gen_call "_souc_quotient(" x y
         FloorDiv          ->  undefined
-        Modulo            ->  (,) "" <$> gen_call "_souc_remainder(" x y
+        Modulo            ->  (,) mempty <$> gen_call "_souc_remainder(" x y
         Hihat             ->  undefined -- FIXME C doesn't have ^
-        Equals            ->  (,) "" <$>
+        Equals            ->  (,) mempty <$>
                                 gen_call "_souc_is_equal_integer(" x y
-        NotEquals         ->  (,) "" <$>
+        NotEquals         ->  (,) mempty <$>
                                 gen_call "_souc_is_unequal_integer(" x y
         RegexMatch        ->  undefined
-        GreaterThan       ->  (,) "" <$> gen_call "_souc_is_greater(" x y
-        LesserThan        ->  (,) "" <$> gen_call "_souc_is_lesser(" x y
-        And               ->  (,) "" <$> gen_call "_souc_conjunction(" x y
-        Or                ->  (,) "" <$> gen_call "_souc_disjunction(" x y
+        GreaterThan       ->  (,) mempty <$> gen_call "_souc_is_greater(" x y
+        LesserThan        ->  (,) mempty <$> gen_call "_souc_is_lesser(" x y
+        And               ->  (,) mempty <$> gen_call "_souc_conjunction(" x y
+        Or                ->  (,) mempty <$> gen_call "_souc_disjunction(" x y
         Xor               ->  undefined
         In                ->  undefined
         Comma             ->  gen_tuple x y
@@ -63,8 +68,8 @@ generate_expr = \case
         Combine           ->  undefined
         Index             ->  undefined
         Lookup            ->  undefined
-        Apply             ->  (,) "" <$> gen_apply x y
-        FlipApply         ->  (,) "" <$> gen_apply y x
+        Apply             ->  (,) mempty <$> gen_apply x y
+        FlipApply         ->  (,) mempty <$> gen_apply y x
         Map               ->  undefined
         FlipMap           ->  undefined
         Applicative       ->  undefined
@@ -79,15 +84,15 @@ gen_apply :: ExprTree -> ExprTree -> Generator Text
 gen_apply x y = do
     (x_decls, gx) <- generate_expr x
     (y_decls, gy) <- generate_expr y
-    pure $ x_decls <> y_decls <> gx <> "(" <> gy <> ")"
+    pure $ gen_decls x_decls <> gen_decls y_decls <> gx <> "(" <> gy <> ")"
 
 gen_call :: Text -> ExprTree -> ExprTree -> Generator Text
 gen_call s x y = do
     (x_decls, gx) <- generate_expr x
     (y_decls, gy) <- generate_expr y
-    pure $ x_decls <> y_decls <> s <> gx <> "," <> gy <> ")"
+    pure $ gen_decls x_decls <> gen_decls y_decls <> s <> gx <> "," <> gy <> ")"
 
-gen_tuple :: ExprTree -> ExprTree -> Generator (Text,Text)
+gen_tuple :: ExprTree -> ExprTree -> Generator (Decls,Text)
 gen_tuple x y = do
     (x_decls, gx) <- generate_expr x
     (y_decls, gy) <- generate_expr y
@@ -95,10 +100,11 @@ gen_tuple x y = do
     -- fixme: this works for static storage, but not automatic storage
     -- space for the return value should be allocated outside of the function
     tell $ "struct _souc_pair " <> pair <> ";\n"
-    pure $ (x_decls <> y_decls <> pair <> " = (struct _souc_pair) {.first = "
-           <> gx <> ", .second = " <> gy <> "};\n" ,
-           "(union _souc_obj) {._souc_pair = &" <> pair <> "}")
 
+    pure $ (x_decls <> y_decls,
+            "(" <> pair <> " = (struct _souc_pair) {.first = "
+             <> gx <> ", .second = " <> gy <> "},\n"
+             <> "(union _souc_obj) {._souc_pair = &" <> pair <> "})")
 
 generate_term :: Term -> Generator Text
 generate_term = \case
@@ -130,40 +136,38 @@ generate_prefix_expr = \case
 
 
 generate_match_expr :: ExprTree -> [(Pattern,Maybe Guard,ExprTree)]
-                       -> Generator (Text,Text)
+                       -> Generator (Decls,Text)
 generate_match_expr scrutinee branches = do
     (decls, expr) <- generate_expr scrutinee
     alloc <- get_next_id
-    tell $ "union _souc_obj " <> gen_c_identifier alloc <> "; // hehehe \n"
+    tell $ "union _souc_obj " <> gen_c_identifier alloc <> ";\n"
     arms <- mconcat <$> traverse (generate_case alloc) branches
     pure $ (decls, "(\n" <> gen_c_identifier alloc <> " = " <> expr <> ",\n") <> arms
 
 
 generate_case :: CIdentifier -> (Pattern,Maybe Guard,ExprTree)
-                 -> Generator (Text,Text)
+                 -> Generator (Decls,Text)
 generate_case alloc (pat,m_guard,expr) = do
     (decls, e) <- generate_expr expr
 
     p <- case pat of
-        PatLit l -> pure $ "(_souc_is_equal_integer(("
-                           <> gen_c_identifier alloc
-                           <> "),(" <> generate_literal l
-                           <> "))._souc_bool"
+        PatLit l -> pure $ (mempty, "(_souc_is_equal_integer(("
+                                    <> gen_c_identifier alloc
+                                    <> "),(" <> generate_literal l
+                                    <> "))._souc_bool")
         PatBinding i -> do
-            tell $ "union _souc_obj " <> gen_identifier i <> ";\n"
-            -- the `true` can eventually be replaced by a guard
-            pure $  "(" <> gen_identifier i <> " = "
-                    <> gen_c_identifier alloc <> ", true"
+            -- finish with `, true` in case there is no guard clause
+            pure $ (new_decl i, "(" <> gen_identifier i <> " = "
+                                <> gen_c_identifier alloc <> ", true")
 
     g <- case m_guard of
-        Nothing -> pure ""
+        Nothing -> pure mempty
         Just (Guard guar) -> do
             (guard_decls, guard_clause) <- generate_expr guar
-            tell $ guard_decls
-            pure $ ", (" <> guard_clause <> ")._souc_bool"
+            pure $ (guard_decls, ", (" <> guard_clause <> ")._souc_bool")
 
     let closer = ") ?\n(" <> e <> ") :\n"
-    pure (decls, p <> g <> closer)
+    pure $ p <> g <> (decls,closer)
 
 
 gen_c_identifier :: CIdentifier -> Text
@@ -181,3 +185,13 @@ get_next_id = do
     n <- get
     put (n+1)
     pure $ CIdentifier $ Text.pack $ 'v' : show n
+
+
+gen_decls :: Decls -> Text
+gen_decls (Decls ids) = fold (Set.map declaration ids)
+    where
+        declaration i = "union _souc_obj " <> gen_identifier i <> ";\n"
+
+
+new_decl :: Identifier -> Decls
+new_decl i = Decls (Set.singleton i)
