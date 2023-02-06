@@ -1,9 +1,6 @@
 module SurCC.Builtins (
-    gen_builtin_identifier,
-    gen_builtin_data,
+    gen_builtin,
     typeof_builtin,
-    typeof_builtin_identifier,
-    typeof_builtin_data,
 ) where
 
 import Data.HashMap.Strict qualified as Map
@@ -24,32 +21,18 @@ data Builtin = Builtin {
 
 newtype Cleanup = Cleanup Text
 
-newtype BuiltinsCtx = Builtins [Bound]
 
-instance TextShow BuiltinsCtx where
-    showb list = "Builtins" <> showb list
-
-typeof_builtin :: Either Identifier Constant -> Maybe SoucType
-typeof_builtin = \case
-    Left i -> typeof_builtin_identifier i
-    Right c -> typeof_builtin_data c
-
-gen_builtin_identifier :: Identifier -> Maybe Text
-gen_builtin_identifier i = body <$> Map.lookup i builtins where
-    builtins :: Mapping Identifier
-    builtins = builtin_subroutines <>  builtin_functions <> builtin_constants
-
-typeof_builtin_identifier :: Identifier -> Maybe SoucType
-typeof_builtin_identifier i = souc_type <$> Map.lookup i builtins where
-    builtins :: Mapping Identifier
-    builtins = builtin_subroutines <> builtin_functions <> builtin_constants
+gen_builtin :: Identifier -> Maybe Text
+gen_builtin i = body <$> Map.lookup i all_builtins where
 
 
-gen_builtin_data :: Constant -> Maybe Text
-gen_builtin_data c = body <$> Map.lookup c builtin_data
+typeof_builtin :: Identifier -> Maybe SoucType
+typeof_builtin i = souc_type <$> Map.lookup i all_builtins where
 
-typeof_builtin_data :: Constant -> Maybe SoucType
-typeof_builtin_data c = souc_type <$> Map.lookup c builtin_data
+
+all_builtins :: Mapping Identifier
+all_builtins = builtin_subroutines <> builtin_functions <> builtin_constants
+
 
 builtin_subroutines :: Mapping Identifier
 builtin_subroutines = Map.fromList [
@@ -67,6 +50,7 @@ builtin_subroutines = Map.fromList [
         Nothing
     )]
 
+
 builtin_functions :: Mapping Identifier
 builtin_functions = Map.fromList [
     ("increment", Builtin "_souc_increment"
@@ -77,6 +61,7 @@ builtin_functions = Map.fromList [
         (SoucFn SoucInteger SoucString)
         Nothing
     )]
+
 
 builtin_constants :: Mapping Identifier
 builtin_constants = Map.fromList [
@@ -94,10 +79,7 @@ builtin_constants = Map.fromList [
         "_souc_42"
         SoucInteger
         Nothing
-    )]
-
-builtin_data :: Mapping Constant
-builtin_data = Map.fromList [
+    ),
     ("True", Builtin
         "(union _souc_obj) { ._souc_bool = true }"
         (SoucType "Bool" (SoucKind 0))

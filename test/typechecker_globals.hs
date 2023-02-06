@@ -31,8 +31,8 @@ type Test = ([ImportDecl], [TopLevelDefn], Either TypeError LocalScope, String)
 
 tests :: [Test]
 tests = [
-    ([], [TopLevelConstDefn "i" (Just SoucInteger) (Leaf (Lit (LitInt 4)))], Right (GlobalScope (Map.singleton (Left "i") SoucInteger) no_exports_ctx), "int"),
-    ([LibImport "salad", LibImport "tofu"], [], Right (GlobalScope (Map.fromList [(Left "salad", SoucModuleType), (Left "tofu", SoucModuleType)]) no_exports_ctx), "imports")
+    ([], [TopLevelConstDefn "i" (Just SoucInteger) (Leaf (Lit (LitInt 4)))], Right (GlobalScope (Map.singleton "i" SoucInteger) no_exports_ctx), "int"),
+    ([LibImport "salad", LibImport "tofu"], [], Right (GlobalScope (Map.fromList [("salad", SoucModuleType), ("tofu", SoucModuleType)]) no_exports_ctx), "imports")
     ]
 
 borked_tests :: [Test]

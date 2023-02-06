@@ -14,7 +14,7 @@ import SurCC.TypeChecker.Context
 
 import Debug.Trace
 
-type Mapping = Map (Either Identifier Constant) SoucType
+type Mapping = Map Identifier SoucType
 
 newtype TypeSet = TypeSet (Map SoucType Refutable) deriving (Show)
 
@@ -40,13 +40,14 @@ build_typedefs' (types, consts, exps) = \case
         updated_types <- insert_type types t refut
         updated_consts <-
              -- also FIXME get rid of Constant, use Identifier
-            insert_consts consts (Right <$> terms) t
-        new_exps <- remove_exports exps (Right <$> terms) t
+            insert_consts consts terms t
+        new_exps <- remove_exports exps terms t
         build_typedefs' (updated_types, updated_consts, new_exps) defs
     [] -> pure (types, consts, exps)
 
 
-build_typedef :: TypeDef -> Either TypeError (SoucType, Refutable, [Constant])
+build_typedef :: TypeDef
+                 -> Either TypeError (SoucType, Refutable, [Identifier])
 build_typedef = \case
     EmptyType t -> pure (t, Refutable True, [])
     UnitType t term -> pure (t, Refutable False, [term])
@@ -60,22 +61,20 @@ build_typedef = \case
     GADType t -> undefined t -- FIXME
 
 
-insert_consts :: Mapping -> [Either Identifier Constant] -> SoucType
+insert_consts :: Mapping -> [Identifier] -> SoucType
                  -> Either TypeError Mapping
-insert_consts m ids_or_cons t = case ids_or_cons of
-    (ioc:iocs) -> do
-        new_map <- insert_const m ioc t
-        insert_consts new_map iocs t
+insert_consts m i t = case i of
+    (con:cons) -> do
+        new_map <- insert_const m con t
+        insert_consts new_map cons t
     [] -> pure Map.empty
 
 
-insert_const :: Mapping -> Either Identifier Constant -> SoucType
+insert_const :: Mapping -> Identifier -> SoucType
                 -> Either TypeError Mapping
-insert_const m id_or_con t = case insert m id_or_con t of
+insert_const m i t = case insert m i t of
     Just new_map -> Right new_map
-    Nothing  -> case id_or_con of  -- FIXME get rid of Constant, use Identifier
-        Left i -> Left (MultipleDeclarations i)
-        Right _ -> error " FIXME get rid of Constant, use Identifier"
+    Nothing  -> Left (MultipleDeclarations i)
 
 
 insert_type :: TypeSet -> SoucType -> Refutable
@@ -91,12 +90,12 @@ insert m con t = case Map.lookup con m of
     Nothing -> Just (Map.insert con t m)
 
 
-remove_exports :: ExportList -> [Either Identifier Constant]
+remove_exports :: ExportList -> [Identifier]
                   -> SoucType -> Either TypeError ExportList
 remove_exports = undefined
 
-remove_export :: ExportList -> Either Identifier Constant
-                 -> SoucType -> Either TypeError ExportList
+remove_export :: ExportList -> Identifier -> SoucType
+                 -> Either TypeError ExportList
 remove_export = undefined
 
 

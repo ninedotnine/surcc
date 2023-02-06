@@ -57,7 +57,7 @@ export_decl :: HeaderParser ExportDecl
 export_decl = do
     i <- identifier <* optional spaces
     t <- type_signature <* endline
-    pure $ ExportDecl $ bound_id i t
+    pure $ ExportDecl $ Bound i t
 
 
 import_list :: HeaderParser [ImportDecl]

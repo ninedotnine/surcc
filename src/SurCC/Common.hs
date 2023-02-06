@@ -35,10 +35,7 @@ module SurCC.Common (
     pattern SoucPair,
     pattern SoucEither,
     pattern SoucModuleType,
-    Constant(..),
     Bound(..),
-    bound_id,
-    bound_const,
     TypeError(..),
     Stmts(..), -- FIXME rename to StmtBlock ?
     Return(..),
@@ -96,11 +93,11 @@ data SoucType = SoucType Text SoucKind
 -- data Constraint = Instance Text SoucType deriving (Eq)
 
 data TypeDef = EmptyType SoucType
-             | UnitType SoucType Constant
+             | UnitType SoucType Identifier
              | SynonymType SoucType SoucType
-             | WrapperType SoucType Constant SoucType
+             | WrapperType SoucType Identifier SoucType
                         -- fixme: a wrapper (a function) is not a term.
-             | EnumType SoucType [Constant]
+             | EnumType SoucType [Identifier]
              | StructType SoucType -- fixme
              | GADType SoucType -- fixme
              deriving (Show)
@@ -141,23 +138,14 @@ pattern SoucEither t0 t1 = SoucTypeConstructor "Either" (SoucKind 2) [t0,t1]
 pattern SoucModuleType :: SoucType
 pattern SoucModuleType = SoucType "Module" (SoucKind 0)
 
-newtype Constant = Constant Text
-                   deriving (Eq, Ord, IsString, Hashable)
-
-data Bound = Bound (Either Identifier Constant) SoucType deriving Eq
-
-bound_id :: Identifier -> SoucType -> Bound
-bound_id = Bound . Left
-
-bound_const :: Constant -> SoucType -> Bound
-bound_const = Bound . Right
+data Bound = Bound Identifier SoucType deriving Eq
 
 
 data TypeError = TypeMismatch SoucType SoucType
                | MultipleDeclarations Identifier
                | MultipleTypeDeclarations SoucType
                | Undeclared Identifier
-               | UnknownData Constant
+               | UnknownData Identifier -- FIXME delete? same as Undeclared
                | UnknownType SoucType
                | ExportedButNotDefined Bound
     deriving (Eq)
@@ -213,7 +201,7 @@ data ExprTree = Branch Operator ExprTree ExprTree
 
 data Term = Lit Literal
           | Var Identifier
-          | Constructor Constant
+          | Constructor Identifier -- FIXME delete?
     deriving (Eq, Show)
 
 data Operator = Plus
@@ -273,7 +261,6 @@ data Literal = LitInt Integer
 data Pattern = PatLit Literal -- FIXME ints only for now hehe
              | PatBinding Identifier
 --              | PatNested Identifier Pattern
---              | PatConstant Constant
 --              | PatConstructor Constant [Pattern]
              deriving (Eq, Show)
 
@@ -309,12 +296,6 @@ instance TextShow Identifier where
 instance Show Identifier where
     show = TextShow.toString . showb
 
-instance TextShow Constant where
-    showb (Constant c) = TextShow.fromText c
-
-instance Show Constant where
-    show = TextShow.toString . showb
-
 instance TextShow CheckedProgram where
     showb (CheckedProgram m imports body) =
         "CheckedProgam " <> showb m <> " uses " <> showb imports <>
@@ -345,11 +326,7 @@ instance TextShow SoucKind where
         TextShow.fromText (Text.replicate (fromIntegral k) " => *")
 
 instance TextShow Bound where
-    showb = \case
-        Bound (Left (Identifier i)) t ->
-            "Bound " <> showb i <> ": " <> showb t
-        Bound (Right (Constant c)) t ->
-            "Bound " <> showb c <> ": " <> showb t
+    showb (Bound i t) = "Bound " <> showb i <> ": " <> showb t
 
 instance TextShow TypeError where
     showb = \case

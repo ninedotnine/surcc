@@ -13,7 +13,7 @@ import SurCC.Parser.ExprParser (
     PrefixOperator(..)
     )
 
-import SurCC.Builtins (gen_builtin_data, gen_builtin_identifier)
+import SurCC.Builtins (gen_builtin)
 import SurCC.Common (Identifier(..), Pattern(..), Literal(..), Guard(..))
 import SurCC.CodeGen.Common
 
@@ -121,9 +121,7 @@ generate_term :: Term -> Generator Text
 generate_term = \case
     Lit l -> pure $ generate_literal l
     Var v -> pure $ gen_identifier v
-    Constructor s -> case gen_builtin_data s of
-        Just output -> pure output
-        Nothing -> pure "47" -- fixme hehe
+    Constructor s -> pure $ gen_identifier s
 
 
 generate_literal :: Literal -> Text
@@ -186,7 +184,7 @@ gen_c_identifier (CIdentifier i) = i
 
 
 gen_identifier :: Identifier -> Text
-gen_identifier i = fromMaybe (prepend i) (gen_builtin_identifier i)
+gen_identifier i = fromMaybe (prepend i) (gen_builtin i)
     where
         prepend (Identifier name) = "_souc_user_" <> name
 

@@ -32,10 +32,10 @@ empty_ctx = GlobalScope Map.empty no_exports_ctx
 
 globals :: LocalScope
 globals = GlobalScope (Map.fromList [
-    (Left "x", SoucInteger),
-    (Left "s", SoucString),
-    (Left "c", SoucChar),
-    (Left "b", SoucBool)
+    ("x", SoucInteger),
+    ("s", SoucString),
+    ("c", SoucChar),
+    ("b", SoucBool)
     ]) no_exports_ctx
 
 scoped :: LocalScope

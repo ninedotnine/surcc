@@ -88,7 +88,7 @@ add_top_level_defns = \case
 add_top_level_const :: Identifier -> Maybe SoucType -> ExprTree -> Checker ()
 add_top_level_const i m_t expr = do
     t <- infer_if_needed m_t expr
-    add_potential_export $ bound_id i t
+    add_potential_export $ Bound i t
 
 
 add_top_level_short_fn :: Identifier -> Param -> Maybe SoucType -> ExprTree
@@ -100,7 +100,7 @@ add_top_level_short_fn i p m_t expr = do
             new_param_scope param p_t
             t <- infer_if_needed m_t expr
             exit_scope
-            add_potential_export $ bound_id i (SoucFn p_t t)
+            add_potential_export $ Bound i (SoucFn p_t t)
 
 
 add_top_level_long_fn :: Identifier -> Param -> Maybe SoucType -> Stmts
@@ -114,12 +114,12 @@ add_top_level_long_fn i p m_t stmts = do
                 Nothing -> case infer_stmts stmts of
                     Right t -> do
                         exit_scope
-                        add_potential_export (bound_id i (SoucFn p_t t))
+                        add_potential_export (Bound i (SoucFn p_t t))
                     Left err -> throwE err
                 Just t -> do
                     check_stmts stmts (Just t)
                     exit_scope
-                    add_potential_export (bound_id i (SoucFn p_t t))
+                    add_potential_export (Bound i (SoucFn p_t t))
 
 add_top_level_sub :: Identifier -> Maybe Param -> Maybe SoucType -> Stmts
                     -> Checker ()
@@ -134,13 +134,13 @@ add_top_level_sub i m_p m_t stmts = case (i, m_t) of
                 new_scope
                 check_stmts stmts Nothing
                 exit_scope
-                add_potential_export (bound_id i SoucIO)
+                add_potential_export (Bound i SoucIO)
             Just (Param _ Nothing) -> error "FIXME type inference"
             Just (Param param (Just p_t)) -> do
                 new_param_scope param p_t
                 check_stmts stmts Nothing
                 exit_scope
-                add_potential_export (bound_id i (SoucRoutn p_t))
+                add_potential_export (Bound i (SoucRoutn p_t))
 
 
 add_main_routine :: MainParam -> Maybe SoucType -> Stmts -> Checker ()

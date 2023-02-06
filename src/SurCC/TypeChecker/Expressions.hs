@@ -4,6 +4,8 @@ module SurCC.TypeChecker.Expressions (
     infer_if_needed,
 ) where
 
+import Prelude hiding (lookup)
+
 import Control.Applicative
 import Control.Monad (unless)
 import Control.Monad.Trans.Except
@@ -12,7 +14,7 @@ import Data.Functor ((<&>))
 
 import SurCC.Common
 import SurCC.TypeChecker.Context (
-    lookup_identifier,
+    lookup,
     new_scope,
     new_pattern_scope,
     exit_scope,
@@ -50,7 +52,7 @@ infer = \case
 infer_term :: Term -> Checker SoucType
 infer_term = \case
     Lit l -> infer_lit l
-    Var v -> get >>= \ctx -> case lookup_identifier v ctx of
+    Var v -> get >>= \ctx -> case lookup v ctx of
         -- FIXME is this unreachable?
         -- the scrutinee has already been inferred
         Nothing -> throwE (Undeclared v)

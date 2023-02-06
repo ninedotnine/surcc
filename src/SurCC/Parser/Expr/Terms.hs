@@ -58,7 +58,7 @@ parse_string :: ShuntingYardParser Term
 parse_string = Lit <$> LitString . Text.pack <$> ((Parsec.char '\"') *> Parsec.many (Parsec.noneOf "\"") <* (Parsec.char '\"'))
 
 parse_constructor :: ShuntingYardParser Term
-parse_constructor = Constructor <$> Constant <$> upper_name
+parse_constructor = Constructor <$> Identifier <$> upper_name
 
 parse_left_paren :: ShuntingYardParser TermToken
 parse_left_paren = do

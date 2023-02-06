@@ -4,7 +4,7 @@ module SurCC.Parser.TypeDefs (
 
 import Text.Parsec hiding (space, spaces, string, parse)
 
-import SurCC.Common (TypeDef(..), Term(..), Constant(..))
+import SurCC.Common (TypeDef(..), Term(..), Identifier(..))
 import SurCC.Common.Parsing
 import SurCC.Parser.Common (SurCParser)
 
@@ -33,5 +33,5 @@ enum_type = do
     optional spaces *> char '}' *> endline
     pure $ EnumType name constructors
 
-constructor :: SurCParser Constant
-constructor = Constant <$> upper_name
+constructor :: SurCParser Identifier
+constructor = Identifier <$> upper_name

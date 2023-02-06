@@ -19,7 +19,7 @@ import SurCC.TypeChecker.Context (Checker,
                             LocalScope,
                             insert_immut,
                             insert_mut,
-                            lookup_identifier)
+                            lookup)
 import SurCC.TypeChecker.Expressions (
     check_expr,
     infer,
@@ -98,7 +98,7 @@ check_stmt_if expr body m_else m_ret = do
 check_stmt_call :: Identifier -> Maybe ExprTree -> Checker ()
 check_stmt_call name m_expr = do
     ctx <- get
-    case (lookup_identifier name ctx, m_expr) of
+    case (lookup name ctx, m_expr) of
         (Just SoucIO, Nothing) -> pure ()
         (Just (SoucRoutn param), Just expr) -> check_expr param expr
         (Just t, _) -> throwE $ TypeMismatch SoucIO t
