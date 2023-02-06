@@ -21,7 +21,7 @@ module SurCC.TypeChecker.Context (
 
 import Control.Arrow (second)
 import Data.Functor ((<&>))
-import Data.HashMap.Strict qualified as Map
+import Data.Map.Strict qualified as Map
 
 import Prelude hiding (lookup)
 import Control.Monad.State (State, get, put)
@@ -33,14 +33,18 @@ import SurCC.Builtins (typeof_builtin)
 
 type Checker a = ExceptT TypeError (State LocalScope) a
 
-type Mapping = Map.HashMap (Either Identifier Constant) SoucType
+-- FIXME this will just be identifiers
+-- after i decapitalize data constructors
+type ImmutMapping = Map.Map (Either Identifier Constant) SoucType
 
-newtype ExportList = ExportList Mapping
+newtype ExportList = ExportList ImmutMapping
+                deriving (Show)
 
-data LocalScope = GlobalScope Mapping ExportList
-                | InnerScope
-                    (Map.HashMap Identifier (SoucType, Mutability))
-                    LocalScope
+type MutMapping = Map.Map Identifier (SoucType, Mutability)
+
+data LocalScope = GlobalScope ImmutMapping ExportList
+                | InnerScope MutMapping LocalScope
+                deriving (Show)
 
 lookup_identifier :: Identifier -> LocalScope -> Maybe SoucType
 lookup_identifier x ctx = lookup (Left x) ctx

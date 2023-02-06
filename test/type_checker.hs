@@ -9,7 +9,7 @@ import SurCC.Common
 import Control.Monad.Trans.Except (runExceptT)
 import Control.Monad.State (evalState)
 
-import Data.HashMap.Strict qualified as Map
+import Data.Map.Strict qualified as Map
 import Data.Text (Text)
 import Data.Text.IO qualified as Text
 import System.Exit (exitFailure)

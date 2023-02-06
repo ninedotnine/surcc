@@ -33,5 +33,5 @@ enum_type = do
     optional spaces *> char '}' *> endline
     pure $ EnumType name constructors
 
-constructor :: SurCParser Term
-constructor = Constructor <$> Constant <$> upper_name
+constructor :: SurCParser Constant
+constructor = Constant <$> upper_name

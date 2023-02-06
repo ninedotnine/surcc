@@ -7,7 +7,7 @@ import SurCC.TypeChecker.TypeChecker
 import SurCC.TypeChecker.Context
 import SurCC.Common
 
-import Data.HashMap.Strict qualified as Map
+import Data.Map.Strict qualified as Map
 import Data.Text (Text)
 import Data.Text.IO qualified as Text
 import Data.Text qualified as Text
@@ -51,8 +51,6 @@ main = do
     mapM_ test borked_tests
     putStrLn "all type-checker tests passed :^)"
 
-deriving instance Show LocalScope
-deriving instance Show ExportList
 
 render :: Either TypeError LocalScope -> Text
 render (Right ctx) = Text.pack (show ctx)

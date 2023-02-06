@@ -91,18 +91,19 @@ data SoucType = SoucType Text SoucKind
               | SoucTypeConstructor Text SoucKind [SoucType]
               | SoucTypeVar TypeVar
 --               | SoucConstrainedType Constraint SoucType
-              deriving (Eq,Show)
+              deriving (Eq,Show,Ord)
 
 -- data Constraint = Instance Text SoucType deriving (Eq)
 
 data TypeDef = EmptyType SoucType
-             | UnitType SoucType Term
+             | UnitType SoucType Constant
              | SynonymType SoucType SoucType
-             | WrapperType SoucType Term SoucType
+             | WrapperType SoucType Constant SoucType
                         -- fixme: a wrapper (a function) is not a term.
-             | EnumType SoucType [Term]
+             | EnumType SoucType [Constant]
              | StructType SoucType -- fixme
              | GADType SoucType -- fixme
+             deriving (Show)
 
 pattern SoucIO :: SoucType
 pattern SoucIO = SoucType "IO" (SoucKind 0)
@@ -141,7 +142,7 @@ pattern SoucModuleType :: SoucType
 pattern SoucModuleType = SoucType "Module" (SoucKind 0)
 
 newtype Constant = Constant Text
-                   deriving (Eq, IsString, Hashable)
+                   deriving (Eq, Ord, IsString, Hashable)
 
 data Bound = Bound (Either Identifier Constant) SoucType deriving Eq
 
@@ -154,8 +155,10 @@ bound_const = Bound . Right
 
 data TypeError = TypeMismatch SoucType SoucType
                | MultipleDeclarations Identifier
+               | MultipleTypeDeclarations SoucType
                | Undeclared Identifier
                | UnknownData Constant
+               | UnknownType SoucType
                | ExportedButNotDefined Bound
     deriving (Eq)
 
@@ -352,8 +355,11 @@ instance TextShow TypeError where
     showb = \case
         TypeMismatch t0 t1 -> "mismatch: expected " <> showb t0 <> " but got " <> showb t1
         MultipleDeclarations name -> "multiple declarations of " <> showb name
+        MultipleTypeDeclarations name ->
+            "multiple declarations of " <> showb name
         Undeclared name -> "undeclared " <> showb name
         UnknownData name -> "unknown data constructor: " <> showb name
+        UnknownType name -> "unknown type: " <> showb name
         ExportedButNotDefined name -> "declared " <> showb name <> " was not defined"
 
 instance TextShow Param where

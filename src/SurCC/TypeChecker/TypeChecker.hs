@@ -30,13 +30,23 @@ import SurCC.TypeChecker.Context (Checker,
                            )
 import SurCC.TypeChecker.Expressions
 import SurCC.TypeChecker.Statements
+import SurCC.TypeChecker.Typedefs (build_typedefs)
+
+import Debug.Trace
 
 type_check :: ParseTree -> Either TypeError CheckedProgram
 -- fixme: use the typedefs
-type_check (ParseTree module_info imports _ defns) = do
+type_check (ParseTree module_info imports typedefs defns) = do
     exports_ctx <- add_exports module_info
+    (_types,typedefs_ctx) <- build_typedefs typedefs exports_ctx
+--     traceM $ "types is " <> show types
+    traceM $ "typedefs is " <> show typedefs_ctx
     imports_ctx <- add_imports imports exports_ctx
     finished_ctx <- add_globals imports_ctx defns
+    -- FIXME: top level first, then sub-trees:
+--     top_level_ctx <- add_globals imports_ctx defns
+--     finished_ctx <- check_subtrees top_level_ctx defns
+    -- this could be done before subtrees?
     case undefined_export finished_ctx of
         Nothing -> Right $ CheckedProgram module_info imports defns
         Just export -> Left (ExportedButNotDefined export)
@@ -64,6 +74,8 @@ add_globals imports_ctx defns =
 run_globals :: [TopLevelDefn] -> Checker ()
 run_globals defns = mapM_ add_top_level_defns defns
 
+
+-- FIXME bind all the top-level things first, then go into the subtrees
 add_top_level_defns :: TopLevelDefn -> Checker ()
 add_top_level_defns = \case
     TopLevelConstDefn i m_t expr -> add_top_level_const i m_t expr
