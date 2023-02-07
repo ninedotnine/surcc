@@ -3,6 +3,7 @@ module SurCC.Parser.SurCStmts (
     stmt_block_with_param
 ) where
 
+import Data.Foldable (for_)
 import Data.Map.Strict qualified as Map (empty, singleton, member, lookup)
 import Data.List.NonEmpty ( NonEmpty(..), cons )
 import Text.Parsec hiding (space, spaces, string)
@@ -27,7 +28,7 @@ stmt_block = stmt_block_with_param Nothing
 stmt_block_with_param :: Maybe Param -> SurCParser Stmts
 stmt_block_with_param p = do
     new_scope
-    add_param_to_bindings p
+    for_ p add_param_to_bindings
     statements <- many1 (stmt <* many endline)
     ret <- optionMaybe (stmt_return <* endline)
     end_scope
@@ -70,10 +71,8 @@ end_scope = modifyState dedent
                         -- consider a tagged type
 
 
-add_param_to_bindings :: Maybe Param -> SurCParser ()
-add_param_to_bindings = \case
-    Just (Param p _) -> add_to_bindings p Immut
-    _ -> pure ()
+add_param_to_bindings :: Param -> SurCParser ()
+add_param_to_bindings (Param p _) = add_to_bindings p Immut
 
 
 

@@ -35,29 +35,30 @@ identifier_char = (alphaNum <|> char '_') <?> "identifier char"
 
 
 line_comment :: Parsec Text s ()
-line_comment = try (skipMany space_or_tab *> char ';') *> manyTill anyChar newline *> pure () <?> ""
+line_comment = void
+    (try (skipMany space_or_tab *> char ';') *> manyTill anyChar newline <?> "")
 
 space :: Parsec Text s ()
-space = char ' ' *> pure () <?> ""
+space = void (char ' ' <?> "")
 
 spaces :: Parsec Text s ()
-spaces = many1 space *> pure ()
+spaces = void $ many1 space
 
 space_or_tab :: Parsec Text s ()
-space_or_tab = space <|> tab *> pure ()
+space_or_tab = space <|> void tab
 
 ignore_spaces :: Parsec Text s ()
 ignore_spaces = skipMany (char ' ' <?> "")
 
 newline :: Parsec Text s ()
-newline = (char '\n' *> pure ()) <?> "newline"
+newline = void (char '\n' <?> "newline")
 
 
 pragma :: Parsec Text s ()
 pragma = string "{^;" *> space *> endBy1 (many1 alphaNum) space *> (string ";^}") *> endline <?> "pragma"
 
 skipManyTill :: Parsec Text s a -> Parsec Text s b -> Parsec Text s ()
-skipManyTill p1 p2 = manyTill p1 p2 *> pure ()
+skipManyTill p1 p2 = void $ manyTill p1 p2
 
 
 reserved :: String -> Parsec Text s ()

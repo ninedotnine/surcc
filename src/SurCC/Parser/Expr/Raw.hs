@@ -10,7 +10,7 @@ import Debug.Trace
 
 import Text.Parsec hiding (newline, space, spaces, string)
 import Text.Parsec qualified
-import Data.Functor ((<&>))
+import Data.Functor
 import Data.List (intersperse)
 import Data.List.NonEmpty ( NonEmpty(..) )
 import Data.Map.Strict qualified as Map (Map, empty)
@@ -40,7 +40,7 @@ raw_expr = RawExpr <$> Text.pack <$> dumb_raw_expr
 dumb_raw_expr :: Parsec Text s String
 dumb_raw_expr = fmap pure expr_char <> manyTill expr_char (lookAhead (eol <|> do_keyword)) where
     expr_char = oper_char <|> funky_expr_char <|> identifier_char
-    do_keyword = try (reserved' "do" *> (oneOf " \n")) *> pure ()
+    do_keyword = void $ try (reserved' "do" *> (oneOf " \n"))
     eol = try (endline <|> eof)
 
 

@@ -3,6 +3,8 @@ module SurCC.Parser.Expr.Opers (
     parse_oper_token
 ) where
 
+import Data.Functor (void)
+
 import Text.Parsec qualified as Parsec
 import Text.Parsec ((<|>), (<?>))
 
@@ -16,7 +18,8 @@ parse_oper_token =
     <?> "infix operator"
 
 check_for_oper :: ShuntingYardParser ()
-check_for_oper = Parsec.lookAhead (Parsec.try (ignore_spaces *> Parsec.oneOf valid_op_chars)) *> pure ()
+check_for_oper = void $
+    Parsec.lookAhead (Parsec.try (ignore_spaces *> Parsec.oneOf valid_op_chars))
 
 valid_op_chars :: String
 valid_op_chars = "+-*/%^<>=&~,"

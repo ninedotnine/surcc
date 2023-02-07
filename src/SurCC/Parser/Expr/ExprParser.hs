@@ -27,6 +27,8 @@ import Data.List (dropWhileEnd)
 
 import Data.Char (ord) -- for evaluate
 
+import Data.Foldable (traverse_)
+
 import Data.Text (Text)
 import Data.Text qualified as Text
 -- import TextShow (TextShow(..))
@@ -154,11 +156,7 @@ parse_oper = do
             parse_term
 
 parse_sig :: ShuntingYardParser ()
-parse_sig = do
-    m_sig <- optional_sig
-    case m_sig of
-       Just sig -> oper_stack_push (StackSig sig)
-       Nothing -> pure ()
+parse_sig = optional_sig >>= traverse_ (oper_stack_push . StackSig)
 
 finish_expr :: ShuntingYardParser ExprTree
 finish_expr = do

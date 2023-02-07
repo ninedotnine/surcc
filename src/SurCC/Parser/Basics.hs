@@ -12,6 +12,7 @@ module SurCC.Parser.Basics (
 
 import Control.Monad (when)
 import Data.List.NonEmpty ( NonEmpty(..) )
+import Data.Functor
 import Data.Map.Strict qualified as Map (singleton, member, lookup)
 import Data.Maybe (isJust)
 import Data.Text qualified as Text
@@ -40,7 +41,7 @@ param = do
 indentation :: SurCParser ()
 indentation = try $ do
     (level, _) <- getState
-    count level tab *> pure () <?> "indentation"
+    void (count level tab) <?> "indentation"
 
 add_to_bindings :: Identifier -> Mutability -> SurCParser ()
 add_to_bindings key val = do
@@ -79,13 +80,13 @@ bindings_lookup i = do
 
 
 optional_do :: SurCParser ()
-optional_do = skipMany space *> optional (reserved "do") *> pure ()
+optional_do = void $ skipMany space *> optional (reserved "do")
 
 
 end_block_named :: Identifier -> SurCParser ()
 end_block_named (Identifier name) = do
-    _ <- lookAhead (try (indentation *> reserved' "end")) *>
-            indentation *> reserved' "end"
+    void $ lookAhead (try (indentation *> reserved' "end"))
+           *> indentation *> reserved' "end"
     optional (try (spaces *> string (Text.unpack name)))
     endline
 

@@ -2,6 +2,8 @@ module Main_Expr where
 
 import Control.Monad (unless)
 import Control.Monad.Trans (liftIO)
+import Data.Foldable (traverse_)
+import Data.Functor ((<&>))
 import Data.Char (isSpace)
 import System.Environment (getArgs)
 import System.Exit (exitFailure, exitSuccess)
@@ -23,11 +25,8 @@ main = do
 
 repl :: IO ()
 repl = runInputT defaultSettings loop where
-    loop = do
-        m_input <- getInputLine "expr> "
-        case m_input of
-            Nothing -> pure ()
-            Just input -> liftIO (pepe (Text.pack input)) >> loop
+    loop = getInputLine "expr> "
+           >>= traverse_ (Text.pack <&> pepe <&> liftIO <&> (*> loop))
 
 pepe :: Text -> IO ()
 pepe line = unless (Text.all isSpace line) (parse_eval_print_expression line)

@@ -6,6 +6,7 @@ module SurCC.Parser.Expr.Terms (
 
 
 import Data.Text qualified as Text
+import Data.Functor
 import Text.Parsec qualified as Parsec
 import Text.Parsec ((<|>), (<?>))
 
@@ -47,9 +48,7 @@ parse_num :: ShuntingYardParser Term
 parse_num = Lit <$> LitInt <$> read <$> Parsec.many1 Parsec.digit
 
 parse_var :: ShuntingYardParser Term
-parse_var = do
-    i <- identifier
-    pure $ Var i
+parse_var = Var <$> identifier
 
 parse_char :: ShuntingYardParser Term
 parse_char = Lit <$> LitChar <$> ((Parsec.char '\'') *> Parsec.anyChar <* (Parsec.char '\''))
@@ -62,5 +61,6 @@ parse_constructor = Constructor <$> Identifier <$> upper_name
 
 parse_left_paren :: ShuntingYardParser TermToken
 parse_left_paren = do
-    Parsec.lookAhead (Parsec.try (ignore_spaces *> Parsec.char '(' *> pure ()))
-    ignore_spaces *> Parsec.char '(' *> pure LParen
+    void $ Parsec.lookAhead (Parsec.try (ignore_spaces *> Parsec.char '('))
+    void $ ignore_spaces *> Parsec.char '('
+    pure LParen
