@@ -112,13 +112,12 @@ add_top_level_long_fn i p m_t stmts = case p of
     Param param (Just p_t) -> do
         new_param_scope param p_t
         case m_t of
-            Nothing -> case infer_stmts stmts of
-                Right t -> do
-                    exit_scope
-                    add_potential_export (Bound i (SoucFn p_t t))
-                Left err -> throwE err
+            Nothing -> do
+                t <- infer_stmts stmts
+                exit_scope
+                add_potential_export (Bound i (SoucFn p_t t))
             Just t -> do
-                check_stmts stmts (Just t)
+                check_stmts t stmts
                 exit_scope
                 add_potential_export (Bound i (SoucFn p_t t))
 
@@ -133,23 +132,26 @@ add_top_level_sub i m_p m_t stmts = case (i, m_t) of
         ok_sub = case m_p of
             Nothing -> do
                 new_scope
-                check_stmts stmts Nothing
+                check_stmts SoucIO stmts
                 exit_scope
                 add_potential_export (Bound i SoucIO)
             Just (Param _ Nothing) -> error "FIXME type inference"
             Just (Param param (Just p_t)) -> do
                 new_param_scope param p_t
-                check_stmts stmts Nothing
+                check_stmts SoucIO stmts
                 exit_scope
                 add_potential_export (Bound i (SoucRoutn p_t))
 
 
 add_main_routine :: MainParam -> Maybe SoucType -> Stmts -> Checker ()
-add_main_routine param m_t stmts = do
+-- FIXME
+-- main can have many different types,
+-- depending on which parameter is used
+add_main_routine param _m_t stmts = do
     -- FIXME
     -- if a type annotation is given,
     -- it should be checked with the type
     -- that we know the main param must have
     new_main_scope param
-    check_stmts stmts m_t
+    check_stmts SoucIO stmts
     exit_scope

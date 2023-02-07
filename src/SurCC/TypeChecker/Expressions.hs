@@ -2,6 +2,7 @@ module SurCC.TypeChecker.Expressions (
     infer,
     check_expr,
     infer_if_needed,
+    assert_equals,
 ) where
 
 import Prelude hiding (lookup)
