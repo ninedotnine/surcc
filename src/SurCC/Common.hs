@@ -48,6 +48,8 @@ module SurCC.Common (
     ImportDecl(..),
     Imports,
     Mutability(..),
+    Optional(..),
+    or_left,
 ) where
 
 import Control.Monad (join)
@@ -515,3 +517,18 @@ instance TextShow TypeDef where
         EnumType t terms -> "enum type " <> showb t <> " = " <> showb terms
         StructType _ -> error "fixme typedef textshow"
         GADType _ -> error "fixme typedef textshow"
+
+
+class (Foldable f) => Optional f where
+    (//) :: f a -> a -> a
+    (//) = flip (foldr const)
+
+instance Optional Maybe
+instance Optional (Either e)
+instance Optional []
+
+
+or_left :: Maybe a -> b -> Either b a
+or_left m_a dfault = case m_a of
+    Just x -> Right x
+    Nothing -> Left dfault

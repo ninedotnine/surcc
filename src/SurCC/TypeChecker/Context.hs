@@ -18,8 +18,10 @@ module SurCC.TypeChecker.Context (
     undefined_export,
 ) where
 
-import Control.Arrow (second)
+import Control.Arrow (second, (|||))
+import Control.Applicative
 import Data.Functor ((<&>))
+import Data.Function ((&))
 import Data.Map.Strict qualified as Map
 
 import Prelude hiding (lookup)
@@ -46,29 +48,18 @@ data LocalScope = GlobalScope ImmutMapping ExportList
 
 lookup :: Identifier -> LocalScope -> Maybe SoucType
 lookup i = \case
-    GlobalScope bounds ctx -> case Map.lookup i bounds of
-        Nothing -> lookup_exports i ctx
-        just_type -> just_type
-    InnerScope bounds ctx -> case Map.lookup i bounds of
-        Nothing -> lookup i ctx
-        just_type -> fst <$> just_type
+    GlobalScope bounds ctx -> Map.lookup i bounds <|> lookup_exports i ctx
+    InnerScope bounds ctx -> (Map.lookup i bounds <&> fst) <|> lookup i ctx
 
 lookup_mutable :: Identifier -> LocalScope -> Maybe (SoucType, Mutability)
 lookup_mutable i = \case
-    GlobalScope bounds ctx -> case Map.lookup i bounds of
-        Nothing -> case lookup_exports i ctx of
-            Nothing -> Nothing
-            Just t -> Just (t, Immut)
-        Just t -> Just (t, Immut)
-    InnerScope bounds ctx -> case Map.lookup i bounds of
-        Nothing -> lookup_mutable i ctx
-        just_type -> just_type
+    GlobalScope bounds ctx -> (Map.lookup i bounds <|> lookup_exports i ctx)
+                              <&> (,Immut)
+    InnerScope bounds ctx -> Map.lookup i bounds <|> lookup_mutable i ctx
 
 lookup_exports :: Identifier -> ExportList -> Maybe SoucType
-lookup_exports i (ExportList bounds) = case Map.lookup i bounds of
-    Nothing -> typeof_builtin i
-    just_type -> just_type
-
+lookup_exports i (ExportList bounds) =
+    Map.lookup i bounds <|> typeof_builtin i
 
 
 make_export_list :: [ExportDecl] -> ExportList
@@ -97,9 +88,8 @@ remove_export_wrapper :: LocalScope -> Identifier -> SoucType
                         -> Either TypeError LocalScope
 remove_export_wrapper scope b t = case scope of
     InnerScope _ _ -> error "should not remove exports from inner scope"
-    GlobalScope bounds ctx -> case remove_export ctx b t of
-        Left err -> Left err
-        Right ok_ctx -> Right (GlobalScope bounds ok_ctx)
+    GlobalScope bounds ctx -> remove_export ctx b t <&> GlobalScope bounds
+
 
 remove_export :: ExportList -> Identifier -> SoucType
                 -> Either TypeError ExportList
@@ -115,9 +105,8 @@ add_potential_export (bound@(Bound i t)) = do
     case remove_export_wrapper ctx i t of
         Left (Undeclared _) -> insert_immut i t
         Left err -> throwE err
-        Right removed_ctx -> case define_export removed_ctx bound of
-            Left err -> throwE err
-            Right new_ctx -> put new_ctx
+        Right removed_ctx -> define_export removed_ctx bound
+                             & (throwE ||| put)
 
 
 undefined_export :: LocalScope -> Maybe Bound
@@ -138,7 +127,6 @@ new_pattern_scope :: [(Identifier,SoucType)] -> Checker ()
 -- FIXME Map.fromList does not check for duplicate Identifiers
 new_pattern_scope binds = get >>= put . InnerScope new_map
     where
---         new_map = Map.fromList (binds <&> (\(i,t) -> (i,(t,Immut))))
         new_map = Map.fromList (binds <&> second (,Immut))
 
 
@@ -167,7 +155,7 @@ new_main_scope (MainParam
 
 exit_scope :: Checker ()
 exit_scope = get >>= \case
-    InnerScope _ inner -> put inner >> pure ()
+    InnerScope _ inner -> put inner
     GlobalScope _ _ -> throwE (Undeclared "should be unreachable")
 
 
@@ -187,12 +175,12 @@ add_bind ctx modifiable i t = case lookup_mutable i ctx of
         InnerScope binds rest ->
             InnerScope ((Map.insert i (t, modifiable)) binds) rest
 
+
 insert :: Mutability -> Identifier -> SoucType -> Checker ()
 insert modifiable i t = do
     ctx <- get
-    case add_bind ctx modifiable i t of
-        Left err -> throwE err
-        Right new_ctx -> put new_ctx
+    add_bind ctx modifiable i t & (throwE ||| put)
+
 
 insert_mut :: Identifier -> SoucType -> Checker ()
 insert_mut = insert Mut

@@ -72,22 +72,19 @@ insert_consts m i t = case i of
 
 insert_const :: Mapping -> Identifier -> SoucType
                 -> Either TypeError Mapping
-insert_const m i t = case insert m i t of
-    Just new_map -> Right new_map
-    Nothing  -> Left (MultipleDeclarations i)
+insert_const m i t = insert m i t `or_left` MultipleDeclarations i
 
 
 insert_type :: TypeSet -> SoucType -> Refutable
                -> Either TypeError TypeSet
-insert_type (TypeSet m) t r = case insert m t r of
-    Just new_map -> Right (TypeSet new_map)
-    Nothing  -> Left (MultipleTypeDeclarations t)
+insert_type (TypeSet m) t r = (insert m t r <&> TypeSet)
+                              `or_left` MultipleTypeDeclarations t
 
 
 insert :: Ord k => Map k v -> k -> v -> Maybe (Map k v)
-insert m con t = case Map.lookup con m of
-    Just _ -> Nothing
-    Nothing -> Just (Map.insert con t m)
+insert m con t = if Map.member con m
+    then Nothing
+    else Just (Map.insert con t m)
 
 
 remove_exports :: ExportList -> [Identifier]
@@ -105,5 +102,3 @@ default_types = TypeSet $ Map.fromList [
     (SoucInteger, Refutable True)
     ]
 --     SoucString,
-
-

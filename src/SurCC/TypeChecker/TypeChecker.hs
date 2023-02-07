@@ -9,6 +9,9 @@ import Control.Monad.State (runState, get)
 import Control.Monad.Except ()
 import Control.Monad.Trans ()
 import Control.Monad.Trans.Except (runExceptT, throwE)
+import Data.Function ((&))
+import Data.Functor
+
 import Data.Either ()
 import Data.Text (Text)
 import TextShow (TextShow(..), toString) -- for error
@@ -93,33 +96,31 @@ add_top_level_const i m_t expr = do
 
 add_top_level_short_fn :: Identifier -> Param -> Maybe SoucType -> ExprTree
                         -> Checker ()
-add_top_level_short_fn i p m_t expr = do
-    case p of
-        Param _ Nothing -> error "FIXME type inference"
-        Param param (Just p_t) -> do
-            new_param_scope param p_t
-            t <- infer_if_needed m_t expr
-            exit_scope
-            add_potential_export $ Bound i (SoucFn p_t t)
+add_top_level_short_fn i p m_t expr = case p of
+    Param _ Nothing -> error "FIXME type inference"
+    Param param (Just p_t) -> do
+        new_param_scope param p_t
+        t <- infer_if_needed m_t expr
+        exit_scope
+        add_potential_export $ Bound i (SoucFn p_t t)
 
 
 add_top_level_long_fn :: Identifier -> Param -> Maybe SoucType -> Stmts
                         -> Checker ()
-add_top_level_long_fn i p m_t stmts = do
-    case p of
-        Param _ Nothing -> error "FIXME type inference"
-        Param param (Just p_t) -> do
-            new_param_scope param p_t
-            case m_t of
-                Nothing -> case infer_stmts stmts of
-                    Right t -> do
-                        exit_scope
-                        add_potential_export (Bound i (SoucFn p_t t))
-                    Left err -> throwE err
-                Just t -> do
-                    check_stmts stmts (Just t)
+add_top_level_long_fn i p m_t stmts = case p of
+    Param _ Nothing -> error "FIXME type inference"
+    Param param (Just p_t) -> do
+        new_param_scope param p_t
+        case m_t of
+            Nothing -> case infer_stmts stmts of
+                Right t -> do
                     exit_scope
                     add_potential_export (Bound i (SoucFn p_t t))
+                Left err -> throwE err
+            Just t -> do
+                check_stmts stmts (Just t)
+                exit_scope
+                add_potential_export (Bound i (SoucFn p_t t))
 
 add_top_level_sub :: Identifier -> Maybe Param -> Maybe SoucType -> Stmts
                     -> Checker ()

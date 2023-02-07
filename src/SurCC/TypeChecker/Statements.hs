@@ -68,16 +68,15 @@ check_stmt stmt m_ret = do
 
 
 check_return :: Maybe ExprTree -> Maybe SoucType -> Checker ()
-check_return m_expr m_ret = do
-    case m_expr of
-        Just expr -> case m_ret of
-            Just t -> check_expr t expr
-            Nothing -> do
-                expr_t <- infer expr
-                throwE (TypeMismatch SoucIO expr_t)
-        Nothing -> case m_ret of
-            Just t -> throwE (TypeMismatch t SoucIO)
-            Nothing -> pure ()
+check_return m_expr m_ret = case m_expr of
+    Just expr -> case m_ret of
+        Just t -> check_expr t expr
+        Nothing -> do
+            expr_t <- infer expr
+            throwE (TypeMismatch SoucIO expr_t)
+    Nothing -> case m_ret of
+        Just t -> throwE (TypeMismatch t SoucIO)
+        Nothing -> pure ()
 
 
 check_stmt_while :: ExprTree -> Stmts -> Maybe SoucType -> Checker ()
