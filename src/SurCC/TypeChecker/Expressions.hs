@@ -1,3 +1,5 @@
+{-# LANGUAGE FlexibleContexts #-}
+
 module SurCC.TypeChecker.Expressions (
     infer,
     check_expr,
@@ -9,6 +11,7 @@ import Prelude hiding (lookup)
 
 import Control.Applicative
 import Control.Monad (unless)
+import Control.Monad.Error.Class (MonadError, throwError)
 import Control.Monad.Trans.Except
 import Control.Monad.State
 import Data.Functor ((<&>))
@@ -169,8 +172,8 @@ infer_if_needed m_t expr = do
         Just t -> check_expr t expr *> pure t
 
 
-assert_equals :: SoucType -> SoucType -> Checker ()
-assert_equals t0 t1 = unless (t0 == t1) (throwE (TypeMismatch t0 t1))
+assert_equals :: (MonadError TypeError m) => SoucType -> SoucType -> m ()
+assert_equals t0 t1 = unless (t0 == t1) (throwError (TypeMismatch t0 t1))
 
 
 not_implemented :: Checker a

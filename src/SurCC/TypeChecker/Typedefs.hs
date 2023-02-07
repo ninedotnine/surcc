@@ -1,18 +1,19 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE FlexibleContexts #-}
 
 module SurCC.TypeChecker.Typedefs (
     build_typedefs,
     TypeSet,
 ) where
 
+import Control.Monad.Error.Class
 import Data.Functor
 import Data.Map.Strict qualified as Map
 import Data.Map.Strict (Map)
 
 import SurCC.Common
 import SurCC.TypeChecker.Context
-
-import Debug.Trace
+import SurCC.TypeChecker.Expressions (assert_equals)
 
 type Mapping = Map Identifier SoucType
 
@@ -25,7 +26,6 @@ newtype Refutable = Refutable Bool deriving (Eq, Ord, Show)
 build_typedefs :: [TypeDef] -> ExportList
                   -> Either TypeError (TypeSet, LocalScope)
 build_typedefs defs exports = do
-    traceM $ " defs : " <> show defs
     build_typedefs' (default_types, Map.empty, exports) defs <&> wrap
         where
             -- FIXME remove types and constructors from ctx
@@ -89,11 +89,22 @@ insert m con t = if Map.member con m
 
 remove_exports :: ExportList -> [Identifier]
                   -> SoucType -> Either TypeError ExportList
-remove_exports = undefined
+remove_exports (ExportList exports) ids t = case ids of
+    (i:etc) -> do
+        new_exports <- remove_export exports i t
+        remove_exports (ExportList new_exports) etc t
+    [] -> pure $ ExportList exports
 
-remove_export :: ExportList -> Identifier -> SoucType
-                 -> Either TypeError ExportList
-remove_export = undefined
+
+remove_export :: (MonadError TypeError m) =>
+                 Map Identifier SoucType -> Identifier -> SoucType
+                 -> m (Map Identifier SoucType)
+remove_export list i t = do
+    case Map.lookup i list of
+        Just exported_type -> do
+            assert_equals t exported_type
+            pure list -- FIXME delete from the list?
+        Nothing -> pure list
 
 
 default_types = TypeSet $ Map.fromList [
