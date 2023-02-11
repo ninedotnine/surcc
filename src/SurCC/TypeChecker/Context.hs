@@ -25,8 +25,7 @@ module SurCC.TypeChecker.Context (
     new_main_scope,
     exit_scope,
     insert_global,
-    insert_immut,
-    insert_mut,
+    insert_local,
     export_list,
     import_list,
     lookup_scopes_mutables,
@@ -214,12 +213,6 @@ insert_local modifiable i t = do
         InnerScope binds rest ->
             pure $ InnerScope ((Map.insert i (t, modifiable)) binds) rest
 
-
-insert_mut :: Identifier -> SoucType -> Checker ()
-insert_mut = insert_local Mut
-
-insert_immut :: Identifier -> SoucType -> Checker ()
-insert_immut = insert_local Immut
 
 insert_global :: Bound -> Checker ()
 insert_global (Bound i t) = do

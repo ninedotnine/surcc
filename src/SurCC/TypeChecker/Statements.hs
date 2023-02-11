@@ -18,8 +18,7 @@ import SurCC.Common
 
 import SurCC.TypeChecker.Context (Checker,
                             LocalScope,
-                            insert_immut,
-                            insert_mut,
+                            insert_local,
                             get_type,
                             lookup_scopes_mutables)
 import SurCC.TypeChecker.Expressions (
@@ -56,13 +55,13 @@ check_stmt t = \case
                           -> Checker ()
         check_stmt_ass name m_t expr = do
             expr_t <- infer_if_needed m_t expr
-            insert_immut name expr_t
+            insert_local Immut name expr_t
 
         check_stmt_mut_ass :: Identifier -> (Maybe SoucType) -> ExprTree
                               -> Checker ()
         check_stmt_mut_ass name m_t expr = do
             expr_t <- infer_if_needed m_t expr
-            insert_mut name expr_t
+            insert_local Mut name expr_t
 
 
 infer_return :: Maybe ExprTree -> Checker SoucType

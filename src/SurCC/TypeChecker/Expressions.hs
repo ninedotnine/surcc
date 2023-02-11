@@ -20,7 +20,7 @@ import SurCC.TypeChecker.Context (
     get_type,
     new_scope,
     exit_scope,
-    insert_immut,
+    insert_local,
     LocalScope,
     Checker,
     )
@@ -164,7 +164,7 @@ check_lit t l = do
 check_pattern :: SoucType -> Pattern -> Checker ()
 check_pattern t = \case
     PatLit l -> check_lit t l
-    PatBinding i -> insert_immut i t
+    PatBinding i -> insert_local Immut i t
 
 
 infer_if_needed :: Maybe SoucType -> ExprTree -> Checker SoucType
