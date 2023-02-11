@@ -19,7 +19,6 @@ import SurCC.Common
 import SurCC.TypeChecker.Context (
     get_type,
     new_scope,
-    new_pattern_scope,
     exit_scope,
     insert_immut,
     LocalScope,
@@ -64,10 +63,10 @@ infer_term = \case
         "False" -> pure SoucBool
         "None" -> pure (SoucMaybe SoucInteger)
         "OK" -> pure (SoucMaybe (SoucFn SoucInteger SoucInteger))
-        _ -> throwE (UnknownData s)
+        _ -> throwError (UnknownData s)
 
 
-infer_lit :: Literal -> Checker SoucType
+infer_lit :: MonadError TypeError m => Literal -> m SoucType
 infer_lit = pure <$> \case
     LitInt _    -> SoucInteger
     LitChar _   -> SoucChar
@@ -118,7 +117,12 @@ infer_infix_op left right = \case
             SoucFn t0 t1 -> do
                 check_expr t0 right
                 pure t1
-            _ -> throwE (TypeMismatch (SoucFn l_t (SoucTypeVar (TypeVar (Right 'T') (SoucKind 0)))) l_t)
+            _ -> throwError $
+                    TypeMismatch (
+                        SoucFn l_t (
+                            SoucTypeVar (TypeVar (Right 'T')
+                            (SoucKind 0))))
+                        l_t
     FlipApply -> infer_infix_op right left Apply
 
     Comma -> do
@@ -151,7 +155,7 @@ check_guard = \case
     Nothing -> pure ()
     Just (Guard g) -> check_expr SoucBool g
 
-check_lit :: SoucType -> Literal -> Checker ()
+check_lit :: MonadError TypeError m => SoucType -> Literal -> m ()
 check_lit t l = do
     l_t <- infer_lit l
     assert_equals t l_t
@@ -174,5 +178,5 @@ assert_equals :: (MonadError TypeError m) => SoucType -> SoucType -> m ()
 assert_equals t0 t1 = unless (t0 == t1) (throwError (TypeMismatch t0 t1))
 
 
-not_implemented :: Checker a
-not_implemented = throwE $ TypeMismatch (SoucType "NOT YET" (SoucKind 0)) (SoucType "IMPLEMENTED" (SoucKind 0))
+not_implemented :: MonadError TypeError m => m a
+not_implemented = throwError $ TypeMismatch (SoucType "NOT YET" (SoucKind 0)) (SoucType "IMPLEMENTED" (SoucKind 0))

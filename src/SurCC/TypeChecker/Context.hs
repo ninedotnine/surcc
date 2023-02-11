@@ -21,7 +21,7 @@ module SurCC.TypeChecker.Context (
     lookup,
     new_scope,
     new_param_scope,
-    new_pattern_scope,
+--     new_pattern_scope,
     new_main_scope,
     exit_scope,
     insert_global,
@@ -57,6 +57,8 @@ type Checker a = ExceptT TypeError (
                         Reader (ImportList,ExportList))) a
 
 
+-- run_checker :: MonadError TypeError m
+--             => ImportList -> ExportList -> Checker a -> m a
 run_checker :: ImportList -> ExportList -> Checker a -> Either TypeError a
 run_checker imports exports checker =
     runReader (evalStateT (runExceptT checker) empty_scope) (imports,exports)
@@ -85,7 +87,7 @@ get_type_mutables i = do
     (imports,_exports) <- ask
     ctx <- get
     case lookup_mutables i imports ctx of
-        Nothing -> throwE (Undeclared i)
+        Nothing -> throwError (Undeclared i)
         Just (t,m) -> pure (t,m)
 
 
@@ -194,16 +196,16 @@ new_main_scope (MainParam
 exit_scope :: Checker ()
 exit_scope = get >>= \case
     InnerScope _ inner -> put inner
-    GlobalScope _ -> throwE (Undeclared "should be unreachable")
+    GlobalScope _ -> throwError (Undeclared "should be unreachable")
 
 
 insert_local :: Mutability -> Identifier -> SoucType -> Checker ()
 insert_local modifiable i t = do
     (imports,exports) <- ask
     when (member_imports i imports) $
-        throwE (MultipleDeclarations i)
+        throwError (MultipleDeclarations i)
     when (member_exports i exports) $
-        throwE (ExportedLocal i)
+        throwError (ExportedLocal i)
     (put =<<) $ get >>= \case
         GlobalScope binds -> do
             when (modifiable == Mut) $
@@ -223,20 +225,21 @@ insert_global :: Bound -> Checker ()
 insert_global (Bound i t) = do
     (imports,exports) <- ask
     when (member_imports i imports) $
-        throwE (MultipleDeclarations i)
+        throwError (MultipleDeclarations i)
     case lookup_exports i exports of
         Just exp_t -> assert_equals t exp_t
         Nothing -> pure ()
     get >>= \case
         GlobalScope globals -> define_export globals i t
-                             & (throwE ||| put)
+                             & (throwError ||| put)
         InnerScope _ _ -> error "should not be adding exports from here."
 
 
-define_export :: ImmutMapping -> Identifier -> SoucType -> Either TypeError LocalScope
+define_export :: MonadError TypeError m
+              => ImmutMapping -> Identifier -> SoucType -> m LocalScope
 define_export globals b t = if Map.member b globals
-    then Left (MultipleDeclarations b)
-    else Right (GlobalScope (Map.insert b t globals))
+    then throwError (MultipleDeclarations b)
+    else pure (GlobalScope (Map.insert b t globals))
 
 
 assert_equals :: (MonadError TypeError m) => SoucType -> SoucType -> m ()

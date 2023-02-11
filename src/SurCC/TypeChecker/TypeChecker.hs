@@ -71,16 +71,17 @@ assert_no_undefined_exports defined (SurCModule _ exports) = do
 -- e. g. the same name could be exported multiple times, possibly with
 -- different types even.
 -- don't worry about it for now.
-add_exports :: SurCModule -> Either TypeError ExportList
-add_exports (SurCModule _ exports) = Right $ export_list exports
+add_exports :: MonadError TypeError m => SurCModule -> m ExportList
+add_exports (SurCModule _ exports) = pure $ export_list exports
 
 -- getting imports can fail if (e. g.) a file cannot be found.
 -- don't worry about it for now.
 -- FIXME
 -- should also fail if it tries to import something that was
 -- declared exported with a non-module type
-add_imports :: [ImportDecl] -> ExportList -> Either TypeError ImportList
-add_imports imports _exports = Right $ import_list imports
+add_imports :: MonadError TypeError m => [ImportDecl] -> ExportList
+            -> m ImportList
+add_imports imports _exports = pure $ import_list imports
 
 add_globals :: [TopLevelDefn] -> ImportList -> ExportList
                -> Either TypeError [Bound]
