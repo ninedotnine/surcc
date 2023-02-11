@@ -142,14 +142,20 @@ pattern SoucModuleType = SoucType "Module" (SoucKind 0)
 
 data Bound = Bound Identifier SoucType deriving Eq
 
+instance Show Bound where
+    show (Bound (Identifier i) t) =
+        Text.unpack $ i <> ": " <> showt t
+
 
 data TypeError = TypeMismatch SoucType SoucType
                | MultipleDeclarations Identifier
                | MultipleTypeDeclarations SoucType
                | Undeclared Identifier
+               | BadReassign Identifier
                | UnknownData Identifier -- FIXME delete? same as Undeclared
                | UnknownType SoucType
                | ExportedButNotDefined Bound
+               | ExportedLocal Identifier
     deriving (Eq)
 
 data Param = Param Identifier (Maybe SoucType) deriving (Eq, Show)
@@ -260,7 +266,7 @@ data Literal = LitInt Integer
     deriving (Eq, Show)
 
 
-data Pattern = PatLit Literal -- FIXME ints only for now hehe
+data Pattern = PatLit Literal
              | PatBinding Identifier
 --              | PatNested Identifier Pattern
 --              | PatConstructor Constant [Pattern]
@@ -337,9 +343,11 @@ instance TextShow TypeError where
         MultipleTypeDeclarations name ->
             "multiple declarations of " <> showb name
         Undeclared name -> "undeclared " <> showb name
+        BadReassign name -> "cannot reassign immutable: " <> showb name
         UnknownData name -> "unknown data constructor: " <> showb name
         UnknownType name -> "unknown type: " <> showb name
         ExportedButNotDefined name -> "declared " <> showb name <> " was not defined"
+        ExportedLocal name -> "exported " <> showb name <> " must be global"
 
 instance TextShow Param where
     showb = \case

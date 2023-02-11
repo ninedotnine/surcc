@@ -1,123 +1,160 @@
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE TupleSections #-}
+
+
+
+-- FIXME ideas
+-- generalize `check` and `infer`, use typeclass or ADT
+-- make LocalScope and GlobalScope different types
+--     change Checker state to use (GlobalScope,LocalScope)
+-- delete many exports from this file
+-- use MonadError
+
 
 module SurCC.TypeChecker.Context (
     Checker,
     ExportList(..),
+    ImportList,
     LocalScope(..),
+    run_checker,
+    get_type,
     lookup,
     new_scope,
     new_param_scope,
     new_pattern_scope,
     new_main_scope,
     exit_scope,
+    insert_global,
     insert_immut,
     insert_mut,
-    make_export_list,
-    make_global_scope,
-    add_potential_export,
-    undefined_export,
+    export_list,
+    import_list,
+    lookup_scopes_mutables,
 ) where
 
 import Control.Arrow (second, (|||))
-import Control.Applicative
+import Control.Applicative ((<|>))
+import Control.Monad (when, unless)
 import Data.Functor ((<&>))
 import Data.Function ((&))
+import Data.Maybe (isJust)
 import Data.Map.Strict qualified as Map
+import Data.Set qualified as Set
+
 
 import Prelude hiding (lookup)
-import Control.Monad.State (State, get, put)
-import Control.Monad.Trans.Except (ExceptT, throwE)
+import Control.Monad.Error.Class (MonadError, throwError)
+import Control.Monad.Reader (Reader, runReader, ask)
+import Control.Monad.State (evalStateT, StateT, get, put)
+import Control.Monad.Trans.Except (ExceptT, runExceptT, throwE)
 import Data.Text (Text)
 
 import SurCC.Common
 import SurCC.Builtins (typeof_builtin)
 
-type Checker a = ExceptT TypeError (State LocalScope) a
+type Checker a = ExceptT TypeError (
+                    StateT LocalScope (
+                        Reader (ImportList,ExportList))) a
 
-type ImmutMapping = Map.Map Identifier SoucType
+
+run_checker :: ImportList -> ExportList -> Checker a -> Either TypeError a
+run_checker imports exports checker =
+    runReader (evalStateT (runExceptT checker) empty_scope) (imports,exports)
+    where
+        empty_scope = GlobalScope (Map.empty)
+
 
 newtype ExportList = ExportList ImmutMapping
                 deriving (Show)
 
+newtype ImportList = ImportList (Set.Set Identifier)
+                deriving (Show)
+
+type ImmutMapping = Map.Map Identifier SoucType
+
 type MutMapping = Map.Map Identifier (SoucType, Mutability)
 
-data LocalScope = GlobalScope ImmutMapping ExportList
+data LocalScope = GlobalScope ImmutMapping
                 | InnerScope MutMapping LocalScope
                 deriving (Show)
 
 
-lookup :: Identifier -> LocalScope -> Maybe SoucType
-lookup i = \case
-    GlobalScope bounds ctx -> Map.lookup i bounds <|> lookup_exports i ctx
-    InnerScope bounds ctx -> (Map.lookup i bounds <&> fst) <|> lookup i ctx
 
-lookup_mutable :: Identifier -> LocalScope -> Maybe (SoucType, Mutability)
-lookup_mutable i = \case
-    GlobalScope bounds ctx -> (Map.lookup i bounds <|> lookup_exports i ctx)
-                              <&> (,Immut)
-    InnerScope bounds ctx -> Map.lookup i bounds <|> lookup_mutable i ctx
+get_type_mutables :: Identifier -> Checker (SoucType, Mutability)
+get_type_mutables i = do
+    (imports,_exports) <- ask
+    ctx <- get
+    case lookup_mutables i imports ctx of
+        Nothing -> throwE (Undeclared i)
+        Just (t,m) -> pure (t,m)
+
+
+get_type :: Identifier -> Checker SoucType
+get_type i = get_type_mutables i <&> fst
+
+
+lookup_mutables :: Identifier -> ImportList -> LocalScope
+                -> Maybe (SoucType, Mutability)
+lookup_mutables i imports ctx = (lookup_imports i imports <&> (,Immut))
+                            <|> (lookup_scopes_mutables i ctx)
+                            <|> (typeof_builtin i <&> (,Immut))
+
+
+lookup :: Identifier -> ImportList -> LocalScope -> Maybe SoucType
+lookup i imports ctx = lookup_mutables i imports ctx <&> fst
+
+
+lookup_scopes_mutables :: Identifier -> LocalScope
+                       -> Maybe (SoucType, Mutability)
+lookup_scopes_mutables i = \case
+    GlobalScope bounds -> Map.lookup i bounds <&> (,Immut)
+    InnerScope bounds ctx -> Map.lookup i bounds
+                         <|> lookup_scopes_mutables i ctx
+
+
+lookup_scopes :: Identifier -> LocalScope -> Maybe SoucType
+lookup_scopes i = \case
+    GlobalScope bounds -> Map.lookup i bounds
+    InnerScope bounds ctx -> (Map.lookup i bounds <&> fst)
+                         <|> lookup_scopes i ctx
+
 
 lookup_exports :: Identifier -> ExportList -> Maybe SoucType
-lookup_exports i (ExportList bounds) =
-    Map.lookup i bounds <|> typeof_builtin i
+lookup_exports i (ExportList exports) = Map.lookup i exports
 
 
-make_export_list :: [ExportDecl] -> ExportList
-make_export_list exports = ExportList $ Map.fromList (unwrap <$> exports)
+member_exports :: Identifier -> ExportList -> Bool
+member_exports i exports = lookup_exports i exports & isJust
+
+
+lookup_imports :: Identifier -> ImportList -> Maybe SoucType
+lookup_imports i imports = if member_imports i imports
+    then Just SoucModuleType
+    else Nothing
+
+
+member_imports :: Identifier -> ImportList -> Bool
+member_imports i (ImportList imports) = Set.member i imports
+
+
+export_list :: [ExportDecl] -> ExportList
+export_list exports = ExportList $ Map.fromList (unwrap <$> exports)
     where
         unwrap (ExportDecl (Bound b t)) = (b,t)
 
-make_global_scope :: Imports -> ExportList -> LocalScope
-make_global_scope imps exps = GlobalScope import_map exps
+
+import_list :: [ImportDecl] -> ImportList
+import_list imports = ImportList $ Set.fromList (unwrap <$> imports)
     where
-        import_map = Map.fromList (from_import <$> imps)
-        from_import :: ImportDecl -> (Identifier, SoucType)
-        from_import = \case
-            LibImport name -> wrap name
-            RelImport name -> wrap name
-        wrap txt = (Identifier txt, SoucModuleType)
-
-define_export :: LocalScope -> Bound -> Either TypeError LocalScope
-define_export scope (Bound b t) = case scope of
-    InnerScope _ _ -> error "should not define exports from inner scope"
-    GlobalScope binds ctx -> case Map.lookup b binds of
-            Nothing -> Right (GlobalScope (Map.insert b t binds) ctx)
-            Just _ -> Left (MultipleDeclarations b)
-
-remove_export_wrapper :: LocalScope -> Identifier -> SoucType
-                        -> Either TypeError LocalScope
-remove_export_wrapper scope b t = case scope of
-    InnerScope _ _ -> error "should not remove exports from inner scope"
-    GlobalScope bounds ctx -> remove_export ctx b t <&> GlobalScope bounds
+        unwrap = \case
+            LibImport name -> Identifier name
+            RelImport name -> Identifier name
 
 
-remove_export :: ExportList -> Identifier -> SoucType
-                -> Either TypeError ExportList
-remove_export (ExportList bounds) b t = case Map.lookup b bounds of
-    Just b_t | t == b_t -> Right $ ExportList $ Map.delete b bounds
-    Just b_t -> Left (TypeMismatch b_t t)
-    Nothing -> Left (Undeclared b)
-
-
-add_potential_export :: Bound -> Checker ()
-add_potential_export (bound@(Bound i t)) = do
-    ctx <- get
-    case remove_export_wrapper ctx i t of
-        Left (Undeclared _) -> insert_immut i t
-        Left err -> throwE err
-        Right removed_ctx -> define_export removed_ctx bound
-                             & (throwE ||| put)
-
-
-undefined_export :: LocalScope -> Maybe Bound
-undefined_export = \case
-    InnerScope _ ctx -> undefined_export ctx
-    GlobalScope _ (ExportList exports) -> case Map.toList exports of
-        [] -> Nothing
-        exps -> Just $ uncurry Bound $ head exps
 
 new_scope :: Checker ()
 new_scope = get >>= put . InnerScope Map.empty
+
 
 new_param_scope :: Identifier -> SoucType -> Checker ()
 new_param_scope i t = get >>= put . InnerScope (Map.singleton i (t, Immut))
@@ -153,37 +190,54 @@ new_main_scope (MainParam
             then [(name, (SoucType t (SoucKind 0), Immut))]
             else []
 
+
 exit_scope :: Checker ()
 exit_scope = get >>= \case
     InnerScope _ inner -> put inner
-    GlobalScope _ _ -> throwE (Undeclared "should be unreachable")
+    GlobalScope _ -> throwE (Undeclared "should be unreachable")
 
 
-add_bind :: LocalScope -> Mutability -> Identifier -> SoucType
-            -> Either TypeError LocalScope
-add_bind ctx modifiable i t = case lookup_mutable i ctx of
-    Just (existing_type, existing_mut) ->
-        if (modifiable, existing_mut) == (Mut, Mut)
-            then if t == existing_type
-                then Right ctx
-                else Left (TypeMismatch existing_type t)
-        else
-            Left (MultipleDeclarations i)
-    Nothing -> Right $ case ctx of
-        GlobalScope binds rest ->
-            GlobalScope (Map.insert i t binds) rest
+insert_local :: Mutability -> Identifier -> SoucType -> Checker ()
+insert_local modifiable i t = do
+    (imports,exports) <- ask
+    when (member_imports i imports) $
+        throwE (MultipleDeclarations i)
+    when (member_exports i exports) $
+        throwE (ExportedLocal i)
+    (put =<<) $ get >>= \case
+        GlobalScope binds -> do
+            when (modifiable == Mut) $
+                error "should not be reachable"
+            pure $ GlobalScope (Map.insert i t binds)
         InnerScope binds rest ->
-            InnerScope ((Map.insert i (t, modifiable)) binds) rest
-
-
-insert :: Mutability -> Identifier -> SoucType -> Checker ()
-insert modifiable i t = do
-    ctx <- get
-    add_bind ctx modifiable i t & (throwE ||| put)
+            pure $ InnerScope ((Map.insert i (t, modifiable)) binds) rest
 
 
 insert_mut :: Identifier -> SoucType -> Checker ()
-insert_mut = insert Mut
+insert_mut = insert_local Mut
 
 insert_immut :: Identifier -> SoucType -> Checker ()
-insert_immut = insert Immut
+insert_immut = insert_local Immut
+
+insert_global :: Bound -> Checker ()
+insert_global (Bound i t) = do
+    (imports,exports) <- ask
+    when (member_imports i imports) $
+        throwE (MultipleDeclarations i)
+    case lookup_exports i exports of
+        Just exp_t -> assert_equals t exp_t
+        Nothing -> pure ()
+    get >>= \case
+        GlobalScope globals -> define_export globals i t
+                             & (throwE ||| put)
+        InnerScope _ _ -> error "should not be adding exports from here."
+
+
+define_export :: ImmutMapping -> Identifier -> SoucType -> Either TypeError LocalScope
+define_export globals b t = if Map.member b globals
+    then Left (MultipleDeclarations b)
+    else Right (GlobalScope (Map.insert b t globals))
+
+
+assert_equals :: (MonadError TypeError m) => SoucType -> SoucType -> m ()
+assert_equals t0 t1 = unless (t0 == t1) (throwError (TypeMismatch t0 t1))

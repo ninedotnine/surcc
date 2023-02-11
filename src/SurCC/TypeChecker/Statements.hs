@@ -20,7 +20,8 @@ import SurCC.TypeChecker.Context (Checker,
                             LocalScope,
                             insert_immut,
                             insert_mut,
-                            lookup)
+                            get_type,
+                            lookup_scopes_mutables)
 import SurCC.TypeChecker.Expressions (
     check_expr,
     infer,
@@ -49,7 +50,7 @@ check_stmt t = \case
     -- redeclaring of the same variable.
     -- eventually this functionality should be removed from the parser
     Stmt_Var_Declare name m_t expr -> check_stmt_mut_ass name m_t expr
-    Stmt_Var_Reassign name m_t expr -> check_stmt_mut_ass name m_t expr
+    Stmt_Var_Reassign name m_t expr -> check_stmt_reassign m_t name expr
     where
         check_stmt_ass :: Identifier -> (Maybe SoucType) -> ExprTree
                           -> Checker ()
@@ -78,6 +79,18 @@ check_return t = \case
     Return Nothing -> assert_equals SoucIO t
 
 
+check_stmt_reassign :: Maybe SoucType -> Identifier -> ExprTree -> Checker ()
+check_stmt_reassign m_t name expr = do
+    expr_t <- infer_if_needed m_t expr
+    ctx <- get
+    case lookup_scopes_mutables name ctx of
+        Nothing -> throwE (Undeclared name)
+        Just (tp, mut) -> do
+            assert_equals tp expr_t
+            when (mut /= Mut) $
+                throwE (BadReassign name)
+
+
 check_stmt_while :: SoucType -> ExprTree -> Stmts -> Checker ()
 check_stmt_while t expr body = do
     check_expr SoucBool expr
@@ -93,19 +106,20 @@ check_stmt_if t expr body m_else = do
 
 check_stmt_call :: SoucType -> Identifier -> Maybe ExprTree -> Checker ()
 check_stmt_call _t name m_expr = do
-    ctx <- get
-    case (lookup name ctx, m_expr) of
-        (Just SoucIO, Nothing) -> pure ()
-        (Just (SoucRoutn param), Just expr) -> check_expr param expr
-        (Just SoucIO, Just expr) -> infer expr
-                                    >>= throwE . TypeMismatch SoucIO
-        (Just t, _) -> throwE $ TypeMismatch SoucIO t
-        (Nothing, _) -> throwE $ Undeclared name
+    m_type <- get_type name
+    case (m_type, m_expr) of
+        (SoucIO, Nothing) -> pure ()
+        (SoucRoutn param, Just expr) -> check_expr param expr
+        (SoucIO, Just expr) -> infer expr
+                           >>= throwE . TypeMismatch SoucIO
+        (t, _) -> throwE $ TypeMismatch SoucIO t
+
 
 infer_stmts :: Stmts -> Checker SoucType
 infer_stmts (Stmts _ t) = case t of
     Just (Return r) -> undefined
     Nothing -> undefined
+
 
 infer_or_check_stmts :: Maybe SoucType -> Stmts -> Checker SoucType
 infer_or_check_stmts m_t stmts = do

@@ -23,17 +23,15 @@ newtype TypeSet = TypeSet (Map SoucType Refutable) deriving (Show)
 newtype Refutable = Refutable Bool deriving (Eq, Ord, Show)
 
 
+-- FIXME check types and constructors with exports
 build_typedefs :: [TypeDef] -> ExportList
-                  -> Either TypeError (TypeSet, LocalScope)
+                  -> Either TypeError (TypeSet, Mapping)
 build_typedefs defs exports = do
-    build_typedefs' (default_types, Map.empty, exports) defs <&> wrap
-        where
-            -- FIXME remove types and constructors from ctx
-            wrap (ts,m,exps) = (ts, GlobalScope m exps)
+    build_typedefs' (default_types, Map.empty, exports) defs
 
 
 build_typedefs' :: (TypeSet, Mapping, ExportList) -> [TypeDef]
-                   -> Either TypeError (TypeSet, Mapping, ExportList)
+                   -> Either TypeError (TypeSet, Mapping)
 build_typedefs' (types, consts, exps) = \case
     (d:defs) -> do
         (t, refut, terms) <- build_typedef d
@@ -43,7 +41,7 @@ build_typedefs' (types, consts, exps) = \case
             insert_consts consts terms t
         new_exps <- remove_exports exps terms t
         build_typedefs' (updated_types, updated_consts, new_exps) defs
-    [] -> pure (types, consts, exps)
+    [] -> pure (types, consts)
 
 
 build_typedef :: TypeDef

@@ -9,16 +9,15 @@ module SurCC.TypeChecker.Expressions (
 
 import Prelude hiding (lookup)
 
-import Control.Applicative
+import Control.Applicative ()
 import Control.Monad (unless)
 import Control.Monad.Error.Class (MonadError, throwError)
 import Control.Monad.Trans.Except
-import Control.Monad.State
 import Data.Functor ((<&>))
 
 import SurCC.Common
 import SurCC.TypeChecker.Context (
-    lookup,
+    get_type,
     new_scope,
     new_pattern_scope,
     exit_scope,
@@ -56,11 +55,10 @@ infer = \case
 infer_term :: Term -> Checker SoucType
 infer_term = \case
     Lit l -> infer_lit l
-    Var v -> get >>= \ctx -> case lookup v ctx of
+    Var v ->
         -- FIXME is this unreachable?
         -- the scrutinee has already been inferred
-        Nothing -> throwE (Undeclared v)
-        Just t -> pure t
+        get_type v
     Constructor s -> case s of
         "True" -> pure SoucBool
         "False" -> pure SoucBool

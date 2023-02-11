@@ -6,9 +6,9 @@ import SurCC.TypeChecker.Context
 import SurCC.TypeChecker.Expressions
 import SurCC.Common
 
-import Control.Monad.Trans.Except (runExceptT)
-import Control.Monad.State (evalState)
-
+import Control.Monad.Except
+import Control.Monad.Reader
+import Control.Monad.State
 import Data.Map.Strict qualified as Map
 import Data.Text (Text)
 import Data.Text.IO qualified as Text
@@ -24,11 +24,8 @@ match = Result (Right ())
 mismatch :: Text -> Text -> Expected
 mismatch x y = Result $ Left $ TypeMismatch (SoucType x (SoucKind 0)) (SoucType y (SoucKind 0))
 
-no_exports_ctx :: ExportList
-no_exports_ctx = ExportList Map.empty
-
 empty_ctx :: LocalScope
-empty_ctx = GlobalScope Map.empty no_exports_ctx
+empty_ctx = GlobalScope Map.empty
 
 globals :: LocalScope
 globals = GlobalScope (Map.fromList [
@@ -36,7 +33,7 @@ globals = GlobalScope (Map.fromList [
     ("s", SoucString),
     ("c", SoucChar),
     ("b", SoucBool)
-    ]) no_exports_ctx
+    ])
 
 scoped :: LocalScope
 scoped = InnerScope (Map.fromList [
@@ -125,11 +122,19 @@ print_err :: Either TypeError () -> Either TypeError () -> IO ()
 print_err expected actual = Text.putStrLn failmsg where
     failmsg = "FAILED! \n  expected " <> render expected <> " but got: " <> render actual
 
+
+-- FIXME don't test internals.
+run_test :: LocalScope -> Checker a -> Either TypeError a
+run_test ctx checker =
+    runReader (evalStateT (runExceptT checker) ctx) imports_n_exports
+    where
+        imports_n_exports = (import_list [], export_list [])
+
+
 test :: Test -> IO ()
 test (ctx, expr, expr_t, Result expected, name) = do
     putStr name >> putStr "... "
-    let actual = evalState (runExceptT (check_expr
-                    (SoucType expr_t (SoucKind 0)) expr)) ctx
+    let actual = run_test ctx $ check_expr (SoucType expr_t (SoucKind 0)) expr
     if expected == actual
         then putStrLn "OK."
         else print_err expected actual >> exitFailure
