@@ -15,10 +15,10 @@ module SurCC.TypeChecker.Context (
     Checker,
     ExportList(..),
     ImportList,
-    LocalScope(..),
+    LocalScopes(..),
     run_checker,
     get_type,
-    lookup,
+--     lookup,
     new_scope,
     new_param_scope,
 --     new_pattern_scope,
@@ -52,7 +52,7 @@ import SurCC.Common
 import SurCC.Builtins (typeof_builtin)
 
 type Checker a = ExceptT TypeError (
-                    StateT LocalScope (
+                    StateT (GlobalScope,LocalScopes) (
                         Reader (ImportList,ExportList))) a
 
 
@@ -62,7 +62,7 @@ run_checker :: ImportList -> ExportList -> Checker a -> Either TypeError a
 run_checker imports exports checker =
     runReader (evalStateT (runExceptT checker) empty_scope) (imports,exports)
     where
-        empty_scope = GlobalScope (Map.empty)
+        empty_scope = (GlobalScope Map.empty, LocalScopes [])
 
 
 newtype ExportList = ExportList ImmutMapping
@@ -75,8 +75,11 @@ type ImmutMapping = Map.Map Identifier SoucType
 
 type MutMapping = Map.Map Identifier (SoucType, Mutability)
 
-data LocalScope = GlobalScope ImmutMapping
-                | InnerScope MutMapping LocalScope
+newtype GlobalScope = GlobalScope ImmutMapping
+                deriving (Show)
+
+-- data LocalScope = LocalScope MutMapping LocalScope
+data LocalScopes = LocalScopes [MutMapping]
                 deriving (Show)
 
 
@@ -84,8 +87,8 @@ data LocalScope = GlobalScope ImmutMapping
 get_type_mutables :: Identifier -> Checker (SoucType, Mutability)
 get_type_mutables i = do
     (imports,_exports) <- ask
-    ctx <- get
-    case lookup_mutables i imports ctx of
+    (globals,locals) <- get
+    case lookup_mutables i imports globals locals of
         Nothing -> throwError (Undeclared i)
         Just (t,m) -> pure (t,m)
 
@@ -94,30 +97,44 @@ get_type :: Identifier -> Checker SoucType
 get_type i = get_type_mutables i <&> fst
 
 
-lookup_mutables :: Identifier -> ImportList -> LocalScope
+lookup_mutables :: Identifier -> ImportList -> GlobalScope -> LocalScopes
                 -> Maybe (SoucType, Mutability)
-lookup_mutables i imports ctx = (lookup_imports i imports <&> (,Immut))
-                            <|> (lookup_scopes_mutables i ctx)
-                            <|> (typeof_builtin i <&> (,Immut))
+lookup_mutables i imports globals locals =
+    (lookup_imports i imports <&> (,Immut))
+    <|> (lookup_globals_mutables i globals)
+    <|> (lookup_locals_mutables i locals)
+    <|> (typeof_builtin i <&> (,Immut))
 
 
-lookup :: Identifier -> ImportList -> LocalScope -> Maybe SoucType
-lookup i imports ctx = lookup_mutables i imports ctx <&> fst
+-- lookup :: Identifier -> ImportList -> LocalScopes -> Maybe SoucType
+-- lookup i imports locals = lookup_mutables i imports locals <&> fst
 
 
-lookup_scopes_mutables :: Identifier -> LocalScope
+lookup_globals_mutables :: Identifier -> GlobalScope
+                        -> Maybe (SoucType, Mutability)
+lookup_globals_mutables i (GlobalScope bounds) =
+    Map.lookup i bounds <&> (,Immut)
+
+
+lookup_locals_mutables :: Identifier -> LocalScopes
                        -> Maybe (SoucType, Mutability)
-lookup_scopes_mutables i = \case
-    GlobalScope bounds -> Map.lookup i bounds <&> (,Immut)
-    InnerScope bounds ctx -> Map.lookup i bounds
-                         <|> lookup_scopes_mutables i ctx
+lookup_locals_mutables i  = \case
+    LocalScopes [] -> Nothing
+    LocalScopes (bounds : rest) ->
+        Map.lookup i bounds <|> lookup_locals_mutables i (LocalScopes rest)
 
 
-lookup_scopes :: Identifier -> LocalScope -> Maybe SoucType
-lookup_scopes i = \case
-    GlobalScope bounds -> Map.lookup i bounds
-    InnerScope bounds ctx -> (Map.lookup i bounds <&> fst)
-                         <|> lookup_scopes i ctx
+lookup_scopes_mutables :: Identifier -> GlobalScope -> LocalScopes
+                       -> Maybe (SoucType, Mutability)
+lookup_scopes_mutables i globals locals =
+    lookup_locals_mutables i locals <|> lookup_globals_mutables i globals
+
+
+lookup_scopes :: Identifier -> GlobalScope -> LocalScopes -> Maybe SoucType
+-- lookup_scopes = lookup_scopes_mutables <&> fmap fst
+lookup_scopes i globs locs = lookup_scopes_mutables i globs locs <&> fst
+--     (Map.lookup i bounds <&> fst) <|> lookup_scopes i ctx
+--     GlobalScope bounds -> Map.lookup i bounds
 
 
 lookup_exports :: Identifier -> ExportList -> Maybe SoucType
@@ -154,16 +171,20 @@ import_list imports = ImportList $ Set.fromList (unwrap <$> imports)
 
 
 new_scope :: Checker ()
-new_scope = get >>= put . InnerScope Map.empty
+new_scope = get >>= (\(globs,LocalScopes locals) -> put (globs,LocalScopes (Map.empty : locals)))
 
 
 new_param_scope :: Identifier -> SoucType -> Checker ()
-new_param_scope i t = get >>= put . InnerScope (Map.singleton i (t, Immut))
+-- new_param_scope i t = get >>= put . LocalScope (Map.singleton i (t, Immut))
+new_param_scope i t = get >>= (\(globs,LocalScopes locals) -> put (globs,LocalScopes ((Map.singleton i (t, Immut)) : locals)))
 
 
 new_pattern_scope :: [(Identifier,SoucType)] -> Checker ()
 -- FIXME Map.fromList does not check for duplicate Identifiers
-new_pattern_scope binds = get >>= put . InnerScope new_map
+-- new_pattern_scope binds = get >>= put . LocalScope new_map
+--     where
+--         new_map = Map.fromList (binds <&> second (,Immut))
+new_pattern_scope binds = get >>= (\(globs,LocalScopes locals) -> put $ (globs, LocalScopes (new_map : locals)))
     where
         new_map = Map.fromList (binds <&> second (,Immut))
 
@@ -183,7 +204,8 @@ new_main_scope (MainParam
             <> include progname "program_name" "String"
             <> include args "args" "FIXME"
             <> include env "env" "FIXME"
-    get >>= put . InnerScope (Map.fromList list)
+--     get >>= put . LocalScope (Map.fromList list)
+    get >>= (\(globs,LocalScopes locals) -> put $ (globs, LocalScopes (Map.fromList list : locals)))
 
     where include :: Bool -> Identifier -> Text
                      -> [(Identifier,(SoucType,Mutability))]
@@ -192,10 +214,12 @@ new_main_scope (MainParam
             else []
 
 
+-- FIXME use second from Arrow for these
 exit_scope :: Checker ()
 exit_scope = get >>= \case
-    InnerScope _ inner -> put inner
-    GlobalScope _ -> throwError (Undeclared "should be unreachable")
+    (_,LocalScopes []) -> error "should be impossible"
+    (globs,LocalScopes (_ : etc)) -> put (globs,LocalScopes etc)
+--     GlobalScope _ -> throwError (Undeclared "should be unreachable")
 
 
 insert_local :: Mutability -> Identifier -> SoucType -> Checker ()
@@ -206,12 +230,15 @@ insert_local modifiable i t = do
     when (member_exports i exports) $
         throwError (ExportedLocal i)
     (put =<<) $ get >>= \case
-        GlobalScope binds -> do
-            when (modifiable == Mut) $
-                error "should not be reachable"
-            pure $ GlobalScope (Map.insert i t binds)
-        InnerScope binds rest ->
-            pure $ InnerScope ((Map.insert i (t, modifiable)) binds) rest
+--     (put =<<) $ (get <&> snd) >>= \case
+--         GlobalScope binds -> do
+--             when (modifiable == Mut) $
+--                 error "should not be reachable"
+--             pure $ GlobalScope (Map.insert i t binds)
+        (_, LocalScopes []) -> error "should not be reachable"
+        (globs, LocalScopes (binds : etc)) ->
+            pure (globs,
+                  LocalScopes (Map.insert i (t, modifiable) binds : etc))
 
 
 insert_global :: Bound -> Checker ()
@@ -223,13 +250,18 @@ insert_global (Bound i t) = do
         Just exp_t -> assert_equals t exp_t
         Nothing -> pure ()
     get >>= \case
-        GlobalScope globals -> define_export globals i t
-                             & (throwError ||| put)
-        InnerScope _ _ -> error "should not be adding exports from here."
+--     get <&> fst >>= \case
+--        GlobalScope globals -> define_export globals i t
+--                              & (throwError ||| put)
+--         LocalScope _ _ -> error "should not be adding exports from here."
+        (GlobalScope globals, locals) -> do
+        globs <- define_export globals i t
+        put (globs,locals)
+
 
 
 define_export :: MonadError TypeError m
-              => ImmutMapping -> Identifier -> SoucType -> m LocalScope
+              => ImmutMapping -> Identifier -> SoucType -> m GlobalScope
 define_export globals b t = if Map.member b globals
     then throwError (MultipleDeclarations b)
     else pure (GlobalScope (Map.insert b t globals))

@@ -21,7 +21,6 @@ import SurCC.TypeChecker.Context (
     new_scope,
     exit_scope,
     insert_local,
-    LocalScope,
     Checker,
     )
 

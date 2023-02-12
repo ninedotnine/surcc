@@ -27,7 +27,6 @@ import SurCC.Common
 import SurCC.TypeChecker.Context (Checker,
                             ExportList,
                             ImportList,
-                            LocalScope,
                             run_checker,
                             insert_global,
                             new_scope,

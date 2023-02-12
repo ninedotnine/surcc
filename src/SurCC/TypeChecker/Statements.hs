@@ -17,7 +17,6 @@ import Prelude hiding (lookup)
 import SurCC.Common
 
 import SurCC.TypeChecker.Context (Checker,
-                            LocalScope,
                             insert_local,
                             get_type,
                             lookup_scopes_mutables)
@@ -81,8 +80,8 @@ check_return t = \case
 check_stmt_reassign :: Maybe SoucType -> Identifier -> ExprTree -> Checker ()
 check_stmt_reassign m_t name expr = do
     expr_t <- infer_if_needed m_t expr
-    ctx <- get
-    case lookup_scopes_mutables name ctx of
+    (globs,locs) <- get
+    case lookup_scopes_mutables name globs locs of
         Nothing -> throwE (Undeclared name)
         Just (tp, mut) -> do
             assert_equals tp expr_t

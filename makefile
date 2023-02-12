@@ -71,7 +71,7 @@ test/typechecker: typechecker
 
 .PHONY: test/codegen test/type_checker test/typechecker_globals
 # test/codegen test/type_checker test/typechecker_globals: all | $(TEST_DIR)
-test/codegen test/type_checker: all | $(TEST_DIR)
+test/codegen: all | $(TEST_DIR)
 	@$(RM) $(CACHE_DIR)/hi_files/Main.hi  	# ugh hack to fix ghc
 	@ghc $(FLAGS) -o $(CACHE_DIR)/$@ $@.hs
 	@$(CACHE_DIR)/$@
