@@ -57,12 +57,7 @@ infer_term = \case
         -- FIXME is this unreachable?
         -- the scrutinee has already been inferred
         get_type v
-    Constructor s -> case s of
-        "True" -> pure SoucBool
-        "False" -> pure SoucBool
-        "None" -> pure (SoucMaybe SoucInteger)
-        "OK" -> pure (SoucMaybe (SoucFn SoucInteger SoucInteger))
-        _ -> throwError (UnknownData s)
+    Constructor v -> get_type v
 
 
 infer_lit :: MonadError TypeError m => Literal -> m SoucType

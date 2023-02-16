@@ -27,9 +27,9 @@ newtype Refutable = Refutable Bool deriving (Eq, Ord, Show)
 -- FIXME check types and constructors with exports
 build_typedefs :: [TypeDef] -> ExportList
                   -> Either TypeError (TypeSet, GlobalScope)
-build_typedefs defs exports =
-    build_typedefs' (default_types, Map.empty, exports) defs
-    <&> second GlobalScope
+build_typedefs defs exports = do
+    build_typedefs' (default_types, default_vals, exports) defs
+        <&> second GlobalScope
 
 
 build_typedefs' :: (TypeSet, Mapping, ExportList) -> [TypeDef]
@@ -65,7 +65,7 @@ insert_consts m i t = case i of
     (con:cons) -> do
         new_map <- insert_const m con t
         insert_consts new_map cons t
-    [] -> pure Map.empty
+    [] -> pure m
 
 
 insert_const :: Mapping -> Identifier -> SoucType
@@ -108,6 +108,14 @@ remove_export list i t = do
 default_types = TypeSet $ Map.fromList [
     (SoucBool, Refutable True),
     (SoucChar, Refutable True),
-    (SoucInteger, Refutable True)
+    (SoucInteger, Refutable True),
+    (SoucString, Refutable True)
     ]
---     SoucString,
+
+
+default_vals = Map.fromList [
+    ("True", SoucBool),
+    ("False", SoucBool),
+    ("None", SoucMaybe SoucInteger), -- FIXME polymorphic
+    ("Some", SoucMaybe (SoucFn SoucInteger SoucInteger)) -- FIXME polymorphic
+    ]

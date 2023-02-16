@@ -46,6 +46,7 @@ import Data.Text (Text)
 import SurCC.Common
 import SurCC.Builtins (typeof_builtin)
 
+
 type TopChecker a = ExceptT TypeError (
                         StateT (GlobalScope) (
                             Reader (ImportList,ExportList))) a
@@ -55,21 +56,22 @@ type Checker a = ExceptT TypeError (
                         Reader (ImportList,ExportList,GlobalScope))) a
 
 
-
 newtype ExportList = ExportList ImmutMapping
                 deriving (Show)
 
 newtype ImportList = ImportList (Set.Set Identifier)
                 deriving (Show)
 
+
 type ImmutMapping = Map.Map Identifier SoucType
 
 type MutMapping = Map.Map Identifier (SoucType, Mutability)
 
+
 newtype GlobalScope = GlobalScope ImmutMapping
                 deriving (Show)
 
-data LocalScopes = LocalScopes [MutMapping]
+newtype LocalScopes = LocalScopes [MutMapping]
                 deriving (Show)
 
 
