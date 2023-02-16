@@ -1,13 +1,13 @@
 i = 9: Int
 c = 'a': Char
 s = "str": String
-b = True: Bool
+b = true: Bool
 
 main(stdout: OutputStream): IO = do
 	im = 0: Int
 	cm = 'c': Char
 	var sm <- "str": String
-	var bm <- False: Bool
+	var bm <- false: Bool
 end
 
 x = ( (( (42: Integer): Integer ): Integer): Integer ): Integer

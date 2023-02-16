@@ -1,5 +1,5 @@
-def enum Boots = { Troot Fabs }
+def enum Boots = { troot fabs }
 
-def enum CBools = { Zero One }
+def enum CBools = { zero one }
 
-b: Boots = Zero
+b: Boots = zero

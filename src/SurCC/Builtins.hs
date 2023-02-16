@@ -80,22 +80,22 @@ builtin_constants = Map.fromList [
         SoucInteger
         Nothing
     ),
-    ("True", Builtin
+    ("true", Builtin
         "(union _souc_obj) { ._souc_bool = true }"
         (SoucType "Bool" (SoucKind 0))
         Nothing
     ),
-    ("False", Builtin
+    ("false", Builtin
         "(union _souc_obj) { ._souc_bool = false }"
         (SoucType "Bool" (SoucKind 0))
         Nothing
     ),
-    ("None", Builtin
+    ("none", Builtin
         "_souc_none"
         (SoucMaybe SoucInteger)
         Nothing
     ),
-    ("OK", Builtin
+    ("ok", Builtin
         "_souc_ok"
         (SoucFn SoucInteger (SoucMaybe SoucInteger))
         Nothing

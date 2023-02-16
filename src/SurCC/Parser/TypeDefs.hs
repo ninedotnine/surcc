@@ -7,6 +7,7 @@ import Text.Parsec hiding (space, spaces, string, parse)
 import SurCC.Common (TypeDef(..), Term(..), Identifier(..))
 import SurCC.Common.Parsing
 import SurCC.Parser.Common (SurCParser)
+import SurCC.Parser.Basics (identifier)
 
  -- fixme: others (empty, struct, gadt, etc.)
 
@@ -20,7 +21,7 @@ unit_type = do
     reserved "unit" *> spaces
     name <- type_name
     spaces *> char '=' *> spaces *> char '{' *> optional spaces
-    c <- constructor
+    c <- identifier
     optional spaces *> char '}' *> endline
     pure $ UnitType name c
 
@@ -29,9 +30,6 @@ enum_type = do
     reserved "enum" *> spaces
     name <- type_name
     spaces *> char '=' *> spaces *> char '{' *> optional spaces
-    constructors <- many1 (constructor <* spaces)
+    constructors <- many1 (identifier <* spaces)
     optional spaces *> char '}' *> endline
     pure $ EnumType name constructors
-
-constructor :: SurCParser Identifier
-constructor = Identifier <$> upper_name

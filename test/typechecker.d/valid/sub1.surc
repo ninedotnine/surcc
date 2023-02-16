@@ -8,4 +8,4 @@ subr(b: Bool): IO = do
 	end
 
 main(): IO = do
-	subr True
+	subr true

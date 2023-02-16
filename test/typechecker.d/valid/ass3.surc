@@ -1,6 +1,6 @@
 ; silly, but the types are ok.
 f(x: Integer): Integer = fndo
-	b = True
+	b = true
 	b2 = b
 	var b3 <- b2
 	if b2

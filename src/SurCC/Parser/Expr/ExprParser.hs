@@ -186,7 +186,7 @@ evaluate_astree (Leaf t) = case t of
         LitChar c -> fromIntegral (ord c)
         LitString s -> fromIntegral (Text.length s)
     Var _ -> 42 -- all identifiers are bound to this, sure
-    Constructor _ -> 43 -- yeah sure no problem here
+    Constructor _ -> 42 -- yeah sure no problem here
 
 evaluate_astree (Signed e _) = evaluate_astree e
 evaluate_astree (Twig op tree) = operate (evaluate_astree tree)

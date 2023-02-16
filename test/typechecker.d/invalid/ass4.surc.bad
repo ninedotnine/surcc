@@ -1,6 +1,6 @@
 n = 5
 
 f(x: Integer): Integer = fndo
-	b: Bool = True
+	b: Bool = true
 	i = b
 	return i

@@ -1,7 +1,7 @@
 n = 5
 
 f(x: Integer): Integer = fndo
-	var b: Char <- True
+	var b: Char <- true
 	if b
 		return x
 	else

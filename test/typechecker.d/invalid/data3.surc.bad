@@ -1,1 +1,1 @@
-def enum Bool = { Ohno CantDoThat }
+def enum Bool = { ohno cantDoThat }

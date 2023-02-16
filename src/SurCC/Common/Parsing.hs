@@ -14,7 +14,6 @@ module SurCC.Common.Parsing (
     endline,
     type_signature,
     type_name,
-    upper_name,
     optional_sig,
     literal,
 ) where

@@ -1,7 +1,7 @@
 module maybe where
 	i: Maybe(Integer)
 
-i = None
+i = none
 
 main(stdout: OutputStream): IO = do
 	write stdout , "neat"

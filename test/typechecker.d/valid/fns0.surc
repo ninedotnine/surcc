@@ -3,21 +3,21 @@ n = 5
 ; silly, but the types are ok.
 
 f(x: Integer): Integer = fndo
-	if True
+	if true
 		return 3
 	else
 		return 4
-	unless False
+	unless false
 		return n
 	var n2: Integer <- n
 	return n2
 
 g(x: Integer): Integer = fndo
-	while False
+	while false
 		let n1 = n+1 
 		if n == n1
 			return n1
-	until True
+	until true
 		let n3 = n*3
 		unless n == n3
 			return n3

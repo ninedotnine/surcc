@@ -1,6 +1,6 @@
 import valid
 
 i = 42:      Integer
-b = True:    Bool
+b = true:    Bool
 c = 'a':     Char
 s = "hello": String

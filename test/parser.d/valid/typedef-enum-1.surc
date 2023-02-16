@@ -1,5 +1,5 @@
 import whatever
 
-def enum Number = { One Two Three }
+def enum Number = { one two three }
 
-def enum Unit = { Unit }
+def enum Unit = { unit }

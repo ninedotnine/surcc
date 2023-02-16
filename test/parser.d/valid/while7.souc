@@ -5,7 +5,7 @@ main() = do
 		i++ ; should be printed
 	end
 
-	while False
+	while false
 		i++
 
 	puts "done"

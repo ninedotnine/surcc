@@ -1,1 +1,3 @@
-def enum Boots = { True Uhoh }
+def enum Boots = { true uhoh }
+
+n: Integer = true

@@ -7,4 +7,4 @@ two = 2
 
 four = "4"
 
-six: Bool = True
+six: Bool = true

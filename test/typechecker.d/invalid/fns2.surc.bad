@@ -1,6 +1,6 @@
 n = 5
 
 f(x: Integer): Integer = fndo
-	if True
+	if true
 		return n
 	return 'a'
