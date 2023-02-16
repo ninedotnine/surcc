@@ -218,11 +218,11 @@ data Operator = Plus
               | Splat
               | FieldDiv
               | FloorDiv
-              | Modulo
-              | Hihat
+              | Modulo -- FIXME delete this
+              | Hihat -- FIXME delete this?
               | Equals
               | NotEquals
-              | RegexMatch
+              | RegexMatch -- FIXME delete this?
               | GreaterThan
               | LesserThan
               | And
@@ -230,7 +230,7 @@ data Operator = Plus
               | Xor
               | In
               | Comma
-              | Iff
+              | Iff -- FIXME delete this?
               | FromMaybe
               | Prepend
               | Append

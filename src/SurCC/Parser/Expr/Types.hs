@@ -49,24 +49,24 @@ get_prec :: Operator -> Precedence
 get_prec = Precedence <$> \case
     Comma          -> 10
     Iff            -> 20
-    BindRight      -> 30
-    BindLeft       -> 30
-    Applicative    -> 40
-    FlipApplicative -> 40
-    SequenceRight  -> 40
-    SequenceLeft   -> 40
-    Map            -> 43
-    FlipMap        -> 43
-    Apply          -> 46
-    FlipApply      -> 46
-    And            -> 50
-    Or             -> 50
-    Xor            -> 50
-    Equals         -> 70
-    NotEquals      -> 70
-    RegexMatch     -> 70
-    GreaterThan    -> 80
-    LesserThan     -> 80
+    And            -> 30
+    Or             -> 30
+    Xor            -> 30
+    Equals         -> 40
+    NotEquals      -> 40
+    RegexMatch     -> 40
+    GreaterThan    -> 50
+    LesserThan     -> 50
+    BindRight      -> 60
+    BindLeft       -> 60
+    Applicative    -> 70
+    FlipApplicative -> 70
+    SequenceRight  -> 70
+    SequenceLeft   -> 70
+    Map            -> 80
+    FlipMap        -> 80
+    Apply          -> 90
+    FlipApply      -> 90
     Plus           -> 130
     Minus          -> 130
     Splat          -> 140
