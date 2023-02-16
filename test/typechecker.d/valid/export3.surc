@@ -2,4 +2,4 @@ module export1 where
 	subr: IO
 
 subr(): IO = do
-	puts  "subroutine"
+	puts "subroutine"

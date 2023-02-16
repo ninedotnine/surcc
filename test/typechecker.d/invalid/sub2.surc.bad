@@ -1,2 +1,2 @@
 main(): IO = do
-	puts ; needs an argument!
+	write ; needs an argument!

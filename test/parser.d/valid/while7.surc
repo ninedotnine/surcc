@@ -1,5 +1,5 @@
 ; note that "puts" is not the name for this souc subroutine (probably)
-main() = do
+main(stdout: OutputStream) = do
 	var i <- 0
 	while i < 4
 		i++ ; should be printed
@@ -8,4 +8,4 @@ main() = do
 	while false
 		i++
 
-	puts "done"
+	write stdout , "done"

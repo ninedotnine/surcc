@@ -3,7 +3,9 @@ module export4 where
 	print_hi_2: IO
 ; 	print_s: String -> IO
 
+; print_hi(stdout: OutputStream): IO = do
 print_hi(): IO = do
+; 	write stdout , "explicit type"
 	puts "explicit type"
 
 print_hi_2() = do
@@ -12,6 +14,7 @@ print_hi_2() = do
 printy(s: String): IO = do
 	puts s
 
-main(): IO = do
+main(stdout: OutputStream): IO = do
+; 	print_hi stdout
 	print_hi
 	printy "hola"

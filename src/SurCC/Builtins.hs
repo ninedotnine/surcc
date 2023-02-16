@@ -52,9 +52,12 @@ builtin_types = Map.fromList [
 
 builtin_subroutines :: Mapping
 builtin_subroutines = Map.fromList [
-    ("puts", Builtin "_souc_puts"
-        (SoucRoutn SoucString)
-        Nothing
+    ("puts",
+        -- FIXME delete this eventually
+        -- some type-checker tests will be complicated by removing this
+        Builtin "_souc_puts"
+            (SoucRoutn SoucString)
+            Nothing
     ),
     ("write", Builtin "_souc_write"
         (SoucRoutn
@@ -83,16 +86,6 @@ builtin_constants :: Mapping
 builtin_constants = Map.fromList [
     ("pi", Builtin
         "(union _souc_obj) { ._souc_int = 3 }" -- biblical value
-        SoucInteger
-        Nothing
-    ),
-    ("i42", Builtin
-        "_souc_42"
-        SoucInteger
-        Nothing
-    ),
-    ("ok43", Builtin
-        "_souc_42"
         SoucInteger
         Nothing
     ),
