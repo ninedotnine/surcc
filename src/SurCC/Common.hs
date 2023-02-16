@@ -22,6 +22,7 @@ module SurCC.Common (
     Guard(..),
     SoucKind(..),
     SoucType(..),
+    Refutable(..),
     TypeVar(..),
     pattern SoucIO,
     pattern SoucBool,
@@ -271,6 +272,10 @@ data Pattern = PatLit Literal
 --              | PatNested Identifier Pattern
 --              | PatConstructor Constant [Pattern]
              deriving (Eq, Show)
+
+
+-- whether a pattern can be used in a match that might fail
+newtype Refutable = Refutable Bool deriving (Eq, Ord, Show)
 
 
 newtype Guard = Guard ExprTree

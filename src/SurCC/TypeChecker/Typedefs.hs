@@ -12,6 +12,7 @@ import Data.Functor
 import Data.HashMap.Strict qualified as Map
 import Data.HashMap.Strict (HashMap)
 
+import SurCC.Builtins (builtin_identifiers, builtin_types)
 import SurCC.Common
 import SurCC.Common.Hashable
 import SurCC.TypeChecker.Context
@@ -21,15 +22,11 @@ type Mapping = HashMap Identifier SoucType
 
 newtype TypeSet = TypeSet (HashMap SoucType Refutable) deriving (Show)
 
--- whether a pattern can be used in a match that might fail
-newtype Refutable = Refutable Bool deriving (Eq, Ord, Show)
-
-
 -- FIXME check types and constructors with exports
 build_typedefs :: [TypeDef] -> ExportList
                   -> Either TypeError (TypeSet, GlobalScope)
 build_typedefs defs exports = do
-    build_typedefs' (default_types, default_vals, exports) defs
+    build_typedefs' (TypeSet builtin_types, builtin_identifiers, exports) defs
         <&> second GlobalScope
 
 
@@ -86,8 +83,8 @@ insert m con t = if Map.member con m
     else Just (Map.insert con t m)
 
 
-remove_exports :: ExportList -> [Identifier]
-                  -> SoucType -> Either TypeError ExportList
+remove_exports :: ExportList -> [Identifier] -> SoucType
+                  -> Either TypeError ExportList
 remove_exports (ExportList exports) ids t = case ids of
     (i:etc) -> do
         new_exports <- remove_export exports i t
@@ -104,19 +101,3 @@ remove_export list i t = do
             assert_equals t exported_type
             pure list -- FIXME delete from the list?
         Nothing -> pure list
-
-
-default_types = TypeSet $ Map.fromList [
-    (SoucBool, Refutable True),
-    (SoucChar, Refutable True),
-    (SoucInteger, Refutable True),
-    (SoucString, Refutable True)
-    ]
-
-
-default_vals = Map.fromList [
-    ("true", SoucBool),
-    ("false", SoucBool),
-    ("none", SoucMaybe SoucInteger), -- FIXME polymorphic
-    ("some", SoucMaybe (SoucFn SoucInteger SoucInteger)) -- FIXME polymorphic
-    ]
