@@ -3,7 +3,7 @@
 module SurCC.TypeChecker.Expressions (
     infer,
     check_expr,
-    infer_if_needed,
+    checkm_expr,
     assert_equals,
 ) where
 
@@ -166,11 +166,10 @@ check_pattern t = \case
     PatBinding i -> insert_local Immut i t
 
 
-infer_if_needed :: Maybe SoucType -> ExprTree -> Checker SoucType
-infer_if_needed m_t expr =
-    case m_t of
-        Nothing -> infer expr
-        Just t -> check_expr t expr *> pure t
+checkm_expr :: Maybe SoucType -> ExprTree -> Checker SoucType
+checkm_expr m_t expr = case m_t of
+    Nothing -> infer expr
+    Just t -> check_expr t expr *> pure t
 
 
 assert_equals :: (MonadError TypeError m) => SoucType -> SoucType -> m ()

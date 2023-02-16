@@ -2,28 +2,29 @@
 
 module SurCC.TypeChecker.Statements (
     check_stmts,
+    checkm_stmts,
     infer_stmts,
 ) where
 
 import Control.Monad
-import Control.Monad.State
-import Control.Monad.Except
-import Control.Monad.Trans.Except
+import Control.Monad.Error.Class (throwError)
 import Data.Foldable (for_)
 import Data.Either (lefts)
-import Data.Traversable
+import Data.Traversable ()
 import Prelude hiding (lookup)
 
 import SurCC.Common
 
-import SurCC.TypeChecker.Context (Checker,
-                            insert_local,
-                            get_type,
-                            get_var)
+import SurCC.TypeChecker.Context (
+    Checker,
+    insert_local,
+    get_type,
+    get_var
+    )
 import SurCC.TypeChecker.Expressions (
     check_expr,
     infer,
-    infer_if_needed,
+    checkm_expr,
     assert_equals,
     )
 
@@ -32,6 +33,7 @@ check_stmts :: SoucType -> Stmts -> Checker ()
 check_stmts t (Stmts stmts m_ret) = do
     mapM_ (check_stmt t) stmts
     for_ m_ret (check_return t)
+
 
 check_stmt :: SoucType -> Stmt -> Checker ()
 check_stmt t = \case
@@ -53,21 +55,21 @@ check_stmt t = \case
         check_stmt_ass :: Identifier -> (Maybe SoucType) -> ExprTree
                           -> Checker ()
         check_stmt_ass name m_t expr = do
-            expr_t <- infer_if_needed m_t expr
+            expr_t <- checkm_expr m_t expr
             insert_local Immut name expr_t
 
         check_stmt_mut_ass :: Identifier -> (Maybe SoucType) -> ExprTree
                               -> Checker ()
         check_stmt_mut_ass name m_t expr = do
-            expr_t <- infer_if_needed m_t expr
+            expr_t <- checkm_expr m_t expr
             insert_local Mut name expr_t
 
 
 infer_return :: Maybe ExprTree -> Checker SoucType
 infer_return m_expr = case m_expr of
-    Just expr -> do
-        expr_t <- infer expr
-        throwE (TypeMismatch SoucIO expr_t)
+    Just expr -> infer expr
+                    -- FIXME why throw an error?
+                 >>= throwError . TypeMismatch SoucIO
     Nothing -> pure SoucIO
 
 
@@ -79,7 +81,7 @@ check_return t = \case
 
 check_stmt_reassign :: Maybe SoucType -> Identifier -> ExprTree -> Checker ()
 check_stmt_reassign m_t name expr = do
-    expr_t <- infer_if_needed m_t expr
+    expr_t <- checkm_expr m_t expr
     t <- get_var name
     assert_equals t expr_t
 
@@ -104,8 +106,8 @@ check_stmt_call _t name m_expr = do
         (SoucIO, Nothing) -> pure ()
         (SoucRoutn param, Just expr) -> check_expr param expr
         (SoucIO, Just expr) -> infer expr
-                           >>= throwE . TypeMismatch SoucIO
-        (t, _) -> throwE $ TypeMismatch SoucIO t
+                               >>= throwError . TypeMismatch SoucIO
+        (t, _) -> throwError $ TypeMismatch SoucIO t
 
 
 infer_stmts :: Stmts -> Checker SoucType
@@ -114,8 +116,7 @@ infer_stmts (Stmts _ t) = case t of
     Nothing -> undefined
 
 
-infer_or_check_stmts :: Maybe SoucType -> Stmts -> Checker SoucType
-infer_or_check_stmts m_t stmts = do
-    case m_t of
-        Nothing -> infer_stmts stmts
-        Just t -> check_stmts t stmts *> pure t
+checkm_stmts :: Maybe SoucType -> Stmts -> Checker SoucType
+checkm_stmts m_t stmts = case m_t of
+    Nothing -> infer_stmts stmts
+    Just t -> check_stmts t stmts *> pure t

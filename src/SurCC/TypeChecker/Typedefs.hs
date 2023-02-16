@@ -6,6 +6,7 @@ module SurCC.TypeChecker.Typedefs (
     TypeSet,
 ) where
 
+import Control.Arrow (second)
 import Control.Monad.Error.Class
 import Data.Functor
 import Data.Map.Strict qualified as Map
@@ -25,9 +26,10 @@ newtype Refutable = Refutable Bool deriving (Eq, Ord, Show)
 
 -- FIXME check types and constructors with exports
 build_typedefs :: [TypeDef] -> ExportList
-                  -> Either TypeError (TypeSet, Mapping)
-build_typedefs defs exports = do
+                  -> Either TypeError (TypeSet, GlobalScope)
+build_typedefs defs exports =
     build_typedefs' (default_types, Map.empty, exports) defs
+    <&> second GlobalScope
 
 
 build_typedefs' :: (TypeSet, Mapping, ExportList) -> [TypeDef]
@@ -36,9 +38,7 @@ build_typedefs' (types, consts, exps) = \case
     (d:defs) -> do
         (t, refut, terms) <- build_typedef d
         updated_types <- insert_type types t refut
-        updated_consts <-
-             -- also FIXME get rid of Constant, use Identifier
-            insert_consts consts terms t
+        updated_consts <- insert_consts consts terms t
         new_exps <- remove_exports exps terms t
         build_typedefs' (updated_types, updated_consts, new_exps) defs
     [] -> pure (types, consts)

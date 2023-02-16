@@ -2,8 +2,6 @@
 
 module SurCC.TypeChecker.TypeChecker (
     type_check,
-    add_globals, -- for tests
-    add_imports, -- for tests
     ) where
 
 import Control.Applicative ()
@@ -24,6 +22,7 @@ import SurCC.TypeChecker.Context (
                             TopChecker,
                             ExportList,
                             ImportList,
+                            GlobalScope,
                             run_top_checker,
                             insert_global,
                             local_scope,
@@ -32,18 +31,19 @@ import SurCC.TypeChecker.Context (
                             import_list,
                             export_list,
                            )
-import SurCC.TypeChecker.Expressions (infer_if_needed)
-import SurCC.TypeChecker.Statements (infer_stmts, check_stmts)
+import SurCC.TypeChecker.Expressions (checkm_expr)
+import SurCC.TypeChecker.Statements (infer_stmts, check_stmts, checkm_stmts)
 import SurCC.TypeChecker.Typedefs (build_typedefs)
 
 
 type_check :: ParseTree -> Either TypeError CheckedProgram
--- fixme: use the typedefs
+-- fixme: use the defined types
 type_check (ParseTree module_info imports typedefs defns) = do
     exports_list <- add_exports module_info
-    (_types,_typedefs_ctx) <- build_typedefs typedefs exports_list
+    (_types,typedefs_ctx) <- build_typedefs typedefs exports_list
     imports_list <- add_imports imports exports_list
-    globals <- add_globals defns imports_list exports_list
+    globals <- run_top_checker imports_list exports_list typedefs_ctx $
+                (traverse add_top_level_defns defns)
     -- FIXME: top level first, then sub-trees:
 --     top_level_ctx <- add_globals imports_ctx defns
 --     finished_ctx <- check_subtrees top_level_ctx defns
@@ -78,14 +78,6 @@ add_imports :: MonadError TypeError m => [ImportDecl] -> ExportList
             -> m ImportList
 add_imports imports _exports = pure $ import_list imports
 
-add_globals :: [TopLevelDefn] -> ImportList -> ExportList
-               -> Either TypeError [Bound]
-add_globals defns imports exports =
-    run_top_checker imports exports (run_globals defns)
-
-run_globals :: [TopLevelDefn] -> TopChecker [Bound]
-run_globals defns = traverse add_top_level_defns defns
-
 
 -- FIXME bind all the top-level things first, then go into the subtrees
 add_top_level_defns :: TopLevelDefn -> TopChecker Bound
@@ -100,7 +92,7 @@ add_top_level_defns = \case
 add_top_level_const :: Identifier -> Maybe SoucType -> ExprTree ->
                        TopChecker Bound
 add_top_level_const i m_t expr = do
-    t <- local_scope (infer_if_needed m_t expr)
+    t <- local_scope (checkm_expr m_t expr)
     insert_global $ Bound i t
     pure $ Bound i t
 
@@ -110,7 +102,7 @@ add_top_level_short_fn :: Identifier -> Param -> Maybe SoucType -> ExprTree
 add_top_level_short_fn i p m_t expr = case p of
     Param _ Nothing -> error "FIXME type inference"
     Param param (Just p_t) -> do
-        t <- local_scope_param param p_t (infer_if_needed m_t expr)
+        t <- local_scope_param param p_t (checkm_expr m_t expr)
         insert_global $ Bound i (SoucFn p_t t)
         pure $ Bound i (SoucFn p_t t)
 
@@ -120,15 +112,10 @@ add_top_level_long_fn :: Identifier -> Param -> Maybe SoucType -> Stmts
 add_top_level_long_fn i p m_t stmts = case p of
     Param _ Nothing -> error "FIXME type inference"
     Param param (Just p_t) -> do
-        case m_t of
-            Nothing -> do
-                t <- local_scope_param param p_t (infer_stmts stmts)
-                insert_global (Bound i (SoucFn p_t t))
-                pure (Bound i (SoucFn p_t t))
-            Just t -> do
-                local_scope_param param p_t (check_stmts t stmts)
-                insert_global (Bound i (SoucFn p_t t))
-                pure (Bound i (SoucFn p_t t))
+        t <- local_scope_param param p_t (checkm_stmts m_t stmts)
+        insert_global (Bound i (SoucFn p_t t))
+        pure (Bound i (SoucFn p_t t))
+
 
 add_top_level_sub :: Identifier -> Maybe Param -> Maybe SoucType -> Stmts
                     -> TopChecker Bound

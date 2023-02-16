@@ -9,6 +9,7 @@ module SurCC.TypeChecker.Context (
     Checker,
     ExportList(..),
     ImportList,
+    GlobalScope(..),
     LocalScopes(..),
     run_top_checker,
     get_type,
@@ -72,12 +73,10 @@ data LocalScopes = LocalScopes [MutMapping]
                 deriving (Show)
 
 
-run_top_checker :: ImportList -> ExportList -> TopChecker a
+run_top_checker :: ImportList -> ExportList -> GlobalScope -> TopChecker a
                    -> Either TypeError a
-run_top_checker imports exports checker =
-    runReader (evalStateT (runExceptT checker) empty_scope) (imports,exports)
-    where
-        empty_scope = GlobalScope Map.empty
+run_top_checker imports exports scope checker =
+    runReader (evalStateT (runExceptT checker) scope) (imports,exports)
 
 
 get_type :: Identifier -> Checker SoucType
