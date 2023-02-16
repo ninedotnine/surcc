@@ -53,11 +53,7 @@ infer = \case
 infer_term :: Term -> Checker SoucType
 infer_term = \case
     Lit l -> infer_lit l
-    Var v ->
-        -- FIXME is this unreachable?
-        -- the scrutinee has already been inferred
-        get_type v
-    Constructor v -> get_type v
+    Name n -> get_type n
 
 
 infer_lit :: MonadError TypeError m => Literal -> m SoucType

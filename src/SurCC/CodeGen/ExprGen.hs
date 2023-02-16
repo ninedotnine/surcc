@@ -120,8 +120,7 @@ gen_tuple x y = do
 generate_term :: Term -> Generator Text
 generate_term = \case
     Lit l -> pure $ generate_literal l
-    Var v -> pure $ gen_identifier v
-    Constructor s -> pure $ gen_identifier s
+    Name n -> pure $ gen_identifier n
 
 
 generate_literal :: Literal -> Text

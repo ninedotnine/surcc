@@ -70,7 +70,7 @@ default_main = MainDefn (default_main_param True) Nothing short_stmts
 short_stmts :: Stmts
 short_stmts = Stmts [
     Stmt_Sub_Call (Identifier "write")
-                  (Just (Branch Comma (Leaf (Var (Identifier "stdout")))
+                  (Just (Branch Comma (Leaf (Name (Identifier "stdout")))
                                       (Leaf (Lit (LitString "hello")))))
     ] Nothing
 
@@ -124,7 +124,7 @@ subber_while :: CheckedProgram
 subber_while = CheckedProgram default_module [] [
     default_main,
     SubDefn (Identifier "subby") Nothing Nothing (Stmts [
-        Stmt_While (Leaf (Constructor "false")) (Stmts [
+        Stmt_While (Leaf (Name "false")) (Stmts [
             Stmt_Var_Declare (Identifier "x") Nothing (Leaf (Lit (LitInt 41))),
             Stmt_Postfix_Oper (Identifier "x") "++"] Nothing)
         ] Nothing)]
@@ -133,7 +133,7 @@ subber_if :: CheckedProgram
 subber_if = CheckedProgram default_module [] [
     default_main,
     SubDefn (Identifier "subby") Nothing Nothing (Stmts [
-        Stmt_If (Leaf (Constructor "false")) (Stmts [
+        Stmt_If (Leaf (Name "false")) (Stmts [
             Stmt_Var_Declare (Identifier "x") Nothing (Leaf (Lit (LitInt 41))),
             Stmt_Postfix_Oper (Identifier "x") "++"
             ] Nothing) Nothing
@@ -157,7 +157,7 @@ subber_unless :: CheckedProgram
 subber_unless = CheckedProgram default_module [] [
     default_main,
     SubDefn (Identifier "subby") Nothing Nothing (Stmts [
-        Stmt_Unless (Leaf (Constructor "false")) (Stmts [
+        Stmt_Unless (Leaf (Name "false")) (Stmts [
             Stmt_Var_Declare (Identifier "x") Nothing (Leaf (Lit (LitInt 41))),
             Stmt_Postfix_Oper (Identifier "x") "++"
             ] Nothing)
@@ -168,7 +168,7 @@ subber_unless_else :: CheckedProgram
 subber_unless_else = CheckedProgram default_module [] [
     SubDefn (Identifier "subby") Nothing Nothing (Stmts [
         Stmt_Var_Declare (Identifier "x") Nothing (Leaf (Lit (LitInt 41))),
-        Stmt_Unless (Leaf (Constructor "false")) (Stmts [
+        Stmt_Unless (Leaf (Name "false")) (Stmts [
             Stmt_Postfix_Oper (Identifier "x") "++"] Nothing)
             (Just (Stmts [
                 (Stmt_Postfix_Oper (Identifier "x") "--")] Nothing))] Nothing),
@@ -179,7 +179,7 @@ sub_while :: CheckedProgram
 sub_while = CheckedProgram default_module [] [
     SubDefn (Identifier "subby") Nothing Nothing (Stmts [
         Stmt_Var_Declare (Identifier "x") Nothing (Leaf (Lit (LitInt 41))),
-        Stmt_While (Leaf (Constructor "true")) (Stmts [
+        Stmt_While (Leaf (Name "true")) (Stmts [
             Stmt_Postfix_Oper (Identifier "x") "++"] Nothing)] Nothing),
     MainDefn (default_main_param False) Nothing (Stmts [
         Stmt_Sub_Call (Identifier "subby") Nothing] Nothing)]
@@ -188,7 +188,7 @@ sub_until :: CheckedProgram
 sub_until = CheckedProgram default_module [] [
     SubDefn (Identifier "subby") Nothing Nothing (Stmts [
         Stmt_Var_Declare (Identifier "x") Nothing (Leaf (Lit (LitInt 41))),
-        Stmt_Until (Leaf (Constructor "false")) (Stmts [
+        Stmt_Until (Leaf (Name "false")) (Stmts [
             Stmt_Postfix_Oper (Identifier "x") "++"] Nothing)] Nothing),
     MainDefn (default_main_param False) Nothing (Stmts [
         Stmt_Sub_Call (Identifier "subby") Nothing] Nothing)]

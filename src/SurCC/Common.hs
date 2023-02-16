@@ -209,8 +209,7 @@ data ExprTree = Branch Operator ExprTree ExprTree
 
 
 data Term = Lit Literal
-          | Var Identifier
-          | Constructor Identifier -- FIXME delete?
+          | Name Identifier
     deriving (Eq, Show)
 
 data Operator = Plus
@@ -455,8 +454,7 @@ instance TextShow ExprTree where
 instance TextShow Term where
     showb = \case
         Lit l -> showb l
-        Var v -> showb v
-        Constructor name -> showb name
+        Name n -> showb n
 
 instance TextShow Operator where
     showb = \case
