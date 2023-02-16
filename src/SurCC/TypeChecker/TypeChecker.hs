@@ -56,12 +56,12 @@ type_check (ParseTree module_info imports typedefs defns) = do
 assert_no_undefined_exports :: (MonadError TypeError m)
                                => [Bound] -> SurCModule -> m ()
 assert_no_undefined_exports defined (SurCModule _ exports) = do
-    unless (null (exported \\ defined)) $
-        throwError (ExportedButNotDefined (head exported))
+    unless (null undefined_exports) $
+        throwError (ExportedButNotDefined (head undefined_exports))
     where
         unwrap (ExportDecl b) = b
         exported = exports <&> unwrap
-
+        undefined_exports = exported \\ defined
 
 -- this returns an Either TypeError ExportList because it could fail.
 -- e. g. the same name could be exported multiple times, possibly with
