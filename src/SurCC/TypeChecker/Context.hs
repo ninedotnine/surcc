@@ -32,7 +32,8 @@ import Data.Foldable (for_)
 import Data.Functor ((<&>))
 import Data.Function ((&))
 import Data.Maybe (isJust)
-import Data.Map.Strict qualified as Map
+import Data.HashMap.Strict qualified as Map
+import Data.HashMap.Strict (HashMap)
 import Data.Set qualified as Set
 
 
@@ -63,9 +64,9 @@ newtype ImportList = ImportList (Set.Set Identifier)
                 deriving (Show)
 
 
-type ImmutMapping = Map.Map Identifier SoucType
+type ImmutMapping = HashMap Identifier SoucType
 
-type MutMapping = Map.Map Identifier (SoucType, Mutability)
+type MutMapping = HashMap Identifier (SoucType, Mutability)
 
 
 newtype GlobalScope = GlobalScope ImmutMapping

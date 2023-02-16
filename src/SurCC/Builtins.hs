@@ -9,6 +9,7 @@ import Data.Text qualified as Text
 import TextShow (TextShow(..))
 
 import SurCC.Common
+import SurCC.Common.Hashable
 
 
 type Mapping a = Map.HashMap a Builtin

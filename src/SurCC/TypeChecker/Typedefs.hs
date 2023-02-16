@@ -9,16 +9,17 @@ module SurCC.TypeChecker.Typedefs (
 import Control.Arrow (second)
 import Control.Monad.Error.Class
 import Data.Functor
-import Data.Map.Strict qualified as Map
-import Data.Map.Strict (Map)
+import Data.HashMap.Strict qualified as Map
+import Data.HashMap.Strict (HashMap)
 
 import SurCC.Common
+import SurCC.Common.Hashable
 import SurCC.TypeChecker.Context
 import SurCC.TypeChecker.Expressions (assert_equals)
 
-type Mapping = Map Identifier SoucType
+type Mapping = HashMap Identifier SoucType
 
-newtype TypeSet = TypeSet (Map SoucType Refutable) deriving (Show)
+newtype TypeSet = TypeSet (HashMap SoucType Refutable) deriving (Show)
 
 -- whether a pattern can be used in a match that might fail
 newtype Refutable = Refutable Bool deriving (Eq, Ord, Show)
@@ -79,7 +80,7 @@ insert_type (TypeSet m) t r = (insert m t r <&> TypeSet)
                               `or_left` MultipleTypeDeclarations t
 
 
-insert :: Ord k => Map k v -> k -> v -> Maybe (Map k v)
+insert :: (Hashable k) => HashMap k v -> k -> v -> Maybe (HashMap k v)
 insert m con t = if Map.member con m
     then Nothing
     else Just (Map.insert con t m)
@@ -95,8 +96,8 @@ remove_exports (ExportList exports) ids t = case ids of
 
 
 remove_export :: (MonadError TypeError m) =>
-                 Map Identifier SoucType -> Identifier -> SoucType
-                 -> m (Map Identifier SoucType)
+                 Mapping -> Identifier -> SoucType
+                 -> m Mapping
 remove_export list i t = do
     case Map.lookup i list of
         Just exported_type -> do

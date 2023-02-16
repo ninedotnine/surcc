@@ -53,7 +53,6 @@ module SurCC.Common (
 ) where
 
 import Control.Monad (join)
-import Data.Hashable (Hashable)
 import Data.String (IsString)
 import Data.Text (Text)
 import Data.Text qualified as Text
@@ -63,7 +62,7 @@ import TextShow qualified
 data Mutability = Mut | Immut deriving (Eq, Show)
 
 newtype Identifier = Identifier Text
-                   deriving (Eq, Ord, IsString, Semigroup, Hashable)
+                   deriving (Eq, Ord, IsString, Semigroup)
 
 data ParseTree = ParseTree SurCModule Imports [TypeDef] Body
 
