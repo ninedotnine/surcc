@@ -1,0 +1,5 @@
+def enum Boots = { Troot Fabs }
+
+def enum CBools = { Zero One }
+
+b: Boots = Zero
