@@ -114,8 +114,8 @@ default_types = TypeSet $ Map.fromList [
 
 
 default_vals = Map.fromList [
-    ("True", SoucBool),
-    ("False", SoucBool),
-    ("None", SoucMaybe SoucInteger), -- FIXME polymorphic
-    ("Some", SoucMaybe (SoucFn SoucInteger SoucInteger)) -- FIXME polymorphic
+    ("true", SoucBool),
+    ("false", SoucBool),
+    ("none", SoucMaybe SoucInteger), -- FIXME polymorphic
+    ("some", SoucMaybe (SoucFn SoucInteger SoucInteger)) -- FIXME polymorphic
     ]
