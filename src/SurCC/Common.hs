@@ -268,6 +268,7 @@ data Literal = LitInt Integer
 
 
 data Pattern = PatLit Literal
+             | PatConst Identifier
              | PatBinding Identifier
 --              | PatNested Identifier Pattern
 --              | PatConstructor Constant [Pattern]
@@ -287,6 +288,7 @@ instance TextShow Literal where
 instance TextShow Pattern where
     showb = \case
         PatLit l -> "lit " <> showb l
+        PatConst i -> "= " <> showb i
         PatBinding i -> "binding " <> showb i
 --  FIXME do i need these? i do need sub-patterns
 --         PatConstant k -> "constant " <> showb k

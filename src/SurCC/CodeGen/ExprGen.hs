@@ -164,6 +164,10 @@ generate_case alloc (pat,m_guard,expr) = do
                                     <> gen_c_identifier alloc
                                     <> "),(" <> generate_literal l
                                     <> "))._souc_bool")
+        PatConst i -> pure $ (mempty, "(_souc_is_equal_integer(("
+                                    <> gen_c_identifier alloc
+                                    <> "),(" <> gen_identifier i
+                                    <> "))._souc_bool")
         PatBinding i -> do
             -- finish with `, true` in case there is no guard clause
             pure $ (new_decl i, "(" <> gen_identifier i <> " = "

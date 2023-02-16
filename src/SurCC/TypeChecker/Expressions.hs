@@ -158,6 +158,7 @@ check_lit t l = do
 check_pattern :: SoucType -> Pattern -> Checker ()
 check_pattern t = \case
     PatLit l -> check_lit t l
+    PatConst i -> assert_equals t =<< get_type i
     PatBinding i -> insert_local Immut i t
 
 
