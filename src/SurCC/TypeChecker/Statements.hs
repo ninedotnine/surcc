@@ -19,7 +19,7 @@ import SurCC.Common
 import SurCC.TypeChecker.Context (Checker,
                             insert_local,
                             get_type,
-                            lookup_scopes_mutables)
+                            get_var)
 import SurCC.TypeChecker.Expressions (
     check_expr,
     infer,
@@ -81,12 +81,8 @@ check_stmt_reassign :: Maybe SoucType -> Identifier -> ExprTree -> Checker ()
 check_stmt_reassign m_t name expr = do
     expr_t <- infer_if_needed m_t expr
     (globs,locs) <- get
-    case lookup_scopes_mutables name globs locs of
-        Nothing -> throwE (Undeclared name)
-        Just (tp, mut) -> do
-            assert_equals tp expr_t
-            when (mut /= Mut) $
-                throwE (BadReassign name)
+    t <- get_var name
+    assert_equals t expr_t
 
 
 check_stmt_while :: SoucType -> ExprTree -> Stmts -> Checker ()

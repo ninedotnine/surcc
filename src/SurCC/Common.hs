@@ -152,6 +152,7 @@ data TypeError = TypeMismatch SoucType SoucType
                | MultipleTypeDeclarations SoucType
                | Undeclared Identifier
                | BadReassign Identifier
+               | MutateImmutable Identifier SoucType -- FIXME replaces BadReassign
                | UnknownData Identifier -- FIXME delete? same as Undeclared
                | UnknownType SoucType
                | ExportedButNotDefined Bound
@@ -344,6 +345,8 @@ instance TextShow TypeError where
             "multiple declarations of " <> showb name
         Undeclared name -> "undeclared " <> showb name
         BadReassign name -> "cannot reassign immutable: " <> showb name
+        MutateImmutable name t -> "cannot mutate immutable: " <> showb name
+                                  <> " : " <> showb t
         UnknownData name -> "unknown data constructor: " <> showb name
         UnknownType name -> "unknown type: " <> showb name
         ExportedButNotDefined name -> "declared " <> showb name <> " was not defined"

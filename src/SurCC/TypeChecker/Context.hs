@@ -18,6 +18,7 @@ module SurCC.TypeChecker.Context (
     LocalScopes(..),
     run_checker,
     get_type,
+    get_var,
 --     lookup,
     new_scope,
     new_param_scope,
@@ -28,7 +29,6 @@ module SurCC.TypeChecker.Context (
     insert_local,
     export_list,
     import_list,
-    lookup_scopes_mutables,
 ) where
 
 import Control.Arrow (second, (|||))
@@ -84,36 +84,35 @@ data LocalScopes = LocalScopes [MutMapping]
 
 
 
-get_type_mutables :: Identifier -> Checker (SoucType, Mutability)
-get_type_mutables i = do
-    (imports,_exports) <- ask
-    (globals,locals) <- get
-    case lookup_mutables i imports globals locals of
-        Nothing -> throwError (Undeclared i)
-        Just (t,m) -> pure (t,m)
-
-
 get_type :: Identifier -> Checker SoucType
-get_type i = get_type_mutables i <&> fst
+get_type i = do
+    (imports,_exports) <- ask
+--     (imports,_exports,globals) <- ask
+    (globals,locals) <- get
+    case lookup i imports globals locals of
+        Nothing -> throwError (Undeclared i)
+        Just t -> pure t
 
 
-lookup_mutables :: Identifier -> ImportList -> GlobalScope -> LocalScopes
-                -> Maybe (SoucType, Mutability)
-lookup_mutables i imports globals locals =
-    (lookup_imports i imports <&> (,Immut))
-    <|> (lookup_globals_mutables i globals)
-    <|> (lookup_locals_mutables i locals)
-    <|> (typeof_builtin i <&> (,Immut))
+
+get_var :: Identifier -> Checker SoucType
+get_var i = get <&> snd >>= \locs -> case lookup_locals_mutables i locs of
+    Just (t, Immut) -> throwError $ MutateImmutable i t
+    Just (t, Mut) -> pure t
+    Nothing -> throwError . MutateImmutable i =<< get_type i
 
 
--- lookup :: Identifier -> ImportList -> LocalScopes -> Maybe SoucType
--- lookup i imports locals = lookup_mutables i imports locals <&> fst
+lookup :: Identifier -> ImportList -> GlobalScope -> LocalScopes -> Maybe SoucType
+lookup i imports globals locals =
+    (lookup_imports i imports)
+    <|> (lookup_globals i globals)
+    <|> (lookup_locals_mutables i locals <&> fst)
+    <|> (typeof_builtin i)
 
 
-lookup_globals_mutables :: Identifier -> GlobalScope
-                        -> Maybe (SoucType, Mutability)
-lookup_globals_mutables i (GlobalScope bounds) =
-    Map.lookup i bounds <&> (,Immut)
+
+lookup_globals :: Identifier -> GlobalScope -> Maybe SoucType
+lookup_globals i (GlobalScope bounds) = Map.lookup i bounds
 
 
 lookup_locals_mutables :: Identifier -> LocalScopes
@@ -122,19 +121,6 @@ lookup_locals_mutables i  = \case
     LocalScopes [] -> Nothing
     LocalScopes (bounds : rest) ->
         Map.lookup i bounds <|> lookup_locals_mutables i (LocalScopes rest)
-
-
-lookup_scopes_mutables :: Identifier -> GlobalScope -> LocalScopes
-                       -> Maybe (SoucType, Mutability)
-lookup_scopes_mutables i globals locals =
-    lookup_locals_mutables i locals <|> lookup_globals_mutables i globals
-
-
-lookup_scopes :: Identifier -> GlobalScope -> LocalScopes -> Maybe SoucType
--- lookup_scopes = lookup_scopes_mutables <&> fmap fst
-lookup_scopes i globs locs = lookup_scopes_mutables i globs locs <&> fst
---     (Map.lookup i bounds <&> fst) <|> lookup_scopes i ctx
---     GlobalScope bounds -> Map.lookup i bounds
 
 
 lookup_exports :: Identifier -> ExportList -> Maybe SoucType
