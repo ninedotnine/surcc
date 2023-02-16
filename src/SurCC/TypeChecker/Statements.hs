@@ -80,7 +80,6 @@ check_return t = \case
 check_stmt_reassign :: Maybe SoucType -> Identifier -> ExprTree -> Checker ()
 check_stmt_reassign m_t name expr = do
     expr_t <- infer_if_needed m_t expr
-    (globs,locs) <- get
     t <- get_var name
     assert_equals t expr_t
 

@@ -167,7 +167,7 @@ check_pattern t = \case
 
 
 infer_if_needed :: Maybe SoucType -> ExprTree -> Checker SoucType
-infer_if_needed m_t expr = do
+infer_if_needed m_t expr =
     case m_t of
         Nothing -> infer expr
         Just t -> check_expr t expr *> pure t
