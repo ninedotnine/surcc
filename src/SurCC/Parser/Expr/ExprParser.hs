@@ -106,8 +106,7 @@ parse_raw_expression (RawExpr input) =
 
 parse_term :: ShuntingYardParser ExprTree
 parse_term = do
-    toke <- parse_term_token
-    case toke of
+    parse_term_token >>= \case
         LParen -> do
             if_tightly_spaced (oper_stack_push StackSpace *> set_spacing_tight False)
             spacing <- Parsec.optionMaybe respect_spaces
@@ -130,8 +129,7 @@ parse_term = do
 
 parse_oper :: ShuntingYardParser ExprTree
 parse_oper = do
-    toke <- parse_oper_token
-    case toke of
+    parse_oper_token >>= \case
         RParen -> do
             if_tightly_spaced find_left_space
             look_for StackLParen
