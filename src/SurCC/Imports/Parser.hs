@@ -39,7 +39,7 @@ spoof_module = \case
 
 module_header :: HeaderParser SurCModule
 module_header = do
-    name <- string "module" *> space *> raw_identifier
+    name <- string "module" *> space *> identifier
     decls <- optionMaybe export_decls
     case decls of
         Just exports ->

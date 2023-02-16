@@ -36,6 +36,7 @@ import SurCC.TypeChecker.Statements (infer_stmts, check_stmts, checkm_stmts)
 import SurCC.TypeChecker.Typedefs (build_typedefs)
 
 
+-- FIXME: add the module name to the global scope
 type_check :: ParseTree -> Either TypeError CheckedProgram
 -- fixme: use the defined types
 type_check (ParseTree module_info imports typedefs defns) = do

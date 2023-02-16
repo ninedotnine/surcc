@@ -71,7 +71,7 @@ data CheckedProgram = CheckedProgram SurCModule Imports Body
 
 data ExportDecl = ExportDecl Bound
 
-data SurCModule = SurCModule Text [ExportDecl]
+data SurCModule = SurCModule Identifier [ExportDecl]
 
 data ImportDecl = LibImport Text | RelImport Text
 

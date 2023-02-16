@@ -19,7 +19,8 @@ import SurCC.Parser.ExprParser (parse_expression)
 import SurCC.Parser.TabChecker (check_tabs)
 import SurCC.Parser.TypeDefs (type_def)
 
-parse :: SourceName -> (SurCModule, [ImportDecl], Text, SourcePos) -> Either ParseError ParseTree
+parse :: SourceName -> (SurCModule, [ImportDecl], Text, SourcePos)
+         -> Either ParseError ParseTree
 parse source_name ((SurCModule name exports), imps, input, pos) = do
     check_tabs source_name input
     (typedefs, body) <- runParser
@@ -30,16 +31,15 @@ parse source_name ((SurCModule name exports), imps, input, pos) = do
     pure $ (ParseTree (SurCModule name exports) imps typedefs body)
 
 
-type ModuleName = Text
-start_state :: ModuleName -> [ImportDecl] -> ParserState
-start_state name imps = (0, binds:|[])
+start_state :: Identifier -> [ImportDecl] -> ParserState
+start_state module_name imps = (0, binds:|[])
     where
         make_identifier :: ImportDecl -> Identifier
         make_identifier = \case
             LibImport n -> Identifier n
             RelImport n -> Identifier n
         binds = Map.fromList (zip ids (repeat Immut))
-        ids = (Identifier name) : map make_identifier imps
+        ids = module_name : map make_identifier imps
 
 
 surc_parser :: SourcePos -> SurCParser ([TypeDef], [TopLevelDefn])

@@ -44,7 +44,7 @@ import SurCC.Parser.Expr.Raw  (RawExpr, raw_expr)
 
 import SurCC.Common
 import SurCC.Parser.Common (SurCParser)
-import SurCC.Common.Parsing (type_name, upper_name, optional_sig, reserved, endline, spaces, string)
+import SurCC.Common.Parsing (optional_sig, reserved, endline, spaces, string)
 import SurCC.Parser.Patterns  (parse_pattern)
 
 
