@@ -51,7 +51,7 @@ type_check (ParseTree module_info imports typedefs defns) = do
     -- this could be done before subtrees?
     let all_bounds = nub (globals <> typedef_bounds)
     assert_no_undefined_exports all_bounds module_info
-    Right $ CheckedProgram module_info imports defns
+    Right $ CheckedProgram module_info imports typedef_bounds defns
 
 
 assert_no_undefined_exports :: (MonadError TypeError m)

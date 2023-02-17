@@ -17,4 +17,3 @@ type Generator a = WriterT Text (State Word) a
 
 newtype CIdentifier = CIdentifier Text
                    deriving (Eq, Ord, IsString)
-

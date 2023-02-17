@@ -67,7 +67,7 @@ newtype Identifier = Identifier Text
 
 data ParseTree = ParseTree SurCModule Imports [TypeDef] Body
 
-data CheckedProgram = CheckedProgram SurCModule Imports Body
+data CheckedProgram = CheckedProgram SurCModule Imports [Bound] Body
 
 data ExportDecl = ExportDecl Bound
 
@@ -311,7 +311,7 @@ instance Show Identifier where
     show = TextShow.toString . showb
 
 instance TextShow CheckedProgram where
-    showb (CheckedProgram m imports body) =
+    showb (CheckedProgram m imports _constructors body) =
         "CheckedProgam " <> showb m <> " uses " <> showb imports <>
         " : " <> showb body
 

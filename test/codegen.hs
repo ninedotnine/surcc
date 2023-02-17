@@ -75,37 +75,37 @@ short_stmts = Stmts [
     ] Nothing
 
 conster :: CheckedProgram
-conster = CheckedProgram default_module [] [
+conster = CheckedProgram default_module [] [] [
     TopLevelConstDefn (Identifier "x") Nothing (Leaf (Lit (LitInt 42))),
     MainDefn (default_main_param False) Nothing (Stmts [
         Stmt_Const_Assign_Static (Identifier "x2") Nothing (Leaf (Lit (LitInt 0)))] Nothing)]
 
 func :: CheckedProgram
-func = CheckedProgram default_module [] [
+func = CheckedProgram default_module [] [] [
     default_main,
     ShortFuncDefn (Identifier "f") (Param (Identifier "x") Nothing) Nothing (Leaf (Lit (LitInt 42)))]
 
 func2 :: CheckedProgram
-func2 = CheckedProgram default_module [] [
+func2 = CheckedProgram default_module [] [] [
     default_main,
     FuncDefn (Identifier "f") (Param (Identifier "x") Nothing)
         Nothing (Stmts [] (Just (Return (Just (Leaf (Lit (LitInt 42)))))))]
 
 
 subber :: CheckedProgram
-subber = CheckedProgram default_module [] [
+subber = CheckedProgram default_module [] [] [
     MainDefn (default_main_param False) Nothing (Stmts [
         Stmt_Sub_Call (Identifier "abort") Nothing] Nothing)]
 
 subber_ass :: CheckedProgram
-subber_ass = CheckedProgram default_module [] [
+subber_ass = CheckedProgram default_module [] [] [
     default_main,
     SubDefn (Identifier "subby") Nothing Nothing (Stmts [
         Stmt_Var_Declare (Identifier "x") Nothing (Leaf (Lit (LitInt 42)))
     ] Nothing)]
 
 subber_const_ass :: CheckedProgram
-subber_const_ass = CheckedProgram default_module [] [
+subber_const_ass = CheckedProgram default_module [] [] [
     default_main,
     SubDefn (Identifier "subby") Nothing Nothing (Stmts [
         Stmt_Const_Assign_Static (Identifier "x")
@@ -113,7 +113,7 @@ subber_const_ass = CheckedProgram default_module [] [
     ] Nothing)]
 
 subber_postfix_oper :: CheckedProgram
-subber_postfix_oper = CheckedProgram default_module [] [
+subber_postfix_oper = CheckedProgram default_module [] [] [
     default_main,
     SubDefn (Identifier "subby_postfix_oper") Nothing Nothing (Stmts [
         Stmt_Var_Declare (Identifier "x") Nothing (Leaf (Lit (LitInt 41))),
@@ -121,7 +121,7 @@ subber_postfix_oper = CheckedProgram default_module [] [
         ] Nothing)]
 
 subber_while :: CheckedProgram
-subber_while = CheckedProgram default_module [] [
+subber_while = CheckedProgram default_module [] [] [
     default_main,
     SubDefn (Identifier "subby") Nothing Nothing (Stmts [
         Stmt_While (Leaf (Name "false")) (Stmts [
@@ -130,7 +130,7 @@ subber_while = CheckedProgram default_module [] [
         ] Nothing)]
 
 subber_if :: CheckedProgram
-subber_if = CheckedProgram default_module [] [
+subber_if = CheckedProgram default_module [] [] [
     default_main,
     SubDefn (Identifier "subby") Nothing Nothing (Stmts [
         Stmt_If (Leaf (Name "false")) (Stmts [
@@ -140,7 +140,7 @@ subber_if = CheckedProgram default_module [] [
         ] Nothing)]
 
 subber_if_else :: CheckedProgram
-subber_if_else = CheckedProgram default_module [] [
+subber_if_else = CheckedProgram default_module [] [] [
     SubDefn (Identifier "subby") Nothing Nothing (Stmts [
         Stmt_Var_Declare (Identifier "x") Nothing (Leaf (Lit (LitInt 41))),
         Stmt_If (Leaf (Lit (LitInt 0))) (Stmts [
@@ -154,7 +154,7 @@ subber_if_else = CheckedProgram default_module [] [
         ] Nothing)]
 
 subber_unless :: CheckedProgram
-subber_unless = CheckedProgram default_module [] [
+subber_unless = CheckedProgram default_module [] [] [
     default_main,
     SubDefn (Identifier "subby") Nothing Nothing (Stmts [
         Stmt_Unless (Leaf (Name "false")) (Stmts [
@@ -165,7 +165,7 @@ subber_unless = CheckedProgram default_module [] [
             ] Nothing )]
 
 subber_unless_else :: CheckedProgram
-subber_unless_else = CheckedProgram default_module [] [
+subber_unless_else = CheckedProgram default_module [] [] [
     SubDefn (Identifier "subby") Nothing Nothing (Stmts [
         Stmt_Var_Declare (Identifier "x") Nothing (Leaf (Lit (LitInt 41))),
         Stmt_Unless (Leaf (Name "false")) (Stmts [
@@ -176,7 +176,7 @@ subber_unless_else = CheckedProgram default_module [] [
         Stmt_Sub_Call (Identifier "subby") Nothing] Nothing)]
 
 sub_while :: CheckedProgram
-sub_while = CheckedProgram default_module [] [
+sub_while = CheckedProgram default_module [] [] [
     SubDefn (Identifier "subby") Nothing Nothing (Stmts [
         Stmt_Var_Declare (Identifier "x") Nothing (Leaf (Lit (LitInt 41))),
         Stmt_While (Leaf (Name "true")) (Stmts [
@@ -185,7 +185,7 @@ sub_while = CheckedProgram default_module [] [
         Stmt_Sub_Call (Identifier "subby") Nothing] Nothing)]
 
 sub_until :: CheckedProgram
-sub_until = CheckedProgram default_module [] [
+sub_until = CheckedProgram default_module [] [] [
     SubDefn (Identifier "subby") Nothing Nothing (Stmts [
         Stmt_Var_Declare (Identifier "x") Nothing (Leaf (Lit (LitInt 41))),
         Stmt_Until (Leaf (Name "false")) (Stmts [

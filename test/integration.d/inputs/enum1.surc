@@ -1,0 +1,12 @@
+def enum Elem = { fire water air earth }
+
+rendered(x: Elem): String = match x
+	=fire -> "fire"
+	=earth -> "earth"
+	e -> "water or air"
+
+main(stdout: OutputStream) = do
+	write stdout , rendered ~& water
+	write stdout , rendered ~& earth
+	write stdout , rendered ~& air
+	write stdout , rendered ~& fire

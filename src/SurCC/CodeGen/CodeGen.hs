@@ -7,6 +7,7 @@ module SurCC.CodeGen.CodeGen (
 ) where
 
 import SurCC.CodeGen.Common
+import SurCC.CodeGen.TypeDefs (gen_typedefs)
 import SurCC.CodeGen.ExprGen (
     gen_expr,
     gen_identifier,
@@ -37,10 +38,13 @@ import Data.Functor ((<&>))
 import Data.Text (Text)
 import Data.Text qualified as Text
 
+
 generate :: CheckedProgram -> Text
-generate (CheckedProgram _ _ body) = runtime <> text
+generate (CheckedProgram _ _ constructors body) = runtime <> datas <> text
     where
         text = evalState (execWriterT (gen body)) 0
+        datas = gen_typedefs constructors <> "// end of data constructors\n\n"
+
 
 class Genny a b | a -> b where
     gen :: a -> Generator b
