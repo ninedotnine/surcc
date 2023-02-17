@@ -3,7 +3,8 @@ module SurCC.Parser.Expr.Opers (
     parse_oper_token
 ) where
 
-import Data.Functor (void)
+import Data.Foldable (asum)
+import Data.Functor ((<&>), void)
 
 import Text.Parsec qualified as Parsec
 import Text.Parsec ((<|>), (<?>))
@@ -51,46 +52,47 @@ parse_infix_oper = do
     pure (Oper oper)
     where
         str :: String -> ShuntingYardParser String
-        char :: Char -> ShuntingYardParser Char
         str s = Parsec.try ((Parsec.string s) <* Parsec.notFollowedBy (Parsec.oneOf valid_op_chars))
-        char c = Parsec.try ((Parsec.char c) <* Parsec.notFollowedBy (Parsec.oneOf valid_op_chars))
 
-        parse_oper_symbol = (
-            char '+' *> pure Plus   <|>
-            char '-' *> pure Minus  <|>
-            char '*' *> pure Splat  <|>
-            str "//" *> pure FloorDiv <|>
-            char '/' *> pure FieldDiv <|>
-            char '%' *> pure Modulo <|>
-            char '^' *> pure Hihat  <|>
-            str ">>" *> pure FlipApply  <|>
-            str "==" *> pure Equals <|>
-            str "=/=" *> pure NotEquals <|>
-            str "=~" *> pure RegexMatch <|>
-            str "<>" *> pure Combine <|>
-            char '>' *> pure GreaterThan <|>
-            char '<' *> pure LesserThan <|>
-            str "AND" *> pure And <|> -- FIXME
-            str "OR" *> pure Or <|> -- FIXME
-            str "><" *> pure Xor <|>
-            str "IN" *> pure In <|> -- FIXME
-            char ',' *> pure Comma <|>
-            char '?' *> pure Iff <|>
-            str "??" *> pure FromMaybe <|>
-            str ">|" *> pure Prepend <|>
-            str "|<" *> pure Append <|>
-            char '#' *> pure Index <|>
-            str "##" *> pure Lookup <|>
-            str "<<" *> pure Apply <|>
-            str "<~&>" *> pure Map <|>
-            str "<&>" *> pure FlipMap <|>
-            str "<~*>" *> pure Applicative <|>
-            str "<*>" *> pure FlipApplicative <|>
-            str "*>" *> pure SequenceRight <|>
-            str "<*" *> pure SequenceLeft <|>
-            str ">>=" *> pure BindRight <|>
-            str "=<<" *> pure BindLeft
-            ) <?> "infix operator"
+        parse_oper_symbol :: ShuntingYardParser Operator
+        parse_oper_symbol = asum (symbols <&> parser) <?> "infix operator"
+        parser (chars, op) = str chars *> pure op
+        symbols = [
+            ("+",   Plus),
+            ("-",   Minus),
+            ("*",   Splat),
+            ("//",  FloorDiv),
+            ("/",   FieldDiv),
+            ("%",   Modulo),
+            ("^",   Hihat ),
+            ("<<",  Apply),
+            (">>",  FlipApply ),
+            ("==",  Equals),
+            ("=/=", NotEquals),
+            (">",   GreaterThan),
+            ("<",   LesserThan),
+            ("=~",  RegexMatch),
+            ("<>",  Combine),
+            ("AND", And),
+            ("OR",  Or),
+            ("><",  Xor),
+            ("IN",  In),
+            (",",   Comma),
+            ("?",   Iff),
+            ("??",  FromMaybe),
+            (">|",  Prepend),
+            ("|<",  Append),
+            ("#",   Index),
+            ("##",  Lookup),
+            ("<~&>", Map),
+            ("<&>", FlipMap),
+            ("<~*>", Applicative),
+            ("<*>", FlipApplicative),
+            ("*>",  SequenceRight),
+            ("<*",  SequenceLeft),
+            (">>=", BindRight),
+            ("=<<", BindLeft)
+            ]
 
 
 parse_right_paren :: ShuntingYardParser OperToken
