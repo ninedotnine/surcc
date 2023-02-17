@@ -7,7 +7,9 @@ module SurCC.Common.Hashable (Hashable) where
 
 import Data.Hashable (Hashable)
 import GHC.Generics (Generic)
+
 import SurCC.Common
+import SurCC.Common.SoucTypes
 
 deriving instance Generic Identifier
 instance Hashable Identifier

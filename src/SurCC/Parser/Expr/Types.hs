@@ -22,6 +22,7 @@ import Data.Word (Word8)
 import Text.Parsec qualified as Parsec
 
 import SurCC.Common
+import SurCC.Common.SoucTypes (SoucType(..))
 
 data RawExpr = RawExpr Text deriving (Show)
 

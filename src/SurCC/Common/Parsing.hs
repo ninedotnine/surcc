@@ -27,7 +27,8 @@ import Data.Text qualified as Text
 import Text.Parsec hiding (string, space, spaces, newline)
 import Text.Parsec qualified (string)
 
-import SurCC.Common (SoucKind(..), SoucType(..), Term(..), Literal(..))
+import SurCC.Common (Term(..), Literal(..))
+import SurCC.Common.SoucTypes (SoucKind(..), SoucType(..))
 
 identifier_char :: Parsec Text s Char
 identifier_char = (alphaNum <|> char '_') <?> "identifier char"

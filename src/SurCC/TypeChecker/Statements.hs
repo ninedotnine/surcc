@@ -14,6 +14,7 @@ import Data.Traversable ()
 import Prelude hiding (lookup)
 
 import SurCC.Common
+import SurCC.Common.SoucTypes
 
 import SurCC.TypeChecker.Context (
     Checker,

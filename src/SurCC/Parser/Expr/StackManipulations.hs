@@ -18,7 +18,7 @@ import Text.Parsec qualified as Parsec
 import SurCC.Parser.Expr.Types
 import SurCC.Parser.Expr.RegardingSpaces
 
-import SurCC.Common (SoucType)
+import SurCC.Common.SoucTypes (SoucType(..))
 
 -- functions to get the current state
 get_op_stack :: ShuntingYardParser Oper_Stack

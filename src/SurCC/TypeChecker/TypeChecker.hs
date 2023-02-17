@@ -18,6 +18,8 @@ import TextShow (TextShow(..), toString) -- for error
 
 import Prelude hiding (lookup)
 import SurCC.Common
+import SurCC.Common.SoucTypes
+import SurCC.Common.TextShow
 import SurCC.TypeChecker.Context (
                             TopChecker,
                             ExportList,

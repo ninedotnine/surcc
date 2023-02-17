@@ -16,6 +16,8 @@ import Control.Monad.Trans.Except
 import Data.Functor ((<&>))
 
 import SurCC.Common
+import SurCC.Common.SoucTypes
+
 import SurCC.TypeChecker.Context (
     get_type,
     new_scope,

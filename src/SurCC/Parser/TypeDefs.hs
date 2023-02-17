@@ -7,7 +7,7 @@ import Text.Parsec hiding (space, spaces, string, parse)
 import SurCC.Common (TypeDef(..), Term(..), Identifier(..))
 import SurCC.Common.Parsing
 import SurCC.Parser.Common (SurCParser)
-import SurCC.Parser.Basics (identifier)
+import SurCC.Parser.Basics (identifier, indentation)
 
  -- fixme: others (empty, struct, gadt, etc.)
 

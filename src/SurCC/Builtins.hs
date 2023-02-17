@@ -11,6 +11,7 @@ import Data.Text qualified as Text
 import TextShow (TextShow(..))
 
 import SurCC.Common
+import SurCC.Common.SoucTypes
 import SurCC.Common.Hashable
 
 

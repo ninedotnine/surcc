@@ -15,6 +15,7 @@ import Data.HashMap.Strict (HashMap)
 import SurCC.Builtins (builtin_identifiers, builtin_types)
 import SurCC.Common
 import SurCC.Common.Hashable
+import SurCC.Common.SoucTypes
 import SurCC.TypeChecker.Context
 import SurCC.TypeChecker.Expressions (assert_equals)
 
@@ -49,7 +50,7 @@ build_typedef = \case
     EnumType t constructors ->
         -- FIXME fail if two constructors are equal
         pure (t, Refutable True, constructors) -- FIXME
-    StructType t -> pure (t, Refutable False, []) -- FIXME
+    StructType t constructor _ -> pure (t, Refutable False, [constructor])
     GADType t -> undefined t -- FIXME
 
 

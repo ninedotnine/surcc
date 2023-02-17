@@ -46,6 +46,7 @@ import Control.Monad.Trans.Except (ExceptT, runExceptT)
 import Data.Text (Text)
 
 import SurCC.Common
+import SurCC.Common.SoucTypes
 import SurCC.Builtins (typeof_builtin)
 
 
