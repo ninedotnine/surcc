@@ -6,6 +6,6 @@ rendered(x: Elem): String = match x
 	=water -> "water"
 
 main(stdout: OutputStream) = do
-	write stdout , water & rendered
-	write stdout , air & rendered
-	write stdout , fire & rendered
+	write stdout , water >> rendered
+	write stdout , air >> rendered
+	write stdout , fire >> rendered

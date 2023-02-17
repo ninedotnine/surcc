@@ -8,8 +8,8 @@ char_match(ch: Char): Integer = match ch
 	'c' -> 3
 
 main(stdout: OutputStream) = do
-	write stdout , 5 & partial_increment & str
+	write stdout , 5 >> partial_increment >> str
 	n: Integer = 7
-	write stdout , n & partial_increment & str
+	write stdout , n >> partial_increment >> str
 	var c <- 'c'
-	write stdout , c & char_match & str
+	write stdout , c >> char_match >> str

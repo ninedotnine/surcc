@@ -1,3 +1,3 @@
 f(x: Char): Char = 'a'
 
-g(x: Char): Char = x & f
+g(x: Char): Char = x >> f

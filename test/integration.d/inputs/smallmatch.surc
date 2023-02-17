@@ -3,5 +3,5 @@ partial_increment(x: Integer) = match x
 	7 -> 8
 
 main(stdout: OutputStream) = do
-	write stdout , 5 & partial_increment & str
-	write stdout , 7 & partial_increment & str
+	write stdout , 5 >> partial_increment >> str
+	write stdout , 7 >> partial_increment >> str

@@ -4,4 +4,4 @@ main(stdout: OutputStream) = do
 	var i <- 1
 	while i < 15
 		write stdout , "doublin"
-		i <- i & foo
+		i <- i >> foo

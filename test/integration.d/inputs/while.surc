@@ -1,10 +1,10 @@
 main(stdout: OutputStream) = do
 	var i <- 0
 	until i > 3
-		write stdout , (i & str)
-		i <- i & increment
+		write stdout , (i >> str)
+		i <- i >> increment
 	end
 	while i < 5
-		write stdout , (i & str)
-		i <- i & increment
+		write stdout , (i >> str)
+		i <- i >> increment
 	write stdout , "done"

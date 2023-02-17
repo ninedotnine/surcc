@@ -1,6 +1,6 @@
 main(stdout: OutputStream) = do
 	var i <- 0
 	if i < 4
-		i <- i & increment
-		write stdout , (i & str)
+		i <- i >> increment
+		write stdout , (i >> str)
 	write stdout , "done"

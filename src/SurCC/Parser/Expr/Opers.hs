@@ -52,8 +52,8 @@ parse_infix_oper = do
     where
         str :: String -> ShuntingYardParser String
         char :: Char -> ShuntingYardParser Char
-        str s = Parsec.try (Parsec.string s) <* Parsec.notFollowedBy (Parsec.oneOf valid_op_chars)
-        char c = Parsec.char c <* Parsec.notFollowedBy (Parsec.oneOf valid_op_chars)
+        str s = Parsec.try ((Parsec.string s) <* Parsec.notFollowedBy (Parsec.oneOf valid_op_chars))
+        char c = Parsec.try ((Parsec.char c) <* Parsec.notFollowedBy (Parsec.oneOf valid_op_chars))
 
         parse_oper_symbol = (
             char '+' *> pure Plus   <|>
@@ -63,7 +63,7 @@ parse_infix_oper = do
             char '/' *> pure FieldDiv <|>
             char '%' *> pure Modulo <|>
             char '^' *> pure Hihat  <|>
-            char '&' *> pure FlipApply  <|>
+            str ">>" *> pure FlipApply  <|>
             str "==" *> pure Equals <|>
             str "=/=" *> pure NotEquals <|>
             str "=~" *> pure RegexMatch <|>
@@ -77,12 +77,11 @@ parse_infix_oper = do
             char ',' *> pure Comma <|>
             char '?' *> pure Iff <|>
             str "??" *> pure FromMaybe <|>
-            str ">>" *> pure Prepend <|>
-            str "<<" *> pure Append <|>
+            str ">|" *> pure Prepend <|>
+            str "|<" *> pure Append <|>
             char '#' *> pure Index <|>
             str "##" *> pure Lookup <|>
-            str "~&" *> pure Apply <|>
-            char '&' *> pure FlipApply <|>
+            str "<<" *> pure Apply <|>
             str "<~&>" *> pure Map <|>
             str "<&>" *> pure FlipMap <|>
             str "<~*>" *> pure Applicative <|>

@@ -8,23 +8,23 @@ weird(x: Integer) = match x
 	n -> n
 
 serial(stdout: OutputStream) = do
-	write stdout , 0 & weird & str
-	write stdout , 1 & weird & str
-	write stdout , 2 & weird & str
-	write stdout , 3 & weird & str
-	write stdout , 4 & weird & str
-	write stdout , 5 & weird & str
-	write stdout , 6 & weird & str
-	write stdout , 7 & weird & str
-	write stdout , 8 & weird & str
-	write stdout , 9 & weird & str
+	write stdout , 0 >> weird >> str
+	write stdout , 1 >> weird >> str
+	write stdout , 2 >> weird >> str
+	write stdout , 3 >> weird >> str
+	write stdout , 4 >> weird >> str
+	write stdout , 5 >> weird >> str
+	write stdout , 6 >> weird >> str
+	write stdout , 7 >> weird >> str
+	write stdout , 8 >> weird >> str
+	write stdout , 9 >> weird >> str
 
 ; same as serial, expressed as a loop
 loopy(stdout: OutputStream) = do
 	var n <- 0
 	while n < 10
-		write stdout , n & weird & str
-		n <- n & increment
+		write stdout , n >> weird >> str
+		n <- n >> increment
 
 main(stdout: OutputStream) = do
 	serial stdout

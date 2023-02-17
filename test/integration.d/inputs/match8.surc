@@ -12,8 +12,8 @@ weird(x: Integer) = match x
 loopy(stdout: OutputStream) = do
 	var n <- 0
 	while n < 10
-		write stdout , n & weird & str
-		n <- n & increment
+		write stdout , n >> weird >> str
+		n <- n >> increment
 
 main(stdout: OutputStream) = do
 	loopy stdout

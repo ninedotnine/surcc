@@ -1,5 +1,5 @@
 f(x: Integer): Integer = x + 1
 
 g(x: Integer): Integer = fndo
-	var r <- 'a' & f
+	var r <- 'a' >> f
 	return r

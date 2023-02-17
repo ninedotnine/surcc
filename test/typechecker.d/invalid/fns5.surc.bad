@@ -1,5 +1,5 @@
 f(x: Integer): Char = 'a'
 
 g(x: Integer): Char = fndo
-	var r <- 'a' & f
+	var r <- 'a' >> f
 	return r

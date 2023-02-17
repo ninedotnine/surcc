@@ -4,7 +4,7 @@ weird(x: Integer) = match x
 	n -> n
 
 main(stdout: OutputStream) = do
-	write stdout , 5 & weird & str
-	write stdout , 9 & weird & str
+	write stdout , 5 >> weird >> str
+	write stdout , 9 >> weird >> str
 	var ten <- 10
-	write stdout , ten & weird & str
+	write stdout , ten >> weird >> str

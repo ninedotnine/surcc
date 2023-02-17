@@ -7,7 +7,7 @@
 [ ] generating params is really not implemented at all
 [ ] don't always assume `int`, that was super lazy hacking
 [ ] keep bindings of variables (not only constants)
-[ ] shuntingyard uses `Parsec.string "<>"` which will explode if a < is read first
+[x] shuntingyard uses `Parsec.string "<>"` which will explode if a < is read first
 [ ] do bindings after program tree is built, not in the parser
 [ ] make TypeError parameters always be in the right order with newtypes
     e. g. TypeError (Expect t) (Got t)

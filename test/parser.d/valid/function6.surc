@@ -1,5 +1,5 @@
 main(stdout) = do
-	write_stdout (f & x)
+	write_stdout (f << x)
 
 f(x): Int = x+2
 
