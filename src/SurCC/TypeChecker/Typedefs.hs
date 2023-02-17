@@ -1,9 +1,9 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE TupleSections #-}
 
 module SurCC.TypeChecker.Typedefs (
     build_typedefs,
-    TypeSet,
 ) where
 
 import Control.Arrow (second)
@@ -20,26 +20,25 @@ import SurCC.TypeChecker.Expressions (assert_equals)
 
 type Mapping = HashMap Identifier SoucType
 
-newtype TypeSet = TypeSet (HashMap SoucType Refutable) deriving (Show)
-
 -- FIXME check types and constructors with exports
+-- fixme: use the defined types
 build_typedefs :: [TypeDef] -> ExportList
-                  -> Either TypeError (TypeSet, GlobalScope)
+                  -> Either TypeError (GlobalScope,[Bound])
 build_typedefs defs exports = do
-    build_typedefs' (TypeSet builtin_types, builtin_identifiers, exports) defs
-        <&> second GlobalScope
+    build_typedefs' (TypeSet builtin_types, builtin_identifiers, exports) [] defs
 
 
-build_typedefs' :: (TypeSet, Mapping, ExportList) -> [TypeDef]
-                   -> Either TypeError (TypeSet, Mapping)
-build_typedefs' (types, consts, exps) = \case
+build_typedefs' :: (TypeSet, Mapping, ExportList) -> [Bound] -> [TypeDef]
+                   -> Either TypeError (GlobalScope,[Bound])
+build_typedefs' (types, consts, exps) bounds = \case
     (d:defs) -> do
         (t, refut, terms) <- build_typedef d
         updated_types <- insert_type types t refut
         updated_consts <- insert_consts consts terms t
         new_exps <- remove_exports exps terms t
-        build_typedefs' (updated_types, updated_consts, new_exps) defs
-    [] -> pure (types, consts)
+        let abounds = (terms <&> (\term -> Bound term t)) <> bounds
+        build_typedefs' (updated_types, updated_consts, new_exps) abounds defs
+    [] -> pure $ (GlobalScope types consts, bounds)
 
 
 build_typedef :: TypeDef

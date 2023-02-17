@@ -9,6 +9,7 @@ module SurCC.TypeChecker.Context (
     Checker,
     ExportList(..),
     ImportList,
+    TypeSet(..),
     GlobalScope(..),
     LocalScopes(..),
     run_top_checker,
@@ -49,7 +50,7 @@ import SurCC.Builtins (typeof_builtin)
 
 
 type TopChecker a = ExceptT TypeError (
-                        StateT (GlobalScope) (
+                        StateT GlobalScope (
                             Reader (ImportList,ExportList))) a
 
 type Checker a = ExceptT TypeError (
@@ -68,8 +69,9 @@ type ImmutMapping = HashMap Identifier SoucType
 
 type MutMapping = HashMap Identifier (SoucType, Mutability)
 
+newtype TypeSet = TypeSet (HashMap SoucType Refutable) deriving (Show)
 
-newtype GlobalScope = GlobalScope ImmutMapping
+data GlobalScope = GlobalScope TypeSet ImmutMapping
                 deriving (Show)
 
 newtype LocalScopes = LocalScopes [MutMapping]
@@ -78,8 +80,8 @@ newtype LocalScopes = LocalScopes [MutMapping]
 
 run_top_checker :: ImportList -> ExportList -> GlobalScope -> TopChecker a
                    -> Either TypeError a
-run_top_checker imports exports scope checker =
-    runReader (evalStateT (runExceptT checker) scope) (imports,exports)
+run_top_checker imports exports globals checker =
+    runReader (evalStateT (runExceptT checker) globals) (imports,exports)
 
 
 get_type :: Identifier -> Checker SoucType
@@ -111,7 +113,7 @@ lookup i imports globals locals =
 
 
 lookup_globals :: Identifier -> GlobalScope -> Maybe SoucType
-lookup_globals i (GlobalScope bounds) = Map.lookup i bounds
+lookup_globals i (GlobalScope _ bounds) = Map.lookup i bounds
 
 
 member_globals :: Identifier -> GlobalScope -> Bool
@@ -233,10 +235,10 @@ insert_global (Bound i t) = do
         throwError (MultipleDeclarations i)
     for_ (lookup_exports i exports) $
         assert_equals t
-    GlobalScope globals <- get
+    GlobalScope types globals <- get
     if Map.member i globals
         then throwError (MultipleDeclarations i)
-        else put (GlobalScope (Map.insert i t globals))
+        else put (GlobalScope types (Map.insert i t globals))
 
 
 assert_equals :: (MonadError TypeError m) => SoucType -> SoucType -> m ()
