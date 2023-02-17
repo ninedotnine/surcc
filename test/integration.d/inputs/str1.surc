@@ -1,0 +1,5 @@
+main(stdout: OutputStream) = do
+	write stdout , (5 >> str)
+	write stdout , $ 6
+	n: Integer = 7
+	write stdout , $n

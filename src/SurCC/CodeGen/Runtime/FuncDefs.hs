@@ -34,7 +34,7 @@ product = "union _souc_obj _souc_product(union _souc_obj x, union _souc_obj y) {
 
 quotient = "union _souc_obj _souc_quotient(union _souc_obj x, union _souc_obj y) { return (union _souc_obj) { ._souc_int = x._souc_int / y._souc_int };}"
 
-remainder = "union _souc_obj _souc_remainder(union _souc_obj x, union _souc_obj y) { return (union _souc_obj) { ._souc_int = x._souc_int % y._souc_int };}"
+remainder = "union _souc_obj _souc_remainder(union _souc_obj p) { union _souc_obj x = p._souc_pair->first; union _souc_obj y = p._souc_pair->second; return (union _souc_obj) { ._souc_int = x._souc_int % y._souc_int };}"
 
 is_equal_integer = "union _souc_obj _souc_is_equal_integer(union _souc_obj x, union _souc_obj y) { union _souc_obj b = { ._souc_bool = x._souc_int == y._souc_int }; return b;}"
 

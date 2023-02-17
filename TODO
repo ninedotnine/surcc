@@ -33,3 +33,9 @@
         ```
     this trivially always matches and is not useful. disallow this?
 [ ] global constants must be declared before they can be used
+[ ] in C, a global must be statically known.
+    you can't do `int x = f(y)` at top level
+[ ] implement remainder and modulo properly
+[ ] implement dynamic integers
+[ ] implement ratios
+[ ] implement dynamic strings

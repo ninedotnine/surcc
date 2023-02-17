@@ -1,0 +1,12 @@
+fizzbuzz(i: Integer): String = match i
+	n if remainder << (n,15) == 0 -> "fizzbuzz"
+	n if remainder << (n,5) == 0 -> "buzz"
+	n if remainder << (n,3) == 0 -> "fizz"
+	n -> $n
+
+
+main(stdout: OutputStream) = do
+	var s <- 1
+	while s < 20
+		write stdout , s>>fizzbuzz
+		s <- s+1

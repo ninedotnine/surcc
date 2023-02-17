@@ -76,6 +76,10 @@ builtin_functions = Map.fromList [
         (SoucFn SoucInteger SoucInteger)
         Nothing
     ),
+    ("remainder", Builtin "_souc_remainder"
+        (SoucFn (SoucPair SoucInteger SoucInteger) SoucInteger)
+        Nothing
+    ),
     ("str", Builtin "_souc_int_str"
         (SoucFn SoucInteger SoucString)
         Nothing
