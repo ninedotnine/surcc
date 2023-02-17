@@ -1,0 +1,19 @@
+seven = 7
+
+two: Integer = 2
+
+weird(x: Integer) = match x
+	4 -> 6
+	=seven -> 1
+	=two -> 3
+	n if (n > seven) -> 9
+	n -> n
+
+loopy(stdout: OutputStream) = do
+	var n <- 0
+	while n < 10
+		write stdout , n & weird & str
+		n <- n & increment
+
+main(stdout: OutputStream) = do
+	loopy stdout

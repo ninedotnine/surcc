@@ -1,0 +1,6 @@
+seven: Integer = 7
+
+match3(dox: Integer): Integer = match dox
+	3 -> 3
+	=seven -> 7: Integer
+	n -> 0

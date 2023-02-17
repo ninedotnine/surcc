@@ -1,0 +1,8 @@
+module data1 where
+	t: Boots
+	f: Boots
+
+def enum Boots = { troot fabs }
+
+t: Boots = troot
+f: Boots = fabs

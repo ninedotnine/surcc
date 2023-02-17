@@ -1,0 +1,4 @@
+def enum Boots = { troot fabs }
+
+t: Boots = troot
+f: Boots = fabs
