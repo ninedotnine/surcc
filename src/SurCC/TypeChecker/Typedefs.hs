@@ -20,24 +20,21 @@ import SurCC.TypeChecker.Expressions (assert_equals)
 
 type Mapping = HashMap Identifier SoucType
 
--- FIXME check types and constructors with exports
--- fixme: use the defined types
-build_typedefs :: [TypeDef] -> ExportList
-                  -> Either TypeError (GlobalScope,[Bound])
-build_typedefs defs exports = do
-    build_typedefs' (TypeSet builtin_types, builtin_identifiers, exports) [] defs
+
+build_typedefs :: [TypeDef] -> Either TypeError (GlobalScope,[Bound])
+build_typedefs defs = do
+    build_typedefs' (TypeSet builtin_types, builtin_identifiers) [] defs
 
 
-build_typedefs' :: (TypeSet, Mapping, ExportList) -> [Bound] -> [TypeDef]
+build_typedefs' :: (TypeSet, Mapping) -> [Bound] -> [TypeDef]
                    -> Either TypeError (GlobalScope,[Bound])
-build_typedefs' (types, consts, exps) bounds = \case
+build_typedefs' (types, consts) bounds = \case
     (d:defs) -> do
         (t, refut, terms) <- build_typedef d
         updated_types <- insert_type types t refut
         updated_consts <- insert_consts consts terms t
-        new_exps <- remove_exports exps terms t
         let abounds = (terms <&> (\term -> Bound term t)) <> bounds
-        build_typedefs' (updated_types, updated_consts, new_exps) abounds defs
+        build_typedefs' (updated_types, updated_consts) abounds defs
     [] -> pure $ (GlobalScope types consts, bounds)
 
 
@@ -80,23 +77,3 @@ insert :: (Hashable k) => HashMap k v -> k -> v -> Maybe (HashMap k v)
 insert m con t = if Map.member con m
     then Nothing
     else Just (Map.insert con t m)
-
-
-remove_exports :: ExportList -> [Identifier] -> SoucType
-                  -> Either TypeError ExportList
-remove_exports (ExportList exports) ids t = case ids of
-    (i:etc) -> do
-        new_exports <- remove_export exports i t
-        remove_exports (ExportList new_exports) etc t
-    [] -> pure $ ExportList exports
-
-
-remove_export :: (MonadError TypeError m) =>
-                 Mapping -> Identifier -> SoucType
-                 -> m Mapping
-remove_export list i t = do
-    case Map.lookup i list of
-        Just exported_type -> do
-            assert_equals t exported_type
-            pure list -- FIXME delete from the list?
-        Nothing -> pure list

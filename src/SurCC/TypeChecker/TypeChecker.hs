@@ -40,7 +40,7 @@ import SurCC.TypeChecker.Typedefs (build_typedefs)
 type_check :: ParseTree -> Either TypeError CheckedProgram
 type_check (ParseTree module_info imports typedefs defns) = do
     exports_list <- add_exports module_info
-    (types_ctx,typedef_bounds) <- build_typedefs typedefs exports_list
+    (types_ctx,typedef_bounds) <- build_typedefs typedefs
     imports_list <- add_imports imports exports_list
     globals <- run_top_checker imports_list exports_list types_ctx $
                     traverse add_top_level_defn defns
