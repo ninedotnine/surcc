@@ -17,11 +17,13 @@ import SurCC.Builtins (gen_builtin)
 import SurCC.Common (Identifier(..), Pattern(..), Literal(..), Guard(..))
 import SurCC.CodeGen.Common
 
+import Control.Arrow (second)
 import Control.Monad.State (get, put)
 import Control.Monad.Writer (tell)
 import Data.Maybe (fromMaybe)
 import Data.Foldable (fold)
 import Data.Functor
+import Data.Function
 import Data.Set (Set)
 import Data.Set qualified as Set
 import Data.Text (Text)
@@ -44,9 +46,8 @@ generate_expr = \case
     Leaf e -> (mempty,) <$> generate_term e
     Signed e _ -> generate_expr e
     Twig op e -> do
-        pref <- generate_prefix_expr op
-        (decls, expr) <- generate_expr e
-        pure $ (decls , pref <> expr <> "// fixme\n")
+        (decls, expr) <- generate_prefix_expr e op
+        pure $ (decls, expr <> "\n")
     Match scrutinee branches -> do
         (decls, expr) <- generate_match_expr scrutinee branches
         tell $ gen_decls decls
@@ -133,12 +134,14 @@ generate_literal = \case
                    <> s <> "\"}"
 
 
-generate_prefix_expr :: PrefixOperator -> Generator Text
-generate_prefix_expr = \case
-    GetAddr    -> pure "&"
-    Deref      -> pure "*"
-    Negate     -> pure "-"
-    ToString   -> undefined
+generate_prefix_expr :: ExprTree -> PrefixOperator -> Generator (Decls,Text)
+generate_prefix_expr expr = \case
+    GetAddr    -> generate_expr expr <&> second ("&"<>)
+    Deref      -> generate_expr expr <&> second ("*"<>)
+    Negate     -> generate_expr expr <&> second ("-"<>)
+    ToString   -> do
+        (decls,e) <- generate_expr expr
+        pure $ (decls, gen_identifier "str" <> "(" <> e <> ")")
     Pure       -> undefined
     Join       -> undefined
 
