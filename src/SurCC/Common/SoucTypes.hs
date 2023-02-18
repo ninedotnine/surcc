@@ -2,6 +2,7 @@
 
 module SurCC.Common.SoucTypes (
     SoucType(..),
+    pattern SoucType,
     SoucKind(..),
     TypeVar(..),
     pattern SoucIO,
@@ -21,12 +22,11 @@ module SurCC.Common.SoucTypes (
 import Data.Text (Text)
 
 
-data SoucType = SoucType Text SoucKind
                 -- SoucTypeConstructor invariant:
                 -- the length of the list of types
                 -- must be equal to the SoucKind
                 -- FIXME find a better way to represent this
-              | SoucTypeConstructor Text SoucKind [SoucType]
+data SoucType = SoucTypeConstructor Text SoucKind [SoucType]
               | SoucTypeVar TypeVar
 --               | SoucConstrainedType Constraint SoucType
               deriving (Eq,Show,Ord)
@@ -43,6 +43,9 @@ data TypeVar = TypeVar (Either Word Char) SoucKind deriving (Eq, Ord, Show)
 
 -- data Constraint = Instance Text SoucType deriving (Eq)
 
+
+pattern SoucType :: Text -> SoucKind -> SoucType
+pattern SoucType name k = SoucTypeConstructor name k []
 
 pattern SoucIO :: SoucType
 pattern SoucIO = SoucType "IO" (SoucKind 0)
