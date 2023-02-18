@@ -1,2 +1,2 @@
-p0 = (3 , 4): Pair(Integer Integer)
-p1: Pair(Integer Integer) = (3 , 4)
+p0 = (3 , 4): Pair(Integer)(Integer)
+p1: Pair(Integer)(Integer) = (3 , 4)

@@ -1,0 +1,1 @@
+def struct Tuple(A)(Bool) = { tuple(first: A)(second: Bool) }

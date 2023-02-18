@@ -13,13 +13,16 @@ module SurCC.Common.Parsing (
     string,
     endline,
     type_signature,
-    type_name,
+    souc_type,
+    souc_type_simple,
+    souc_type_parameterized,
     optional_sig,
     literal,
 ) where
 
 import Control.Monad (when)
 import Data.Functor ((<&>), void)
+import Data.Function
 import Data.List (genericLength)
 import Data.Set qualified as Set
 import Data.Text (Text)
@@ -28,7 +31,7 @@ import Text.Parsec hiding (string, space, spaces, newline)
 import Text.Parsec qualified (string)
 
 import SurCC.Common (Term(..), Literal(..))
-import SurCC.Common.SoucTypes (SoucKind(..), SoucType(..))
+import SurCC.Common.SoucTypes
 
 identifier_char :: Parsec Text s Char
 identifier_char = (alphaNum <|> char '_') <?> "identifier char"
@@ -130,27 +133,34 @@ optional_sig :: Parsec Text s (Maybe SoucType)
 optional_sig = optionMaybe type_signature
 
 type_signature :: Parsec Text s SoucType
-type_signature = char ':' *> ignore_spaces *> type_broadly where
+type_signature = char ':' *> ignore_spaces *> souc_type
 
-    type_broadly :: Parsec Text s SoucType
-    type_broadly = try type_constructor <|> type_name
+souc_type :: Parsec Text s SoucType
+souc_type = do
+    name <- upper_name
+    args <- many $ between (char '(') (char ')') souc_type
+    pure (SoucTypeConstructor name (SoucKind $ genericLength args) args)
 
-    type_constructor :: Parsec Text s SoucType
-    type_constructor = do
-        name <- upper_name <* char '('
-        args <- sepBy1 type_broadly spaces <* char ')'
-        pure (SoucTypeConstructor name (SoucKind $ genericLength args) args)
+souc_type_parameterized :: Parsec Text s SoucType
+souc_type_parameterized = do
+    name <- upper_name
+    args <- many $ between (char '(') (char ')') souc_type_var
+    pure (SoucTypeConstructor name (SoucKind $ genericLength args) args)
+
+souc_type_var :: Parsec Text s SoucType
+souc_type_var = SoucTypeVar <$> flip TypeVar (SoucKind 0) <$>
+    (((char 'V' *> many1 digit) <&> read <&> Left) <|> (upper <&> Right))
+
+souc_type_simple :: Parsec Text s SoucType
+souc_type_simple = do
+    n <- upper_name
+    return $ SoucType n (SoucKind 0)
 
 upper_name :: Parsec Text s Text
 upper_name = do
     first <- upper
     rest <- many alphaNum
     pure $ Text.pack $ first:rest
-
-type_name :: Parsec Text s SoucType
-type_name = do
-    n <- upper_name
-    return $ SoucType n (SoucKind 0)
 
 
 literal :: Parsec Text s Literal

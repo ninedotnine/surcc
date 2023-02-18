@@ -1,0 +1,2 @@
+; use `_` to avoid naming the fields:
+def struct Tuple(A)(B) = { tuple(first: A)(_: B) }

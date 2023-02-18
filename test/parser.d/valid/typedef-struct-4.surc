@@ -1,0 +1,2 @@
+; give names to create accessor functions
+def struct Tuple(A)(B) = { tuple(first: A)(second: B) }

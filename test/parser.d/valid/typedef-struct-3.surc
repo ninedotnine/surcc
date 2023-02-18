@@ -1,0 +1,2 @@
+; parameterized on some type T
+def struct NonEmptyList(T) = { non_empty_list(head: T)(etc: List(T)) }

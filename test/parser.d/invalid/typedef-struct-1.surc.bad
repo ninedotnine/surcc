@@ -1,0 +1,1 @@
+def struct TupleIntBool = { tuple_int_bool(i)(b) }

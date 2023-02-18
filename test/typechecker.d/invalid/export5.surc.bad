@@ -1,6 +1,6 @@
 module export5 where
 	two: Integer
-	f: Fn(Integer Integer)
+	f: Fn(Integer)(Integer)
 
 two = 2
 

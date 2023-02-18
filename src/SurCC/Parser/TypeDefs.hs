@@ -22,7 +22,7 @@ type_def = do
 
 unit_type :: SurCParser TypeDef
 unit_type = do
-    name <- opener "unit"
+    name <- opener "unit" souc_type_simple
     c <- identifier
     closer
     pure $ UnitType name c
@@ -30,7 +30,7 @@ unit_type = do
 
 enum_type :: SurCParser TypeDef
 enum_type = do
-    name <- opener "enum"
+    name <- opener "enum" souc_type_simple
     constructors <- many1 (identifier <* spaces)
     closer
     pure $ EnumType name constructors
@@ -38,7 +38,7 @@ enum_type = do
 
 struct_type :: SurCParser TypeDef
 struct_type = do
-    name <- opener "struct"
+    name <- opener "struct" souc_type_parameterized
     constructor <- identifier
     accessors <- many1 (accessor name)
     let constructor_t = (accessors <&> get_type) & foldr SoucFn name
@@ -55,10 +55,10 @@ accessor t = do
     pure $ Bound i (SoucFn t sig)
 
 
-opener :: String -> SurCParser SoucType
-opener word =
+opener :: String -> SurCParser SoucType -> SurCParser SoucType
+opener word name_parser =
     reserved word *> spaces *>
-    type_name
+    name_parser
     <* spaces <* char '=' <* spaces <* char '{' <* optional spaces
 
 closer :: SurCParser ()
