@@ -106,12 +106,11 @@ gen_call s x y = do
 
 gen_tuple :: ExprTree -> ExprTree -> Generator (Decls,Text)
 gen_tuple x y = do
+    (CIdentifier pair) <- get_next_id
+    tell $ "struct _souc_pair " <> pair <> ";\n"
+
     (x_decls, gx) <- generate_expr x
     (y_decls, gy) <- generate_expr y
-    (CIdentifier pair) <- get_next_id
-    -- fixme: this works for static storage, but not automatic storage
-    -- space for the return value should be allocated outside of the function
-    tell $ "struct _souc_pair " <> pair <> ";\n"
 
     pure $ (x_decls <> y_decls,
             "(" <> pair <> " = (struct _souc_pair) {.first = "

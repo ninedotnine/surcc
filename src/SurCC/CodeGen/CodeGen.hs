@@ -71,29 +71,29 @@ instance Genny TopLevelDefn () where
         FuncDefn name param _ stmts -> do
             n <- gen name
             p <- gen param
-            tell $ "union _souc_obj " <> n <> "(" <> p <> ") {\n"
             s <- gen stmts
+            tell $ "union _souc_obj " <> n <> "(" <> p <> ") {\n"
             tell $ s <> "}\n"
 
         ShortFuncDefn name param _ expr -> do
             n <- gen name
             p <- gen param
+            e <- gen expr
             tell $ "union _souc_obj " <> n <> "(" <> p <> ") {\n"
             -- fixme decls need to be statically allocd
-            e <- gen expr
             tell $ "return " <> e <> ";\n}\n"
 
         SubDefn name m_param _ stmts -> do
             n <- gen name
             p <- gen m_param
-            tell $ "void " <> n <> "(" <> p <> ") {\n"
             s <- gen stmts
+            tell $ "void " <> n <> "(" <> p <> ") {\n"
             tell $ s <> "}\n"
 
         MainDefn param _ stmts -> do
-            tell $ "int main(void) {\n"
             gen param
             s <- gen stmts
+            tell $ "int main(void) {\n"
             tell $ s <> "}\n"
 
 instance Genny MainParam () where
