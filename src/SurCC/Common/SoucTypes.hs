@@ -44,23 +44,23 @@ data TypeVar = TypeVar (Either Word Char) SoucKind deriving (Eq, Ord, Show)
 -- data Constraint = Instance Text SoucType deriving (Eq)
 
 
-pattern SoucType :: Text -> SoucKind -> SoucType
-pattern SoucType name k = SoucTypeConstructor name k []
+pattern SoucType :: Text -> SoucType
+pattern SoucType name = SoucTypeConstructor name (SoucKind 0) []
 
 pattern SoucIO :: SoucType
-pattern SoucIO = SoucType "IO" (SoucKind 0)
+pattern SoucIO = SoucType "IO"
 
 pattern SoucBool :: SoucType
-pattern SoucBool = SoucType "Bool" (SoucKind 0)
+pattern SoucBool = SoucType "Bool"
 
 pattern SoucInteger :: SoucType
-pattern SoucInteger = SoucType "Integer" (SoucKind 0)
+pattern SoucInteger = SoucType "Integer"
 
 pattern SoucChar :: SoucType
-pattern SoucChar = SoucType "Char" (SoucKind 0)
+pattern SoucChar = SoucType "Char"
 
 pattern SoucString :: SoucType
-pattern SoucString = SoucType "String" (SoucKind 0)
+pattern SoucString = SoucType "String"
 
 pattern SoucFn :: SoucType -> SoucType -> SoucType
 pattern SoucFn t0 t1 = SoucTypeConstructor "Fn" (SoucKind 2) [t0,t1]
@@ -81,5 +81,5 @@ pattern SoucEither :: SoucType -> SoucType-> SoucType
 pattern SoucEither t0 t1 = SoucTypeConstructor "Either" (SoucKind 2) [t0,t1]
 
 pattern SoucModuleType :: SoucType
-pattern SoucModuleType = SoucType "Module" (SoucKind 0)
+pattern SoucModuleType = SoucType "Module"
 

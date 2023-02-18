@@ -172,4 +172,5 @@ assert_equals t0 t1 = unless (t0 == t1) (throwError (TypeMismatch t0 t1))
 
 
 not_implemented :: MonadError TypeError m => m a
-not_implemented = throwError $ TypeMismatch (SoucType "NOT YET" (SoucKind 0)) (SoucType "IMPLEMENTED" (SoucKind 0))
+not_implemented = throwError $
+    TypeMismatch (SoucType "NOT YET") (SoucType "IMPLEMENTED")

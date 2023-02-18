@@ -199,7 +199,7 @@ local_scope_main (MainParam
         include :: Bool -> Identifier -> Text
                      -> [(Identifier,(SoucType,Mutability))]
         include b name t = if b
-            then [(name, (SoucType t (SoucKind 0), Immut))]
+            then [(name, (SoucType t, Immut))]
             else []
 
 

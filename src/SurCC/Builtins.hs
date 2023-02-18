@@ -62,7 +62,7 @@ builtin_subroutines = Map.fromList [
     ),
     ("write", Builtin "_souc_write"
         (SoucRoutn
-            (SoucPair (SoucType "OutputStream" (SoucKind 0)) SoucString))
+            (SoucPair (SoucType "OutputStream") SoucString))
         Nothing
     ),
     ("abort", Builtin "abort"

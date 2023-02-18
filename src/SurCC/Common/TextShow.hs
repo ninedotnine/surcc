@@ -243,7 +243,7 @@ instance TextShow SoucType where
         SoucList t -> "[" <> showb t <> "]"
         SoucPair t0 t1 -> showb t0 <> " & " <> showb t1
         SoucEither t0 t1 -> showb t0 <> " | " <> showb t1
-        SoucType t _ -> TextShow.fromText t
+        SoucType t -> TextShow.fromText t
         SoucTypeVar (TypeVar (Left  v) _) -> "T" <> showb v
         SoucTypeVar (TypeVar (Right v) _) -> TextShow.singleton v
         SoucTypeConstructor t _ ts -> showb t <> "(" <> showb ts <> ")"

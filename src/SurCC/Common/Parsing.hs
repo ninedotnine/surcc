@@ -154,7 +154,7 @@ souc_type_var = SoucTypeVar <$> flip TypeVar (SoucKind 0) <$>
 souc_type_simple :: Parsec Text s SoucType
 souc_type_simple = do
     n <- upper_name
-    return $ SoucType n (SoucKind 0)
+    return $ SoucType n
 
 upper_name :: Parsec Text s Text
 upper_name = do

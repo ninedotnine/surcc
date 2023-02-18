@@ -153,4 +153,4 @@ add_main_routine param _m_t stmts = do
     -- it should be checked with the type
     -- that we know the main param must have
     local_scope_main param (check_stmts SoucIO stmts)
-    pure $ Bound "main" (SoucRoutn (SoucType "OutputStream" (SoucKind 0)))
+    pure $ Bound "main" (SoucRoutn (SoucType "OutputStream"))
