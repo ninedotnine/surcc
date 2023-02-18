@@ -39,18 +39,22 @@ build_typedefs' (types, consts) bounds = \case
     [] -> pure $ (GlobalScope types consts, bounds)
 
 
+-- FIXME can this function fail? does it need Either TypeError?
 build_typedef :: TypeDef
                  -> Either TypeError (SoucType, Refutable, [Identifier])
-build_typedef = \case
-    EmptyType t -> pure (t, Refutable True, [])
-    UnitType t term -> pure (t, Refutable False, [term])
+build_typedef = pure <$> \case
+    EmptyType t -> (t, Refutable True, [])
+    UnitType t term -> (t, Refutable False, [term])
     SynonymType t0 t1 -> undefined t0 t1 -- FIXME
     WrapperType t0 constructor t1 ->
-        pure (undefined t0 t1, Refutable False, [constructor]) -- FIXME
+        (undefined t0 t1, Refutable False, [constructor]) -- FIXME
     EnumType t constructors ->
         -- FIXME fail if two constructors are equal
-        pure (t, Refutable True, constructors) -- FIXME
-    StructType t constructor _ -> pure (t, Refutable False, [constructor])
+        (t, Refutable True, constructors) -- FIXME
+    StructType t fns ->
+        -- FIXME we're gonna need the bounds i think
+        (t, Refutable False, fns <&> get_id)
+        where get_id (Bound i _) = i
     GADType t -> undefined t -- FIXME
 
 

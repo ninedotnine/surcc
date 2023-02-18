@@ -255,6 +255,7 @@ instance TextShow TypeDef where
         SynonymType t0 t1 -> "synonym " <> showb t0 <> " = " <> showb t1
         WrapperType t0 _ t1 -> "wrapper " <> showb t0 <> " wraps " <> showb t1
         EnumType t terms -> "enum type " <> showb t <> " = " <> showb terms
-        StructType _ _ _ -> error "fixme typedef textshow"
+        StructType t fns -> "struct type " <> showb t <>
+                            " = {" <> showb fns <> "}"
         GADType _ -> error "fixme typedef textshow"
 

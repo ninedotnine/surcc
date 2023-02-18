@@ -72,7 +72,7 @@ data TypeDef = EmptyType SoucType
              | WrapperType SoucType Identifier SoucType
                         -- fixme: a wrapper (a function) is not a term.
              | EnumType SoucType [Identifier]
-             | StructType SoucType Identifier SoucType
+             | StructType SoucType [Bound]
              | GADType SoucType -- fixme
              deriving (Show)
 

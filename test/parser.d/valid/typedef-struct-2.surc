@@ -1,0 +1,1 @@
+def struct NonEmptyIntList = { non_empty_int_list(head: Int)(etc: List(Int)) }

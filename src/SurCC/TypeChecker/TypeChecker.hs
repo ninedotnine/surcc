@@ -4,6 +4,7 @@ module SurCC.TypeChecker.TypeChecker (
     type_check,
     ) where
 
+
 import Control.Applicative ()
 import Control.Monad (unless)
 import Control.Monad.Error.Class (MonadError, throwError)

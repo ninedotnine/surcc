@@ -22,6 +22,10 @@ import Data.Text (Text)
 
 
 data SoucType = SoucType Text SoucKind
+                -- SoucTypeConstructor invariant:
+                -- the length of the list of types
+                -- must be equal to the SoucKind
+                -- FIXME find a better way to represent this
               | SoucTypeConstructor Text SoucKind [SoucType]
               | SoucTypeVar TypeVar
 --               | SoucConstrainedType Constraint SoucType
