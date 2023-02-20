@@ -34,7 +34,6 @@ build_typedefs' (types, consts) bounds = \case
         let (t, refut, terms) = build_typedef d
         updated_types <- insert_type types t refut
         updated_consts <- insert_consts consts terms
---         let abounds = (terms <&> (\term -> Bound term t)) <> bounds
         let abounds = terms <> bounds
         build_typedefs' (updated_types, updated_consts) abounds defs
     [] -> pure $ (GlobalScope types consts, bounds)
@@ -45,8 +44,8 @@ build_typedef = \case
     EmptyType t -> (t, Refutable True, [])
     UnitType t term -> (t, Refutable False, [Bound term t])
     SynonymType t0 t1 -> undefined t0 t1 -- FIXME
-    WrapperType t0 constructor t1 -> -- FIXME
-        (undefined t0 t1, Refutable False, [Bound constructor (SoucFn t1 t0)])
+    IsomorphismType t constructor constructor_t b ->
+        (t, Refutable False, [b, Bound constructor constructor_t])
     EnumType t constructors ->
         (t, Refutable True, (constructors <&> (\con -> Bound con t)))
     StructType t fns -> (t, Refutable False, fns)

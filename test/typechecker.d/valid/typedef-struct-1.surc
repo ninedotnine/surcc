@@ -1,0 +1,5 @@
+def struct TupleIntBool = { tuple_int_bool(get_i: Integer)(get_b: Bool) }
+
+tup: TupleIntBool = tuple_int_bool << 4 << true
+i: Integer = tup >> get_i
+b: Bool = tup >> get_b

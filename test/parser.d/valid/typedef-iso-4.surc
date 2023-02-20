@@ -1,0 +1,2 @@
+; don't define unwrap function
+def isomorphism Wrapper(T) = { wrap(_: T) }

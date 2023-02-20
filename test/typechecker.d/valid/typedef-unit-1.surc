@@ -1,0 +1,10 @@
+def unit Unit = { unit }
+
+f(x: Unit): Unit = match x
+	=unit -> unit
+
+g(x: Unit): Unit = match x
+	u -> u
+
+h(x: Unit): Integer = match x
+	=unit -> 1

@@ -1,0 +1,6 @@
+def struct TripleIntBoolChar = { triple(get_i: Integer)(get_b: Bool)(get_c: Char) }
+
+trip: TripleIntBoolChar = triple << 4 << true << 'c'
+i: Integer = trip >> get_i
+b: Bool = trip >> get_b
+c: Char = trip >> get_c

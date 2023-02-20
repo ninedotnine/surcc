@@ -1,0 +1,5 @@
+def isomorphism TupleIntBool = { tuple_int_bool(pair: Pair(Integer)(Bool)) }
+
+p: Pair(Integer)(Bool) = (3,true)
+tib: TupleIntBool = p >> tuple_int_bool
+untib: Pair(Integer)(Bool) = tib >> pair

@@ -1,0 +1,5 @@
+; this could be a wrapper type instead, but that's okay
+def struct IntWrapper = { int_wrapper(unwrap: Integer) }
+
+x: IntWrapper = int_wrapper << 7
+i: Integer = unwrap << x

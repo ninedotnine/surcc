@@ -69,7 +69,8 @@ data Stmts = Stmts [Stmt] (Maybe Return) deriving (Eq, Show)
 data TypeDef = EmptyType SoucType
              | UnitType SoucType Identifier
              | SynonymType SoucType SoucType
-             | WrapperType SoucType Identifier SoucType
+             | IsomorphismType SoucType Identifier SoucType Bound
+                        -- fixme: an iso might not have any Bound
                         -- fixme: a wrapper (a function) is not a term.
              | EnumType SoucType [Identifier]
              | StructType SoucType [Bound]

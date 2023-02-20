@@ -17,7 +17,7 @@ import SurCC.Parser.Basics (identifier, indentation)
 type_def :: SurCParser TypeDef
 type_def = do
     reserved "def" *> spaces
-    unit_type <|> enum_type <|> struct_type
+    unit_type <|> enum_type <|> isomorphism_type <|> struct_type
 
 
 unit_type :: SurCParser TypeDef
@@ -36,23 +36,35 @@ enum_type = do
     pure $ EnumType name constructors
 
 
+isomorphism_type :: SurCParser TypeDef
+isomorphism_type = do
+    name <- opener "isomorphism" souc_type_parameterized
+    constructor <- identifier
+    (accessr_id,accessr_return_t) <- accessor
+    let
+        constructor_t = SoucFn accessr_return_t name
+        accessr = Bound accessr_id (SoucFn name accessr_return_t)
+    closer
+    pure $ IsomorphismType name constructor constructor_t accessr
+
+
 struct_type :: SurCParser TypeDef
 struct_type = do
     name <- opener "struct" souc_type_parameterized
     constructor <- identifier
-    accessors <- many1 (accessor name)
-    let constructor_t = (accessors <&> get_type) & foldr SoucFn name
-            where
-                get_type :: Bound -> SoucType
-                get_type (Bound _ s) = s
+    accessors <- many1 accessor
+    let
+        constructor_t = accessors <&> snd & foldr SoucFn name
+        accessor_bounds = accessors <&> (\(i,t) -> Bound i (SoucFn name t))
     closer
-    pure $ StructType name (Bound constructor constructor_t : accessors)
+    pure $ StructType name (Bound constructor constructor_t : accessor_bounds)
 
-accessor :: SoucType -> SurCParser Bound
-accessor t = do
+
+accessor :: SurCParser (Identifier,SoucType)
+accessor = do
     i <- char '(' *> optional spaces *> identifier
     sig <- type_signature <* optional spaces <* char ')'
-    pure $ Bound i (SoucFn t sig)
+    pure (i,sig)
 
 
 opener :: String -> SurCParser SoucType -> SurCParser SoucType

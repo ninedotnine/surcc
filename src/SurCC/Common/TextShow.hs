@@ -253,7 +253,8 @@ instance TextShow TypeDef where
         EmptyType t -> "empty type " <> showb t
         UnitType t _ -> "unit type " <> showb t
         SynonymType t0 t1 -> "synonym " <> showb t0 <> " = " <> showb t1
-        WrapperType t0 _ t1 -> "wrapper " <> showb t0 <> " wraps " <> showb t1
+        IsomorphismType t0 _ t1 _ -> "wrapper " <> showb t0
+                                     <> " wraps " <> showb t1
         EnumType t terms -> "enum type " <> showb t <> " = " <> showb terms
         StructType t fns -> "struct type " <> showb t <>
                             " = {" <> showb fns <> "}"

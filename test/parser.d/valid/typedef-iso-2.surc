@@ -1,0 +1,1 @@
+def isomorphism Wrapper(T) = { wrap(unwrap: T) } ; parameterized on T

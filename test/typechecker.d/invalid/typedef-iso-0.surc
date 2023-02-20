@@ -1,0 +1,6 @@
+def isomorphism IntWrapper = { int_wrapper(unwrap: Integer) }
+
+; int_wrapper: Int -> IntWrapper
+; unwrap: IntWrapper -> Int
+
+wrapped_int: Integer = int_wrapper << 8
