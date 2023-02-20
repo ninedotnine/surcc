@@ -54,7 +54,7 @@ build_typedef = \case
 
 
 insert_consts :: Mapping -> [Bound] -> Either TypeError Mapping
-insert_consts m bounds = case bounds of
+insert_consts m = \case
     ((Bound i t):cons) -> do
         new_map <- insert_const m i t
         insert_consts new_map cons

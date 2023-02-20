@@ -67,7 +67,7 @@ check_stmt t = \case
 
 
 infer_return :: Maybe ExprTree -> Checker SoucType
-infer_return m_expr = case m_expr of
+infer_return = \case
     Just expr -> infer expr
                     -- FIXME why throw an error?
                  >>= throwError . TypeMismatch SoucIO
