@@ -149,7 +149,8 @@ souc_type_parameterized = do
 
 souc_type_var :: Parsec Text s SoucType
 souc_type_var = SoucTypeVar <$> flip TypeVar (SoucKind 0) <$>
-    (((char 'V' *> many1 digit) <&> read <&> Left) <|> (upper <&> Right))
+    ((try (char 'T' *> many1 digit) <&> read <&> Left)
+    <|> (upper <&> Right))
 
 souc_type_simple :: Parsec Text s SoucType
 souc_type_simple = do
