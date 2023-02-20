@@ -11,6 +11,7 @@ import Control.Monad.Error.Class
 import Data.Functor
 import Data.HashMap.Strict qualified as Map
 import Data.HashMap.Strict (HashMap)
+import Data.Maybe (maybeToList)
 
 import SurCC.Builtins (builtin_identifiers, builtin_types)
 import SurCC.Common
@@ -45,7 +46,7 @@ build_typedef = \case
     UnitType t term -> (t, Refutable False, [Bound term t])
     SynonymType t0 t1 -> undefined t0 t1 -- FIXME
     IsomorphismType t constructor constructor_t b ->
-        (t, Refutable False, [b, Bound constructor constructor_t])
+        (t, Refutable False, (Bound constructor constructor_t):maybeToList b)
     EnumType t constructors ->
         (t, Refutable True, (constructors <&> (\con -> Bound con t)))
     StructType t fns -> (t, Refutable False, fns)

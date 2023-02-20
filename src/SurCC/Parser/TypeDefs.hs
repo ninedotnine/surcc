@@ -43,7 +43,9 @@ isomorphism_type = do
     (accessr_id,accessr_return_t) <- accessor
     let
         constructor_t = SoucFn accessr_return_t name
-        accessr = Bound accessr_id (SoucFn name accessr_return_t)
+        accessr = if accessr_id == "_"
+            then Nothing
+            else Just $ Bound accessr_id (SoucFn name accessr_return_t)
     closer
     pure $ IsomorphismType name constructor constructor_t accessr
 
@@ -55,7 +57,10 @@ struct_type = do
     accessors <- many1 accessor
     let
         constructor_t = accessors <&> snd & foldr SoucFn name
-        accessor_bounds = accessors <&> (\(i,t) -> Bound i (SoucFn name t))
+        accessor_bounds = accessors
+                          & filter (\(i,_) ->  i /= "_")
+                          <&> (\(i,t) -> Bound i (SoucFn name t))
+
     closer
     pure $ StructType name (Bound constructor constructor_t : accessor_bounds)
 
