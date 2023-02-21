@@ -16,13 +16,13 @@ import System.Console.Haskeline (runInputT, defaultSettings, getInputLine)
 
 import Data.Text (Text)
 import Data.Text qualified as Text
+import Data.Text.IO qualified as TextIO
+import TextShow (showt)
 
 import SurCC.Parser.ExprParser (parse_text_as_expr)
-import SurCC.Parser.Expr.Types (RawExpr(..))
 import SurCC.TypeChecker.Expressions (infer)
-import SurCC.TypeChecker.Context (Checker)
--- import SurCC.Common (TypeError, ExprTree(..), Term(..), Literal(..))
 import SurCC.Common
+import SurCC.Common.SoucTypes (SoucType)
 
 main :: IO ()
 main = do
@@ -35,36 +35,47 @@ main = do
 repl :: IO ()
 repl = runInputT defaultSettings loop where
     loop = getInputLine "expr> "
-           >>= traverse_ (Text.pack <&> pepe <&> liftIO <&> (*> loop))
+           >>= traverse_ (Text.pack <&> pcepe <&> liftIO <&> (*> loop))
 
-pepe :: Text -> IO ()
-pepe line = unless (Text.all isSpace line) (parse_eval_print_expression line)
+-- parse, check, eval, print expression
+pcepe :: Text -> IO ()
+pcepe line = unless (Text.all isSpace line) (print_expression line)
 
 parse_stdin :: IO ()
-parse_stdin = do
-    input <- getContents
-    case parse_text_as_expr (Text.pack input) of
-        Left err -> putStrLn (show err) >> exitFailure
-        Right tree -> putStrLn (eval_show_astree tree) >> exitSuccess
+parse_stdin = TextIO.getContents >>= parse_check_eval_print_exit
 
 parse_all :: [Text] -> IO ()
-parse_all exprs = mapM_ parse_eval_print_expression exprs
+parse_all exprs = mapM_ print_expression exprs
 
 
------
+parse_check_eval_print_exit :: Text -> IO ()
+parse_check_eval_print_exit = parse_check_eval <&> (fale ||| succeed)
+    where
+        fale txt = TextIO.putStrLn txt *> exitFailure
+        succeed txt = TextIO.putStrLn txt *> exitSuccess
 
-parse_eval_print_expression :: Text -> IO ()
-parse_eval_print_expression input =
+print_expression :: Text -> IO ()
+print_expression =
+    parse_check_eval <&> (TextIO.putStrLn ||| TextIO.putStrLn)
+
+
+parse_check_eval :: Text -> Either Text Text
+parse_check_eval input =
     case parse_text_as_expr input of
-        Left err -> putStrLn (show err)
-        Right tree -> putStrLn (eval_show_astree tree)
+        Left err -> Left (show err & Text.pack)
+        Right tree -> case type_check tree of
+            Left err -> Left (showt err)
+            Right t -> Right $
+                (evaluate_astree tree & showt) <> ": " <> showt t
 
 
-run_expr_checker :: Checker a -> Either TypeError a
-run_expr_checker checker =
-    runReader (evalStateT (runExceptT checker) mempty) mempty
+type_check :: ExprTree -> Either TypeError SoucType
+type_check expr =
+    runReader (evalStateT (runExceptT (infer expr)) mempty) mempty
 
 
+-- this does some silly things to treat everything as an Integer
+-- it should probably produce a Term instead?
 evaluate_astree :: ExprTree -> Integer
 evaluate_astree = \case
     Leaf t -> case t of
@@ -72,7 +83,10 @@ evaluate_astree = \case
             LitInt x -> x
             LitChar c -> fromIntegral (ord c)
             LitString s -> fromIntegral (Text.length s)
-        Name _ -> 42 -- all identifiers are bound to this, sure
+        Name "true" -> 1
+        Name "false" -> 0
+        Name "none" -> (-1)
+        Name _ -> 42 -- should have failed to type-check anyway
 
     Signed e _ -> evaluate_astree e
 
@@ -95,14 +109,11 @@ evaluate_astree = \case
                     FloorDiv -> div
                     Modulo -> mod
                     Hihat  -> (^)
-                    Equals -> undefined -- can't do this on integers
-                    GreaterThan -> undefined -- can't do this on integers
-                    LesserThan -> undefined -- can't do this on integers
+                    Equals -> \x y -> if (x==y) then 1 else 0
+                    GreaterThan -> \x y -> if (x>y) then 1 else 0
+                    LesserThan -> \x y -> if (x<y) then 1 else 0
                     Combine  -> undefined
                     Apply  -> undefined -- definitely can't do this
                     whatever -> error $ "can't evaluate " ++ show whatever
 
-    Match _expr _branches -> undefined
-
-eval_show_astree :: ExprTree -> String
-eval_show_astree = evaluate_astree <&> show
+    Match _expr _branches -> undefined -- cannot be input in 1 line anyway
