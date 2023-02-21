@@ -1,0 +1,5 @@
+def struct TupleBoolChar = { tuplebc(_: Bool)(get_c: Char) }
+
+tup: TupleBoolChar = tuplebc << true << 'c'
+b: Bool = tup >> _
+c: Char = tup >> get_c
