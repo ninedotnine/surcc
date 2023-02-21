@@ -8,10 +8,7 @@ module SurCC.CodeGen.CodeGen (
 
 import SurCC.CodeGen.Common
 import SurCC.CodeGen.TypeDefs (gen_typedefs)
-import SurCC.CodeGen.ExprGen (
-    gen_expr,
-    gen_identifier,
-    )
+import SurCC.CodeGen.ExprGen (gen_expr, gen_identifier)
 import SurCC.CodeGen.Runtime (runtime)
 import SurCC.Common (
     Stmt(..),
@@ -26,10 +23,10 @@ import SurCC.Common (
     Identifier(..),
     Stmts(..),
     Return(..),
+    ExprTree,
     CheckedProgram(..),
     TopLevelDefn(..)
     )
-import SurCC.Parser.ExprParser (ExprTree)
 
 import Control.Monad.State (evalState)
 import Control.Monad.Writer (execWriterT, tell)

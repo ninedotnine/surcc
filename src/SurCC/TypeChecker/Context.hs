@@ -1,5 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE TupleSections #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 -- FIXME ideas
 -- generalize `check` and `infer`, use typeclass or ADT
@@ -7,11 +8,11 @@
 module SurCC.TypeChecker.Context (
     TopChecker,
     Checker,
-    ExportList(..),
+    ExportList,
     ImportList,
     TypeSet(..),
     GlobalScope(..),
-    LocalScopes(..),
+    LocalScopes,
     run_top_checker,
     get_type,
     get_var,
@@ -60,23 +61,32 @@ type Checker a = ExceptT TypeError (
 
 
 newtype ExportList = ExportList ImmutMapping
-                deriving (Show)
+                deriving (Show,Semigroup,Monoid)
 
 newtype ImportList = ImportList (Set.Set Identifier)
-                deriving (Show)
+                deriving (Show,Semigroup,Monoid)
 
 
 type ImmutMapping = HashMap Identifier SoucType
 
 type MutMapping = HashMap Identifier (SoucType, Mutability)
 
-newtype TypeSet = TypeSet (HashMap SoucType Refutable) deriving (Show)
+
+newtype TypeSet = TypeSet (HashMap SoucType Refutable) deriving (Show,Semigroup,Monoid)
 
 data GlobalScope = GlobalScope TypeSet ImmutMapping
                 deriving (Show)
 
 newtype LocalScopes = LocalScopes [MutMapping]
-                deriving (Show)
+                deriving (Show, Semigroup, Monoid)
+
+
+instance Semigroup GlobalScope where
+    (GlobalScope types0 map0) <> (GlobalScope types1 map1) =
+        GlobalScope (types0 <> types1) (map0 <> map1)
+
+instance Monoid GlobalScope where
+    mempty = GlobalScope mempty mempty
 
 
 run_top_checker :: ImportList -> ExportList -> GlobalScope -> TopChecker a

@@ -1,5 +1,4 @@
 module SurCC.Parser.Expr.Raw (
-    RawExpr(..),
     raw_expr,
 --     run_raw_expr_parser,
     postfix_oper -- fixme why is this in this module?

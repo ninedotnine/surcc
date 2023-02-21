@@ -1,15 +1,6 @@
 module SurCC.Parser.ExprParser (
---     pretty_show_expression,
     parse_expression,
-    parse_raw_expression,
---     parse_print_expression,
---     evaluate_astree,
-    eval_show_astree,
-    parse_eval_print_expression,
-    ExprTree(..),
-    Term(..),
-    Operator(..),
-    PrefixOperator(..),
+    parse_text_as_expr,
 ) where
 
 import SurCC.Parser.Expr.ExprParser

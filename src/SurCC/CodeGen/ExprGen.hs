@@ -6,15 +6,9 @@ module SurCC.CodeGen.ExprGen (
     gen_identifier,
 ) where
 
-import SurCC.Parser.ExprParser (
-    ExprTree(..),
-    Term(..),
-    Operator(..),
-    PrefixOperator(..)
-    )
 
 import SurCC.Builtins (gen_builtin)
-import SurCC.Common (Identifier(..), Pattern(..), Literal(..), Guard(..))
+import SurCC.Common
 import SurCC.CodeGen.Common
 
 import Control.Arrow (second)
