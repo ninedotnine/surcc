@@ -1,5 +1,6 @@
 module Main_Expr where
 
+import Control.Arrow ((|||))
 import Control.Monad (unless)
 import Control.Monad.Trans (liftIO)
 import Control.Monad.Reader (runReader)
@@ -7,6 +8,7 @@ import Control.Monad.State (evalStateT)
 import Control.Monad.Except (runExceptT)
 import Data.Foldable (traverse_)
 import Data.Functor ((<&>))
+import Data.Function ((&))
 import Data.Char (isSpace, ord)
 import System.Environment (getArgs)
 import System.Exit (exitFailure, exitSuccess)

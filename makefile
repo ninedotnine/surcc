@@ -23,16 +23,22 @@ GHC_WARNS += -fmax-errors=2
 FLAGS := $(HSFLAGS) $(GHC_EXTS) $(GHC_FLAGS) $(GHC_WARNS)
 
 
-.PHONY: surcc expr parser typechecker all default
+# the binaries are PHONY targets
+# because make doesn't know which .hs source files they depend on
+# so just let GHC resolve the depends
 
-default: all test
+.PHONY: default parser typechecker expr surcc
 
-all: parser expr typechecker surcc
+default: surcc
 
-surcc: src/Main_Surcc.hs expr parser typechecker | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
+# GHC compiles modules in parallel.
+# asking make to parallelize too just creates trouble.
+# that's why the targets depend on each other.
+
+surcc: src/Main_Surcc.hs expr | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
 	@ghc $(FLAGS) -o $(OUT_DIR)/$@ -main-is Main_Surcc $<
 
-expr: src/Main_Expr.hs parser typechecker | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
+expr: src/Main_Expr.hs typechecker | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
 	@ghc $(FLAGS) -o $(OUT_DIR)/$@ -main-is Main_Expr $<
 
 typechecker: src/Main_TypeChecker.hs parser | $(OUT_DIR) $(HI_DIR) $(OBJ_DIR)
@@ -50,31 +56,25 @@ clean:
 	rm -fr $(OUT_DIR) $(CACHE_DIR)
 
 .PHONY: test
-test: test/parser test/type_checker test/codegen test/expr_parser test/integration test/typechecker_globals test/typechecker
+.PHONY: test/parser test/codegen test/integration test/typechecker
+test:   test/parser test/codegen test/integration test/typechecker
 	@echo "all tests successful! :^D"
 
-.PHONY: test/expr_parser test/integration test/typechecker
-test/expr_parser: parser expr
-test/integration test/expr_parser: surcc
+test/integration: surcc
 	@ $@
 
-
-.PHONY: test/parser
-test/parser: test/TestParser.hs parser surcc | $(TEST_DIR)
-	@$(RM) $(CACHE_DIR)/hi_files/Main.hi  	# ugh hack to fix ghc
-	ghc $(FLAGS) -o $(TEST_DIR)/parser -main-is TestParser $<
-	$(TEST_DIR)/parser
-
-
 test/typechecker: typechecker
-	bin/typechecker --test
+	$(OUT_DIR)/typechecker --test
 
-.PHONY: test/codegen test/type_checker test/typechecker_globals
-# test/codegen test/type_checker test/typechecker_globals: all | $(TEST_DIR)
-test/codegen: all | $(TEST_DIR)
+test/parser: parser
+test/codegen: surcc
+test/parser test/codegen: | $(TEST_DIR)
 	@$(RM) $(CACHE_DIR)/hi_files/Main.hi  	# ugh hack to fix ghc
 	@ghc $(FLAGS) -o $(CACHE_DIR)/$@ $@.hs
 	@$(CACHE_DIR)/$@
+
+
+## i really don't use this and do not know that it works
 
 .PHONY: deps
 deps: | $(CACHE_DIR)
@@ -82,3 +82,18 @@ deps: | $(CACHE_DIR)
 	ghc -M -dep-suffix '' $(FLAGS) -dep-makefile $(CACHE_DIR)/expr-deps src/Main_Expr.hs
 	ghc -M -dep-suffix '' $(FLAGS) -dep-makefile $(CACHE_DIR)/parser-deps src/Main_Parser.hs
 	ghc -M -dep-suffix '' $(FLAGS) -dep-makefile $(CACHE_DIR)/typechecker-deps src/Main_TypeChecker.hs
+
+
+## tests after this line are not guaranteed to pass or even compile
+
+.PHONY: obsolete_tests
+obsolete_tests: test/expr_parser test/type_checker test/typechecker_progs test/typechecker_globals
+.PHONY:         test/expr_parser test/type_checker test/typechecker_progs test/typechecker_globals
+
+test/expr_parser: typechecker
+	@ $@
+
+test/type_checker test/typechecker_progs test/typechecker_globals: surcc | $(TEST_DIR)
+	@$(RM) $(CACHE_DIR)/hi_files/Main.hi  	# ugh hack to fix ghc
+	@ghc $(FLAGS) -o $(CACHE_DIR)/$@ $@.hs
+	@$(CACHE_DIR)/$@
