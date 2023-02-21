@@ -29,7 +29,7 @@ FLAGS := $(HSFLAGS) $(GHC_EXTS) $(GHC_FLAGS) $(GHC_WARNS)
 
 .PHONY: default parser typechecker expr surcc
 
-default: surcc
+default: surcc test
 
 # GHC compiles modules in parallel.
 # asking make to parallelize too just creates trouble.
