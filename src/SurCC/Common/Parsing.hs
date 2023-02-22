@@ -3,6 +3,8 @@ module SurCC.Common.Parsing (
     line_comment,
     space,
     spaces,
+    ignore_spaces,
+    enclosed_spaces,
     space_or_tab,
     newline,
     pragma,
@@ -47,11 +49,14 @@ space = void (char ' ' <?> "")
 spaces :: Parsec Text s ()
 spaces = void $ many1 space
 
+ignore_spaces :: Parsec Text s ()
+ignore_spaces = skipMany space
+
 space_or_tab :: Parsec Text s ()
 space_or_tab = space <|> void tab
 
-ignore_spaces :: Parsec Text s ()
-ignore_spaces = skipMany (char ' ' <?> "")
+enclosed_spaces :: Parsec Text s ()
+enclosed_spaces = void (try (ignore_spaces *> newline *> tab)) <|> spaces
 
 newline :: Parsec Text s ()
 newline = void (char '\n' <?> "newline")

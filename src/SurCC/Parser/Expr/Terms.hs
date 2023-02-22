@@ -32,7 +32,7 @@ parse_term_tok = TermTok <$> (
 parse_prefix_op :: ShuntingYardParser TermToken
 parse_prefix_op = do
     oper <- parse_oper_symbol
-    spacing <- Parsec.optionMaybe respect_spaces
+    spacing <- Parsec.optionMaybe spaces
     case spacing of
         Nothing -> pure (TightPreOp oper)
         Just () -> pure (SpacedPreOp oper)

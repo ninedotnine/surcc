@@ -32,7 +32,14 @@ import SurCC.Parser.Expr.Raw (raw_expr)
 
 import SurCC.Common
 import SurCC.Parser.Common (SurCParser)
-import SurCC.Common.Parsing (optional_sig, reserved, endline, spaces, string)
+import SurCC.Common.Parsing (
+    optional_sig,
+    reserved,
+    endline,
+    spaces,
+    ignore_spaces,
+    string
+    )
 import SurCC.Common.TextShow ()
 import SurCC.Parser.Patterns  (parse_pattern)
 
@@ -100,7 +107,7 @@ parse_term = do
     parse_term_token >>= \case
         LParen -> do
             if_tightly_spaced (oper_stack_push StackSpace *> set_spacing_tight False)
-            spacing <- Parsec.optionMaybe respect_spaces
+            spacing <- Parsec.optionMaybe spaces
             case spacing of
                 Nothing -> oper_stack_push StackLParen
                 Just () -> oper_stack_push StackLParenFollowedBySpace

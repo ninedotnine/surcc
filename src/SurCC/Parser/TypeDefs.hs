@@ -2,7 +2,8 @@ module SurCC.Parser.TypeDefs (
     type_def,
 ) where
 
-import Text.Parsec hiding (space, spaces, string, parse)
+import Text.Parsec hiding (space, spaces, string, parse, newline)
+import Control.Applicative (liftA2)
 import Data.Function
 import Data.Functor
 
@@ -23,60 +24,64 @@ type_def = do
 unit_type :: SurCParser TypeDef
 unit_type = do
     name <- opener "unit" souc_type_simple
-    c <- identifier
-    closer
+    c <- in_braces identifier
     pure $ UnitType name c
 
 
 enum_type :: SurCParser TypeDef
 enum_type = do
     name <- opener "enum" souc_type_simple
-    constructors <- many1 (identifier <* spaces)
-    closer
+    constructors <- in_braces $ multiple identifier
     pure $ EnumType name constructors
 
 
 isomorphism_type :: SurCParser TypeDef
 isomorphism_type = do
     name <- opener "isomorphism" souc_type_parameterized
-    constructor <- identifier
-    (accessr_id,accessr_return_t) <- accessor
+    (constructor,accessr_id,accessr_return_t) <- in_braces $ do
+        i <- identifier
+        (aid,art) <- accessor
+        pure (i,aid,art)
     let
         constructor_t = SoucFn accessr_return_t name
         accessr = if accessr_id == "_"
             then Nothing
             else Just $ Bound accessr_id (SoucFn name accessr_return_t)
-    closer
     pure $ IsomorphismType name constructor constructor_t accessr
 
 
 struct_type :: SurCParser TypeDef
 struct_type = do
     name <- opener "struct" souc_type_parameterized
-    constructor <- identifier
-    accessors <- many1 accessor
+    (constructor,accessors) <- in_braces $
+        liftA2 (,) identifier (many1 accessor)
     let
         constructor_t = accessors <&> snd & foldr SoucFn name
         accessor_bounds = accessors
                           & filter (\(i,_) ->  i /= "_")
                           <&> (\(i,t) -> Bound i (SoucFn name t))
-
-    closer
     pure $ StructType name (Bound constructor constructor_t : accessor_bounds)
 
 
 accessor :: SurCParser (Identifier,SoucType)
 accessor = do
-    i <- char '(' *> optional spaces *> identifier
-    sig <- type_signature <* optional spaces <* char ')'
+    i <- char '(' *> optional enclosed_spaces *> identifier
+    sig <- type_signature <* optional enclosed_spaces <* char ')'
     pure (i,sig)
 
 
 opener :: String -> SurCParser SoucType -> SurCParser SoucType
 opener word name_parser =
-    reserved word *> spaces *>
-    name_parser
-    <* spaces <* char '=' <* spaces <* char '{' <* optional spaces
+    reserved word *> spaces *> name_parser <* spaces <* char '='
 
-closer :: SurCParser ()
-closer = optional spaces *> char '}' *> endline
+
+multiple :: SurCParser a -> SurCParser [a]
+multiple p = p `sepBy1` try (enclosed_spaces *> lookAhead identifier_char)
+
+
+in_braces :: SurCParser a -> SurCParser a
+in_braces p = do
+    void $ spaces *> char '{' *> optional enclosed_spaces
+    x <- p
+    void $ ignore_spaces *> optional newline *> char '}'
+    pure x

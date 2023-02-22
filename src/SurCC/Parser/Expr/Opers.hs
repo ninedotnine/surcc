@@ -9,6 +9,7 @@ import Data.Functor ((<&>), void)
 import Text.Parsec qualified as Parsec
 import Text.Parsec ((<|>), (<?>))
 
+import SurCC.Common.Parsing (spaces, ignore_spaces)
 import SurCC.Parser.Expr.Types
 import SurCC.Parser.Expr.RegardingSpaces
 import SurCC.Parser.Expr.StackManipulations
@@ -39,7 +40,7 @@ apply_tight_prefix_opers = do
 
 parse_infix_oper :: ShuntingYardParser OperToken
 parse_infix_oper = do
-    spacing <- Parsec.optionMaybe respect_spaces
+    spacing <- Parsec.optionMaybe spaces
     case spacing of
         Nothing -> do
             if_loosely_spaced (oper_stack_push StackSpace)
@@ -47,7 +48,7 @@ parse_infix_oper = do
         Just _  -> do
             if_tightly_spaced find_left_space
     oper <- parse_oper_symbol
-    if_loosely_spaced (respect_spaces <?> ("space after `" ++ show oper ++ "`"))
+    if_loosely_spaced (spaces <?> ("space after `" ++ show oper ++ "`"))
     if_tightly_spaced $ no_spaces ("whitespace after `" ++ show oper ++ "`")
     pure (Oper oper)
     where
@@ -97,7 +98,7 @@ parse_infix_oper = do
 
 parse_right_paren :: ShuntingYardParser OperToken
 parse_right_paren = do
-    spacing <- Parsec.optionMaybe respect_spaces
+    spacing <- Parsec.optionMaybe spaces
     _ <- Parsec.char ')' <?> ""
     pure $ case spacing of
         Nothing -> RParen
