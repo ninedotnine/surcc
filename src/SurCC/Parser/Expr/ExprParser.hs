@@ -17,6 +17,7 @@ import Data.Char (isSpace) -- for trim_spaces
 
 import Data.Foldable (traverse_)
 import Data.Functor ((<&>))
+import Data.Function
 
 import Data.Text (Text)
 import Data.Text qualified as Text
@@ -81,16 +82,15 @@ parse_match = do
 
 
 parse_infix_expression :: Parsec.Parsec Text s ExprTree
-parse_infix_expression = do
-    raw <- raw_expr
-    case parse_raw_expression raw of
-        Right e -> pure e
-        Left err -> parserFail $ "invalid expression:\n" ++ show err
+parse_infix_expression = raw_expr <&> parse_raw_expression >>= \case
+    Right e -> pure e
+    Left err -> parserFail $ "invalid expression: " ++ show expr_str
+        where expr_str = err & Parsec.errorPos & Parsec.sourceName
 
 
 parse_raw_expression :: RawExpr -> Either ParseError ExprTree
 parse_raw_expression (RawExpr input) =
-    Parsec.runParser parse_term start_state "input" (trim_spaces input)
+    Parsec.runParser parse_term start_state (Text.unpack input) (trim_spaces input)
     where
         start_state = (Oper_Stack [], Tree_Stack [], Tight False)
         trim_spaces = Text.dropWhile isSpace <&> Text.dropWhileEnd isSpace

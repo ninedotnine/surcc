@@ -137,9 +137,13 @@ stmt_var_reassign name = do
 
 stmt_sub_call :: Identifier -> SurCParser Stmt
 stmt_sub_call name = do
-    m_arg <- optionMaybe (try (spaces *> parse_expression))
+    m_arg <- optionMaybe $ try (spaces *> lookAhead expr_start)
+                           *> parse_expression
     endline
     pure $ Stmt_Sub_Call name m_arg
+    where
+        expr_start = identifier_char <|> oneOf (op_chars <> "([{\"\'")
+
 
 stmt_postfix_oper :: Identifier -> SurCParser Stmt
 stmt_postfix_oper name = do

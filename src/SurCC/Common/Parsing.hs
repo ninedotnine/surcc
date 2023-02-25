@@ -7,6 +7,7 @@ module SurCC.Common.Parsing (
     enclosed_spaces,
     space_or_tab,
     newline,
+    op_chars,
     pragma,
     skipManyTill,
     reserved,
@@ -60,6 +61,10 @@ enclosed_spaces = void (try (ignore_spaces *> newline *> tab)) <|> spaces
 
 newline :: Parsec Text s ()
 newline = void (char '\n' <?> "newline")
+
+
+op_chars :: String
+op_chars = "+-*/~!@#$%^&<>=,"
 
 
 pragma :: Parsec Text s ()

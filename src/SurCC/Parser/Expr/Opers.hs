@@ -9,7 +9,7 @@ import Data.Functor ((<&>), void)
 import Text.Parsec qualified as Parsec
 import Text.Parsec ((<|>), (<?>))
 
-import SurCC.Common.Parsing (spaces, ignore_spaces)
+import SurCC.Common.Parsing (spaces, ignore_spaces, op_chars)
 import SurCC.Parser.Expr.Types
 import SurCC.Parser.Expr.RegardingSpaces
 import SurCC.Parser.Expr.StackManipulations
@@ -21,10 +21,7 @@ parse_oper_token =
 
 check_for_oper :: ShuntingYardParser ()
 check_for_oper = void $
-    Parsec.lookAhead (Parsec.try (ignore_spaces *> Parsec.oneOf valid_op_chars))
-
-valid_op_chars :: String
-valid_op_chars = "+-*/%^<>=&~,"
+    Parsec.lookAhead (Parsec.try (ignore_spaces *> Parsec.oneOf op_chars))
 
 apply_tight_prefix_opers :: ShuntingYardParser ()
 apply_tight_prefix_opers = do
@@ -53,7 +50,7 @@ parse_infix_oper = do
     pure (Oper oper)
     where
         str :: String -> ShuntingYardParser String
-        str s = Parsec.try ((Parsec.string s) <* Parsec.notFollowedBy (Parsec.oneOf valid_op_chars))
+        str s = Parsec.try ((Parsec.string s) <* Parsec.notFollowedBy (Parsec.oneOf op_chars))
 
         parse_oper_symbol :: ShuntingYardParser Operator
         parse_oper_symbol = asum (symbols <&> parser) <?> "infix operator"

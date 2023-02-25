@@ -14,7 +14,6 @@ import SurCC.Parser.Common
 import SurCC.Parser.Basics (param, end_block_named, add_to_bindings, identifier)
 import SurCC.Common.Parsing
 import SurCC.Common.SoucTypes (SoucType)
-import SurCC.Parser.Expr.Raw  (raw_expr)
 import SurCC.Parser.SurCStmts (stmt_block, stmt_block_with_param)
 import SurCC.Parser.ExprParser (parse_expression)
 import SurCC.Parser.TabChecker (check_tabs)
