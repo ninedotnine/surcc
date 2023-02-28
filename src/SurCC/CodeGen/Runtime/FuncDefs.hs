@@ -5,9 +5,11 @@ import Prelude qualified
 import Data.Text (Text)
 import Data.Text qualified as Text
 
+join = Text.intercalate "\n"
 
 funcdefs :: Text
-funcdefs = Text.intercalate "\n" [
+funcdefs = join [
+    pair,
     sum,
     difference,
     product,
@@ -24,6 +26,17 @@ funcdefs = Text.intercalate "\n" [
     increment,
     int_str,
     "// end of funcdefs\n"
+    ]
+
+-- pair is very special!
+-- but for now, this is not used
+pair = join [
+    "union _souc_obj _souc_pair(union _souc_obj x, union _souc_obj y) {",
+    "\tstruct _souc_pair * p = calloc(sizeof(*p),1); // FIXME this leaks",
+    "\tp->first = x;",
+    "\tp->second = y;",
+    "\treturn (union _souc_obj) { ._souc_pair = p };",
+    "}"
     ]
 
 sum = "union _souc_obj _souc_sum(union _souc_obj x, union _souc_obj y) { return (union _souc_obj) { ._souc_int = x._souc_int + y._souc_int };}"

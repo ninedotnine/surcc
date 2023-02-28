@@ -113,4 +113,10 @@ builtin_constants = Map.fromList [
         "_souc_ok"
         (SoucFn SoucInteger (SoucMaybe SoucInteger)) -- FIXME make polymorphic
         Nothing
+    ),
+    ("pair", Builtin
+        "_souc_pair"
+         -- FIXME make polymorphic
+        (SoucFn SoucInteger (SoucFn SoucInteger (SoucPair SoucInteger SoucInteger)))
+        Nothing
     )]
