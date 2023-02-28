@@ -1,0 +1,6 @@
+rem(x: Pair(Integer)(Integer)) = remainder << x
+
+main(stdout: OutputStream) = do
+	write stdout , (8,2) >> remainder >> str
+	write stdout , (8,3) >> remainder >> str
+	write stdout , (8,5) >> remainder >> str
