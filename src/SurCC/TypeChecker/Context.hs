@@ -27,7 +27,7 @@ module SurCC.TypeChecker.Context (
     import_list,
 ) where
 
-import Control.Arrow ((|||))
+import Control.Arrow ((|||), second)
 import Control.Applicative ((<|>))
 import Control.Monad (when, unless)
 import Data.Foldable (for_)
@@ -170,22 +170,27 @@ import_list imports = ImportList $ Set.fromList (unwrap <$> imports)
             RelImport name -> Identifier name
 
 
-local_scope_with :: LocalScopes -> Checker a -> TopChecker a
-local_scope_with locals checker = do
+local_scope_with :: [(Identifier,SoucType)] -> Checker a -> TopChecker a
+local_scope_with list checker = do
     (imps,exps) <- ask
     globals <- get
+    for_ (list <&> fst) $ \i -> do
+        when (isJust $ lookup i imps globals mempty) $
+            throwError (MultipleDeclarations i)
+        when (member_exports i exps) $
+            throwError (ExportedLocal i)
     runReader (evalStateT (runExceptT checker) locals) (imps,exps,globals)
         & (throwError ||| pure)
+        where
+            locals = LocalScopes [list <&> second (,Immut) & Map.fromList]
 
 
 local_scope :: Checker a -> TopChecker a
-local_scope checker = local_scope_with locals checker
-    where locals = LocalScopes [Map.empty]
+local_scope = local_scope_with []
 
 
 local_scope_param :: Identifier -> SoucType -> Checker a -> TopChecker a
-local_scope_param i t checker = local_scope_with locals checker
-    where locals = LocalScopes [Map.singleton i (t, Immut)]
+local_scope_param i t = local_scope_with [(i,t)]
 
 
 local_scope_main :: MainParam -> Checker a -> TopChecker a
@@ -196,10 +201,10 @@ local_scope_main (MainParam
         (MainParamProgName progname)
         (MainParamArgs args)
         (MainParamEnv env)
-    ) checker = local_scope_with locals checker
+    ) = local_scope_with locals
     where
-        locals = LocalScopes [Map.fromList list]
-        list = include stdin "stdin" "InputStream"
+        locals :: [(Identifier,SoucType)]
+        locals = include stdin "stdin" "InputStream"
                 <> include stdout "stdout" "OutputStream"
                 <> include stderr "stderr" "OutputStream"
                 <> include progname "program_name" "String"
@@ -207,9 +212,9 @@ local_scope_main (MainParam
                 <> include env "env" "FIXME"
 
         include :: Bool -> Identifier -> Text
-                     -> [(Identifier,(SoucType,Mutability))]
+                     -> [(Identifier,SoucType)]
         include b name t = if b
-            then [(name, (SoucType t, Immut))]
+            then [(name, (SoucType t))]
             else []
 
 
@@ -233,6 +238,7 @@ insert_local modifiable i t = do
         throwError (ExportedLocal i)
     when (member_globals i globals) $
         throwError (MultipleDeclarations i)
+    -- FIXME this should also check the local scopes!
     (put =<<) $ get >>= \case
         LocalScopes [] -> error "should not be reachable"
         LocalScopes (binds : etc) ->

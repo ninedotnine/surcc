@@ -1,0 +1,4 @@
+b: Bool = true
+
+; b already declared
+f(b: Bool): Bool = b
