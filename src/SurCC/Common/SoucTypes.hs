@@ -4,6 +4,7 @@ module SurCC.Common.SoucTypes (
     SoucType(..),
     pattern SoucType,
     SoucKind(..),
+    recurse_kind,
     TypeVar(..),
     pattern SoucIO,
     pattern SoucBool,
@@ -23,13 +24,19 @@ import Data.Text (Text)
 import TextShow (showt)
 
 
-data SoucType = SoucTypeCon Text [SoucType]
+data SoucType = SoucTypeCon Text SoucKind [SoucType]
               | SoucTypeVar TypeVar
 --               | SoucConstrainedType Constraint SoucType
               deriving (Eq,Show,Ord)
 
 
-newtype SoucKind = SoucKind Word deriving (Eq, Ord, Show)
+data SoucKind = KType
+              | KFunc SoucKind SoucKind
+    deriving (Eq, Ord, Show)
+
+
+recurse_kind :: Int -> SoucKind
+recurse_kind k = foldr ($) KType (replicate k (KFunc KType))
 
 -- allowed type names are single chars like 'A'
 -- or 'T' followed by an increasing number (T0, T1, ...)
@@ -45,7 +52,7 @@ instance Show TypeVar where
 
 
 pattern SoucType :: Text -> SoucType
-pattern SoucType name = SoucTypeCon name []
+pattern SoucType name = SoucTypeCon name KType []
 
 pattern SoucIO :: SoucType
 pattern SoucIO = SoucType "IO"
@@ -63,22 +70,25 @@ pattern SoucString :: SoucType
 pattern SoucString = SoucType "String"
 
 pattern SoucFn :: SoucType -> SoucType -> SoucType
-pattern SoucFn t0 t1 = SoucTypeCon "Fn" [t0,t1]
+pattern SoucFn t0 t1 =
+    SoucTypeCon "Fn" (KFunc KType (KFunc KType KType)) [t0,t1]
 
 pattern SoucRoutn :: SoucType -> SoucType
-pattern SoucRoutn t = SoucTypeCon "Sub" [t]
+pattern SoucRoutn t = SoucTypeCon "Sub" (KFunc KType KType) [t]
 
 pattern SoucMaybe :: SoucType -> SoucType
-pattern SoucMaybe t = SoucTypeCon "Maybe" [t]
+pattern SoucMaybe t = SoucTypeCon "Maybe" (KFunc KType KType) [t]
 
 pattern SoucList :: SoucType -> SoucType
-pattern SoucList t = SoucTypeCon "List" [t]
+pattern SoucList t = SoucTypeCon "List" (KFunc KType KType) [t]
 
 pattern SoucPair :: SoucType -> SoucType -> SoucType
-pattern SoucPair t0 t1 = SoucTypeCon "Pair" [t0,t1]
+pattern SoucPair t0 t1 =
+    SoucTypeCon "Pair" (KFunc KType (KFunc KType KType)) [t0,t1]
 
 pattern SoucEither :: SoucType -> SoucType-> SoucType
-pattern SoucEither t0 t1 = SoucTypeCon "Either" [t0,t1]
+pattern SoucEither t0 t1 =
+    SoucTypeCon "Either" (KFunc KType (KFunc KType KType)) [t0,t1]
 
 -- FIXME modules could have a phantom type to distinguish them
 pattern SoucModuleType :: SoucType

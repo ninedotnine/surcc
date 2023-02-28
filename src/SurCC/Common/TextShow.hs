@@ -65,8 +65,9 @@ instance TextShow TypeVar where
         TypeVar (Right c) _k -> TextShow.singleton c
 
 instance TextShow SoucKind where
-    showb (SoucKind k) = "*" <>
-        TextShow.fromText (Text.replicate (fromIntegral k) " => *")
+    showb = \case
+        KType -> "Type"
+        KFunc k0 k1 -> showb k0 <> " => " <> showb k1
 
 instance TextShow Bound where
     showb (Bound i t) = "Bound " <> showb i <> ": " <> showb t
@@ -248,7 +249,9 @@ instance TextShow SoucType where
         SoucType t -> TextShow.fromText t
         SoucTypeVar (TypeVar (Left  i) _) -> "T" <> showb i
         SoucTypeVar (TypeVar (Right c) _) -> TextShow.singleton c
-        SoucTypeCon c ts -> showb c <> (ts <&> in_parens & mconcat)
+        SoucTypeCon c k ts -> TextShow.fromText c
+                              <> (ts <&> in_parens & mconcat)
+                              <> " :: " <> showb k
             where
                 in_parens t = "(" <> showb t <> ")"
 
