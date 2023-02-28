@@ -20,13 +20,10 @@ module SurCC.Common.SoucTypes (
     ) where
 
 import Data.Text (Text)
+import TextShow (showt)
 
 
-                -- SoucTypeConstructor invariant:
-                -- the length of the list of types
-                -- must be equal to the SoucKind
-                -- FIXME find a better way to represent this
-data SoucType = SoucTypeConstructor Text SoucKind [SoucType]
+data SoucType = SoucTypeCon Text [SoucType]
               | SoucTypeVar TypeVar
 --               | SoucConstrainedType Constraint SoucType
               deriving (Eq,Show,Ord)
@@ -34,18 +31,21 @@ data SoucType = SoucTypeConstructor Text SoucKind [SoucType]
 
 newtype SoucKind = SoucKind Word deriving (Eq, Ord, Show)
 
-
 -- allowed type names are single chars like 'A'
 -- or 'T' followed by an increasing number (T0, T1, ...)
-data TypeVar = TypeVar (Either Word Char) SoucKind deriving (Eq, Ord, Show)
+data TypeVar = TypeVar (Either Word Char) SoucKind deriving (Eq, Ord)
 
+instance Show TypeVar where
+    show (TypeVar v _) = case v of
+        Left i -> 'T' : show i
+        Right c -> [c]
 
 
 -- data Constraint = Instance Text SoucType deriving (Eq)
 
 
 pattern SoucType :: Text -> SoucType
-pattern SoucType name = SoucTypeConstructor name (SoucKind 0) []
+pattern SoucType name = SoucTypeCon name []
 
 pattern SoucIO :: SoucType
 pattern SoucIO = SoucType "IO"
@@ -63,23 +63,23 @@ pattern SoucString :: SoucType
 pattern SoucString = SoucType "String"
 
 pattern SoucFn :: SoucType -> SoucType -> SoucType
-pattern SoucFn t0 t1 = SoucTypeConstructor "Fn" (SoucKind 2) [t0,t1]
+pattern SoucFn t0 t1 = SoucTypeCon "Fn" [t0,t1]
 
 pattern SoucRoutn :: SoucType -> SoucType
-pattern SoucRoutn t = SoucTypeConstructor "Sub" (SoucKind 1) [t]
+pattern SoucRoutn t = SoucTypeCon "Sub" [t]
 
 pattern SoucMaybe :: SoucType -> SoucType
-pattern SoucMaybe t = SoucTypeConstructor "Maybe" (SoucKind 1) [t]
+pattern SoucMaybe t = SoucTypeCon "Maybe" [t]
 
 pattern SoucList :: SoucType -> SoucType
-pattern SoucList t = SoucTypeConstructor "List" (SoucKind 1) [t]
+pattern SoucList t = SoucTypeCon "List" [t]
 
-pattern SoucPair :: SoucType -> SoucType-> SoucType
-pattern SoucPair t0 t1 = SoucTypeConstructor "Pair" (SoucKind 2) [t0,t1]
+pattern SoucPair :: SoucType -> SoucType -> SoucType
+pattern SoucPair t0 t1 = SoucTypeCon "Pair" [t0,t1]
 
 pattern SoucEither :: SoucType -> SoucType-> SoucType
-pattern SoucEither t0 t1 = SoucTypeConstructor "Either" (SoucKind 2) [t0,t1]
+pattern SoucEither t0 t1 = SoucTypeCon "Either" [t0,t1]
 
+-- FIXME modules could have a phantom type to distinguish them
 pattern SoucModuleType :: SoucType
 pattern SoucModuleType = SoucType "Module"
-

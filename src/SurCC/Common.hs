@@ -135,11 +135,14 @@ data Stmt = Stmt_While ExprTree Stmts
 newtype Return = Return (Maybe ExprTree)
     deriving (Eq, Show)
 
+
+-- FIXME: `Branch op e0 e1` is the same as `Twig op (e0,e1)`
 data ExprTree = Branch Operator ExprTree ExprTree
             | Twig PrefixOperator ExprTree
             | Signed ExprTree SoucType
             | Leaf Term
             | Match ExprTree [(Pattern, Maybe Guard, ExprTree)]
+--             | Lambda Identifier ExprTree -- FIXME
          deriving (Eq, Show)
 
 

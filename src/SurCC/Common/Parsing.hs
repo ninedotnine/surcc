@@ -149,13 +149,13 @@ souc_type :: Parsec Text s SoucType
 souc_type = do
     name <- upper_name
     args <- many $ between (char '(') (char ')') souc_type
-    pure (SoucTypeConstructor name (SoucKind $ genericLength args) args)
+    pure (SoucTypeCon name args)
 
 souc_type_parameterized :: Parsec Text s SoucType
 souc_type_parameterized = do
     name <- upper_name
     args <- many $ between (char '(') (char ')') souc_type_var
-    pure (SoucTypeConstructor name (SoucKind $ genericLength args) args)
+    pure (SoucTypeCon name args)
 
 souc_type_var :: Parsec Text s SoucType
 souc_type_var = SoucTypeVar <$> flip TypeVar (SoucKind 0) <$>

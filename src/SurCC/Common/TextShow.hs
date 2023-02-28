@@ -2,6 +2,9 @@
 
 module SurCC.Common.TextShow () where
 
+import Data.Function
+import Data.Functor
+
 import TextShow (TextShow(..))
 import TextShow qualified
 import Data.Text qualified as Text
@@ -58,8 +61,8 @@ instance TextShow Stmts where
 
 instance TextShow TypeVar where
     showb = \case
-        TypeVar (Left num) k -> showb num <> ":: " <> showb k
-        TypeVar (Right c) k -> showb c <> ":: " <> showb k
+        TypeVar (Left i) _k -> "T" <> showb i
+        TypeVar (Right c) _k -> TextShow.singleton c
 
 instance TextShow SoucKind where
     showb (SoucKind k) = "*" <>
@@ -243,9 +246,11 @@ instance TextShow SoucType where
         SoucPair t0 t1 -> showb t0 <> " & " <> showb t1
         SoucEither t0 t1 -> showb t0 <> " | " <> showb t1
         SoucType t -> TextShow.fromText t
-        SoucTypeVar (TypeVar (Left  v) _) -> "T" <> showb v
-        SoucTypeVar (TypeVar (Right v) _) -> TextShow.singleton v
-        SoucTypeConstructor t _ ts -> showb t <> "(" <> showb ts <> ")"
+        SoucTypeVar (TypeVar (Left  i) _) -> "T" <> showb i
+        SoucTypeVar (TypeVar (Right c) _) -> TextShow.singleton c
+        SoucTypeCon c ts -> showb c <> (ts <&> in_parens & mconcat)
+            where
+                in_parens t = "(" <> showb t <> ")"
 
 instance TextShow TypeDef where
     showb = \case
