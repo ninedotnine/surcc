@@ -14,9 +14,6 @@ import SurCC.Common.SoucTypes
 deriving instance Generic Identifier
 instance Hashable Identifier
 
-deriving instance Generic SoucKind
-instance Hashable SoucKind
-
 deriving instance Generic SoucType
 instance Hashable SoucType
 

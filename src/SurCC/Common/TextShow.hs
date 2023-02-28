@@ -61,13 +61,8 @@ instance TextShow Stmts where
 
 instance TextShow TypeVar where
     showb = \case
-        TypeVar (Left i) _k -> "T" <> showb i
-        TypeVar (Right c) _k -> TextShow.singleton c
-
-instance TextShow SoucKind where
-    showb = \case
-        KType -> "Type"
-        KFunc k0 k1 -> showb k0 <> " => " <> showb k1
+        TypeVar (Left i) -> "T" <> showb i
+        TypeVar (Right c) -> TextShow.singleton c
 
 instance TextShow Bound where
     showb (Bound i t) = "Bound " <> showb i <> ": " <> showb t
@@ -247,13 +242,10 @@ instance TextShow SoucType where
         SoucPair t0 t1 -> showb t0 <> " & " <> showb t1
         SoucEither t0 t1 -> showb t0 <> " | " <> showb t1
         SoucType t -> TextShow.fromText t
-        SoucTypeVar (TypeVar (Left  i) _) -> "T" <> showb i
-        SoucTypeVar (TypeVar (Right c) _) -> TextShow.singleton c
-        SoucTypeCon c k ts -> TextShow.fromText c
-                              <> (ts <&> in_parens & mconcat)
-                              <> " :: " <> showb k
-            where
-                in_parens t = "(" <> showb t <> ")"
+        SoucTypeVar v ts -> showb v <> (ts <&> in_parens & mconcat)
+        SoucTypeCon c ts -> TextShow.fromText c <> (ts <&> in_parens & mconcat)
+        where
+            in_parens t = "(" <> showb t <> ")"
 
 instance TextShow TypeDef where
     showb = \case

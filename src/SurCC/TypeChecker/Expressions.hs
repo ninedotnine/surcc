@@ -112,8 +112,7 @@ infer_infix_op left right = \case
             _ -> throwError $
                     TypeMismatch (
                         SoucFn l_t (
-                            SoucTypeVar (TypeVar (Right 'T')
-                            KType)))
+                            SoucTypeVar (TypeVar (Right 'T')) []))
                         l_t
     FlipApply -> infer_infix_op right left Apply
 

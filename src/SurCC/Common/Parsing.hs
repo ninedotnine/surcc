@@ -149,18 +149,16 @@ souc_type :: Parsec Text s SoucType
 souc_type = do
     name <- upper_name
     args <- many $ between (char '(') (char ')') souc_type
-    pure $ if null args
-        then SoucType name
-        else SoucTypeCon name KType args
+    pure $ SoucTypeCon name args
 
 souc_type_parameterized :: Parsec Text s SoucType
 souc_type_parameterized = do
     name <- upper_name
     args <- many $ between (char '(') (char ')') souc_type_var
-    pure (SoucTypeCon name (recurse_kind (length args)) args)
+    pure (SoucTypeCon name (args <&> flip SoucTypeVar []))
 
-souc_type_var :: Parsec Text s SoucType
-souc_type_var = SoucTypeVar <$> flip TypeVar KType <$>
+souc_type_var :: Parsec Text s TypeVar
+souc_type_var = TypeVar <$>
     ((try (char 'T' *> many1 digit) <&> read <&> Left)
     <|> (upper <&> Right))
 
