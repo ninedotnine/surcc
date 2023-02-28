@@ -152,7 +152,6 @@ data Operator = Plus
               | Splat
               | FieldDiv
               | FloorDiv
-              | Modulo -- FIXME delete this
               | Hihat -- FIXME delete this?
               | Equals
               | NotEquals

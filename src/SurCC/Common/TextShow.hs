@@ -193,7 +193,6 @@ instance TextShow Operator where
         Splat           ->  "*"
         FieldDiv        ->  "/"
         FloorDiv        ->  "//"
-        Modulo          ->  "%"
         Hihat           ->  "^"
         Equals          ->  "=="
         Combine         ->  "<>"

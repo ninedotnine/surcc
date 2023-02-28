@@ -107,7 +107,6 @@ evaluate_astree = \case
                     Splat  -> (*)
                     FieldDiv -> div -- FIXME
                     FloorDiv -> div
-                    Modulo -> mod
                     Hihat  -> (^)
                     Equals -> \x y -> if (x==y) then 1 else 0
                     GreaterThan -> \x y -> if (x>y) then 1 else 0

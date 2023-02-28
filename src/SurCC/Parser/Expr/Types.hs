@@ -73,7 +73,6 @@ get_prec = Precedence <$> \case
     Splat          -> 140
     FieldDiv       -> 140
     FloorDiv       -> 140
-    Modulo         -> 140
     Hihat          -> 150
     FromMaybe      -> 160
     Prepend        -> 170

@@ -61,7 +61,6 @@ parse_infix_oper = do
             ("*",   Splat),
             ("//",  FloorDiv),
             ("/",   FieldDiv),
-            ("%",   Modulo),
             ("^",   Hihat ),
             ("<<",  Apply),
             (">>",  FlipApply ),

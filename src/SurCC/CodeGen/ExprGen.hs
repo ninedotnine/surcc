@@ -53,7 +53,6 @@ generate_expr = \case
         Splat             ->  (,) mempty <$> gen_call "_souc_product(" x y
         FieldDiv          ->  (,) mempty <$> gen_call "_souc_quotient(" x y
         FloorDiv          ->  undefined
-        Modulo            ->  (,) mempty <$> gen_call "_souc_remainder(" x y
         Hihat             ->  undefined -- FIXME C doesn't have ^
         Equals            ->  (,) mempty <$>
                                 gen_call "_souc_is_equal_integer(" x y

@@ -88,7 +88,6 @@ infer_infix_op left right = \case
         pure SoucInteger
     Minus -> infer_infix_op left right Plus
     Splat -> infer_infix_op left right Plus
-    Modulo -> infer_infix_op left right Plus
 
     And -> do
         check_expr SoucBool left

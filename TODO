@@ -39,3 +39,5 @@
 [ ] implement dynamic integers
 [ ] implement ratios
 [ ] implement dynamic strings
+[ ] "Fn" is hard-coded. it should be a name in the builtins context
+[ ] also "Pair" and maybe others are hard-coded
