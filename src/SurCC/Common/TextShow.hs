@@ -58,6 +58,8 @@ instance TextShow ImportDecl where
 instance TextShow Stmts where
     showb (Stmts stmts ret) = "Stmts: " <> showb stmts
                               <> " " <> showb ret
+instance TextShow TypeCon where
+    showb (TypeCon c) = TextShow.fromText c
 
 instance TextShow TypeVar where
     showb = \case
@@ -65,7 +67,7 @@ instance TextShow TypeVar where
         TypeVar (Right c) -> TextShow.singleton c
 
 instance TextShow Bound where
-    showb (Bound i t) = "Bound " <> showb i <> ": " <> showb t
+    showb (Bound (Identifier i) t) = TextShow.fromText i <> ": " <> showb t
 
 instance TextShow TypeError where
     showb = \case
