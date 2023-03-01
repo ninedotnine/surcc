@@ -17,6 +17,9 @@ instance Hashable Identifier
 deriving instance Generic SoucType
 instance Hashable SoucType
 
+deriving instance Generic TypeCon
+instance Hashable TypeCon
+
 deriving instance Generic TypeVar
 instance Hashable TypeVar
 

@@ -1,0 +1,2 @@
+; parameterized on some type T
+def struct OnePlusMaybeOne(T) = { opmo(head: T)(etc: Maybe(T)) }

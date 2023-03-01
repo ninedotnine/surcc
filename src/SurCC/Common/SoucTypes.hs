@@ -1,8 +1,10 @@
 {-# LANGUAGE PatternSynonyms #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module SurCC.Common.SoucTypes (
     SoucType(..),
     pattern SoucType,
+    TypeCon(..),
     TypeVar(..),
     pattern SoucIO,
     pattern SoucBool,
@@ -18,20 +20,28 @@ module SurCC.Common.SoucTypes (
     pattern SoucModuleType,
     ) where
 
+import Data.String (IsString)
 import Data.Text (Text)
+import Data.Text qualified as Text
 import TextShow (showt)
 
 
-data SoucType = SoucTypeCon Text [SoucType]
+data SoucType = SoucTypeCon TypeCon [SoucType]
               | SoucTypeVar TypeVar [SoucType]
 --               | SoucConstrainedType Constraint SoucType
               deriving (Eq,Show,Ord)
 
 
+newtype TypeCon = TypeCon Text deriving (Eq, Ord, IsString)
 
 -- allowed type names are single chars like 'A'
 -- or 'T' followed by an increasing number (T0, T1, ...)
 newtype TypeVar = TypeVar (Either Word Char) deriving (Eq, Ord)
+
+
+instance Show TypeCon where
+    show (TypeCon txt) = Text.unpack txt
+
 
 instance Show TypeVar where
     show (TypeVar v) = case v of
@@ -43,7 +53,7 @@ instance Show TypeVar where
 
 
 pattern SoucType :: Text -> SoucType
-pattern SoucType name = SoucTypeCon name []
+pattern SoucType name = SoucTypeCon (TypeCon name) []
 
 pattern SoucIO :: SoucType
 pattern SoucIO = SoucType "IO"

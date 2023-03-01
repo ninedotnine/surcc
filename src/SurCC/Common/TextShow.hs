@@ -243,7 +243,7 @@ instance TextShow SoucType where
         SoucEither t0 t1 -> showb t0 <> " | " <> showb t1
         SoucType t -> TextShow.fromText t
         SoucTypeVar v ts -> showb v <> (ts <&> in_parens & mconcat)
-        SoucTypeCon c ts -> TextShow.fromText c <> (ts <&> in_parens & mconcat)
+        SoucTypeCon c ts -> showb c <> (ts <&> in_parens & mconcat)
         where
             in_parens t = "(" <> showb t <> ")"
 
