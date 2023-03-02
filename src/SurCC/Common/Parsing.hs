@@ -128,7 +128,15 @@ reserved_words = Set.fromList [
             "suchthat", "super", "superclass", "switch", "sync", "synchronous",
             "table", "take", "target", "test", "then", "this", "to", "typeof",
             "unlock", "undef", "use", "virtual", "void", "volatile", "wait",
-            "when", "with", "yield", "zen"]
+            "when", "with", "yield", "zen",
+
+            "absorbs", "also", "api", "at", "catch", "coerce", "coerces",
+            "component", "comprises", "elif", "ensures", "except", "excludes",
+            "extends", "finally", "forbid", "hidden", "invariant",
+            "juxtaposition", "most", "of", "property", "provided", "requires",
+            "self", "spawn", "syntax", "throw", "throws", "trait", "transient",
+            "try", "tryatomic", "type", "typecase", "value", "widens",
+            "wrapped", "idiom", "pure", "reciprocal" ]
 
 
 -- Text.Parsec.string does this silly thing where it might fail while advancing
