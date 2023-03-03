@@ -154,16 +154,32 @@ type_signature :: Parsec Text s SoucType
 type_signature = char ':' *> ignore_spaces *> souc_type
 
 souc_type :: Parsec Text s SoucType
-souc_type = do
+souc_type = souc_type_forall <|> do
     name <- try (souc_type_var <&> SoucTypeVar) <|>
                  (souc_type_con <&> SoucTypeCon)
     args <- many $ between (char '(') (char ')') souc_type
     pure $ name args
 
+
+souc_type_forall :: Parsec Text s SoucType
+souc_type_forall = do
+    v <- reserved "forall" <> spaces *> souc_type_var
+    string "." *> spaces
+    body <- souc_type
+    pure $ SoucForAll v Rigid body
+
+
+souc_type_var :: Parsec Text s TypeVar
+souc_type_var = TypeVar <$>
+    ((try (char 'T' *> many1 digit) <&> read <&> Left)
+    <|> (upper <* notFollowedBy alphaNum <&> Right))
+
+
 souc_type_con :: Parsec Text s TypeCon
 souc_type_con = do
     name <- upper_name
     pure $ TypeCon name
+
 
 souc_type_parameterized :: Parsec Text s SoucType
 souc_type_parameterized = do
@@ -171,10 +187,6 @@ souc_type_parameterized = do
     args <- many $ between (char '(') (char ')') souc_type_var
     pure (SoucTypeCon name (args <&> flip SoucTypeVar []))
 
-souc_type_var :: Parsec Text s TypeVar
-souc_type_var = TypeVar <$>
-    ((try (char 'T' *> many1 digit) <&> read <&> Left)
-    <|> (upper <* notFollowedBy alphaNum <&> Right))
 
 souc_type_simple :: Parsec Text s SoucType
 souc_type_simple = do

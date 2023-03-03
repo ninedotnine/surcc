@@ -6,6 +6,7 @@ module SurCC.Common.SoucTypes (
     pattern SoucType,
     TypeCon(..),
     TypeVar(..),
+    Rigidity(..),
     pattern SoucIO,
     pattern SoucBool,
     pattern SoucInteger,
@@ -23,11 +24,11 @@ module SurCC.Common.SoucTypes (
 import Data.String (IsString)
 import Data.Text (Text)
 import Data.Text qualified as Text
-import TextShow (showt)
 
 
 data SoucType = SoucTypeCon TypeCon [SoucType]
               | SoucTypeVar TypeVar [SoucType]
+              | SoucForAll TypeVar Rigidity SoucType
 --               | SoucConstrainedType Constraint SoucType
               deriving (Eq,Show,Ord)
 
@@ -48,6 +49,9 @@ instance Show TypeVar where
         Left i -> 'T' : show i
         Right c -> [c]
 
+
+data Rigidity = Rigid | Wobbly
+              deriving (Eq,Show,Ord)
 
 -- data Constraint = Instance Text SoucType deriving (Eq)
 

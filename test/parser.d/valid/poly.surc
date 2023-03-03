@@ -1,0 +1,5 @@
+f(x: forall A. A): A = x
+
+main(stdout: OutputStream) = do
+	write stdout , $ 9
+	write stdout , $ 9>>f

@@ -23,3 +23,5 @@ instance Hashable TypeCon
 deriving instance Generic TypeVar
 instance Hashable TypeVar
 
+deriving instance Generic Rigidity
+instance Hashable Rigidity

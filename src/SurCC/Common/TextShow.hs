@@ -244,6 +244,7 @@ instance TextShow SoucType where
         SoucPair t0 t1 -> showb t0 <> " & " <> showb t1
         SoucEither t0 t1 -> showb t0 <> " | " <> showb t1
         SoucType t -> TextShow.fromText t
+        SoucForAll v _r t -> "forall " <> showb v <> ". " <> showb t
         SoucTypeVar v ts -> showb v <> (ts <&> in_parens & mconcat)
         SoucTypeCon c ts -> showb c <> (ts <&> in_parens & mconcat)
         where
