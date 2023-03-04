@@ -2,6 +2,7 @@
 
 module SurCC.TypeChecker.TypeChecker (
     type_check,
+    global_binds,
     ) where
 
 
@@ -39,13 +40,19 @@ import SurCC.TypeChecker.Statements (infer_stmts, check_stmts, checkm_stmts)
 import SurCC.TypeChecker.Typedefs (build_typedefs)
 
 
--- FIXME: add the module name to the global scope
 type_check :: ParseTree -> Either TypeError CheckedProgram
-type_check (ParseTree module_info imports typedefs defns) = do
+type_check = run_type_checker <&> fmap fst
+
+global_binds :: ParseTree -> Either TypeError GlobalScope
+global_binds = run_type_checker <&> fmap snd
+
+-- FIXME: add the module name to the global scope
+run_type_checker :: ParseTree -> Either TypeError (CheckedProgram,GlobalScope)
+run_type_checker (ParseTree module_info imports typedefs defns) = do
     exports_list <- add_exports module_info
     (types_ctx,typedef_bounds) <- build_typedefs typedefs
     imports_list <- add_imports imports exports_list
-    globals <- run_top_checker imports_list exports_list types_ctx $
+    (globals,binds) <- run_top_checker imports_list exports_list types_ctx $
                     traverse add_top_level_defn defns
 
     -- FIXME: top level first, then sub-trees:
@@ -54,7 +61,7 @@ type_check (ParseTree module_info imports typedefs defns) = do
     -- this could be done before subtrees?
     let all_bounds = nub (globals <> typedef_bounds)
     assert_no_undefined_exports all_bounds module_info
-    Right $ CheckedProgram module_info imports typedef_bounds defns
+    Right $ (CheckedProgram module_info imports typedef_bounds defns,binds)
 
 
 assert_no_undefined_exports :: (MonadError TypeError m)

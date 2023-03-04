@@ -13,6 +13,7 @@ module SurCC.TypeChecker.Context (
     TypeSet(..),
     GlobalScope(..),
     LocalScopes,
+    ImmutMapping(..),
     run_top_checker,
     get_type,
     get_var,
@@ -41,9 +42,9 @@ import Data.Set qualified as Set
 
 import Prelude hiding (lookup)
 import Control.Monad.Error.Class (MonadError, throwError)
-import Control.Monad.Reader (Reader, runReader, ask)
-import Control.Monad.State (evalStateT, StateT, get, put)
-import Control.Monad.Trans.Except (ExceptT, runExceptT)
+import Control.Monad.Reader (Reader, ReaderT, runReaderT, runReader, ask)
+import Control.Monad.State (evalStateT, runStateT, StateT, get, put)
+import Control.Monad.Trans.Except (Except, runExcept, ExceptT, runExceptT)
 import Data.Text (Text)
 
 import SurCC.Common
@@ -51,9 +52,9 @@ import SurCC.Common.SoucTypes
 import SurCC.Builtins (typeof_builtin)
 
 
-type TopChecker a = ExceptT TypeError (
-                        StateT GlobalScope (
-                            Reader (ImportList,ExportList))) a
+type TopChecker a = StateT GlobalScope (
+                        ReaderT (ImportList,ExportList) (
+                            Except TypeError)) a
 
 type Checker a = ExceptT TypeError (
                     StateT (LocalScopes) (
@@ -67,7 +68,8 @@ newtype ImportList = ImportList (Set.Set Identifier)
                 deriving (Show,Semigroup,Monoid)
 
 
-type ImmutMapping = HashMap Identifier SoucType
+newtype ImmutMapping = ImmutMapping (HashMap Identifier SoucType)
+                deriving (Show,Semigroup,Monoid)
 
 type MutMapping = HashMap Identifier (SoucType, Mutability)
 
@@ -90,9 +92,9 @@ instance Monoid GlobalScope where
 
 
 run_top_checker :: ImportList -> ExportList -> GlobalScope -> TopChecker a
-                   -> Either TypeError a
+                   -> Either TypeError (a,GlobalScope)
 run_top_checker imports exports globals checker =
-    runReader (evalStateT (runExceptT checker) globals) (imports,exports)
+    runExcept (runReaderT (runStateT checker globals) (imports,exports))
 
 
 get_type :: Identifier -> Checker SoucType
@@ -124,7 +126,7 @@ lookup i imports globals locals =
 
 
 lookup_globals :: Identifier -> GlobalScope -> Maybe SoucType
-lookup_globals i (GlobalScope _ bounds) = Map.lookup i bounds
+lookup_globals i (GlobalScope _ (ImmutMapping bounds)) = Map.lookup i bounds
 
 
 member_globals :: Identifier -> GlobalScope -> Bool
@@ -139,7 +141,7 @@ lookup_locals_mutables i (LocalScopes scopes) = foldr f Nothing scopes
 
 
 lookup_exports :: Identifier -> ExportList -> Maybe SoucType
-lookup_exports i (ExportList exports) = Map.lookup i exports
+lookup_exports i (ExportList (ImmutMapping exports)) = Map.lookup i exports
 
 
 member_exports :: Identifier -> ExportList -> Bool
@@ -157,7 +159,8 @@ member_imports i (ImportList imports) = Set.member i imports
 
 
 export_list :: [ExportDecl] -> ExportList
-export_list exports = ExportList $ Map.fromList (unwrap <$> exports)
+export_list exports = ExportList $ ImmutMapping $
+    Map.fromList (unwrap <$> exports)
     where
         unwrap (ExportDecl (Bound b t)) = (b,t)
 
@@ -252,10 +255,10 @@ insert_global (Bound i t) = do
         throwError (MultipleDeclarations i)
     for_ (lookup_exports i exports) $
         assert_equals t
-    GlobalScope types globals <- get
+    GlobalScope types (ImmutMapping globals) <- get
     if Map.member i globals
         then throwError (MultipleDeclarations i)
-        else put (GlobalScope types (Map.insert i t globals))
+        else put (GlobalScope types (ImmutMapping (Map.insert i t globals)))
 
 
 assert_equals :: (MonadError TypeError m) => SoucType -> SoucType -> m ()

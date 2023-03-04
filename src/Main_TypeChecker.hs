@@ -8,12 +8,13 @@ import System.Directory
 import System.Environment (getArgs)
 import System.Exit (exitFailure, exitSuccess)
 import System.IO
-import TextShow (hPrintT, printT)
+import TextShow (hPrintT, printT, showt)
 
 import SurCC.Common
 import SurCC.Imports.Parser (parse_module_header)
 import SurCC.Parser.SurCParser (parse)
-import SurCC.TypeChecker.TypeChecker (type_check)
+import SurCC.TypeChecker.TypeChecker (type_check, global_binds)
+
 
 main :: IO ()
 main = do
@@ -71,9 +72,9 @@ run_default_test_suite = do
 type Handler = ParseTree -> IO ()
 
 output_results :: Handler
-output_results prog = case type_check prog of
+output_results prog = case global_binds prog of
     Left typecheck_error -> hPrintT stderr typecheck_error >> exitFailure
-    Right ok -> putStrLn "OK." >> printT ok
+    Right binds -> putStrLn "OK." >> Text.putStr (showt binds)
 
 handle_prog_ok :: Handler
 handle_prog_ok prog = case type_check prog of

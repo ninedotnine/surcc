@@ -4,6 +4,7 @@ module SurCC.Common.TextShow () where
 
 import Data.Function
 import Data.Functor
+import Data.HashMap.Strict (keys, foldMapWithKey)
 
 import TextShow (TextShow(..))
 import TextShow qualified
@@ -11,6 +12,7 @@ import Data.Text qualified as Text
 
 import SurCC.Common
 import SurCC.Common.SoucTypes
+import SurCC.TypeChecker.Context
 
 
 instance TextShow Literal where
@@ -262,3 +264,15 @@ instance TextShow TypeDef where
                             " = {" <> showb fns <> "}"
         GADType _ -> error "fixme typedef textshow"
 
+
+instance TextShow TypeSet where
+    showb (TypeSet s) = showb (keys s)
+
+
+instance TextShow ImmutMapping where
+    showb (ImmutMapping binds) = foldMapWithKey sho binds
+        where
+            sho val t = showb val <> ": " <> showb t <> "\n"
+
+instance TextShow GlobalScope where
+    showb (GlobalScope types vals) = showb types <> "\n" <> showb vals

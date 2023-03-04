@@ -9,6 +9,7 @@ module SurCC.TypeChecker.Typedefs (
 import Control.Arrow (second)
 import Control.Monad.Error.Class
 import Data.Functor
+import Data.Function
 import Data.HashMap.Strict qualified as Map
 import Data.HashMap.Strict (HashMap)
 import Data.Maybe (maybeToList)
@@ -20,15 +21,15 @@ import SurCC.Common.SoucTypes
 import SurCC.TypeChecker.Context
 import SurCC.TypeChecker.Expressions (assert_equals)
 
-type Mapping = HashMap Identifier SoucType
-
 
 build_typedefs :: [TypeDef] -> Either TypeError (GlobalScope,[Bound])
 build_typedefs defs = do
-    build_typedefs' (TypeSet builtin_types, builtin_identifiers) [] defs
+    build_typedefs' (TypeSet builtin_types,
+                     ImmutMapping builtin_identifiers)
+                    [] defs
 
 
-build_typedefs' :: (TypeSet, Mapping) -> [Bound] -> [TypeDef]
+build_typedefs' :: (TypeSet, ImmutMapping) -> [Bound] -> [TypeDef]
                    -> Either TypeError (GlobalScope,[Bound])
 build_typedefs' (types, consts) bounds = \case
     (d:defs) -> do
@@ -53,7 +54,7 @@ build_typedef = \case
     GADType t -> undefined t -- FIXME
 
 
-insert_consts :: Mapping -> [Bound] -> Either TypeError Mapping
+insert_consts :: ImmutMapping -> [Bound] -> Either TypeError ImmutMapping
 insert_consts m = \case
     ((Bound i t):cons) -> do
         new_map <- insert_const m i t
@@ -61,9 +62,10 @@ insert_consts m = \case
     [] -> pure m
 
 
-insert_const :: Mapping -> Identifier -> SoucType
-                -> Either TypeError Mapping
-insert_const m i t = insert m i t `or_left` MultipleDeclarations i
+insert_const :: ImmutMapping -> Identifier -> SoucType
+                -> Either TypeError ImmutMapping
+insert_const (ImmutMapping m) i t =
+    (ImmutMapping <$> insert m i t) `or_left` MultipleDeclarations i
 
 
 insert_type :: TypeSet -> SoucType -> Refutable
