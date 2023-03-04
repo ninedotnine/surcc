@@ -20,7 +20,9 @@ import SurCC.TypeChecker.Context (
     Checker,
     insert_local,
     get_type,
-    get_var
+    get_var,
+    new_scope,
+    exit_scope,
     )
 import SurCC.TypeChecker.Expressions (
     check_expr,
@@ -32,8 +34,10 @@ import SurCC.TypeChecker.Expressions (
 
 check_stmts :: SoucType -> Stmts -> Checker ()
 check_stmts t (Stmts stmts m_ret) = do
+    new_scope
     mapM_ (check_stmt t) stmts
     for_ m_ret (check_return t)
+    exit_scope
 
 
 check_stmt :: SoucType -> Stmt -> Checker ()

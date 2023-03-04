@@ -3,9 +3,9 @@ module Main_Expr where
 import Control.Arrow ((|||))
 import Control.Monad (unless)
 import Control.Monad.Trans (liftIO)
-import Control.Monad.Reader (runReader)
+import Control.Monad.Reader (runReaderT)
 import Control.Monad.State (evalStateT)
-import Control.Monad.Except (runExceptT)
+import Control.Monad.Except (runExcept)
 import Data.Foldable (traverse_)
 import Data.Functor ((<&>))
 import Data.Function ((&))
@@ -71,7 +71,7 @@ parse_check_eval input =
 
 type_check :: ExprTree -> Either TypeError SoucType
 type_check expr =
-    runReader (evalStateT (runExceptT (infer expr)) mempty) mempty
+    runExcept (runReaderT (evalStateT (infer expr) mempty) mempty)
 
 
 -- this does some silly things to treat everything as an Integer

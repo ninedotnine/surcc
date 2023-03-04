@@ -56,9 +56,9 @@ type TopChecker a = StateT GlobalScope (
                         ReaderT (ImportList,ExportList) (
                             Except TypeError)) a
 
-type Checker a = ExceptT TypeError (
-                    StateT (LocalScopes) (
-                        Reader (ImportList,ExportList,GlobalScope))) a
+type Checker a = StateT LocalScopes (
+                    ReaderT (ImportList,ExportList,GlobalScope) (
+                        Except TypeError)) a
 
 
 newtype ExportList = ExportList ImmutMapping
@@ -80,7 +80,7 @@ data GlobalScope = GlobalScope TypeSet ImmutMapping
                 deriving (Show)
 
 newtype LocalScopes = LocalScopes [MutMapping]
-                deriving (Show, Semigroup, Monoid)
+                deriving (Eq, Show, Semigroup, Monoid)
 
 
 instance Semigroup GlobalScope where
@@ -94,7 +94,12 @@ instance Monoid GlobalScope where
 run_top_checker :: ImportList -> ExportList -> GlobalScope -> TopChecker a
                    -> Either TypeError (a,GlobalScope)
 run_top_checker imports exports globals checker =
-    runExcept (runReaderT (runStateT checker globals) (imports,exports))
+    run_mtl_stack globals (imports,exports) checker
+
+
+run_mtl_stack :: s -> r -> StateT s (ReaderT r (Except TypeError)) a
+                 -> Either TypeError (a,s)
+run_mtl_stack s r func = runExcept (runReaderT (runStateT func s) r)
 
 
 get_type :: Identifier -> Checker SoucType
@@ -182,10 +187,13 @@ local_scope_with list checker = do
             throwError (MultipleDeclarations i)
         when (member_exports i exps) $
             throwError (ExportedLocal i)
-    runReader (evalStateT (runExceptT checker) locals) (imps,exps,globals)
-        & (throwError ||| pure)
-        where
-            locals = LocalScopes [list <&> second (,Immut) & Map.fromList]
+    run_mtl_stack locals (imps,exps,globals) checker & (throwError ||| confirm)
+    where
+        locals = LocalScopes [list <&> second (,Immut) & Map.fromList]
+        confirm (result,end_state) = do -- redundant check for bug-prevention
+            when (end_state /= locals) $
+                error "there is a bug in the compiler."
+            pure result
 
 
 local_scope :: Checker a -> TopChecker a
