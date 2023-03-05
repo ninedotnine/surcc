@@ -65,14 +65,14 @@ type Body = [TopLevelDefn]
 
 data Stmts = Stmts [Stmt] (Maybe Return) deriving (Eq, Show)
 
-data TypeDef = EmptyType SoucType
-             | UnitType SoucType Identifier
-             | SynonymType SoucType SoucType
-             | IsomorphismType SoucType Identifier SoucType (Maybe Bound)
+data TypeDef = EmptyType TypeCon
+             | UnitType TypeCon Identifier
+             | SynonymType TypeCon SoucType
+             | IsomorphismType TypeCon Identifier SoucType (Maybe Bound)
                         -- fixme: a wrapper (a function) is not a term.
-             | EnumType SoucType [Identifier]
-             | StructType SoucType [Bound]
-             | GADType SoucType -- fixme
+             | EnumType TypeCon [Identifier]
+             | StructType TypeCon [Bound]
+             | GADType TypeCon -- fixme
              deriving (Show)
 
 data Bound = Bound Identifier SoucType deriving Eq
@@ -85,11 +85,15 @@ instance Show Bound where
 data TypeError = TypeMismatch SoucType SoucType
                | MultipleDeclarations Identifier
                | MultipleTypeDeclarations SoucType
+               | MultipleTypeConDecls TypeCon
+               | MultipleTypeVarDecls TypeVar
                | Undeclared Identifier
                | BadReassign Identifier
                | MutateImmutable Identifier SoucType -- FIXME replaces BadReassign
                | UnknownData Identifier -- FIXME delete? same as Undeclared
                | UnknownType SoucType
+               | UnknownTypeCon TypeCon
+               | UnknownTypeVar TypeVar
                | ExportedButNotDefined Bound
                | ExportedLocal Identifier
     deriving (Eq)

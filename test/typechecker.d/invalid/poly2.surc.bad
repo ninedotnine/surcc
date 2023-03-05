@@ -1,0 +1,1 @@
+f(x: forall A. A) = x: forall A. A

@@ -23,6 +23,8 @@ import SurCC.TypeChecker.Context (
     get_var,
     new_scope,
     exit_scope,
+    assert_type_exists,
+    add_type_vars,
     )
 import SurCC.TypeChecker.Expressions (
     check_expr,
@@ -136,7 +138,10 @@ infer_stmt = undefined
 checkm_stmts :: Maybe SoucType -> Stmts -> Checker SoucType
 checkm_stmts m_t stmts = case m_t of
     Nothing -> infer_stmts stmts
-    Just t -> check_stmts t stmts *> pure t
+    Just t -> do
+        t_added <- add_type_vars t
+        check_stmts t_added stmts
+        pure t_added
 
 
 assert_maybe_equals :: Maybe SoucType -> Maybe SoucType -> Checker (Maybe SoucType)

@@ -23,6 +23,8 @@ import SurCC.TypeChecker.Context (
     new_scope,
     exit_scope,
     insert_local,
+    assert_type_exists,
+    add_type_vars,
     Checker,
     )
 
@@ -31,8 +33,9 @@ infer = \case
     Branch op left right -> infer_infix_op left right op
     Twig op expr -> infer_prefix_op expr op
     Signed expr t -> do
-        check_expr t expr
-        pure t
+        t_added <- add_type_vars t
+        check_expr t_added expr
+        pure t_added
     Leaf term -> infer_term term
     Match scrutinee branches -> do
         pat_t <- infer scrutinee
@@ -162,7 +165,10 @@ check_pattern t = \case
 checkm_expr :: Maybe SoucType -> ExprTree -> Checker SoucType
 checkm_expr m_t expr = case m_t of
     Nothing -> infer expr
-    Just t -> check_expr t expr *> pure t
+    Just t -> do
+        t_added <- add_type_vars t
+        check_expr t_added expr
+        pure t_added
 
 
 assert_equals :: (MonadError TypeError m) => SoucType -> SoucType -> m ()

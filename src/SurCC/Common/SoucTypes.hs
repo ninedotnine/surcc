@@ -33,6 +33,7 @@ data SoucType = SoucTypeCon TypeCon [SoucType]
               deriving (Eq,Show,Ord)
 
 
+-- FIXME TypeCon and TypeVar will need to know their kinds
 newtype TypeCon = TypeCon Text deriving (Eq, Ord, IsString)
 
 -- allowed type names are single chars like 'A'

@@ -10,7 +10,7 @@ module SurCC.TypeChecker.Context (
     Checker,
     ExportList,
     ImportList,
-    TypeSet(..),
+    TypeConSet(..),
     GlobalScope(..),
     LocalScopes,
     ImmutMapping(..),
@@ -26,11 +26,13 @@ module SurCC.TypeChecker.Context (
     insert_local,
     export_list,
     import_list,
+    assert_type_exists,
+    add_type_vars,
 ) where
 
 import Control.Arrow ((|||), second)
 import Control.Applicative ((<|>))
-import Control.Monad (when, unless)
+import Control.Monad (when, unless, foldM)
 import Data.Foldable (for_)
 import Data.Functor ((<&>))
 import Data.Function ((&))
@@ -38,6 +40,7 @@ import Data.Maybe (isJust)
 import Data.HashMap.Strict qualified as Map
 import Data.HashMap.Strict (HashMap)
 import Data.Set qualified as Set
+import Data.Traversable (for)
 
 
 import Prelude hiding (lookup)
@@ -74,14 +77,17 @@ newtype ImmutMapping = ImmutMapping (HashMap Identifier SoucType)
 type MutMapping = HashMap Identifier (SoucType, Mutability)
 
 
-newtype TypeSet = TypeSet (HashMap SoucType Refutable) deriving (Show,Semigroup,Monoid)
+newtype TypeConSet = TypeConSet (HashMap TypeCon Refutable) deriving (Show,Semigroup,Monoid)
 
-data GlobalScope = GlobalScope TypeSet ImmutMapping
+data GlobalScope = GlobalScope TypeConSet ImmutMapping
                 deriving (Show)
 
-newtype LocalScopes = LocalScopes [MutMapping]
-                deriving (Eq, Show, Semigroup, Monoid)
+data LocalScopes = LocalScopes TypeVarSet [MutMapping]
+                deriving (Eq, Show)
 
+
+newtype TypeVarSet = TypeVarSet (HashMap TypeVar Rigidity)
+                deriving (Eq, Show, Semigroup, Monoid)
 
 instance Semigroup GlobalScope where
     (GlobalScope types0 map0) <> (GlobalScope types1 map1) =
@@ -90,6 +96,12 @@ instance Semigroup GlobalScope where
 instance Monoid GlobalScope where
     mempty = GlobalScope mempty mempty
 
+instance Semigroup LocalScopes where
+    (LocalScopes types0 map0) <> (LocalScopes types1 map1) =
+        LocalScopes (types0 <> types1) (map0 <> map1)
+
+instance Monoid LocalScopes where
+    mempty = LocalScopes mempty mempty
 
 run_top_checker :: ImportList -> ExportList -> GlobalScope -> TopChecker a
                    -> Either TypeError (a,GlobalScope)
@@ -140,7 +152,7 @@ member_globals i globals = lookup_globals i globals & isJust
 
 lookup_locals_mutables :: Identifier -> LocalScopes
                           -> Maybe (SoucType, Mutability)
-lookup_locals_mutables i (LocalScopes scopes) = foldr f Nothing scopes
+lookup_locals_mutables i (LocalScopes _ scopes) = foldr f Nothing scopes
     where
         f scope next = Map.lookup i scope <|> next
 
@@ -163,6 +175,80 @@ member_imports :: Identifier -> ImportList -> Bool
 member_imports i (ImportList imports) = Set.member i imports
 
 
+-- get_types :: TypeVar -> Checker (Maybe Refutable)
+assert_type_exists :: SoucType -> Checker ()
+assert_type_exists = \case
+    SoucForAll v rig t -> insert_tvar v rig *> assert_type_exists t
+    SoucTypeCon c args -> do
+        assert_type_con_exists c
+        for_ args assert_type_exists
+    SoucTypeVar v args -> do
+        assert_type_var_exists v
+        for_ args assert_type_exists
+
+
+
+-- like assert_type_exists, but converts its input
+-- into a SoucType which does not contain any ForAlls
+add_type_vars :: SoucType -> Checker SoucType
+add_type_vars = \case
+    SoucForAll v rig t -> do
+        insert_tvar v rig
+        add_type_vars t
+    SoucTypeCon c args -> do
+        assert_type_con_exists c
+        new_args <- for args add_type_vars
+        pure $ SoucTypeCon c new_args
+    SoucTypeVar v args -> do
+        assert_type_var_exists v
+        new_args <- for args add_type_vars
+        pure $ SoucTypeVar v new_args
+
+
+insert_tvar_l :: (MonadError TypeError m)
+                 => TypeVar -> Rigidity -> TypeVarSet -> m TypeVarSet
+insert_tvar_l tv rig (TypeVarSet tvs) = if Map.member tv tvs
+    then throwError $ MultipleTypeVarDecls tv
+    else pure $ TypeVarSet (Map.insert tv rig tvs)
+
+
+insert_tvar :: TypeVar -> Rigidity -> Checker ()
+insert_tvar tv rig = get >>= \case
+    LocalScopes (TypeVarSet tvs) vals -> if Map.member tv tvs
+        then throwError $ MultipleTypeVarDecls tv
+        else put $ LocalScopes (TypeVarSet (Map.insert tv rig tvs)) vals
+
+
+
+assert_type_con_exists' :: (MonadError TypeError m)
+                           => TypeCon -> TypeConSet -> m ()
+assert_type_con_exists' con (TypeConSet type_set) = do
+        unless (Map.member con type_set) $
+            throwError (UnknownTypeCon con)
+
+
+assert_type_con_exists :: TypeCon -> Checker ()
+assert_type_con_exists con = do
+        (_, _, GlobalScope type_set _) <- ask
+        assert_type_con_exists' con type_set
+
+
+assert_type_var_exists' :: (MonadError TypeError m)
+                           => TypeVar -> TypeVarSet -> m ()
+assert_type_var_exists' var (TypeVarSet type_var_set) = do
+        unless (Map.member var type_var_set) $ throwError (UnknownTypeVar var)
+
+
+assert_type_var_exists :: TypeVar -> Checker ()
+assert_type_var_exists var = do
+        LocalScopes type_var_set _ <- get
+        assert_type_var_exists' var type_var_set
+
+
+member_tvars :: TypeVar -> TypeVarSet -> Bool
+member_tvars tv (TypeVarSet tvs) = Map.member tv tvs
+
+
 export_list :: [ExportDecl] -> ExportList
 export_list exports = ExportList $ ImmutMapping $
     Map.fromList (unwrap <$> exports)
@@ -182,18 +268,45 @@ local_scope_with :: [(Identifier,SoucType)] -> Checker a -> TopChecker a
 local_scope_with list checker = do
     (imps,exps) <- ask
     globals <- get
+    -- FIXME:
+    -- this checks whether an identifier is already in use (globally)
+    -- it does *not* check whether the same identifier appears twice in `list`
     for_ (list <&> fst) $ \i -> do
         when (isJust $ lookup i imps globals mempty) $
             throwError (MultipleDeclarations i)
         when (member_exports i exps) $
             throwError (ExportedLocal i)
-    run_mtl_stack locals (imps,exps,globals) checker & (throwError ||| confirm)
+    tv_set <- type_var_set (list <&> snd)
+    run_mtl_stack (LocalScopes tv_set locals) (imps,exps,globals) checker
+        & (throwError ||| confirm)
     where
-        locals = LocalScopes [list <&> second (,Immut) & Map.fromList]
-        confirm (result,end_state) = do -- redundant check for bug-prevention
-            when (end_state /= locals) $
+        locals :: [MutMapping]
+        locals = [list <&> second normalized <&> second (,Immut) & Map.fromList]
+        confirm (result,LocalScopes _ end_state) = do
+            when (end_state /= locals) $ -- redundant check for bug-prevention
                 error "there is a bug in the compiler."
             pure result
+        type_var_set :: [SoucType] -> TopChecker TypeVarSet
+        type_var_set types = foldM go mempty types
+            where
+                go :: TypeVarSet -> SoucType -> TopChecker TypeVarSet
+                go tvars = \case
+                    SoucForAll v rig t -> do
+                        tvs <- insert_tvar_l v rig tvars
+                        go tvs t
+                    SoucTypeCon con args -> do
+                        GlobalScope type_cons _ <- get
+                        assert_type_con_exists' con type_cons
+                        foldM go tvars args
+                    SoucTypeVar var args -> do
+                        assert_type_var_exists' var tvars
+                        foldM go tvars args
+
+
+normalized :: SoucType -> SoucType
+normalized = \case
+    SoucForAll _v _rig t -> normalized t
+    t -> t
 
 
 local_scope :: Checker a -> TopChecker a
@@ -231,13 +344,14 @@ local_scope_main (MainParam
 
 new_scope :: Checker ()
 new_scope = get >>= \case
-    LocalScopes locals -> put (LocalScopes (Map.empty : locals))
+    LocalScopes tvs locals -> put (LocalScopes tvs (Map.empty : locals))
 
 
 exit_scope :: Checker ()
 exit_scope = get >>= \case
-    (LocalScopes []) -> error "should be impossible"
-    (LocalScopes (_ : etc)) -> put (LocalScopes etc)
+    (LocalScopes _ []) -> error "should be impossible"
+    (LocalScopes tvs (_ : etc)) -> put (LocalScopes tvs etc)
+
 
 
 insert_local :: Mutability -> Identifier -> SoucType -> Checker ()
@@ -251,9 +365,10 @@ insert_local modifiable i t = do
         throwError (MultipleDeclarations i)
     -- FIXME this should also check the local scopes!
     (put =<<) $ get >>= \case
-        LocalScopes [] -> error "should not be reachable"
-        LocalScopes (binds : etc) ->
-            pure (LocalScopes (Map.insert i (t, modifiable) binds : etc))
+        LocalScopes _ [] -> error "should not be reachable"
+        -- FIXME type var
+        LocalScopes tvs (binds : etc) ->
+            pure (LocalScopes tvs (Map.insert i (t, modifiable) binds : etc))
 
 
 insert_global :: Bound -> TopChecker ()
@@ -270,4 +385,9 @@ insert_global (Bound i t) = do
 
 
 assert_equals :: (MonadError TypeError m) => SoucType -> SoucType -> m ()
-assert_equals t0 t1 = unless (t0 == t1) (throwError (TypeMismatch t0 t1))
+assert_equals t0 t1 = unless (compat (t0,t1)) (throwError (TypeMismatch t0 t1))
+
+
+compat :: (SoucType,SoucType) -> Bool
+compat = \case
+    (t0,t1) -> t0 == t1

@@ -1,0 +1,4 @@
+main(stdout: OutputStream) = do
+	if (true)
+		three = 3
+	write stdout , $three

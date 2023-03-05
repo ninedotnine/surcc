@@ -181,17 +181,17 @@ souc_type_con = do
     pure $ TypeCon name
 
 
-souc_type_parameterized :: Parsec Text s SoucType
+souc_type_parameterized :: Parsec Text s (TypeCon,[SoucType])
 souc_type_parameterized = do
     name <- upper_name <&> TypeCon
     args <- many $ between (char '(') (char ')') souc_type_var
-    pure (SoucTypeCon name (args <&> flip SoucTypeVar []))
+    pure (name, args <&> flip SoucTypeVar [])
 
 
-souc_type_simple :: Parsec Text s SoucType
+souc_type_simple :: Parsec Text s TypeCon
 souc_type_simple = do
     n <- upper_name
-    return $ SoucType n
+    return $ TypeCon n
 
 upper_name :: Parsec Text s Text
 upper_name = do

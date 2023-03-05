@@ -77,12 +77,18 @@ instance TextShow TypeError where
         MultipleDeclarations name -> "multiple declarations of " <> showb name
         MultipleTypeDeclarations name ->
             "multiple declarations of " <> showb name
+        MultipleTypeConDecls name ->
+            "multiple declarations of type constructor " <> showb name
+        MultipleTypeVarDecls name ->
+            "multiple declarations of type variable " <> showb name
         Undeclared name -> "undeclared " <> showb name
         BadReassign name -> "cannot reassign immutable: " <> showb name
         MutateImmutable name t -> "cannot mutate immutable: " <> showb name
                                   <> " : " <> showb t
         UnknownData name -> "unknown data constructor: " <> showb name
         UnknownType name -> "unknown type: " <> showb name
+        UnknownTypeCon name -> "unknown type constructor: " <> showb name
+        UnknownTypeVar name -> "unknown type variable: " <> showb name
         ExportedButNotDefined name -> "declared " <> showb name <> " was not defined"
         ExportedLocal name -> "exported " <> showb name <> " must be global"
 
@@ -265,8 +271,8 @@ instance TextShow TypeDef where
         GADType _ -> error "fixme typedef textshow"
 
 
-instance TextShow TypeSet where
-    showb (TypeSet s) = showb (keys s)
+instance TextShow TypeConSet where
+    showb (TypeConSet s) = showb (keys s)
 
 
 instance TextShow ImmutMapping where

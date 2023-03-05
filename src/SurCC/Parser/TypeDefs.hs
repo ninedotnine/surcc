@@ -37,29 +37,31 @@ enum_type = do
 
 isomorphism_type :: SurCParser TypeDef
 isomorphism_type = do
-    name <- opener "isomorphism" souc_type_parameterized
+    (name,args) <- opener "isomorphism" souc_type_parameterized
     (constructor,accessr_id,accessr_return_t) <- in_braces $ do
         i <- identifier
         (aid,art) <- accessor
         pure (i,aid,art)
     let
-        constructor_t = SoucFn accessr_return_t name
+        constructor_t = SoucFn accessr_return_t (SoucTypeCon name args)
         accessr = if accessr_id == "_"
             then Nothing
-            else Just $ Bound accessr_id (SoucFn name accessr_return_t)
+            else Just $ Bound accessr_id (
+                            SoucFn (SoucTypeCon name args) accessr_return_t)
     pure $ IsomorphismType name constructor constructor_t accessr
 
 
 struct_type :: SurCParser TypeDef
 struct_type = do
-    name <- opener "struct" souc_type_parameterized
+    (name,args) <- opener "struct" souc_type_parameterized
     (constructor,accessors) <- in_braces $
         liftA2 (,) identifier (many1 accessor)
     let
-        constructor_t = accessors <&> snd & foldr SoucFn name
+        constructor_t = accessors <&> snd & foldr SoucFn (SoucTypeCon name args)
         accessor_bounds = accessors
                           & filter (\(i,_) ->  i /= "_")
-                          <&> (\(i,t) -> Bound i (SoucFn name t))
+                          <&> (\(i,t) -> Bound i (
+                                            SoucFn (SoucTypeCon name args) t))
     pure $ StructType name (Bound constructor constructor_t : accessor_bounds)
 
 
@@ -70,7 +72,7 @@ accessor = do
     pure (i,sig)
 
 
-opener :: String -> SurCParser SoucType -> SurCParser SoucType
+opener :: String -> SurCParser a -> SurCParser a
 opener word name_parser =
     reserved word *> spaces *> name_parser <* spaces <* char '='
 

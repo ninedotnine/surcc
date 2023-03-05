@@ -42,12 +42,14 @@ builtin_identifiers :: Map.HashMap Identifier SoucType
 builtin_identifiers = Map.map souc_type all_builtins
 
 
-builtin_types :: Map.HashMap SoucType Refutable
+builtin_types :: Map.HashMap TypeCon Refutable
 builtin_types = Map.fromList [
-    (SoucBool, Refutable True),
-    (SoucChar, Refutable True),
-    (SoucInteger, Refutable True),
-    (SoucString, Refutable True)
+    ("Bool", Refutable True),
+    ("Char", Refutable True),
+    ("Integer", Refutable True),
+    ("String", Refutable True),
+    ("OutputStream", Refutable True),
+    ("Pair", Refutable True)
     ]
 
 

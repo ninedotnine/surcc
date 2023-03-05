@@ -1,0 +1,5 @@
+main(stdout: OutputStream) = do
+	var two <- 2
+	if (true)
+		two <- 3
+	write stdout , $two

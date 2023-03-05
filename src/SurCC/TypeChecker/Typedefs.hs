@@ -24,12 +24,12 @@ import SurCC.TypeChecker.Expressions (assert_equals)
 
 build_typedefs :: [TypeDef] -> Either TypeError (GlobalScope,[Bound])
 build_typedefs defs = do
-    build_typedefs' (TypeSet builtin_types,
+    build_typedefs' (TypeConSet builtin_types,
                      ImmutMapping builtin_identifiers)
                     [] defs
 
 
-build_typedefs' :: (TypeSet, ImmutMapping) -> [Bound] -> [TypeDef]
+build_typedefs' :: (TypeConSet, ImmutMapping) -> [Bound] -> [TypeDef]
                    -> Either TypeError (GlobalScope,[Bound])
 build_typedefs' (types, consts) bounds = \case
     (d:defs) -> do
@@ -41,15 +41,15 @@ build_typedefs' (types, consts) bounds = \case
     [] -> pure $ (GlobalScope types consts, bounds)
 
 
-build_typedef :: TypeDef -> (SoucType, Refutable, [Bound])
+build_typedef :: TypeDef -> (TypeCon, Refutable, [Bound])
 build_typedef = \case
     EmptyType t -> (t, Refutable True, [])
-    UnitType t term -> (t, Refutable False, [Bound term t])
+    UnitType t term -> (t, Refutable False, [Bound term (SoucTypeCon t [])])
     SynonymType t0 t1 -> undefined t0 t1 -- FIXME
     IsomorphismType t constructor constructor_t b ->
         (t, Refutable False, (Bound constructor constructor_t):maybeToList b)
-    EnumType t constructors ->
-        (t, Refutable True, (constructors <&> (\con -> Bound con t)))
+    EnumType t constructors -> (t,
+        Refutable True, (constructors <&> (\con -> Bound con (SoucTypeCon t []))))
     StructType t fns -> (t, Refutable False, fns)
     GADType t -> undefined t -- FIXME
 
@@ -68,10 +68,10 @@ insert_const (ImmutMapping m) i t =
     (ImmutMapping <$> insert m i t) `or_left` MultipleDeclarations i
 
 
-insert_type :: TypeSet -> SoucType -> Refutable
-               -> Either TypeError TypeSet
-insert_type (TypeSet m) t r = (insert m t r <&> TypeSet)
-                              `or_left` MultipleTypeDeclarations t
+insert_type :: TypeConSet -> TypeCon -> Refutable
+               -> Either TypeError TypeConSet
+insert_type (TypeConSet m) t r = (insert m t r <&> TypeConSet)
+                              `or_left` MultipleTypeConDecls t
 
 
 insert :: (Hashable k) => HashMap k v -> k -> v -> Maybe (HashMap k v)
