@@ -10,7 +10,7 @@ import Control.Monad
 import Control.Monad.Error.Class (throwError)
 import Data.Foldable (for_)
 import Data.Either (lefts)
-import Data.Traversable ()
+import Data.Traversable (for)
 import Prelude hiding (lookup)
 
 import SurCC.Common
@@ -70,12 +70,13 @@ check_stmt t = \case
             insert_local Mut name expr_t
 
 
-infer_return :: Maybe ExprTree -> Checker SoucType
+infer_return :: Return -> Checker SoucType
 infer_return = \case
-    Just expr -> infer expr
+    Return (Just expr) -> infer expr
                     -- FIXME why throw an error?
+                    -- the actual FIXME is that `infer_stmts` is not even used
                  >>= throwError . TypeMismatch SoucIO
-    Nothing -> pure SoucIO
+    Return Nothing -> pure SoucIO
 
 
 check_return :: SoucType -> Return -> Checker ()
@@ -116,12 +117,31 @@ check_stmt_call _t name m_expr = do
 
 
 infer_stmts :: Stmts -> Checker SoucType
-infer_stmts (Stmts _ t) = case t of
-    Just (Return r) -> undefined
-    Nothing -> undefined
+infer_stmts (Stmts stmts m_ret) = do
+    new_scope
+    l_m_t0 <- mapM infer_stmt stmts
+    m_t0 <- foldM assert_maybe_equals Nothing l_m_t0
+    m_t1 <- for m_ret infer_return
+    exit_scope
+    assert_maybe_equals m_t0 m_t1 >>= \case
+        Just t -> pure t
+        Nothing -> undefined
+
+
+-- a Stmt could contain a Stmts, which could contain a Return
+infer_stmt :: Stmt -> Checker (Maybe SoucType)
+infer_stmt = undefined
 
 
 checkm_stmts :: Maybe SoucType -> Stmts -> Checker SoucType
 checkm_stmts m_t stmts = case m_t of
     Nothing -> infer_stmts stmts
     Just t -> check_stmts t stmts *> pure t
+
+
+assert_maybe_equals :: Maybe SoucType -> Maybe SoucType -> Checker (Maybe SoucType)
+assert_maybe_equals m_t0 m_t1 = case (m_t0,m_t1) of
+    (Just t0,Just t1) -> assert_equals t0 t1 *> pure (Just t0)
+    (Just t0,Nothing) -> pure $ Just t0
+    (Nothing,Just t1) -> pure $ Just t1
+    (Nothing,Nothing) -> pure Nothing
