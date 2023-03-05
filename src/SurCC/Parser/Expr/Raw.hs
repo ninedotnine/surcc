@@ -44,7 +44,7 @@ dumb_raw_expr = fmap pure expr_char <> manyTill expr_char (lookAhead (eol <|> do
 
 
 funky_expr_char :: Parsec Text s Char
-funky_expr_char = oneOf " \"'()[]{}:"
+funky_expr_char = oneOf " \"'()[]{}:."
 
 oper_char :: Parsec Text s Char
 oper_char = oneOf "!@#$%&*+-/<=>?\\^|~,"
